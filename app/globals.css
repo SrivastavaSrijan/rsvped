@@ -4,7 +4,7 @@
 @layer base {
   /* Lu.ma Dark Theme Overrides */
   .dark {
-    /* Dark theme colors (From Lu.ma dark system) */
+    /* Dark theme colors */
     --color-primary-color: var(--color-white);
     --color-secondary-color: var(--color-gray-40);
     --color-tertiary-color: var(--color-gray-60);
@@ -15,43 +15,32 @@
     --color-secondary-bg-color: var(--color-gray-100);
     --color-tertiary-bg-color: var(--color-gray-90);
     --color-quaternary-bg-color: var(--color-gray-80);
-    --color-elevated-primary-bg-color: var(--color-gray-100);
-    --color-elevated-secondary-bg-color: var(--color-gray-90);
-    --color-elevated-tertiary-bg-color: var(--color-gray-80);
 
     /* Dark borders */
     --color-primary-border-color: var(--color-gray-60);
     --color-secondary-border-color: var(--color-gray-90);
+    --color-tertiary-border-color: var(--color-gray-80);
     --color-active-border-color: var(--color-white);
 
-    /* Dark semantic mappings */
+    /* Dark brand colors (lighter variants) */
+    --color-brand-color: var(--color-cranberry-50);
+    --color-brand-content-color: var(--color-cranberry-40);
+    --color-brand-active-color: var(--color-cranberry-40);
+
+    /* Dark semantic mappings for ShadCN */
     --color-background: var(--color-primary-bg-color);
     --color-foreground: var(--color-primary-color);
     --color-card: var(--color-secondary-bg-color);
     --color-card-foreground: var(--color-primary-color);
     --color-popover: var(--color-secondary-bg-color);
     --color-popover-foreground: var(--color-primary-color);
+    --color-primary: var(--color-brand-color);
     --color-secondary: var(--color-secondary-bg-color);
     --color-secondary-foreground: var(--color-primary-color);
     --color-muted: var(--color-tertiary-bg-color);
     --color-muted-foreground: var(--color-secondary-color);
     --color-border: var(--color-secondary-border-color);
     --color-input: rgba(255, 255, 255, 0.15);
-
-    /* Dark brand colors (lighter variants) */
-    --color-brand-color: var(--color-cranberry-30);
-    --color-brand-content-color: var(--color-cranberry-40);
-    --color-brand-active-color: var(--color-cranberry-40);
-    --color-primary: var(--color-brand-color);
-
-    /* Dark accent colors */
-    --color-blue: var(--color-blue-30);
-    --color-green: var(--color-green-30);
-    --color-red: var(--color-red-30);
-    --color-yellow: var(--color-yellow-30);
-    --color-orange: var(--color-orange-30);
-    --color-purple: var(--color-purple-30);
-    --color-barney: var(--color-barney-30);
   }
 
   /* Lu.ma Mobile Responsive */
@@ -63,11 +52,12 @@
   }
 
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     font-family: var(--font-family-sans);
   }
 }
