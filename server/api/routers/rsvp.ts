@@ -13,12 +13,10 @@ export const rsvpRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       // Check if RSVP already exists
-      const existingRsvp = await ctx.prisma.rSVP.findUnique({
+      const existingRsvp = await ctx.prisma.rsvp.findFirst({
         where: {
-          eventId_email: {
-            eventId: input.eventId,
-            email: input.email,
-          },
+          eventId: input.eventId,
+          email: input.email,
         },
       })
 
@@ -45,7 +43,7 @@ export const rsvpRouter = createTRPCRouter({
       }
 
       // Create RSVP
-      return ctx.prisma.rSVP.create({
+      return ctx.prisma.rsvp.create({
         data: {
           eventId: input.eventId,
           name: input.name,
@@ -56,13 +54,13 @@ export const rsvpRouter = createTRPCRouter({
           event: {
             select: {
               title: true,
-              startDateTime: true,
+              startDate: true,
             },
           },
           ticketTier: {
             select: {
               name: true,
-              price: true,
+              priceCents: true,
             },
           },
         },
@@ -76,21 +74,21 @@ export const rsvpRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.rSVP.findMany({
+      return ctx.prisma.rsvp.findMany({
         where: { email: input.email },
         include: {
           event: {
             select: {
               id: true,
               title: true,
-              startDateTime: true,
+              startDate: true,
               slug: true,
             },
           },
           ticketTier: {
             select: {
               name: true,
-              price: true,
+              priceCents: true,
             },
           },
         },

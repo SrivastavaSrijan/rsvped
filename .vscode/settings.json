@@ -1,0 +1,5 @@
+{
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "workbench.colorTheme": "SynthWave '84"
+}

@@ -1,189 +1,152 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Organization {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  description String?
-  website     String?
-  logo        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  events  Event[]
-  members OrganizationMember[]
-
-  @@map("organizations")
+generator client {
+  provider = "prisma-client-js"
 }
 
-model OrganizationMember {
-  id             String @id @default(cuid())
-  organizationId String
-  userId         String
-  role           Role   @default(MEMBER)
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, userId])
-  @@map("organization_members")
-}
+/**
+ * ---------- Core identities ----------
+ */
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts            Account[]
-  sessions            Session[]
-  organizationMembers OrganizationMember[]
-  rsvps               RSVP[]
-
-  @@map("users")
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
+  email        String   @unique
+  name         String?
+  avatarUrl    String?
+  // A user can both host and attend events
+  hostedEvents Event[]  @relation("Host")
+  rsvps        Rsvp[]
+  createdAt    DateTime @default(now())
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
-}
+/**
+ * ---------- Event & taxonomy ----------
+ */
 
 model Event {
-  id             String      @id @default(cuid())
-  slug           String      @unique
-  title          String
-  description    String?     @db.Text
-  startDateTime  DateTime
-  endDateTime    DateTime?
-  timezone       String      @default("UTC")
-  location       String?
-  capacity       Int?
-  isPublic       Boolean     @default(true)
-  status         EventStatus @default(DRAFT)
-  featuredImage  String?
-  organizationId String
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  rsvps        RSVP[]
-  ticketTiers  TicketTier[]
-  checkIns     CheckIn[]
-
-  @@map("events")
-}
-
-model TicketTier {
   id          String  @id @default(cuid())
-  eventId     String
-  name        String
-  description String?
-  price       Int     @default(0) // Price in cents
-  capacity    Int?
-  isActive    Boolean @default(true)
-  sortOrder   Int     @default(0)
+  slug        String  @unique // pretty URLs
+  title       String
+  subtitle    String?
+  description String? @db.Text
+  coverImage  String? // CDN URL
 
-  event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  rsvps RSVP[]
+  startDate DateTime
+  endDate   DateTime
+  timezone  String // e.g. "Asia/Kolkata"
 
-  @@map("ticket_tiers")
-}
+  locationType LocationType
+  venueName    String? // only if physical
+  venueAddress String? // "
+  onlineUrl    String? // only if virtual
 
-model RSVP {
-  id           String     @id @default(cuid())
-  eventId      String
-  userId       String?
-  ticketTierId String
-  email        String
-  name         String
-  status       RSVPStatus @default(CONFIRMED)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  capacity    Int? // null = unlimited
+  isPublished Boolean     @default(false)
+  status      EventStatus @default(DRAFT)
 
-  event      Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  ticketTier TicketTier @relation(fields: [ticketTierId], references: [id], onDelete: Cascade)
-  checkIns   CheckIn[]
+  hostId String
+  host   User   @relation("Host", fields: [hostId], references: [id])
 
-  @@unique([eventId, email])
-  @@map("rsvps")
-}
-
-model CheckIn {
-  id          String   @id @default(cuid())
-  rsvpId      String
-  eventId     String
-  checkedInAt DateTime @default(now())
-
-  rsvp  RSVP  @relation(fields: [rsvpId], references: [id], onDelete: Cascade)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@unique([rsvpId])
-  @@map("check_ins")
-}
-
-enum Role {
-  OWNER
-  ADMIN
-  MEMBER
+  categories  EventCategory[] // many-to-many
+  ticketTiers TicketTier[]
+  rsvps       Rsvp[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 enum EventStatus {
   DRAFT
   PUBLISHED
   CANCELLED
-  COMPLETED
 }
 
-enum RSVPStatus {
+enum LocationType {
+  PHYSICAL
+  ONLINE
+  HYBRID
+}
+
+/**
+ * ---------- Categories (tags) ----------
+ */
+
+model Category {
+  id     String          @id @default(cuid())
+  name   String          @unique
+  slug   String          @unique
+  events EventCategory[]
+}
+
+model EventCategory {
+  eventId    String
+  categoryId String
+  event      Event    @relation(fields: [eventId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@id([eventId, categoryId]) // composite PK
+}
+
+/**
+ * ---------- Ticketing ----------
+ */
+
+model TicketTier {
+  id            String @id @default(cuid())
+  eventId       String
+  name          String // e.g. “General”, “VIP”
+  priceCents    Int // 0 for free tickets
+  quantityTotal Int? // null = unlimited
+  quantitySold  Int    @default(0)
+
+  event Event  @relation(fields: [eventId], references: [id])
+  rsvps Rsvp[]
+
+  @@index([eventId])
+}
+
+/**
+ * ---------- RSVP / Attendance ----------
+ */
+
+model Rsvp {
+  id           String       @id @default(cuid())
+  eventId      String
+  ticketTierId String?
+  userId       String? // null if guest checkout
+  email        String
+  name         String?
+  status       RsvpStatus   @default(CONFIRMED) // wait-list etc.
+  paymentState PaymentState @default(NONE)
+
+  event      Event       @relation(fields: [eventId], references: [id])
+  ticketTier TicketTier? @relation(fields: [ticketTierId], references: [id])
+  user       User?       @relation(fields: [userId], references: [id])
+  checkIn    CheckIn?
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, email])
+}
+
+enum RsvpStatus {
   CONFIRMED
   CANCELLED
-  WAITLISTED
+  WAITLIST
+}
+
+enum PaymentState {
+  NONE // free ticket
+  PENDING // Stripe intent created
+  PAID
+  REFUNDED
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  rsvpId    String   @unique
+  scannedAt DateTime @default(now())
+  rsvp      Rsvp     @relation(fields: [rsvpId], references: [id])
 }
