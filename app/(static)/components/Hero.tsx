@@ -28,7 +28,7 @@ export default function Hero() {
               {copy.hero.description}
             </p>
 
-            <Button size="lg" className="w-full sm:w-auto" asChild>
+            <Button size="lg" className="w-full sm:w-auto lg:py-4 lg:text-xl" asChild>
               <Link href={Routes.CreateEvent}>{copy.hero.cta}</Link>
             </Button>
           </div>

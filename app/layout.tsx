@@ -9,7 +9,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "RSVP'd - Event Management Platform",
+  title: 'RSVPed · Delightful Events Start Here',
   description: 'Lu.ma-inspired event platform for managing RSVPs and events',
 }
 

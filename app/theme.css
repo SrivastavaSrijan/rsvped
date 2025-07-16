@@ -1,10 +1,8 @@
 @theme {
   /* ===== TYPOGRAPHY ===== */
-  --font-family-sans:
-    -apple-system, BlinkMacSystemFont, "Apple Color Emoji", Inter, Roboto, "Segoe UI",
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Apple Color Emoji", Inter, Roboto, "Segoe UI",
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --font-family-mono:
-    "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  --font-family-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
 
   /* Font sizes (Lu.ma inspired) */
   --font-size-xs: 0.75rem; /* 12px */
@@ -256,30 +254,30 @@
   --color-popover: var(--color-primary-bg-color);
   --color-popover-foreground: var(--color-primary-color);
 
-  /* Primary = Lu.ma brand cranberry */
-  --color-primary: var(--color-cranberry-50);
-  --color-primary-foreground: var(--color-white);
+  /* Primary = Lu.ma's NEUTRAL color system (e.g., black text on white bg) */
+  --color-primary: var(--color-primary-color);
+  --color-primary-foreground: var(--color-primary-bg-color);
 
-  /* Secondary = Lu.ma secondary backgrounds */
+  /* Secondary = Lu.ma's secondary backgrounds (e.g., gray bg with dark text) */
   --color-secondary: var(--color-secondary-bg-color);
-  --color-secondary-foreground: var(--color-primary-color);
+  --color-secondary-foreground: var(--color-secondary-color);
 
   /* Muted = Lu.ma tertiary colors */
-  --color-muted: var(--color-secondary-bg-color);
+  --color-muted: var(--color-tertiary-bg-color);
   --color-muted-foreground: var(--color-tertiary-color);
 
-  /* Accent = Same as secondary for Lu.ma style */
-  --color-accent: var(--color-secondary-bg-color);
-  --color-accent-foreground: var(--color-primary-color);
+  /* Accent = Lu.ma's BRAND color (Cranberry) */
+  --color-accent: var(--color-brand-color);
+  --color-accent-foreground: var(--color-white);
 
   /* Destructive = Lu.ma error red */
-  --color-destructive: var(--color-red-50);
+  --color-destructive: var(--color-error-color);
   --color-destructive-foreground: var(--color-white);
 
   /* Border & Input */
   --color-border: var(--color-secondary-border-color);
   --color-input: var(--color-secondary-border-color);
-  --color-ring: var(--color-cranberry-50);
+  --color-ring: var(--color-brand-color);
 
   /* Charts */
   --color-chart-1: var(--color-blue-50);
