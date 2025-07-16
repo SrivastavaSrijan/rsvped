@@ -241,7 +241,7 @@
 
   /* ===== SHADCN SEMANTIC MAPPINGS (Lu.ma colors) ===== */
   /* Map Lu.ma colors to ShadCN's existing variant system */
-  
+
   /* Background & Foreground */
   --color-background: var(--color-primary-bg-color);
   --color-foreground: var(--color-primary-color);
