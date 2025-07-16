@@ -8,4 +8,4 @@ export const Routes = {
   CreateEvent: '/events/create',
 } as const
 
-export type Route = typeof Routes[keyof typeof Routes]
+export type Route = (typeof Routes)[keyof typeof Routes]

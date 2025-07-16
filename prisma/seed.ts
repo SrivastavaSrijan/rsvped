@@ -3,8 +3,6 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Seeding database...')
-
   // Create a sample user
   const user = await prisma.user.upsert({
     where: { email: 'john@example.com' },
@@ -36,7 +34,7 @@ async function main() {
   })
 
   // Create a sample event
-  const event = await prisma.event.upsert({
+  const _event = await prisma.event.upsert({
     where: { slug: 'tech-meetup-2025' },
     update: {},
     create: {
@@ -74,11 +72,6 @@ async function main() {
       },
     },
   })
-
-  console.log('✅ Database seeded successfully!')
-  console.log(`👤 Created user: ${user.email}`)
-  console.log(`🎯 Created event: ${event.title}`)
-  console.log(`📚 Created categories: Technology, Networking`)
 }
 
 main()

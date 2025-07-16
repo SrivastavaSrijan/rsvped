@@ -2,8 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createCaller } from '@/server/api/root'
-import { createTRPCContext } from '@/server/api/trpc'
+import { getAPI } from '@/server/api'
 
 const createEventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -39,9 +38,8 @@ export async function createEvent(formData: FormData) {
     // Validate data
     const validatedData = createEventSchema.parse(rawData)
 
-    // Create tRPC context and caller
-    const ctx = await createTRPCContext()
-    const caller = createCaller(ctx)
+    // Create server API
+    const api = await getAPI()
 
     // Convert string dates to Date objects
     const eventData = {
@@ -51,7 +49,7 @@ export async function createEvent(formData: FormData) {
     }
 
     // Create event via tRPC
-    await caller.event.create(eventData)
+    await api.event.create(eventData)
 
     // Revalidate the page to show new event
     revalidatePath('/')
