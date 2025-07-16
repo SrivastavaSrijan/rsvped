@@ -4,11 +4,10 @@ import { copy } from '../copy'
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-border border-t">
-      <div className="container mx-auto px-4 py-6 lg:px-8 lg:py-8">
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+    <footer className="mt-auto">
+      <div className="container mx-auto px-4 py-2 lg:px-4 lg:py-4">
+        <div className="flex flex-row items-center justify-between gap-4 ">
           <div className="flex items-center space-x-2">
-            <div className="h-6 w-6 rounded-sm bg-primary" />
             <span className="font-medium">{copy.footer.logo}</span>
           </div>
 

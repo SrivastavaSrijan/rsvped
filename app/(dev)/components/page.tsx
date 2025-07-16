@@ -69,7 +69,7 @@ import { Textarea } from '@/components/ui/textarea'
 
 export default function ComponentsPreviewPage() {
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen p-6">
       <div className="mx-auto max-w-6xl space-y-12">
         {/* Header */}
         <div className="space-y-4">
@@ -719,7 +719,7 @@ export default function ComponentsPreviewPage() {
           <CardContent className="space-y-6">
             {/* Notification List */}
             <div className="space-y-3">
-              <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-brand p-3">
                 <Bell className="mt-0.5 h-5 w-5 text-blue-600" />
                 <div className="flex-1">
                   <p className="font-medium text-blue-900">New RSVP for Design Workshop</p>

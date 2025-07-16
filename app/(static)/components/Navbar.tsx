@@ -5,20 +5,19 @@ import { copy } from '../copy'
 
 export default function Navbar() {
   return (
-    <nav className="border-border border-b">
-      <div className="container mx-auto px-4 py-4 lg:px-8">
+    <nav>
+      <div className="container mx-auto px-4 py-3 lg:px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {/* Logo placeholder */}
-            <div className="h-8 w-8 rounded-md bg-primary" />
-            <span className="font-semibold text-lg">{copy.nav.logo}</span>
+            <span className="font-semibold text-base">{copy.nav.logo}</span>
           </div>
 
           <div className="flex items-center space-x-2 lg:space-x-4">
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
               <Link href={Routes.Explore}>{copy.nav.exploreEvents}</Link>
             </Button>
-            <Button size="sm" asChild>
+            <Button size="sm" variant="outline" asChild>
               <Link href={Routes.SignIn}>{copy.nav.signIn}</Link>
             </Button>
           </div>

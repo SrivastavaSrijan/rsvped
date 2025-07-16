@@ -171,51 +171,51 @@
   --color-faint-gray: rgba(147, 149, 151, 0.067);
   --color-darker-pale-gray: rgba(147, 149, 151, 0.267);
 
-  /* ===== LU.MA SEMANTIC SYSTEM ===== */
+  /* ===== LU.MA SEMANTIC SYSTEM (Corrected) ===== */
   /* Text Colors (from Lu.ma) */
-  --color-primary-color: var(--color-black);
-  --color-secondary-color: var(--color-gray-70);
-  --color-tertiary-color: var(--color-gray-50);
-  --color-quaternary-color: var(--color-gray-30);
+  --color-text-primary: var(--color-black);
+  --color-text-secondary: var(--color-gray-70);
+  --color-text-tertiary: var(--color-gray-50);
+  --color-text-quaternary: var(--color-gray-30);
 
   /* Background Colors (from Lu.ma) */
-  --color-primary-bg-color: var(--color-white);
-  --color-secondary-bg-color: var(--color-gray-10);
-  --color-tertiary-bg-color: var(--color-gray-20);
-  --color-quaternary-bg-color: var(--color-gray-30);
+  --color-bg-primary: var(--color-white);
+  --color-bg-secondary: var(--color-gray-10);
+  --color-bg-tertiary: var(--color-gray-20);
+  --color-bg-quaternary: var(--color-gray-30);
 
   /* Border Colors (from Lu.ma) */
-  --color-primary-border-color: var(--color-gray-40);
-  --color-secondary-border-color: var(--color-gray-20);
-  --color-tertiary-border-color: var(--color-gray-10);
-  --color-active-border-color: var(--color-black);
+  --color-border-primary: var(--color-gray-40);
+  --color-border-secondary: var(--color-gray-20);
+  --color-border-tertiary: var(--color-gray-10);
+  --color-border-active: var(--color-black);
 
   /* Brand System (from Lu.ma) */
-  --color-brand-color: var(--color-cranberry-50);
-  --color-brand-content-color: var(--color-cranberry-50);
-  --color-brand-active-color: var(--color-cranberry-60);
-  --color-brand-pale-bg-color: var(--color-pale-cranberry);
-  --color-brand-faint-bg-color: var(--color-faint-cranberry);
+  --color-brand: var(--color-cranberry-50);
+  --color-brand-content: var(--color-cranberry-50);
+  --color-brand-active: var(--color-cranberry-60);
+  --color-brand-pale-bg: var(--color-pale-cranberry);
+  --color-brand-faint-bg: var(--color-faint-cranberry);
 
   /* Success System */
-  --color-success-color: var(--color-green-50);
-  --color-success-pale-bg-color: var(--color-pale-green);
-  --color-success-faint-bg-color: var(--color-faint-green);
+  --color-success: var(--color-green-50);
+  --color-success-pale-bg: var(--color-pale-green);
+  --color-success-faint-bg: var(--color-faint-green);
 
   /* Error System */
-  --color-error-color: var(--color-red-50);
-  --color-error-pale-bg-color: var(--color-pale-red);
-  --color-error-faint-bg-color: var(--color-faint-red);
+  --color-error: var(--color-red-50);
+  --color-error-pale-bg: var(--color-pale-red);
+  --color-error-faint-bg: var(--color-faint-red);
 
   /* Warning System */
-  --color-warning-color: var(--color-yellow-60);
-  --color-warning-pale-bg-color: var(--color-pale-yellow);
-  --color-warning-faint-bg-color: var(--color-faint-yellow);
+  --color-warning: var(--color-yellow-60);
+  --color-warning-pale-bg: var(--color-pale-yellow);
+  --color-warning-faint-bg: var(--color-faint-yellow);
 
   /* Info System */
-  --color-info-color: var(--color-blue-50);
-  --color-info-pale-bg-color: var(--color-pale-blue);
-  --color-info-faint-bg-color: var(--color-faint-blue);
+  --color-info: var(--color-blue-50);
+  --color-info-pale-bg: var(--color-pale-blue);
+  --color-info-faint-bg: var(--color-faint-blue);
 
   /* ===== DIRECT COLOR MAPPINGS FOR SHORT SYNTAX ===== */
   /* For text-cranberry, bg-blue, etc. - these map to the main color */
@@ -243,41 +243,41 @@
   /* Map Lu.ma colors to ShadCN's existing variant system */
 
   /* Background & Foreground */
-  --color-background: var(--color-primary-bg-color);
-  --color-foreground: var(--color-primary-color);
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
 
   /* Card */
-  --color-card: var(--color-primary-bg-color);
-  --color-card-foreground: var(--color-primary-color);
+  --color-card: var(--color-bg-primary);
+  --color-card-foreground: var(--color-text-primary);
 
   /* Popover */
-  --color-popover: var(--color-primary-bg-color);
-  --color-popover-foreground: var(--color-primary-color);
+  --color-popover: var(--color-bg-primary);
+  --color-popover-foreground: var(--color-text-primary);
 
   /* Primary = Lu.ma's NEUTRAL color system (e.g., black text on white bg) */
-  --color-primary: var(--color-primary-color);
-  --color-primary-foreground: var(--color-primary-bg-color);
+  --color-primary: var(--color-text-primary);
+  --color-primary-foreground: var(--color-bg-primary);
 
   /* Secondary = Lu.ma's secondary backgrounds (e.g., gray bg with dark text) */
-  --color-secondary: var(--color-secondary-bg-color);
-  --color-secondary-foreground: var(--color-secondary-color);
+  --color-secondary: var(--color-bg-secondary);
+  --color-secondary-foreground: var(--color-text-secondary);
 
   /* Muted = Lu.ma tertiary colors */
-  --color-muted: var(--color-tertiary-bg-color);
-  --color-muted-foreground: var(--color-tertiary-color);
+  --color-muted: var(--color-bg-tertiary);
+  --color-muted-foreground: var(--color-text-tertiary);
 
   /* Accent = Lu.ma's BRAND color (Cranberry) */
-  --color-accent: var(--color-brand-color);
+  --color-accent: var(--color-brand);
   --color-accent-foreground: var(--color-white);
 
   /* Destructive = Lu.ma error red */
-  --color-destructive: var(--color-error-color);
+  --color-destructive: var(--color-error);
   --color-destructive-foreground: var(--color-white);
 
   /* Border & Input */
-  --color-border: var(--color-secondary-border-color);
-  --color-input: var(--color-secondary-border-color);
-  --color-ring: var(--color-brand-color);
+  --color-border: var(--color-border-secondary);
+  --color-input: var(--color-border-secondary);
+  --color-ring: var(--color-brand);
 
   /* Charts */
   --color-chart-1: var(--color-blue-50);

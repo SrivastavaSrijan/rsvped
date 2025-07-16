@@ -1,8 +1,7 @@
 export const copy = {
   hero: {
     headline: 'Delightful events start here',
-    description:
-      'Create memorable experiences with our intuitive event management platform. From intimate gatherings to large celebrations, we make hosting seamless and delightful for everyone involved.',
+    description: 'Set up an event, invite your friends, and manage RSVPs effortlessly.',
     cta: 'Create your first event',
     imagePlaceholder: 'Event illustration coming soon',
   },
