@@ -1,0 +1,39 @@
+import Link from 'next/link'
+import { Routes } from '@/lib/config/routes'
+import { copy } from '../copy'
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-border mt-auto">
+      <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-primary rounded-sm" />
+            <span className="font-medium">{copy.footer.logo}</span>
+          </div>
+          
+          <div className="flex items-center space-x-4 lg:space-x-6">
+            <Link 
+              href={Routes.WhatsNew}
+              className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base"
+            >
+              {copy.footer.whatsNew}
+            </Link>
+            <Link 
+              href={Routes.Discover}
+              className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base"
+            >
+              {copy.footer.discover}
+            </Link>
+            <Link 
+              href={Routes.Pricing}
+              className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base"
+            >
+              {copy.footer.pricing}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
