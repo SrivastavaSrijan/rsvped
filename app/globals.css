@@ -76,3 +76,18 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
+
+@layer utilities {
+  .text-gradient-radial {
+    background-image: radial-gradient(
+      circle at 0 0,
+      var(--color-blue-40) 0%,
+      var(--color-purple-50) 18.82%,
+      var(--color-barney-30) 32.6%,
+      var(--color-cranberry-40) 52.83%,
+      var(--color-red-40) 68.03%,
+      var(--color-red-30) 87.66%,
+      var(--color-orange-40) 100%
+    );
+  }
+}

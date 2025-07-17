@@ -1,14 +1,15 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { Routes } from '@/lib/config/routes'
 import { copy } from '../copy'
 
 export default function Footer() {
   return (
-    <footer className="mt-auto">
+    <footer className="mx-auto mt-auto w-full max-w-extra-wide-page border-border border-t">
       <div className="container mx-auto px-4 py-2 lg:px-4 lg:py-4">
         <div className="flex flex-row items-center justify-between gap-4 ">
           <div className="flex items-center space-x-2">
-            <span className="font-medium">{copy.footer.logo}</span>
+            <Image src="/logo-full.png" alt="Logo" width={64} height={32} className="opacity-75" />
           </div>
 
           <div className="flex items-center space-x-4 lg:space-x-6">

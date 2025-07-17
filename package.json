@@ -19,7 +19,8 @@
     "vercel:build": "prisma migrate deploy && prisma generate && next build",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f postgres"
+    "docker:logs": "docker-compose logs -f postgres",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -66,6 +67,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "husky": "^9.1.7",
     "puppeteer": "^24.13.0",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",

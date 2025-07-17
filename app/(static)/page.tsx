@@ -1,9 +1,9 @@
 import Image from 'next/image'
-import { Hero } from './components'
+import { Footer, Hero, Navbar } from './components'
 
 export default function Home() {
   return (
-    <div className="flex flex-1">
+    <div className="relative">
       <div className="absolute inset-0">
         <Image
           src="/background.svg"
@@ -13,7 +13,13 @@ export default function Home() {
           priority
         />
       </div>
-      <Hero />
+      <div className="relative z-10 flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-b from-black/0 to-black">
+        <Navbar />
+        <main className="flex flex-1 items-center justify-center">
+          <Hero />
+        </main>
+        <Footer />
+      </div>
     </div>
   )
 }
