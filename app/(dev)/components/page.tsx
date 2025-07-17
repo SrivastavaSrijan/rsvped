@@ -677,6 +677,7 @@ export default function ComponentsPreviewPage() {
               </div>
               <div className="max-h-64 divide-y overflow-y-auto">
                 {Array.from({ length: 5 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: just testing!
                   <div key={i} className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
