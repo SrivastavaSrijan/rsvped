@@ -7,7 +7,7 @@ export const rsvpRouter = createTRPCRouter({
       z.object({
         eventId: z.string(),
         name: z.string().min(1),
-        email: z.string().email(),
+        email: z.email(),
         ticketTierId: z.string(),
       })
     )
@@ -70,7 +70,7 @@ export const rsvpRouter = createTRPCRouter({
   getByEmail: publicProcedure
     .input(
       z.object({
-        email: z.string().email(),
+        email: z.email(),
       })
     )
     .query(async ({ ctx, input }) => {

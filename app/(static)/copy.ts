@@ -10,6 +10,7 @@ export const copy = {
     logo: "rsvp'd",
     exploreEvents: 'Explore Events',
     signIn: 'Sign In',
+    dashboard: 'Hey there',
   },
   footer: {
     logo: "rsvp'd",

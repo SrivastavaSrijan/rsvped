@@ -49,7 +49,7 @@
 
     --color-border: var(--color-secondary-border-color);
     --color-input: rgba(255, 255, 255, 0.15);
-    --color-ring: var(--color-brand-active-color);
+    --color-ring: var(--color-primary);
   }
 
   /* Lu.ma Mobile Responsive */

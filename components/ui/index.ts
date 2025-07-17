@@ -1,4 +1,6 @@
 // Re-export all UI components for cleaner imports
+
+export { Alert, AlertDescription, AlertTitle } from './alert'
 export {
   AlertDialog,
   AlertDialogAction,
@@ -57,6 +59,7 @@ export {
   useFormField,
 } from './form'
 export { Input } from './input'
+export { InputWithError } from './input-with-error'
 export { Label } from './label'
 export { Popover, PopoverContent, PopoverTrigger } from './popover'
 export { RadioGroup, RadioGroupItem } from './radio-group'

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { Toaster } from 'sonner'
 import { TRPCProvider } from '@/lib/trpc'
 
 const inter = Inter({
@@ -9,8 +10,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'RSVPed · Delightful Events Start Here',
-  description: 'Lu.ma-inspired event platform for managing RSVPs and events',
+  title: "rsvp'd · Delightful Events Start Here",
+  description:
+    "rsvp'd is an event management platform that makes organizing and attending events a breeze.",
 }
 
 export default function RootLayout({
@@ -22,6 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} dark font-sans antialiased`}>
         <TRPCProvider>{children}</TRPCProvider>
+        <Toaster />
       </body>
     </html>
   )
