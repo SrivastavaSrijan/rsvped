@@ -1,5 +1,5 @@
 'use client'
-import { LogInIcon, Mail } from 'lucide-react'
+import { Loader2, LogInIcon, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useActionState } from 'react'
@@ -13,13 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { signIn } from '@/lib/auth'
 import { useServerActionErrorHandler } from '@/lib/hooks'
 import {
   AuthActionErrorCodeMap,
   AuthActionResponse,
   AuthFormData,
   authAction,
+  signInWithGoogle,
 } from '@/server/actions'
 import { copy } from '../copy'
 
@@ -86,15 +86,23 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
               required
             />
 
-            <Button type="submit" className="flex items-center justify-center gap-1.5">
-              <Mail className="size-3" />
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="flex items-center justify-center gap-1.5"
+            >
+              {isPending ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Mail className="size-3" />
+              )}
               {mode === 'login' ? copy.buttonText.signIn : copy.buttonText.register}
             </Button>
           </form>
           <hr />
           <Button
             type="button"
-            onClick={() => signIn('google')}
+            onClick={signInWithGoogle}
             className="flex items-center justify-center gap-1.5"
           >
             <Image src="google.svg" alt="Google Icon" width={12} height={12} />

@@ -8,6 +8,7 @@ export const CookieNames = {
    * login attempt to a registration form to pre-fill data.
    */
   PrefillForm: 'prefill-form',
+  RedirectTimeoutProps: 'redirect-timeout-props',
 } as const
 
 export type CookieName = (typeof CookieNames)[keyof typeof CookieNames]

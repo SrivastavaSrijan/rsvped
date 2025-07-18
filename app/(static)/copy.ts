@@ -11,6 +11,8 @@ export const copy = {
     exploreEvents: 'Explore Events',
     signIn: 'Sign In',
     dashboard: 'Hey there',
+    profile: 'Settings',
+    signOut: 'Sign Out',
   },
   footer: {
     logo: "rsvp'd",

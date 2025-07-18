@@ -5,6 +5,7 @@ import { Button } from '@/components/ui'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
 import { copy } from '../copy'
+import { ProfileDropdown } from './ProfileDropdown'
 
 export default async function Navbar() {
   const session = await auth()
@@ -29,11 +30,7 @@ export default async function Navbar() {
               </Button>
             </Link>
             {session ? (
-              <Link href={Routes.Dashboard} passHref>
-                <Button size="sm" variant="outline">
-                  {`${copy.nav.dashboard}, ${session.user.name || '!'}`}
-                </Button>
-              </Link>
+              <ProfileDropdown session={session} />
             ) : (
               <Link href={Routes.SignIn} passHref>
                 <Button size="sm" variant="outline">

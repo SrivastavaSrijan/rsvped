@@ -4,8 +4,8 @@ import { Prisma } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
 import { z } from 'zod'
-import { signIn } from '@/lib/auth'
-import { CookieNames, Routes } from '@/lib/config'
+import { signIn, signOut } from '@/lib/auth'
+import { CookieNames, getAvatarURL, Routes } from '@/lib/config'
 import { setEncryptedCookie } from '@/lib/cookies'
 import { comparePasswords } from '@/lib/utils'
 import { getAPI } from '@/server/api'
@@ -19,18 +19,19 @@ const loginSchema = z.object({
 
 const registrationSchema = loginSchema.extend({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  image: z.string().optional(),
 })
 
 export type AuthFormData = z.infer<typeof registrationSchema>
 export type AuthActionResponse = ServerActionResponse<never, AuthErrorCodes, AuthFormData>
 
-async function checkUserExists(email: string): Promise<boolean> {
+async function checkUserExists(email: string) {
   try {
     const api = await getAPI()
-    await api.user.findByEmail({ email })
-    return true
+    const user = await api.user.findByEmail({ email })
+    return user
   } catch {
-    return false
+    return null
   }
 }
 
@@ -52,6 +53,7 @@ async function performSignIn(
     email: string
     password: string
   },
+  { name, image }: { name: string | null; image: string | null },
   next?: string | null
 ): Promise<AuthActionResponse> {
   try {
@@ -69,8 +71,16 @@ async function performSignIn(
       }
     }
   }
+  const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
+  const redirectTo = hasValidNext ? next : Routes.HoldOn
+  if (!hasValidNext) {
+    await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
+      title: `Welcome to rsvp'd${name ? `, ${name}` : ''}!`,
+      description: 'Let us get you to where you need to go.',
+      illustration: image,
+    })
+  }
 
-  const redirectTo = next?.startsWith('/') ? next : Routes.Home
   redirect(redirectTo)
 }
 
@@ -97,9 +107,10 @@ export async function authAction(
     if (await checkUserExists(email)) {
       return { success: false, error: AuthErrorCodes.USER_ALREADY_EXISTS }
     }
+    const avatar = getAvatarURL(name)
 
-    await createUser({ email, name, password })
-    return await performSignIn({ email, password }, next)
+    await createUser({ email, name, password, image: avatar })
+    return await performSignIn({ email, password }, { name, image: avatar }, next)
   }
   // --- Path B: Login Attempt ---
   const validation = loginSchema.safeParse(rawData)
@@ -111,13 +122,24 @@ export async function authAction(
     }
   }
   const { email, password } = validation.data
-
-  if (!(await checkUserExists(email))) {
+  const user = await checkUserExists(email)
+  if (!user) {
     // Set form data in a temporary, encrypted cookie
     await setEncryptedCookie(CookieNames.PrefillForm, { email, password })
     redirect(Routes.SignUp)
   }
-  return await performSignIn({ email, password }, next)
+  return await performSignIn({ email, password }, { name: user.name, image: user.image }, next)
+}
+
+export async function signOutAction(): Promise<void> {
+  try {
+    await signOut({ redirect: false })
+  } catch (error) {
+    console.error('Sign out failed:', error)
+  }
+  // Clear the temporary form data cookie
+  await setEncryptedCookie(CookieNames.PrefillForm, null)
+  redirect(Routes.Home)
 }
 
 export const verifyPassword = async ({
@@ -141,4 +163,8 @@ export const verifyPassword = async ({
       }
     }
   }
+}
+
+export const signInWithGoogle = async () => {
+  await signIn('google')
 }
