@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
-import { Routes } from '@/lib/config/routes'
+import { Routes } from '@/lib/config'
 import { copy } from '../copy'
 
 export default function Hero() {

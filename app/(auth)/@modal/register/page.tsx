@@ -1,5 +1,11 @@
-import { AuthModal } from '../../components'
+'use server'
+import { CookieNames } from '@/lib/config'
+import { getEncryptedCookie } from '@/lib/cookies'
 
-export default function RegisterModal() {
-  return <AuthModal mode="register" />
+import { AuthFormData } from '@/server/actions'
+import { AuthModal } from '../../components/AuthModal'
+
+export default async function RegisterModal() {
+  const prefill = await getEncryptedCookie<Partial<AuthFormData>>(CookieNames.PrefillForm)
+  return <AuthModal mode="register" prefill={prefill ?? undefined} />
 }

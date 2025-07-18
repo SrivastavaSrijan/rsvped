@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { hashPassword } from '@/lib/utils' // You'll need to implement this
+import { hashPassword } from '@/lib/utils'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
 export const userRouter = createTRPCRouter({
@@ -19,6 +19,7 @@ export const userRouter = createTRPCRouter({
           email: true,
           name: true,
           createdAt: true,
+          password: true,
         },
       })
 

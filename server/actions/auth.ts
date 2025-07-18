@@ -5,8 +5,11 @@ import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
 import { z } from 'zod'
 import { signIn } from '@/lib/auth'
-import { Routes } from '@/lib/config/routes'
+import { CookieNames, Routes } from '@/lib/config'
+import { setEncryptedCookie } from '@/lib/cookies'
+import { comparePasswords } from '@/lib/utils'
 import { getAPI } from '@/server/api'
+import { AuthActionErrorCodeMap } from './constants'
 import { AuthErrorCodes, ServerActionResponse } from './types'
 
 const loginSchema = z.object({
@@ -44,7 +47,13 @@ async function createUser(data: Prisma.UserCreateInput): Promise<void> {
   }
 }
 
-async function performSignIn(credentials: { email: string; password: string }) {
+async function performSignIn(
+  credentials: {
+    email: string
+    password: string
+  },
+  next?: string | null
+): Promise<AuthActionResponse> {
   try {
     await signIn('credentials', {
       email: credentials.email,
@@ -54,10 +63,15 @@ async function performSignIn(credentials: { email: string; password: string }) {
   } catch (error) {
     console.error(error)
     if (error instanceof AuthError && error.type === 'CredentialsSignin') {
-      return { success: false, error: AuthErrorCodes.INVALID_CREDENTIALS }
+      return {
+        success: false,
+        fieldErrors: { password: [AuthActionErrorCodeMap[AuthErrorCodes.INVALID_CREDENTIALS]] },
+      }
     }
   }
-  redirect(Routes.Home)
+
+  const redirectTo = next?.startsWith('/') ? next : Routes.Home
+  redirect(redirectTo)
 }
 
 export async function authAction(
@@ -65,6 +79,7 @@ export async function authAction(
   formData: FormData
 ): Promise<AuthActionResponse> {
   const rawData = Object.fromEntries(formData)
+  const next = formData.get('next') as string | null
   const isRegistrationAttempt = !!rawData.name
 
   if (isRegistrationAttempt) {
@@ -84,7 +99,7 @@ export async function authAction(
     }
 
     await createUser({ email, name, password })
-    return await performSignIn({ email, password })
+    return await performSignIn({ email, password }, next)
   }
   // --- Path B: Login Attempt ---
   const validation = loginSchema.safeParse(rawData)
@@ -98,7 +113,32 @@ export async function authAction(
   const { email, password } = validation.data
 
   if (!(await checkUserExists(email))) {
+    // Set form data in a temporary, encrypted cookie
+    await setEncryptedCookie(CookieNames.PrefillForm, { email, password })
     redirect(Routes.SignUp)
   }
-  return await performSignIn({ email, password })
+  return await performSignIn({ email, password }, next)
+}
+
+export const verifyPassword = async ({
+  email,
+  password,
+}: Partial<Record<'email' | 'password', unknown>>) => {
+  const parsedCredentials = loginSchema.safeParse({ email, password })
+  const api = await getAPI()
+
+  if (parsedCredentials.success) {
+    const { email, password } = parsedCredentials.data
+    const user = await api.user.findByEmail({ email })
+    if (!user || !user.password) return null
+
+    const passwordsMatch = await comparePasswords(password, user.password)
+    if (passwordsMatch) {
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      }
+    }
+  }
 }

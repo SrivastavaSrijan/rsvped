@@ -1,6 +1,7 @@
 'use client'
 import { LogInIcon, Mail } from 'lucide-react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { useActionState } from 'react'
 import { Background } from '@/components/shared'
 import { InputWithError } from '@/components/ui'
@@ -14,7 +15,12 @@ import {
 } from '@/components/ui/dialog'
 import { signIn } from '@/lib/auth'
 import { useServerActionErrorHandler } from '@/lib/hooks'
-import { AuthActionErrorCodeMap, AuthActionResponse, authAction } from '@/server/actions'
+import {
+  AuthActionErrorCodeMap,
+  AuthActionResponse,
+  AuthFormData,
+  authAction,
+} from '@/server/actions'
 import { copy } from '../copy'
 
 const initalState: AuthActionResponse = {
@@ -24,15 +30,17 @@ const initalState: AuthActionResponse = {
 
 interface AuthModalProps {
   mode: 'login' | 'register'
+  prefill?: Partial<AuthFormData>
 }
 
-export const AuthModal = ({ mode }: AuthModalProps) => {
+export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
   const [state, action, isPending] = useActionState(authAction, initalState)
   useServerActionErrorHandler<AuthActionResponse>({
     state,
     isPending,
     errorCodeMap: AuthActionErrorCodeMap,
   })
+  const next = useSearchParams()
 
   return (
     <Dialog open>
@@ -50,6 +58,7 @@ export const AuthModal = ({ mode }: AuthModalProps) => {
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <form action={action} className="flex flex-col gap-3 lg:gap-3">
+            <input type="hidden" name="next" value={next.get('next') || ''} />
             {mode === 'register' && (
               <InputWithError
                 error={state.fieldErrors?.name}
@@ -64,6 +73,7 @@ export const AuthModal = ({ mode }: AuthModalProps) => {
               name="email"
               type="email"
               placeholder={copy.placeholders.email}
+              defaultValue={prefill?.email}
               required
             />
             <InputWithError
@@ -72,6 +82,7 @@ export const AuthModal = ({ mode }: AuthModalProps) => {
               type="password"
               autoComplete="new-password"
               placeholder={copy.placeholders.password}
+              defaultValue={prefill?.password}
               required
             />
 
