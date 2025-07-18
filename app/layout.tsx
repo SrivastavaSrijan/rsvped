@@ -22,6 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <meta name="apple-mobile-web-app-title" content="rsvp'd" />
       <body className={`${inter.variable} dark font-sans antialiased`}>
         <TRPCProvider>{children}</TRPCProvider>
         <Toaster />
