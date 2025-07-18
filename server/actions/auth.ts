@@ -72,16 +72,14 @@ async function performSignIn(
     }
   }
   const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
-  const redirectTo = hasValidNext ? next : Routes.HoldOn
-  if (!hasValidNext) {
-    await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
-      title: `${name ? `, ${name}` : ''}!`,
-      description: "Welcome to rsvp'd!",
-      illustration: image,
-    })
-  }
 
-  redirect(redirectTo)
+  await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
+    title: name || 'Hey there.',
+    description: "Welcome to rsvp'd!",
+    illustration: image,
+  })
+
+  redirect(`${Routes.HoldOn}?next=${encodeURIComponent(hasValidNext ? next : Routes.Home)}`)
 }
 
 export async function authAction(
@@ -137,9 +135,12 @@ export async function signOutAction(): Promise<void> {
   } catch (error) {
     console.error('Sign out failed:', error)
   }
-  // Clear the temporary form data cookie
-  await setEncryptedCookie(CookieNames.PrefillForm, null)
-  redirect(Routes.Home)
+
+  await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
+    title: 'See you soon.',
+    description: 'Logging you out...',
+  })
+  redirect(`${Routes.HoldOn}?next=${encodeURIComponent(Routes.Home)}`)
 }
 
 export const verifyPassword = async ({

@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server'
 import type { NextAuthConfig } from 'next-auth'
 import { Routes } from '@/lib/config'
 
@@ -8,12 +9,17 @@ export const config = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
-      const isAuthRoute = ([Routes.SignIn, Routes.SignUp] as string[]).includes(nextUrl.pathname)
-      const isProtectedRoute = nextUrl.pathname.startsWith(Routes.Dashboard)
+      const isAuthRoute = ([Routes.SignIn, Routes.SignUp] as string[]).some((route) =>
+        nextUrl.pathname.startsWith(route)
+      )
+      const isProtectedRoute = [Routes.Dashboard].some((route) =>
+        nextUrl.pathname.startsWith(route)
+      )
 
       if (isAuthRoute) {
-        if (isLoggedIn) {
-          return Response.redirect(new URL(Routes.Home, nextUrl))
+        if (isLoggedIn && !nextUrl.pathname.startsWith(Routes.HoldOn)) {
+          // If the user is logged in and tries to access auth routes, redirect them to the home page
+          return NextResponse.redirect(new URL(Routes.Home, nextUrl))
         }
         return true
       }
@@ -21,7 +27,7 @@ export const config = {
       if (isProtectedRoute && !isLoggedIn) {
         const next = nextUrl.pathname + nextUrl.search
         const encodedNext = encodeURIComponent(next)
-        return Response.redirect(new URL(`${Routes.SignIn}?next=${encodedNext}`, nextUrl))
+        return NextResponse.redirect(new URL(`${Routes.SignIn}?next=${encodedNext}`, nextUrl))
       }
 
       return true

@@ -1,5 +1,5 @@
 'use client'
-import { Loader } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { Routes } from '@/lib/config'
@@ -32,7 +32,7 @@ export const RedirectTimeout = ({ title, description, illustration }: RedirectTi
         <h1 className="font-bold text-2xl">{title}</h1>
         <p className="text-sm">{description}</p>
       </div>
-      <Loader className="h-6 w-6 animate-spin text-gray-500" />
+      <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
     </div>
   )
 }
