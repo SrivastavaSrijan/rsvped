@@ -75,8 +75,8 @@ async function performSignIn(
   const redirectTo = hasValidNext ? next : Routes.HoldOn
   if (!hasValidNext) {
     await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
-      title: `Welcome to rsvp'd${name ? `, ${name}` : ''}!`,
-      description: 'Let us get you to where you need to go.',
+      title: `${name ? `, ${name}` : ''}!`,
+      description: "Welcome to rsvp'd!",
       illustration: image,
     })
   }
@@ -156,11 +156,7 @@ export const verifyPassword = async ({
 
     const passwordsMatch = await comparePasswords(password, user.password)
     if (passwordsMatch) {
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      }
+      return user
     }
   }
 }

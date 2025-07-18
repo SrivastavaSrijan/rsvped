@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui'
-import { Routes } from '@/lib/config'
+import { getAvatarURL, Routes } from '@/lib/config'
 import { signOutAction } from '@/server/actions'
 import { copy } from '../copy'
 
@@ -19,9 +19,20 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="outline">
-          {`${copy.nav.dashboard}, ${session.user.name || '!'}`}
-        </Button>
+        {session.user.image ? (
+          // biome-ignore lint/performance/noImgElement: SVG
+          <img
+            alt={session.user.name || 'User'}
+            src={
+              session.user.image ? session.user.image : getAvatarURL(session.user.name || 'User')
+            }
+            className="size-8 rounded-full object-cover"
+          />
+        ) : (
+          <Button size="sm" variant="outline">
+            {`${copy.nav.dashboard}, ${session.user.name || '!'}`}
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <Link href={Routes.Profile} passHref>
