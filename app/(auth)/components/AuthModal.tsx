@@ -2,7 +2,6 @@
 import { Loader2, LogInIcon, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { useActionState } from 'react'
 import { Background } from '@/components/shared'
 import { InputWithError } from '@/components/ui'
 import { Button } from '@/components/ui/button'
@@ -13,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useServerActionErrorHandler } from '@/lib/hooks'
+import { useActionStateWithError } from '@/lib/hooks'
 import {
   AuthActionErrorCodeMap,
   AuthActionResponse,
@@ -34,12 +33,28 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
-  const [state, action, isPending] = useActionState(authAction, initalState)
-  useServerActionErrorHandler<AuthActionResponse>({
+  const {
     state,
-    isPending,
+    formAction,
+    isPending: isFormPending,
+    errorComponent: loginError,
+  } = useActionStateWithError({
+    action: authAction,
+    initialState: initalState,
     errorCodeMap: AuthActionErrorCodeMap,
+    displayMode: 'inline',
   })
+  const {
+    errorComponent: oauthError,
+    isPending: isOAuthPending,
+    formAction: googleAction,
+  } = useActionStateWithError({
+    action: signInWithGoogle,
+    initialState: initalState,
+    errorCodeMap: AuthActionErrorCodeMap,
+    displayMode: 'inline',
+  })
+
   const next = useSearchParams()
 
   return (
@@ -47,7 +62,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
       <DialogContent
         overlay={<Background />}
         showCloseButton={false}
-        className="h-[80vw] max-h-[50vh] max-w-screen bg-white/5 backdrop-blur-2xl lg:min-h-96 lg:max-w-80!"
+        className="h-[80vw] max-w-screen bg-white/5 backdrop-blur-2xl lg:h-auto lg:min-h-96 lg:max-w-80!"
       >
         <DialogHeader className="text-left">
           <div className="mb-3 flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-white/50 p-2">
@@ -55,9 +70,10 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
           </div>
           <DialogTitle>{copy.welcome}</DialogTitle>
           <DialogDescription>{copy.description}</DialogDescription>
+          {loginError || oauthError}
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <form action={action} className="flex flex-col gap-3 lg:gap-3">
+          <form action={formAction} className="flex flex-col gap-3 lg:gap-3">
             <input type="hidden" name="next" value={next.get('next') || ''} />
             {mode === 'register' && (
               <InputWithError
@@ -88,10 +104,10 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isFormPending}
               className="flex items-center justify-center gap-1.5"
             >
-              {isPending ? (
+              {isFormPending ? (
                 <Loader2 className="size-3 animate-spin" />
               ) : (
                 <Mail className="size-3" />
@@ -100,14 +116,20 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
             </Button>
           </form>
           <hr />
-          <Button
-            type="button"
-            onClick={signInWithGoogle}
-            className="flex items-center justify-center gap-1.5"
-          >
-            <Image src="google.svg" alt="Google Icon" width={12} height={12} />
-            {copy.buttonText.gooole}
-          </Button>
+          <form action={googleAction}>
+            <Button
+              type="submit"
+              disabled={isOAuthPending}
+              className="flex w-full items-center justify-center gap-1.5"
+            >
+              {isOAuthPending ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Image src="/google.svg" alt="Google Icon" width={12} height={12} />
+              )}
+              {copy.buttonText.gooole}
+            </Button>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

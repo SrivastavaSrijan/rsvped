@@ -162,6 +162,20 @@ export const verifyPassword = async ({
   }
 }
 
-export const signInWithGoogle = async () => {
-  await signIn('google')
+export const signInWithGoogle = async (): Promise<AuthActionResponse> => {
+  try {
+    await signIn('google')
+    return { success: true }
+  } catch (error) {
+    if (error instanceof AuthError && error.type === 'OAuthAccountNotLinked') {
+      return {
+        success: false,
+        error: AuthErrorCodes.OAUTH_ACCOUNT_NOT_LINKED,
+      }
+    }
+    // Redirection to the OAuth provider
+    return {
+      success: true,
+    }
+  }
 }

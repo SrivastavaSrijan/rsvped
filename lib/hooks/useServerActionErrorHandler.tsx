@@ -1,5 +1,7 @@
+import { AlertCircle } from 'lucide-react'
 import { useRef } from 'react'
 import { toast } from 'sonner'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ServerActionResponse } from '@/server/actions/types'
 
 interface UseServerActionErrorHandlerParams<T extends ServerActionResponse> {
@@ -8,16 +10,36 @@ interface UseServerActionErrorHandlerParams<T extends ServerActionResponse> {
   errorCodeMap: T extends { error: infer E extends string }
     ? Record<E, string>
     : Record<string, string>
+  displayMode?: 'toast' | 'inline'
 }
 export const useServerActionErrorHandler = <T extends ServerActionResponse>({
   state,
   isPending,
   errorCodeMap,
-}: UseServerActionErrorHandlerParams<T>) => {
+  displayMode = 'toast',
+}: UseServerActionErrorHandlerParams<T>): React.ReactNode | null => {
   const toastId = useRef<number | string | null>(null)
-  if (state.error && !isPending && !toastId.current) {
-    toastId.current = toast.error(errorCodeMap[state.error], {
-      duration: 2000,
+
+  if (!state?.error || isPending) {
+    return null
+  }
+
+  const errorMessage = errorCodeMap[state.error] || 'An unexpected error occurred.'
+
+  if (displayMode === 'inline') {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="size-4" />
+        <AlertTitle>Authentication Error</AlertTitle>
+        <AlertDescription>{errorMessage}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  // Default toast behavior
+  if (!toastId.current) {
+    toastId.current = toast.error(errorMessage, {
+      duration: 4000,
       onAutoClose: () => {
         toastId.current = null
       },
@@ -33,4 +55,6 @@ export const useServerActionErrorHandler = <T extends ServerActionResponse>({
       },
     })
   }
+
+  return null
 }
