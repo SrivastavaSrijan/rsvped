@@ -1,9 +1,9 @@
 'use client'
-import { Loader2, LogInIcon, Mail } from 'lucide-react'
+import { AlertCircle, Loader2, LogInIcon, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { Background } from '@/components/shared'
-import { InputWithError } from '@/components/ui'
+import { Alert, AlertDescription, AlertTitle, InputWithError } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -20,6 +20,7 @@ import {
   authAction,
   signInWithGoogle,
 } from '@/server/actions'
+import { AuthErrorCodes } from '@/server/actions/types'
 import { copy } from '../copy'
 
 const initalState: AuthActionResponse = {
@@ -44,18 +45,24 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
     errorCodeMap: AuthActionErrorCodeMap,
     displayMode: 'inline',
   })
-  const {
-    errorComponent: oauthError,
-    isPending: isOAuthPending,
-    formAction: googleAction,
-  } = useActionStateWithError({
-    action: signInWithGoogle,
-    initialState: initalState,
-    errorCodeMap: AuthActionErrorCodeMap,
-    displayMode: 'inline',
-  })
+  const searchParams = useSearchParams()
 
-  const next = useSearchParams()
+  const queryError = searchParams.get('error')
+
+  const QueryError = () => {
+    if (!queryError) return null
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="size-4" />
+        <AlertTitle>Something went wrong!</AlertTitle>
+        {queryError in AuthActionErrorCodeMap && (
+          <AlertDescription>
+            {AuthActionErrorCodeMap[queryError as AuthErrorCodes]}
+          </AlertDescription>
+        )}
+      </Alert>
+    )
+  }
 
   return (
     <Dialog open>
@@ -70,11 +77,11 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
           </div>
           <DialogTitle>{copy.welcome}</DialogTitle>
           <DialogDescription>{copy.description}</DialogDescription>
-          {loginError || oauthError}
+          {loginError || <QueryError />}
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <form action={formAction} className="flex flex-col gap-3 lg:gap-3">
-            <input type="hidden" name="next" value={next.get('next') || ''} />
+            <input type="hidden" name="next" value={searchParams.get('next') || ''} />
             {mode === 'register' && (
               <InputWithError
                 error={state.fieldErrors?.name}
@@ -116,20 +123,15 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
             </Button>
           </form>
           <hr />
-          <form action={googleAction}>
-            <Button
-              type="submit"
-              disabled={isOAuthPending}
-              className="flex w-full items-center justify-center gap-1.5"
-            >
-              {isOAuthPending ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Image src="/google.svg" alt="Google Icon" width={12} height={12} />
-              )}
-              {copy.buttonText.gooole}
-            </Button>
-          </form>
+
+          <Button
+            type="button"
+            className="flex w-full items-center justify-center gap-1.5"
+            onClick={signInWithGoogle}
+          >
+            <Image src="/google.svg" alt="Google Icon" width={12} height={12} />
+            {copy.buttonText.google}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -5,7 +5,7 @@ export const copy = {
   buttonText: {
     signIn: 'Sign In',
     register: 'Register',
-    gooole: 'Google',
+    google: 'Sign In With Google',
   },
   placeholders: {
     email: 'you@example.com',
