@@ -1,4 +1,4 @@
-# RSVP'd – Copilot Coding Guidelines (v0.3)
+# RSVP'd – Copilot Coding Guidelines (v0.4)
 
 > **Scope**: Implementation details only. Feature discussions live elsewhere.
 
@@ -45,14 +45,19 @@ function EventList() {
 ```
 
 ### Mutations via Server Actions
+All mutations must be handled by Server Actions, which then call the tRPC API. This centralizes data validation and error handling.
+
 ```ts
 // server/actions/events.ts
 'use server'
 import { getAPI } from '@/server/api'
+import { createEventSchema } from './schemas' // Zod schema
 
-export async function createEvent(formData: FormData) {
+export async function createEvent(prevState, formData) {
+  const validation = createEventSchema.safeParse(...)
+  // ... handle validation errors
   const api = await getAPI()
-  return api.event.create({ /* parsed data */ })
+  return api.event.create(validation.data)
 }
 ```
 
@@ -69,8 +74,8 @@ export async function createEvent(formData: FormData) {
 
 ### Usage
 
-- Never hard‑code values – use `var(--token)` **or** a Tailwind utility already mapped.
-- Rounded, calm Lu.ma aesthetic ⇢ rely on radius & shadow tokens – do not invent new radii.
+- **Use mapped Tailwind utilities ONLY**. The `@theme` directive in `theme.css` maps all CSS variables to Tailwind classes (e.g., `--color-border` becomes `border-border`).
+- **Never use `var(...)` directly in classNames**. This is an anti-pattern.
 - Use two responsive breakpoints: `sm` (640px) & `lg` (1024px). No custom media queries. 
 - For padding/spacing/margins, use Tailwind's `px-4 lg:px-8` etc. This way, mobile‑first design is preserved.
 
@@ -82,6 +87,7 @@ export async function createEvent(formData: FormData) {
 app/
   (dev)/               # Component playground & mocks - use /dev/components-preview
   (main)/              # Authenticated user flows (when auth is implemented)
+    components/        # Components specific to the (main) layout/group
   (static)/            # Marketing & legal pages (RSC only)
     layout.tsx         # Specific layout for static pages
     components/        # Static page components (Navbar, Footer, Hero)
@@ -92,9 +98,13 @@ components/
 lib/
   config/routes.ts     # Centralized route map 
   auth.ts              # NextAuth helpers
+  hooks/               # Custom hooks, e.g., useActionStateWithError
   trpc/                # tRPC client setup (provider.tsx, trpc.ts)
 server/
   actions/             # Server actions ("use server")
+    index.ts           # Barrel export for all actions & types
+    types.ts           # Shared action types (ServerActionResponse, error enums)
+    constants.ts       # Error code to message maps
   api/
     routers/           # tRPC routers (event.ts, rsvp.ts)
     root.ts            # Main router + createCaller export
@@ -138,25 +148,42 @@ server/
 
 ## 5 ▪ Server Actions
 
-- Mutations live in `server/actions/*` and must:
+All form submissions and mutations must use the following server action pattern, which mirrors the `authAction` implementation.
 
-  1. Start with `"use server"`.
-  2. Import the **same** tRPC router logic (no duplicate SQL).
-  3. Return typed data (`z.object({...}).parse`) or throw.
+1.  **Define Schema**: Create a Zod schema for form data validation in the action file.
+2.  **Define Action**: Create the server action function. It must:
+    -   Start with `"use server"`.
+    -   Accept `(prevState, formData)`.
+    -   Use `schema.safeParse()` to validate. Return a `ServerActionResponse` with `fieldErrors` on failure.
+    -   Call the tRPC API via `getAPI()`.
+    -   Wrap the API call in a `try...catch` block to handle server errors, returning a `ServerActionResponse` with an error code.
+    -   On success, `redirect()` to the appropriate route.
+3.  **Export State & Types**: Export the action, an `initialState` object, and related types from the action file.
+4.  **Use Hook in Client**: In the client component, use the `useActionStateWithError` hook to manage state, errors, and pending status.
 
 - Example:
 
-  ```ts
-  // server/actions/rsvp.ts
-  "use server";
-  import { getAPI } from '@/server/api'
+  ```tsx
+  // app/(main)/components/CreateEventForm.tsx
+  'use client'
+  import { useActionStateWithError } from '@/lib/hooks'
+  import { createEvent, EventActionErrorCodeMap } from '@/server/actions'
 
-  export async function rsvpAction(input: RSVPInput) {
-    const api = await getAPI()
-    return api.rsvp.create(input)
+  const initialCreateEventState = {
+    fieldErrors: {},
+    isPending: false,
+    errorCode: null,
+  }
+  export function CreateEventForm() {
+    const { formAction, errorComponent, isPending } = useActionStateWithError({
+      action: createEvent,
+      initialState: initialCreateEventState,
+      errorCodeMap: EventActionErrorCodeMap,
+    })
+
+    return <form action={formAction}>{/* ... inputs and errorComponent ... */}</form>
   }
   ```
-- Call from forms with `action={rsvpAction}`; handle Toaster on client.
 
 ---
 
@@ -181,7 +208,7 @@ server/
 | Kind                             | Case                                  | Example                   |
 | -------------------------------- | ------------------------------------- | ------------------------- |
 | React component (reusable)       | **PascalCase**                        | `EventCard.tsx`           |
-| Route‑local comp                 | **camelCase**                         | `hero.tsx` under page dir |
+| Route‑local comp                 | **PascalCase**                        | `CreateEventForm.tsx`     |
 | UI primitives (ShadCN re‑export) | **kebab‑case** inside `components/ui` | `button.tsx`, `input.tsx` |
 | Utility                          | **camelCase**                         | `formatDate.ts`           |
 | Barrel                           | `index.ts`                            | re‑export only – no logic |
@@ -252,13 +279,25 @@ export type Route = typeof Routes[keyof typeof Routes];
 ### ✅ Do This
 - **Import paths**: Always use `@/` aliases, never relative imports
 - **Routes**: Use `Routes.Home` from `lib/config/routes.ts`  
-- **Data fetching**: tRPC only (server actions for RSC, hooks for client)
-- **Styling**: Use theme tokens or mapped Tailwind utilities
+- **Data fetching**: tRPC only (server actions for mutations, hooks for client queries)
+- **Styling**: Use mapped Tailwind utilities ONLY (e.g., `border-border`, `bg-secondary`).
 - **Components**: Barrel exports from `components/ui/index.ts`
+- **Server Actions**: Follow the authAction pattern for all mutations.
+- **Naming Conventions**: Try to be smart with names.
+  - Bad - `EventCardWithShareActions`, Good - `EventCard` with `ShareEventActions` as a child component.
+  - Bad - `eventUrl`, `eventName`, `eventDate`, Good - `url`, `title`, `startDate` - the context is clear.
+
+
+#### Tailwind Best Practices
+- Use `@theme` tokens in `app/theme.css` for colors, spacing, etc
+- Use Tailwind's responsive utilities (e.g., `px-4 lg:px-8`) for mobile-first design
+- Do not use `mb-4`, `mt-2`, etc. directly in classNames – try to use flex and gap instead. Eg: `flex flex-col gap-4`
+- Do not use `h-*`, `w-*` for SVG icons - use `size-*` instead (e.g., `size-3` for 12px)
 
 ### ❌ Never Do This  
 - Direct fetch('/api/...') calls - use tRPC patterns
 - Hard-coded colors/spacing - use theme tokens
+- `var(...)` in `className` attributes.
 - CSS files outside app/theme.css & app/globals.css
 - Relative imports (../../..)
 - Inline styles or arbitrary className values

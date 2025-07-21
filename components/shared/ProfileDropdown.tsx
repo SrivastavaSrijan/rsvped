@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Session } from 'next-auth'
 import {
@@ -9,36 +10,43 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui'
 import { getAvatarURL, Routes } from '@/lib/config'
+import { getRandomColor } from '@/lib/utils'
 import { signOutAction } from '@/server/actions'
-import { copy } from '../copy'
 
+const copy = {
+  dashboard: 'Hey there',
+  profile: 'Settings',
+  signOut: 'Sign Out',
+}
 interface ProfileDropdownProps {
   session: Session
 }
 export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
+  const { image, name } = session.user
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {session.user.image ? (
-          // biome-ignore lint/performance/noImgElement: SVG
-          <img
-            alt={session.user.name || 'User'}
-            src={
-              session.user.image ? session.user.image : getAvatarURL(session.user.name || 'User')
-            }
-            className="size-8 rounded-full object-cover"
+        {image && name ? (
+          <Image
+            style={{ backgroundColor: getRandomColor({ seed: name }) }}
+            unoptimized
+            width={32}
+            height={32}
+            alt={name || 'User'}
+            src={image ? image : getAvatarURL(name || 'User')}
+            className="flex items-center rounded-full object-contain"
           />
         ) : (
           <Button size="sm" variant="outline">
-            {`${copy.nav.dashboard}, ${session.user.name || '!'}`}
+            {`${copy.dashboard}, ${name || '!'}`}
           </Button>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <Link href={Routes.Auth.Profile} passHref>
-          <DropdownMenuItem>{copy.nav.profile}</DropdownMenuItem>
+          <DropdownMenuItem>{copy.profile}</DropdownMenuItem>
         </Link>
-        <DropdownMenuItem onClick={() => signOutAction()}>{copy.nav.signOut}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => signOutAction()}>{copy.signOut}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

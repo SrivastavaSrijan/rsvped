@@ -9,10 +9,10 @@ export const Navbar = () => {
           <Link
             href="/"
             passHref
-            className="flex cursor-pointer items-center space-x-2 object-cover opacity-50 transition-opacity hover:opacity-100"
+            className="object-cover opacity-50 transition-opacity hover:opacity-100"
           >
             {/* Logo placeholder */}
-            <Image src="/logo.svg" alt="Background pattern" width={32} height={32} priority />
+            <Image src="/logo.svg" alt="Background pattern" width={24} height={24} priority />
           </Link>
         </div>
       </div>

@@ -71,7 +71,6 @@ async function performSignIn(
       }
     }
   }
-  const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
 
   await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
     title: name || 'Hey there.',
@@ -79,7 +78,8 @@ async function performSignIn(
     illustration: image,
   })
 
-  redirect(`${Routes.Utility.HoldOn}?next=${encodeURIComponent(hasValidNext ? next : Routes.Home)}`)
+  const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
+  redirect(`${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : Routes.Home}`)
 }
 
 export async function authAction(
@@ -161,6 +161,12 @@ export const verifyPassword = async ({
     }
   }
 }
-export const signInWithGoogle = async () => {
-  await signIn('google')
+export const signInWithGoogle = async (next: string | null) => {
+  await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
+    title: 'Hey there.',
+    description: "Welcome to rsvp'd!",
+  })
+  const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
+  const redirectTo = `${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : Routes.Home}`
+  await signIn('google', { redirectTo })
 }

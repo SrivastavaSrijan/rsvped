@@ -28,9 +28,9 @@ export const useServerActionErrorHandler = <T extends ServerActionResponse>({
 
   if (displayMode === 'inline') {
     return (
-      <Alert variant="destructive">
+      <Alert className="border-0 bg-white/10">
         <AlertCircle className="size-4" />
-        <AlertTitle>Authentication Error</AlertTitle>
+        <AlertTitle>Something went wrong!</AlertTitle>
         <AlertDescription>{errorMessage}</AlertDescription>
       </Alert>
     )

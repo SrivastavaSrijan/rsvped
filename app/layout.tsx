@@ -21,9 +21,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <meta name="apple-mobile-web-app-title" content="rsvp'd" />
-      <body className={`${inter.variable} dark font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased`}>
         <TRPCProvider>{children}</TRPCProvider>
         <Toaster />
       </body>

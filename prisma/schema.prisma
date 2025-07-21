@@ -165,7 +165,7 @@ model Event {
 
   startDate DateTime
   endDate   DateTime
-  timezone  String // e.g. "Asia/Kolkata"
+  timezone  String  @default("America/New_York") // e.g. "Asia/Kolkata"
 
   locationType LocationType
   venueName    String? // only if physical

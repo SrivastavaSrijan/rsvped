@@ -1,7 +1,6 @@
+import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { createTRPCRouter } from '@/server/api/trpc'
-import { eventRouter } from './routers/event'
-import { rsvpRouter } from './routers/rsvp'
-import { userRouter } from './routers/user'
+import { eventRouter, imageRouter, rsvpRouter, userRouter } from './routers'
 import { createTRPCContext } from './trpc'
 
 /**
@@ -12,13 +11,16 @@ import { createTRPCContext } from './trpc'
 export const appRouter = createTRPCRouter({
   event: eventRouter,
   rsvp: rsvpRouter,
+  image: imageRouter,
 
   user: userRouter,
 })
 
 // export type definition of API
 export type AppRouter = typeof appRouter
-
+type RouterInput = inferRouterInputs<AppRouter>
+type RouterOutput = inferRouterOutputs<AppRouter>
+export type { RouterInput, RouterOutput }
 /**
  * Create a server-side caller for the tRPC API.
  */

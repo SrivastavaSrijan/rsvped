@@ -1,60 +1,153 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { LocationType } from '@prisma/client'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
+import { RouterOutput } from '../api/root'
+import { EventErrorCodes, ServerActionResponse } from './types'
 
-const createEventSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  subtitle: z.string().optional(),
-  description: z.string().optional(),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-  timezone: z.string().default('UTC'),
-  locationType: z.enum(['PHYSICAL', 'ONLINE', 'HYBRID']),
-  venueName: z.string().optional(),
-  venueAddress: z.string().optional(),
-  onlineUrl: z.string().optional(),
-  capacity: z.coerce.number().int().positive().optional(),
-})
+const createEventSchema = z
+  .object({
+    title: z.string().min(1, 'Title is required.'),
+    startDate: z.string().transform((val) => new Date(val)),
+    endDate: z.string().transform((val) => new Date(val)),
+    timezone: z.string().min(1, 'Timezone is required.'),
+    locationType: z.nativeEnum(LocationType),
+    venueName: z.string().optional(),
+    venueAddress: z.string().optional(),
+    onlineUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+    description: z.string().optional(),
+    requiresApproval: z.boolean().optional(),
+    capacity: z
+      .string()
+      .transform((val) => (val ? parseInt(val, 10) : undefined))
+      .optional(),
+    coverImage: z.string().optional(),
+    isPaid: z.boolean().optional(),
+    ticketPrice: z
+      .string()
+      .transform((val) => (val ? parseFloat(val) : undefined))
+      .optional(),
+    ticketCurrency: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.startDate >= data.endDate) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'End date must be after start date.',
+      path: ['endDate'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.locationType === LocationType.PHYSICAL && !data.venueName) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'Venue name is required for physical events.',
+      path: ['venueName'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        (data.locationType === LocationType.ONLINE || data.locationType === LocationType.HYBRID) &&
+        !data.onlineUrl
+      ) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'Online URL is required for online/hybrid events.',
+      path: ['onlineUrl'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.isPaid && !data.ticketPrice) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'Price is required for paid events.',
+      path: ['ticketPrice'],
+    }
+  )
 
-export async function createEvent(formData: FormData) {
+export type EventFormData = z.infer<typeof createEventSchema>
+type CreateEventData = RouterOutput['event']['create']
+export type EventActionResponse = ServerActionResponse<
+  CreateEventData,
+  EventErrorCodes,
+  EventFormData
+>
+
+export async function createEvent(
+  _: EventActionResponse | null,
+  formData: FormData
+): Promise<EventActionResponse> {
+  const data = Object.fromEntries(formData.entries())
+
+  // Transform form data to proper types
+  const transformedData = {
+    ...data,
+    requiresApproval: data.requiresApproval === 'on',
+    isPaid: data.isPaid === 'on',
+  }
+
+  const validation = createEventSchema.safeParse(transformedData)
+
+  if (!validation.success) {
+    return {
+      success: false,
+      error: EventErrorCodes.VALIDATION_ERROR,
+      fieldErrors: validation.error.flatten().fieldErrors,
+    }
+  }
+  let event: EventActionResponse['data']
   try {
-    // Parse form data
-    const rawData = {
-      title: formData.get('title') as string,
-      subtitle: formData.get('subtitle') as string,
-      description: formData.get('description') as string,
-      startDate: formData.get('startDate') as string,
-      endDate: formData.get('endDate') as string,
-      timezone: formData.get('timezone') as string,
-      locationType: formData.get('locationType') as 'PHYSICAL' | 'ONLINE' | 'HYBRID',
-      venueName: formData.get('venueName') as string,
-      venueAddress: formData.get('venueAddress') as string,
-      onlineUrl: formData.get('onlineUrl') as string,
-      capacity: formData.get('capacity') as string,
-    }
-
-    // Validate data
-    const validatedData = createEventSchema.parse(rawData)
-
-    // Create server API
     const api = await getAPI()
-
-    // Convert string dates to Date objects
-    const eventData = {
-      ...validatedData,
-      startDate: new Date(validatedData.startDate),
-      endDate: new Date(validatedData.endDate),
-    }
-
-    // Create event via tRPC
-    await api.event.create(eventData)
-
-    // Revalidate the page to show new event
-    revalidatePath('/')
+    event = await api.event.create(validation.data)
   } catch (error) {
     console.error('Error creating event:', error)
-    throw error
+
+    // Handle specific tRPC errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      if (error.code === 'UNAUTHORIZED') {
+        return {
+          success: false,
+          error: EventErrorCodes.UNAUTHORIZED,
+        }
+      }
+      if (error.code === 'BAD_REQUEST') {
+        return {
+          success: false,
+          error: EventErrorCodes.VALIDATION_ERROR,
+        }
+      }
+    }
+
+    return {
+      success: false,
+      error: EventErrorCodes.CREATION_FAILED,
+    }
+  }
+  if (event) {
+    redirect(`${Routes.Main.Events.Root}/${event.slug}`)
+  }
+  return {
+    success: true,
+    data: event,
+    message: 'Event created successfully.',
   }
 }

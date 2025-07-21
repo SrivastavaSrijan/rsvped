@@ -1,3 +1,65 @@
+@theme static {
+  /* ===== CRANBERRY (brand) ===== */
+  --color-cranberry-5: #fef4f9;
+  --color-cranberry-10: #fde2ef;
+  --color-cranberry-20: #fcc6de;
+  --color-cranberry-30: #f98dbe;
+  --color-cranberry-40: #f6539d;
+  --color-cranberry-50: #f31a7c;
+  --color-cranberry-60: #d5176d;
+  --color-cranberry-70: #b6145d;
+  --color-cranberry-80: #98104e;
+  --color-cranberry-90: #790d3e;
+
+  /* ===== BARNEY ===== */
+  --color-barney-5: #faeeff;
+  --color-barney-10: #f0d3ff;
+  --color-barney-20: #e1a8fe;
+  --color-barney-30: #d27cfe;
+  --color-barney-40: #c350fd;
+  --color-barney-50: #ab46dd;
+  --color-barney-60: #923cbe;
+  --color-barney-70: #7a329e;
+  --color-barney-80: #62287f;
+  --color-barney-90: #491e5f;
+
+  /* ===== PURPLE ===== */
+  --color-purple-5: #f4f3fe;
+  --color-purple-10: #e3defd;
+  --color-purple-20: #d4c4ff;
+  --color-purple-30: #b596ff;
+  --color-purple-40: #7b49ff;
+  --color-purple-50: #682fff;
+  --color-purple-60: #5b29df;
+  --color-purple-70: #4b23bf;
+  --color-purple-80: #2f1880;
+  --color-purple-90: #231260;
+
+  /* ===== LU.MA TRANSLUCENT & PALE COLORS ===== */
+  --color-pale-cranberry: rgba(243, 26, 124, 0.133);
+  --color-faint-cranberry: rgba(243, 26, 124, 0.067);
+  --color-pale-blue: rgba(50, 95, 250, 0.133);
+  --color-faint-blue: rgba(50, 95, 250, 0.067);
+  --color-pale-green: rgba(60, 189, 44, 0.133);
+  --color-faint-green: rgba(60, 189, 44, 0.067);
+  --color-darker-pale-green: rgba(60, 189, 44, 0.267);
+  --color-pale-red: rgba(237, 43, 50, 0.133);
+  --color-faint-red: rgba(237, 43, 50, 0.067);
+  --color-darker-pale-red: rgba(237, 43, 50, 0.267);
+  --color-half-red: rgba(237, 43, 50, 0.467);
+  --color-pale-yellow: rgba(214, 151, 18, 0.133);
+  --color-faint-yellow: rgba(214, 151, 18, 0.067);
+  --color-pale-orange: rgba(217, 99, 38, 0.133);
+  --color-faint-orange: rgba(217, 99, 38, 0.067);
+  --color-pale-purple: rgba(104, 47, 255, 0.133);
+  --color-faint-purple: rgba(104, 47, 255, 0.067);
+  --color-pale-barney: rgba(171, 70, 221, 0.133);
+  --color-faint-barney: rgba(171, 70, 221, 0.067);
+  --color-pale-gray: rgba(147, 149, 151, 0.133);
+  --color-faint-gray: rgba(147, 149, 151, 0.067);
+  --color-darker-pale-gray: rgba(147, 149, 151, 0.267);
+}
+
 @theme {
   /* ===== TYPOGRAPHY ===== */
   --font-family-sans:
@@ -37,42 +99,6 @@
   --letter-spacing-normal: 0em;
   --letter-spacing-wide: 0.025em;
   --letter-spacing-wider: 0.05em;
-
-  /* ===== CRANBERRY (brand) ===== */
-  --color-cranberry-5: #fef4f9;
-  --color-cranberry-10: #fde2ef;
-  --color-cranberry-20: #fcc6de;
-  --color-cranberry-30: #f98dbe;
-  --color-cranberry-40: #f6539d;
-  --color-cranberry-50: #f31a7c;
-  --color-cranberry-60: #d5176d;
-  --color-cranberry-70: #b6145d;
-  --color-cranberry-80: #98104e;
-  --color-cranberry-90: #790d3e;
-
-  /* ===== BARNEY ===== */
-  --color-barney-5: #faeeff;
-  --color-barney-10: #f0d3ff;
-  --color-barney-20: #e1a8fe;
-  --color-barney-30: #d27cfe;
-  --color-barney-40: #c350fd;
-  --color-barney-50: #ab46dd;
-  --color-barney-60: #923cbe;
-  --color-barney-70: #7a329e;
-  --color-barney-80: #62287f;
-  --color-barney-90: #491e5f;
-
-  /* ===== PURPLE ===== */
-  --color-purple-5: #f4f3fe;
-  --color-purple-10: #e3defd;
-  --color-purple-20: #d4c4ff;
-  --color-purple-30: #b596ff;
-  --color-purple-40: #7b49ff;
-  --color-purple-50: #682fff;
-  --color-purple-60: #5b29df;
-  --color-purple-70: #4b23bf;
-  --color-purple-80: #2f1880;
-  --color-purple-90: #231260;
 
   /* ===== BLUE ===== */
   --color-blue-5: #eff5ff;
@@ -149,30 +175,6 @@
   --color-white: #ffffff;
   --color-black: #131517;
 
-  /* ===== LU.MA TRANSLUCENT & PALE COLORS ===== */
-  --color-pale-cranberry: rgba(243, 26, 124, 0.133);
-  --color-faint-cranberry: rgba(243, 26, 124, 0.067);
-  --color-pale-blue: rgba(50, 95, 250, 0.133);
-  --color-faint-blue: rgba(50, 95, 250, 0.067);
-  --color-pale-green: rgba(60, 189, 44, 0.133);
-  --color-faint-green: rgba(60, 189, 44, 0.067);
-  --color-darker-pale-green: rgba(60, 189, 44, 0.267);
-  --color-pale-red: rgba(237, 43, 50, 0.133);
-  --color-faint-red: rgba(237, 43, 50, 0.067);
-  --color-darker-pale-red: rgba(237, 43, 50, 0.267);
-  --color-half-red: rgba(237, 43, 50, 0.467);
-  --color-pale-yellow: rgba(214, 151, 18, 0.133);
-  --color-faint-yellow: rgba(214, 151, 18, 0.067);
-  --color-pale-orange: rgba(217, 99, 38, 0.133);
-  --color-faint-orange: rgba(217, 99, 38, 0.067);
-  --color-pale-purple: rgba(104, 47, 255, 0.133);
-  --color-faint-purple: rgba(104, 47, 255, 0.067);
-  --color-pale-barney: rgba(171, 70, 221, 0.133);
-  --color-faint-barney: rgba(171, 70, 221, 0.067);
-  --color-pale-gray: rgba(147, 149, 151, 0.133);
-  --color-faint-gray: rgba(147, 149, 151, 0.067);
-  --color-darker-pale-gray: rgba(147, 149, 151, 0.267);
-
   /* ===== LU.MA SEMANTIC SYSTEM (Corrected) ===== */
   /* Text Colors (from Lu.ma) */
   --color-text-primary: var(--color-black);
@@ -189,6 +191,7 @@
   /* Border Colors (from Lu.ma) */
   --color-border-primary: var(--color-gray-40);
   --color-border-secondary: var(--color-gray-20);
+  --color-border-subtle: var(--color-gray-10);
   --color-border-tertiary: var(--color-gray-10);
   --color-border-active: var(--color-black);
 
@@ -297,6 +300,7 @@
   --spacing-2: 0.5rem;
   --spacing-25: 0.75rem;
   --spacing-3: 1rem;
+  --spacing-35: 1.25rem;
   --spacing-4: 1.5rem;
   --spacing-45: 2rem;
   --spacing-5: 3rem;

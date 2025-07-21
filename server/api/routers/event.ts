@@ -1,13 +1,25 @@
+import { LocationType } from '@prisma/client'
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
+import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc'
 
 export const eventRouter = createTRPCRouter({
   // Get all events
   list: publicProcedure.query(async ({ ctx }) => {
     return ctx.prisma.event.findMany({
+      where: {
+        deletedAt: null,
+        isPublished: true,
+      },
       orderBy: { createdAt: 'desc' },
       include: {
-        host: true,
+        host: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
         categories: {
           include: {
             category: true,
@@ -23,64 +35,117 @@ export const eventRouter = createTRPCRouter({
     })
   }),
 
-  // Create a new event
-  create: publicProcedure
+  // Create a new event (requires authentication)
+  create: protectedProcedure
     .input(
       z.object({
-        title: z.string().min(1, 'Title is required'),
-        subtitle: z.string().optional(),
+        title: z.string(),
         description: z.string().optional(),
         startDate: z.date(),
         endDate: z.date(),
-        timezone: z.string().default('UTC'),
-        locationType: z.enum(['PHYSICAL', 'ONLINE', 'HYBRID']),
+        timezone: z.string(),
+        locationType: z.nativeEnum(LocationType),
         venueName: z.string().optional(),
         venueAddress: z.string().optional(),
         onlineUrl: z.string().optional(),
         capacity: z.number().int().positive().optional(),
+        requiresApproval: z.boolean().default(false),
+        coverImage: z.string().optional(),
+        isPaid: z.boolean().default(false),
+        ticketPrice: z.number().optional(),
+        ticketCurrency: z.string().default('USD'),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Generate slug from title
-      const slug = input.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '')
-
-      // Find or create a demo user
-      let demoUser = await ctx.prisma.user.findUnique({
-        where: { email: 'demo@example.com' },
-      })
-
-      if (!demoUser) {
-        demoUser = await ctx.prisma.user.create({
-          data: {
-            email: 'demo@example.com',
-            name: 'Demo Host',
-          },
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to create an event',
         })
       }
 
-      const event = await ctx.prisma.event.create({
-        data: {
-          ...input,
-          slug: `${slug}-${Date.now()}`, // Ensure uniqueness
-          hostId: demoUser.id,
-        },
-        include: {
-          host: true,
-        },
-      })
+      try {
+        // Generate unique slug from title
+        const baseSlug = input.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
 
-      return event
+        // Check for existing slugs and make unique
+        let slug = baseSlug
+        let counter = 1
+        while (await ctx.prisma.event.findUnique({ where: { slug } })) {
+          slug = `${baseSlug}-${counter}`
+          counter++
+        }
+
+        const event = await ctx.prisma.event.create({
+          data: {
+            title: input.title,
+            description: input.description,
+            slug,
+            startDate: input.startDate,
+            endDate: input.endDate,
+            timezone: input.timezone,
+            locationType: input.locationType,
+            venueName: input.venueName,
+            venueAddress: input.venueAddress,
+            onlineUrl: input.onlineUrl,
+            capacity: input.capacity,
+            requiresApproval: input.requiresApproval,
+            coverImage: input.coverImage,
+            hostId: ctx.session.user.id,
+            isPublished: false, // Events start as drafts
+          },
+          include: {
+            host: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        })
+
+        // Create default ticket tier if it's a paid event
+        if (input.isPaid && input.ticketPrice) {
+          await ctx.prisma.ticketTier.create({
+            data: {
+              eventId: event.id,
+              name: 'General Admission',
+              priceCents: Math.round(input.ticketPrice * 100), // Convert to cents
+              currency: input.ticketCurrency,
+              quantityTotal: input.capacity,
+            },
+          })
+        }
+
+        return event
+      } catch (error) {
+        console.error('Error creating event:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create event',
+        })
+      }
     }),
 
-  // Get event by ID
-  getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
-    return ctx.prisma.event.findUnique({
-      where: { id: input.id },
+  // Get event by slug
+  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+    const event = await ctx.prisma.event.findUnique({
+      where: {
+        slug: input.slug,
+        deletedAt: null,
+      },
       include: {
-        host: true,
+        host: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
         categories: {
           include: {
             category: true,
@@ -88,11 +153,29 @@ export const eventRouter = createTRPCRouter({
         },
         ticketTiers: true,
         rsvps: {
+          where: {
+            status: 'CONFIRMED',
+          },
           include: {
-            user: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
           },
         },
       },
     })
+
+    if (!event) {
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Event not found',
+      })
+    }
+
+    return event
   }),
 })

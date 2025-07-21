@@ -127,7 +127,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
           <Button
             type="button"
             className="flex w-full items-center justify-center gap-1.5"
-            onClick={signInWithGoogle}
+            onClick={() => signInWithGoogle(searchParams.get('next') || null)}
           >
             <Image src="/google.svg" alt="Google Icon" width={12} height={12} />
             {copy.buttonText.google}
