@@ -22,9 +22,18 @@ model User {
   sessions      Session[]
 
   // A user can both host and attend events
-  hostedEvents Event[]  @relation("Host")
+  hostedEvents Event[] @relation("Host")
   rsvps        Rsvp[]
-  createdAt    DateTime @default(now())
+
+  // Community features
+  ownedCommunities     Community[]           @relation("CommunityOwner")
+  communityMemberships CommunityMembership[]
+  eventMessages        EventMessage[]
+  eventReferrals       EventReferral[]
+  eventCollaborators   EventCollaborator[]
+
+  createdAt DateTime    @default(now())
+  EventView EventView[]
 }
 
 model Account {
@@ -67,6 +76,82 @@ model VerificationToken {
 }
 
 /**
+ * ---------- Community & Membership ----------
+ */
+
+model Community {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+  coverImage  String?
+  isPublic    Boolean @default(true)
+
+  ownerId String
+  owner   User   @relation("CommunityOwner", fields: [ownerId], references: [id])
+
+  members         CommunityMembership[]
+  membershipTiers MembershipTier[]
+  events          Event[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CommunityMembership {
+  id          String         @id @default(cuid())
+  userId      String
+  communityId String
+  role        MembershipRole @default(MEMBER)
+
+  membershipTierId   String?
+  membershipTier     MembershipTier?     @relation(fields: [membershipTierId], references: [id])
+  subscriptionStatus SubscriptionStatus?
+  expiresAt          DateTime?
+  joinedAt           DateTime            @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
+
+  @@unique([userId, communityId])
+  @@index([communityId, role])
+}
+
+model MembershipTier {
+  id              String           @id @default(cuid())
+  communityId     String
+  name            String
+  slug            String
+  description     String?
+  priceCents      Int? // null = free
+  currency        String?
+  billingInterval BillingInterval?
+  stripePriceId   String?
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+
+  community   Community             @relation(fields: [communityId], references: [id])
+  memberships CommunityMembership[]
+}
+
+enum MembershipRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+/**
  * ---------- Event & taxonomy ----------
  */
 
@@ -91,20 +176,61 @@ model Event {
   isPublished Boolean     @default(false)
   status      EventStatus @default(DRAFT)
 
+  // Enhanced visibility & publishing
+  visibility                  EventVisibility @default(PUBLIC)
+  publishedAt                 DateTime?
+  requiresApproval            Boolean         @default(false)
+  locationHiddenUntilApproved Boolean         @default(false)
+
   hostId String
   host   User   @relation("Host", fields: [hostId], references: [id], onDelete: Cascade)
 
-  categories  EventCategory[] // many-to-many
-  ticketTiers TicketTier[]
-  rsvps       Rsvp[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  // Community integration
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id])
+
+  // 🔧 FIX: Soft delete for financial data preservation
+  deletedAt DateTime?
+
+  // Relations
+  categories            EventCategory[]
+  ticketTiers           TicketTier[]
+  rsvps                 Rsvp[]
+  orders                Order[]
+  promoCodes            PromoCode[]
+  registrationQuestions RegistrationQuestion[]
+  eventViews            EventView[]
+  eventDailyStats       EventDailyStat[]
+  eventMessages         EventMessage[]
+  eventReferrals        EventReferral[]
+  eventCollaborators    EventCollaborator[]
+  eventFeedback         EventFeedback[]
+
+  // Denormalized counters
+  rsvpCount     Int @default(0)
+  paidRsvpCount Int @default(0)
+  checkInCount  Int @default(0)
+  viewCount     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([communityId])
+  @@index([publishedAt])
+  @@index([visibility, status])
+  @@index([deletedAt]) // For soft delete filtering
 }
 
 enum EventStatus {
   DRAFT
   PUBLISHED
   CANCELLED
+}
+
+enum EventVisibility {
+  PUBLIC
+  PRIVATE
+  MEMBER_ONLY
 }
 
 enum LocationType {
@@ -130,25 +256,214 @@ model EventCategory {
   event      Event    @relation(fields: [eventId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
 
-  @@id([eventId, categoryId]) // composite PK
+  @@id([eventId, categoryId])
 }
 
 /**
- * ---------- Ticketing ----------
+ * ---------- Enhanced Ticketing ----------
  */
 
 model TicketTier {
-  id            String @id @default(cuid())
+  id            String  @id @default(cuid())
   eventId       String
-  name          String // e.g. “General”, “VIP”
-  priceCents    Int // 0 for free tickets
-  quantityTotal Int? // null = unlimited
-  quantitySold  Int    @default(0)
+  name          String
+  description   String?
+  priceCents    Int
+  currency      String  @default("USD")
+  quantityTotal Int?
+  quantitySold  Int     @default(0)
 
-  event Event  @relation(fields: [eventId], references: [id])
-  rsvps Rsvp[]
+  // Enhanced visibility & sales timing
+  visibility TicketVisibility @default(PUBLIC)
+  salesStart DateTime?
+  salesEnd   DateTime?
+
+  event          Event           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  rsvps          Rsvp[]
+  orderItems     OrderItem[]
+  promoCodeTiers PromoCodeTier[]
 
   @@index([eventId])
+  @@index([eventId, visibility])
+}
+
+enum TicketVisibility {
+  PUBLIC
+  CODE_REQUIRED
+  HIDDEN
+}
+
+/**
+ * ---------- Orders & Payments ----------
+ */
+
+model Order {
+  id             String      @id @default(cuid())
+  eventId        String
+  purchaserEmail String
+  purchaserName  String?
+  status         OrderStatus @default(PENDING)
+  totalCents     Int
+  currency       String      @default("USD")
+
+  // 🔧 FIX: Enhanced payment tracking
+  refundedCents      Int     @default(0)
+  appliedPromoCodeId String?
+  idempotencyKey     String? @unique // For retry safety
+
+  event            Event       @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  appliedPromoCode PromoCode?  @relation(fields: [appliedPromoCodeId], references: [id])
+  items            OrderItem[]
+  payments         Payment[] // 🔧 FIX: Remove @unique to allow multiple payment attempts
+  rsvps            Rsvp[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([eventId, status])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID // 🔧 FIX: Renamed from CONFIRMED for clarity
+  CANCELLED
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  ticketTierId String
+  quantity     Int
+  priceCents   Int // price at time of purchase
+
+  order      Order      @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  ticketTier TicketTier @relation(fields: [ticketTierId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([ticketTierId]) // For sales reporting
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  orderId          String // 🔧 FIX: Removed @unique to allow multiple attempts
+  attemptNumber    Int           @default(1) // Track payment attempt sequence
+  provider         String // "stripe"
+  providerIntentId String?
+  providerChargeId String?
+  status           PaymentStatus @default(PENDING)
+  amountCents      Int
+  currency         String
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  refunds Refund[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orderId, attemptNumber]) // Ensure unique attempt numbers per order
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+model Refund {
+  id               String  @id @default(cuid())
+  paymentId        String
+  amountCents      Int
+  reason           String?
+  providerRefundId String?
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+}
+
+/**
+ * ---------- Promo Codes ----------
+ */
+
+/// A time-bounded promotional discount code for an event's tickets.
+model PromoCode {
+  id                String       @id @default(cuid())
+  eventId           String
+  code              String
+  discountType      DiscountType
+  amountOffCents    Int?
+  percentOff        Int? // 0-100
+  maxRedemptions    Int?
+  redeemedCount     Int          @default(0)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  appliesToAllTiers Boolean      @default(true)
+
+  event           Event           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  applicableTiers PromoCodeTier[]
+  appliedOrders   Order[]
+
+  @@unique([eventId, code])
+  @@index([eventId, code])
+}
+
+model PromoCodeTier {
+  promoCodeId  String
+  ticketTierId String
+
+  promoCode  PromoCode  @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  ticketTier TicketTier @relation(fields: [ticketTierId], references: [id], onDelete: Cascade)
+
+  @@id([promoCodeId, ticketTierId])
+}
+
+enum DiscountType {
+  AMOUNT
+  PERCENT
+}
+
+/**
+ * ---------- Registration Questions ----------
+ */
+
+model RegistrationQuestion {
+  id       String       @id @default(cuid())
+  eventId  String
+  type     QuestionType
+  label    String
+  required Boolean      @default(false)
+  position Int
+  options  String[] // for select / multi
+
+  event   Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  answers RegistrationAnswer[]
+
+  @@index([eventId, position])
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  SINGLE_SELECT
+  MULTI_SELECT
+  CHECKBOX
+  TERMS
+  SIGNATURE
+}
+
+model RegistrationAnswer {
+  id         String @id @default(cuid())
+  rsvpId     String
+  questionId String
+  value      String // normalized JSON/string
+
+  rsvp     Rsvp                 @relation(fields: [rsvpId], references: [id], onDelete: Cascade)
+  question RegistrationQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@index([rsvpId])
 }
 
 /**
@@ -160,19 +475,33 @@ model Rsvp {
   eventId      String
   ticketTierId String?
   userId       String? // null if guest checkout
+  orderId      String? // link to order for multi-ticket purchases
   email        String
   name         String?
-  status       RsvpStatus   @default(CONFIRMED) // wait-list etc.
+  status       RsvpStatus   @default(CONFIRMED)
   paymentState PaymentState @default(NONE)
 
-  event      Event       @relation(fields: [eventId], references: [id])
-  ticketTier TicketTier? @relation(fields: [ticketTierId], references: [id])
-  user       User?       @relation(fields: [userId], references: [id])
-  checkIn    CheckIn?
+  // 🔧 FIX: Waitlist ordering
+  waitlistPosition Int? // deterministic promotion order
+
+  // Referral tracking
+  referralId String?
+
+  event      Event          @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  ticketTier TicketTier?    @relation(fields: [ticketTierId], references: [id], onDelete: Restrict)
+  user       User?          @relation(fields: [userId], references: [id])
+  order      Order?         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  referral   EventReferral? @relation(fields: [referralId], references: [id])
+
+  checkIn             CheckIn?
+  registrationAnswers RegistrationAnswer[]
+  eventFeedback       EventFeedback[]
 
   createdAt DateTime @default(now())
 
   @@index([eventId, email])
+  @@index([eventId, status])
+  @@index([eventId, status, waitlistPosition]) // For waitlist promotion
 }
 
 enum RsvpStatus {
@@ -192,5 +521,123 @@ model CheckIn {
   id        String   @id @default(cuid())
   rsvpId    String   @unique
   scannedAt DateTime @default(now())
-  rsvp      Rsvp     @relation(fields: [rsvpId], references: [id])
+  rsvp      Rsvp     @relation(fields: [rsvpId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * ---------- Event Collaborators ----------
+ */
+
+model EventCollaborator {
+  id      String    @id @default(cuid())
+  eventId String
+  userId  String
+  role    EventRole
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+enum EventRole {
+  CO_HOST
+  MANAGER
+  CHECKIN
+}
+
+/**
+ * ---------- Chat & Messaging ----------
+ */
+
+model EventMessage {
+  id       String  @id @default(cuid())
+  eventId  String
+  userId   String?
+  content  String  @db.Text
+  parentId String? // for threading
+
+  event   Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User?          @relation(fields: [userId], references: [id])
+  parent  EventMessage?  @relation("Thread", fields: [parentId], references: [id])
+  replies EventMessage[] @relation("Thread")
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, createdAt])
+}
+
+/**
+ * ---------- Referrals ----------
+ */
+
+model EventReferral {
+  id      String  @id @default(cuid())
+  eventId String
+  userId  String? // referrer (if registered user)
+  code    String  @unique
+  uses    Int     @default(0)
+
+  event Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User?  @relation(fields: [userId], references: [id])
+  rsvps Rsvp[]
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+}
+
+/**
+ * ---------- Feedback ----------
+ */
+
+model EventFeedback {
+  id      String  @id @default(cuid())
+  eventId String
+  rsvpId  String
+  rating  Int? // 1-5
+  comment String? @db.Text
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  rsvp  Rsvp  @relation(fields: [rsvpId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, rsvpId])
+}
+
+/**
+ * ---------- Analytics ----------
+ */
+
+model EventView {
+  id        String  @id @default(cuid())
+  eventId   String
+  userId    String?
+  ipAddress String?
+  userAgent String?
+  referrer  String?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id])
+
+  viewedAt DateTime @default(now())
+
+  @@index([eventId, viewedAt])
+}
+
+/// Snapshot row summarizing daily engagement for an event (ETL aggregated).
+model EventDailyStat {
+  id          String   @id @default(cuid())
+  eventId     String
+  date        DateTime // truncate to day
+  views       Int      @default(0)
+  uniqueViews Int      @default(0)
+  rsvps       Int      @default(0)
+  paidRsvps   Int      @default(0)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, date])
+  @@index([date])
 }
