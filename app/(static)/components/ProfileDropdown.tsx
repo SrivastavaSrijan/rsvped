@@ -35,7 +35,7 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <Link href={Routes.Profile} passHref>
+        <Link href={Routes.Auth.Profile} passHref>
           <DropdownMenuItem>{copy.nav.profile}</DropdownMenuItem>
         </Link>
         <DropdownMenuItem onClick={() => signOutAction()}>{copy.nav.signOut}</DropdownMenuItem>

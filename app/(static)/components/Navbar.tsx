@@ -23,7 +23,7 @@ export default async function Navbar() {
           </Link>
 
           <div className="flex items-center space-x-2 lg:space-x-4">
-            <Link href={Routes.Explore} passHref>
+            <Link href={Routes.Main.Events.Discover} passHref>
               <Button variant="link" size="sm">
                 {copy.nav.exploreEvents}
                 <ArrowUpRight className="size-3" />
@@ -32,7 +32,7 @@ export default async function Navbar() {
             {session ? (
               <ProfileDropdown session={session} />
             ) : (
-              <Link href={Routes.SignIn} passHref>
+              <Link href={Routes.Auth.SignIn} passHref>
                 <Button size="sm" variant="outline">
                   {copy.nav.signIn}
                 </Button>

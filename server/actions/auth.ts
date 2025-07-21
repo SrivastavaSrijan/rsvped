@@ -79,7 +79,7 @@ async function performSignIn(
     illustration: image,
   })
 
-  redirect(`${Routes.HoldOn}?next=${encodeURIComponent(hasValidNext ? next : Routes.Home)}`)
+  redirect(`${Routes.Utility.HoldOn}?next=${encodeURIComponent(hasValidNext ? next : Routes.Home)}`)
 }
 
 export async function authAction(
@@ -124,7 +124,7 @@ export async function authAction(
   if (!user) {
     // Set form data in a temporary, encrypted cookie
     await setEncryptedCookie(CookieNames.PrefillForm, { email, password })
-    redirect(Routes.SignUp)
+    redirect(Routes.Auth.SignUp)
   }
   return await performSignIn({ email, password }, { name: user.name, image: user.image }, next)
 }
@@ -140,7 +140,7 @@ export async function signOutAction(): Promise<void> {
     title: 'See you soon.',
     description: 'Logging you out...',
   })
-  redirect(`${Routes.HoldOn}?next=${encodeURIComponent(Routes.Home)}`)
+  redirect(`${Routes.Utility.HoldOn}?next=${encodeURIComponent(Routes.Home)}`)
 }
 
 export const verifyPassword = async ({

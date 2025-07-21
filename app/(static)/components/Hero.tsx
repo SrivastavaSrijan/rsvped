@@ -24,7 +24,7 @@ export default function Hero() {
           <p className="text-lg text-muted-foreground leading-relaxed lg:text-xl">
             {copy.hero.description}
           </p>
-          <Link href={Routes.CreateEvent}>
+          <Link href={Routes.Main.Events.Create}>
             <Button size="lg" className="lg:text-lg">
               {copy.hero.cta}
             </Button>

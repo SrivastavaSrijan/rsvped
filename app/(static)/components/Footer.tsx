@@ -14,19 +14,19 @@ export default function Footer() {
 
           <div className="flex items-center space-x-4 lg:space-x-6">
             <Link
-              href={Routes.WhatsNew}
+              href={Routes.Static.WhatsNew}
               className="text-muted-foreground text-sm transition-colors hover:text-foreground lg:text-base"
             >
               {copy.footer.whatsNew}
             </Link>
             <Link
-              href={Routes.Discover}
+              href={Routes.Main.Events.Discover}
               className="text-muted-foreground text-sm transition-colors hover:text-foreground lg:text-base"
             >
               {copy.footer.discover}
             </Link>
             <Link
-              href={Routes.Pricing}
+              href={Routes.Static.Pricing}
               className="text-muted-foreground text-sm transition-colors hover:text-foreground lg:text-base"
             >
               {copy.footer.pricing}

@@ -1,15 +1,35 @@
 export const Routes = {
   Home: '/',
-  HoldOn: '/hold-on',
-  Dashboard: '/overview',
-  Explore: '/explore',
-  Pricing: '/pricing',
-  Discover: '/discover',
-  WhatsNew: '/whats-new',
-  SignIn: '/login',
-  SignUp: '/register',
-  Profile: '/profile',
-  CreateEvent: '/events/create',
+  Utility: {
+    HoldOn: '/hold-on',
+    Components: '/components',
+  },
+  Auth: {
+    SignIn: '/login',
+    SignUp: '/register',
+    Profile: '/profile',
+  },
+  Static: {
+    About: '/about',
+    Terms: '/terms',
+    Privacy: '/privacy',
+    Pricing: '/pricing',
+    WhatsNew: '/whats-new',
+  },
+  Main: {
+    Events: {
+      Root: '/events',
+      get Communities() {
+        return `${this.Root}/communities`
+      },
+      get Create() {
+        return `${this.Root}/create`
+      },
+      get Discover() {
+        return `${this.Root}/discover`
+      },
+    },
+  },
 } as const
 
 const randomPasterColor = () => {

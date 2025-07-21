@@ -69,7 +69,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
       <DialogContent
         overlay={<Background />}
         showCloseButton={false}
-        className="h-[80vw] max-w-screen bg-white/5 backdrop-blur-2xl lg:h-auto lg:min-h-96 lg:max-w-80!"
+        className="h-auto max-w-screen bg-white/5 backdrop-blur-2xl lg:min-h-96 lg:max-w-80!"
       >
         <DialogHeader className="text-left">
           <div className="mb-3 flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-white/50 p-2">
