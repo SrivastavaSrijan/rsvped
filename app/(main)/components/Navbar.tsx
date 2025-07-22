@@ -42,7 +42,7 @@ export async function Navbar() {
           <div className="flex-1" />
           <div className="flex w-fullmax-w-extra-wide-page items-center justify-between">
             <div className="flex items-center space-x-1 lg:space-x-2">
-              <MainLink href={Routes.Main.Events.Root} icon={<Calendar className="size-3" />}>
+              <MainLink href={Routes.Main.Events.Discover} icon={<Calendar className="size-3" />}>
                 {copy.nav.events}
               </MainLink>
               <MainLink href={Routes.Main.Events.Communities} icon={<Users className="size-3" />}>

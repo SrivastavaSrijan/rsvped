@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
-import { EventCard } from '../../components'
+import { ManageEventCard } from '../../components'
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params
@@ -31,7 +31,7 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
     <div className="px=2 mx-auto w-full max-w-extra-wide-page px-2 py-4 lg:px-4 lg:py-8">
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:flex-col-reverse lg:gap-8">
         <div className="col-span-2">
-          <EventCard {...event} url={url} />
+          <ManageEventCard {...event} url={url} />
         </div>
         {/* Left Column - Event Card */}
         <div className="col-span-1 flex flex-col gap-3 px-2 lg:gap-4 lg:px-0">
