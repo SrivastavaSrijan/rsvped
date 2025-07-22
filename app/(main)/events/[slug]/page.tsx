@@ -28,7 +28,7 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
   const { checkInCount } = event
 
   return (
-    <div className="px=2 mx-auto max-w-extra-wide-page px-2 py-4 lg:px-4 lg:py-8">
+    <div className="px=2 mx-auto w-full max-w-extra-wide-page px-2 py-4 lg:px-4 lg:py-8">
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:flex-col-reverse lg:gap-8">
         <div className="col-span-2">
           <EventCard {...event} url={url} />

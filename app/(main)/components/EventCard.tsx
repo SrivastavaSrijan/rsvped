@@ -88,7 +88,7 @@ export function EventCard({
 
   return (
     <Card
-      className="border-0 p-3 text-white lg:p-6"
+      className="w-full border-0 p-3 text-white lg:p-6"
       style={{
         background: `linear-gradient(to bottom right, ${gradientFrom}, ${gradientTo})`,
       }}
@@ -139,8 +139,8 @@ export function EventCard({
         </div>
 
         {/* Share Link */}
-        <ShareLink url={url} />
       </div>
+      <ShareLink url={url} />
     </Card>
   )
 }

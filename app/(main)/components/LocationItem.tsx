@@ -47,7 +47,7 @@ export const LocationItem = ({
   const displayTitle = getDisplayTitle()
 
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] gap-2 text-sm">
+    <div className="grid w-full grid-cols-[auto_1fr_auto] gap-2 text-sm">
       <Icon className="size-3" />
       <div className="flex min-w-0 flex-col gap-1">
         {linkHref ? (
