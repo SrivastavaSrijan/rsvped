@@ -1,6 +1,6 @@
-import { PaymentStatus } from '@prisma/client'
-import * as z from 'zod'
-import { CompleteOrder, CompleteRefund, RelatedOrderModel, RelatedRefundModel } from './index'
+import * as z from "zod"
+import { PaymentStatus } from "@prisma/client"
+import { CompleteOrder, RelatedOrderModel, CompleteRefund, RelatedRefundModel } from "./index"
 
 export const PaymentModel = z.object({
   id: z.string(),
@@ -26,9 +26,7 @@ export interface CompletePayment extends z.infer<typeof PaymentModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedPaymentModel: z.ZodSchema<CompletePayment> = z.lazy(() =>
-  PaymentModel.extend({
-    order: RelatedOrderModel,
-    refunds: RelatedRefundModel.array(),
-  })
-)
+export const RelatedPaymentModel: z.ZodSchema<CompletePayment> = z.lazy(() => PaymentModel.extend({
+  order: RelatedOrderModel,
+  refunds: RelatedRefundModel.array(),
+}))

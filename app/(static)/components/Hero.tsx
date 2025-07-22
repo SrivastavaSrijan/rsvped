@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
+import { AssetMap } from '@/lib/config/assets'
 import { copy } from '../copy'
 
 export default function Hero() {
@@ -34,7 +35,7 @@ export default function Hero() {
         {/* Image Column */}
         <div className="flex justify-center px-3 lg:col-span-2 lg:justify-end">
           <video autoPlay loop muted playsInline className="w-full max-w-lg">
-            <source src="/phone-dark.webm" type="video/webm" />
+            <source src={AssetMap.HeroVideo} type="video/webm" />
           </video>
         </div>
       </div>

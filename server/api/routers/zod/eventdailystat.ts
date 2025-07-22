@@ -1,5 +1,5 @@
-import * as z from 'zod'
-import { CompleteEvent, RelatedEventModel } from './index'
+import * as z from "zod"
+import { CompleteEvent, RelatedEventModel } from "./index"
 
 export const EventDailyStatModel = z.object({
   id: z.string(),
@@ -20,8 +20,6 @@ export interface CompleteEventDailyStat extends z.infer<typeof EventDailyStatMod
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventDailyStatModel: z.ZodSchema<CompleteEventDailyStat> = z.lazy(() =>
-  EventDailyStatModel.extend({
-    event: RelatedEventModel,
-  })
-)
+export const RelatedEventDailyStatModel: z.ZodSchema<CompleteEventDailyStat> = z.lazy(() => EventDailyStatModel.extend({
+  event: RelatedEventModel,
+}))

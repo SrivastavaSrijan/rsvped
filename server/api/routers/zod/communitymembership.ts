@@ -1,13 +1,6 @@
-import { MembershipRole, SubscriptionStatus } from '@prisma/client'
-import * as z from 'zod'
-import {
-  CompleteCommunity,
-  CompleteMembershipTier,
-  CompleteUser,
-  RelatedCommunityModel,
-  RelatedMembershipTierModel,
-  RelatedUserModel,
-} from './index'
+import * as z from "zod"
+import { MembershipRole, SubscriptionStatus } from "@prisma/client"
+import { CompleteMembershipTier, RelatedMembershipTierModel, CompleteUser, RelatedUserModel, CompleteCommunity, RelatedCommunityModel } from "./index"
 
 export const CommunityMembershipModel = z.object({
   id: z.string(),
@@ -31,11 +24,8 @@ export interface CompleteCommunityMembership extends z.infer<typeof CommunityMem
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedCommunityMembershipModel: z.ZodSchema<CompleteCommunityMembership> = z.lazy(
-  () =>
-    CommunityMembershipModel.extend({
-      membershipTier: RelatedMembershipTierModel.nullish(),
-      user: RelatedUserModel,
-      community: RelatedCommunityModel,
-    })
-)
+export const RelatedCommunityMembershipModel: z.ZodSchema<CompleteCommunityMembership> = z.lazy(() => CommunityMembershipModel.extend({
+  membershipTier: RelatedMembershipTierModel.nullish(),
+  user: RelatedUserModel,
+  community: RelatedCommunityModel,
+}))

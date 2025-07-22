@@ -261,22 +261,34 @@ export const eventRouter = createTRPCRouter({
     }
   }),
 
-  getAllEvents: publicProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.event.findMany({
-      where: {
-        deletedAt: null,
-      },
-      orderBy: { startDate: 'asc' },
-
-      include: {
-        host: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+  getAllEvents: publicProcedure
+    .input(
+      z.object({
+        sort: z.enum(['asc', 'desc']).default('asc'),
+        before: z.string().optional(),
+        after: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.event.findMany({
+        where: {
+          deletedAt: null,
+          startDate: {
+            lt: input.before ? new Date(input.before) : new Date(),
+            gt: input.after ? new Date(input.after) : new Date(0),
           },
         },
-      },
-    })
-  }),
+        orderBy: { startDate: input.sort },
+
+        include: {
+          host: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      })
+    }),
 })

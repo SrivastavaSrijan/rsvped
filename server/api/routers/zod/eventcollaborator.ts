@@ -1,6 +1,6 @@
-import { EventRole } from '@prisma/client'
-import * as z from 'zod'
-import { CompleteEvent, CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
+import * as z from "zod"
+import { EventRole } from "@prisma/client"
+import { CompleteEvent, RelatedEventModel, CompleteUser, RelatedUserModel } from "./index"
 
 export const EventCollaboratorModel = z.object({
   id: z.string(),
@@ -19,9 +19,7 @@ export interface CompleteEventCollaborator extends z.infer<typeof EventCollabora
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventCollaboratorModel: z.ZodSchema<CompleteEventCollaborator> = z.lazy(() =>
-  EventCollaboratorModel.extend({
-    event: RelatedEventModel,
-    user: RelatedUserModel,
-  })
-)
+export const RelatedEventCollaboratorModel: z.ZodSchema<CompleteEventCollaborator> = z.lazy(() => EventCollaboratorModel.extend({
+  event: RelatedEventModel,
+  user: RelatedUserModel,
+}))

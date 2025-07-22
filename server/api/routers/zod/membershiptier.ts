@@ -1,11 +1,6 @@
-import { BillingInterval } from '@prisma/client'
-import * as z from 'zod'
-import {
-  CompleteCommunity,
-  CompleteCommunityMembership,
-  RelatedCommunityMembershipModel,
-  RelatedCommunityModel,
-} from './index'
+import * as z from "zod"
+import { BillingInterval } from "@prisma/client"
+import { CompleteCommunity, RelatedCommunityModel, CompleteCommunityMembership, RelatedCommunityMembershipModel } from "./index"
 
 export const MembershipTierModel = z.object({
   id: z.string(),
@@ -31,9 +26,7 @@ export interface CompleteMembershipTier extends z.infer<typeof MembershipTierMod
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedMembershipTierModel: z.ZodSchema<CompleteMembershipTier> = z.lazy(() =>
-  MembershipTierModel.extend({
-    community: RelatedCommunityModel,
-    memberships: RelatedCommunityMembershipModel.array(),
-  })
-)
+export const RelatedMembershipTierModel: z.ZodSchema<CompleteMembershipTier> = z.lazy(() => MembershipTierModel.extend({
+  community: RelatedCommunityModel,
+  memberships: RelatedCommunityMembershipModel.array(),
+}))

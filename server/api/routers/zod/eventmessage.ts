@@ -1,5 +1,5 @@
-import * as z from 'zod'
-import { CompleteEvent, CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
+import * as z from "zod"
+import { CompleteEvent, RelatedEventModel, CompleteUser, RelatedUserModel } from "./index"
 
 export const EventMessageModel = z.object({
   id: z.string(),
@@ -22,11 +22,9 @@ export interface CompleteEventMessage extends z.infer<typeof EventMessageModel> 
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventMessageModel: z.ZodSchema<CompleteEventMessage> = z.lazy(() =>
-  EventMessageModel.extend({
-    event: RelatedEventModel,
-    user: RelatedUserModel.nullish(),
-    parent: RelatedEventMessageModel.nullish(),
-    replies: RelatedEventMessageModel.array(),
-  })
-)
+export const RelatedEventMessageModel: z.ZodSchema<CompleteEventMessage> = z.lazy(() => EventMessageModel.extend({
+  event: RelatedEventModel,
+  user: RelatedUserModel.nullish(),
+  parent: RelatedEventMessageModel.nullish(),
+  replies: RelatedEventMessageModel.array(),
+}))

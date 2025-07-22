@@ -1,15 +1,6 @@
-import { TicketVisibility } from '@prisma/client'
-import * as z from 'zod'
-import {
-  CompleteEvent,
-  CompleteOrderItem,
-  CompletePromoCodeTier,
-  CompleteRsvp,
-  RelatedEventModel,
-  RelatedOrderItemModel,
-  RelatedPromoCodeTierModel,
-  RelatedRsvpModel,
-} from './index'
+import * as z from "zod"
+import { TicketVisibility } from "@prisma/client"
+import { CompleteEvent, RelatedEventModel, CompleteRsvp, RelatedRsvpModel, CompleteOrderItem, RelatedOrderItemModel, CompletePromoCodeTier, RelatedPromoCodeTierModel } from "./index"
 
 export const TicketTierModel = z.object({
   id: z.string(),
@@ -37,11 +28,9 @@ export interface CompleteTicketTier extends z.infer<typeof TicketTierModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedTicketTierModel: z.ZodSchema<CompleteTicketTier> = z.lazy(() =>
-  TicketTierModel.extend({
-    event: RelatedEventModel,
-    rsvps: RelatedRsvpModel.array(),
-    orderItems: RelatedOrderItemModel.array(),
-    promoCodeTiers: RelatedPromoCodeTierModel.array(),
-  })
-)
+export const RelatedTicketTierModel: z.ZodSchema<CompleteTicketTier> = z.lazy(() => TicketTierModel.extend({
+  event: RelatedEventModel,
+  rsvps: RelatedRsvpModel.array(),
+  orderItems: RelatedOrderItemModel.array(),
+  promoCodeTiers: RelatedPromoCodeTierModel.array(),
+}))
