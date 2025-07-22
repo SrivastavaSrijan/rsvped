@@ -1,9 +1,10 @@
+import { LocationType } from '@prisma/client'
 import dayjs from 'dayjs'
-import { MapPin } from 'lucide-react'
 import Image from 'next/image'
 import { Card } from '@/components/ui'
 import { getRandomColor } from '@/lib/utils'
 import { RouterOutput } from '@/server/api/root'
+import { LocationItem } from './LocationItem'
 import { ShareActions } from './ShareActions'
 import { ShareLink } from './ShareLink'
 import { Stats } from './Stats'
@@ -20,6 +21,8 @@ export function EventCard({
   coverImage,
   venueName,
   venueAddress,
+  locationType,
+  onlineUrl,
   rsvpCount,
   viewCount,
   checkInCount,
@@ -33,6 +36,55 @@ export function EventCard({
   // Generate gradient colors based on event title
   const gradientFrom = getRandomColor({ seed: title, intensity: 40 })
   const gradientTo = getRandomColor({ seed: title, intensity: 60 })
+
+  // Dynamic location rendering based on location type
+  const renderLocation = () => {
+    switch (locationType) {
+      case LocationType.PHYSICAL:
+        if (!venueName) return null
+        return (
+          <LocationItem
+            locationType={LocationType.PHYSICAL}
+            title={venueName}
+            subtitle={venueAddress}
+          />
+        )
+
+      case LocationType.ONLINE:
+        return (
+          <LocationItem
+            locationType={LocationType.ONLINE}
+            title="Visit Link"
+            subtitle={onlineUrl}
+          />
+        )
+
+      case LocationType.HYBRID:
+        return (
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              {venueName && (
+                <LocationItem
+                  locationType={LocationType.PHYSICAL}
+                  title={venueName}
+                  subtitle={venueAddress}
+                />
+              )}
+              {onlineUrl && (
+                <LocationItem
+                  locationType={LocationType.ONLINE}
+                  title="Visit Link"
+                  subtitle={onlineUrl}
+                />
+              )}
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
 
   return (
     <Card
@@ -55,38 +107,32 @@ export function EventCard({
                 />
               ) : (
                 <div className="text-center font-medium text-sm tracking-wider">
-                  <div>YOU</div>
-                  <div className="my-2">ARE</div>
-                  <div>INVITED</div>
+                  <p>YOU</p>
+                  <p className="my-2">ARE</p>
+                  <p>INVITED</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Event Info */}
-          <div className="flex flex-1 flex-col gap-3 lg:gap-4">
-            <h1 className="font-bold text-xl lg:text-2xl">{title}</h1>
+          <div className="flex flex-1 flex-col gap-4 lg:gap-4">
             <Stats rsvpCount={rsvpCount} viewCount={viewCount} checkInCount={checkInCount} />
+            <h1 className="font-semibold font-serif font-stretch-semi-condensed text-3xl lg:text-4xl">
+              {title}
+            </h1>
+
             <div className="flex items-center gap-2 text-base">
               <div className="rounded bg-white/20 px-2 py-1 text-center">
-                <div className="text-sm">{eventMonth}</div>
-                <div className="font-bold">{eventDay}</div>
+                <p className="text-sm">{eventMonth}</p>
+                <p className="font-bold">{eventDay}</p>
               </div>
               <div>
-                <div className="font-medium">{eventDate}</div>
-                <div className="text-white/80">{eventTime}</div>
+                <p className="font-medium">{eventDate}</p>
+                <p className="">{eventTime}</p>
               </div>
             </div>
-
-            {venueName && (
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="size-3" />
-                <div>
-                  <div className="font-medium">{venueName}</div>
-                  {venueAddress && <div className="text-white/80">{venueAddress}</div>}
-                </div>
-              </div>
-            )}
+            {renderLocation()}
           </div>
         </div>
 

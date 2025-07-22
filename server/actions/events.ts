@@ -8,8 +8,9 @@ import { getAPI } from '@/server/api'
 import { RouterOutput } from '../api/root'
 import { EventErrorCodes, ServerActionResponse } from './types'
 
-const createEventSchema = z
+const eventSchema = z
   .object({
+    slug: z.string().optional(), // Only provided for updates
     title: z.string().min(1, 'Title is required.'),
     startDate: z.string().transform((val) => new Date(val)),
     endDate: z.string().transform((val) => new Date(val)),
@@ -25,12 +26,6 @@ const createEventSchema = z
       .transform((val) => (val ? parseInt(val, 10) : undefined))
       .optional(),
     coverImage: z.string().optional(),
-    isPaid: z.boolean().optional(),
-    ticketPrice: z
-      .string()
-      .transform((val) => (val ? parseFloat(val) : undefined))
-      .optional(),
-    ticketCurrency: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -71,42 +66,22 @@ const createEventSchema = z
       path: ['onlineUrl'],
     }
   )
-  .refine(
-    (data) => {
-      if (data.isPaid && !data.ticketPrice) {
-        return false
-      }
-      return true
-    },
-    {
-      message: 'Price is required for paid events.',
-      path: ['ticketPrice'],
-    }
-  )
 
-export type EventFormData = z.infer<typeof createEventSchema>
-type CreateEventData = RouterOutput['event']['create']
-export type EventActionResponse = ServerActionResponse<
-  CreateEventData,
-  EventErrorCodes,
-  EventFormData
->
+export type EventFormData = z.infer<typeof eventSchema>
+type EventData = RouterOutput['event']['create'] | RouterOutput['event']['update']
+export type EventActionResponse = ServerActionResponse<EventData, EventErrorCodes, EventFormData>
 
-export async function createEvent(
+export async function saveEvent(
   _: EventActionResponse | null,
   formData: FormData
 ): Promise<EventActionResponse> {
   const data = Object.fromEntries(formData.entries())
-
-  // Transform form data to proper types
   const transformedData = {
     ...data,
-    requiresApproval: data.requiresApproval === 'on',
-    isPaid: data.isPaid === 'on',
+    requiresApproval: data.requiresApproval === 'true',
   }
 
-  const validation = createEventSchema.safeParse(transformedData)
-
+  const validation = eventSchema.safeParse(transformedData)
   if (!validation.success) {
     return {
       success: false,
@@ -114,40 +89,48 @@ export async function createEvent(
       fieldErrors: validation.error.flatten().fieldErrors,
     }
   }
+
+  const isUpdate = Boolean(validation.data.slug)
+
   let event: EventActionResponse['data']
   try {
     const api = await getAPI()
-    event = await api.event.create(validation.data)
+    if (isUpdate && validation.data.slug) {
+      // For updates, slug is guaranteed to exist
+      event = await api.event.update({
+        ...validation.data,
+        slug: validation.data.slug,
+      })
+    } else {
+      // For creates, remove slug from data
+      const { slug: _, ...createData } = validation.data
+      event = await api.event.create(createData)
+    }
   } catch (error) {
-    console.error('Error creating event:', error)
-
-    // Handle specific tRPC errors
+    console.error(`Error ${isUpdate ? 'updating' : 'creating'} event:`, error)
     if (error && typeof error === 'object' && 'code' in error) {
       if (error.code === 'UNAUTHORIZED') {
-        return {
-          success: false,
-          error: EventErrorCodes.UNAUTHORIZED,
-        }
+        return { success: false, error: EventErrorCodes.UNAUTHORIZED }
+      }
+      if (error.code === 'NOT_FOUND') {
+        return { success: false, error: EventErrorCodes.NOT_FOUND }
       }
       if (error.code === 'BAD_REQUEST') {
-        return {
-          success: false,
-          error: EventErrorCodes.VALIDATION_ERROR,
-        }
+        return { success: false, error: EventErrorCodes.VALIDATION_ERROR }
       }
     }
-
     return {
       success: false,
-      error: EventErrorCodes.CREATION_FAILED,
+      error: isUpdate ? EventErrorCodes.UPDATE_FAILED : EventErrorCodes.CREATION_FAILED,
     }
   }
+
   if (event) {
     redirect(`${Routes.Main.Events.Root}/${event.slug}`)
   }
   return {
     success: true,
     data: event,
-    message: 'Event created successfully.',
+    message: `Event ${isUpdate ? 'updated' : 'created'} successfully.`,
   }
 }

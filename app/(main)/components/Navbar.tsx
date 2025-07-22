@@ -53,7 +53,7 @@ export async function Navbar() {
               </MainLink>
             </div>
             <div className="flex items-center space-x-2 lg:space-x-4">
-              <Link href={Routes.Main.Events.Discover} passHref>
+              <Link href={Routes.Main.Events.Create} passHref>
                 <Button variant="link" size="sm">
                   {copy.nav.createEvent}
                   <ArrowUpRight className="size-3" />

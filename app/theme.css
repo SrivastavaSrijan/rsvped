@@ -61,13 +61,6 @@
 }
 
 @theme {
-  /* ===== TYPOGRAPHY ===== */
-  --font-family-sans:
-    -apple-system, BlinkMacSystemFont, "Apple Color Emoji", Inter, Roboto, "Segoe UI",
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --font-family-mono:
-    "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
-
   /* Font sizes (Lu.ma inspired) */
   --font-size-xs: 0.75rem; /* 12px */
   --font-size-sm: 0.875rem; /* 14px */

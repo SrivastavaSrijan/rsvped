@@ -16,5 +16,7 @@ export const EventActionErrorCodeMap: Record<EventErrorCodes, string> = {
   [EventErrorCodes.VALIDATION_ERROR]: 'Please fix the errors in the form.',
   [EventErrorCodes.UNEXPECTED_ERROR]: 'An unexpected error occurred. Please try again later.',
   [EventErrorCodes.CREATION_FAILED]: 'Failed to create the event. Please try again.',
+  [EventErrorCodes.UPDATE_FAILED]: 'Failed to update the event. Please try again.',
+  [EventErrorCodes.NOT_FOUND]: 'Event not found.',
   [EventErrorCodes.UNAUTHORIZED]: 'You are not authorized to perform this action.',
 }

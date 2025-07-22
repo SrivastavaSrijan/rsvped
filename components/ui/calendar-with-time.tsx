@@ -227,16 +227,15 @@ export function DateTimePicker({
   }
 
   return (
-    <div className="flex items-center w-full lg:flex-row flex-col gap-1">
-      <div className="relative lg:w-fit w-full">
+    <div className="flex items-center w-full flex-row gap-1">
+      <div className="relative ">
         <Input
           value={dateInputValue}
           onChange={handleDateInputChange}
           onBlur={handleDateInputBlur}
           onClick={handleDateInputClick}
           placeholder="Enter date"
-          className="lg:w-fit w-full lg:text-sm text-sm"
-          readOnly={window.innerWidth < 768} // Make readonly on mobile to prevent keyboard
+          className="lg:text-sm text-sm lg:max-w-unset min-w-[calc(11ch+24px+24px)]"
         />
         <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
           <PopoverTrigger asChild>
@@ -250,19 +249,19 @@ export function DateTimePicker({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
-            <Calendar mode="single" selected={date} onSelect={handleDateSelect} initialFocus />
+            <Calendar mode="single" selected={date} onSelect={handleDateSelect} autoFocus />
           </PopoverContent>
         </Popover>
       </div>
-      <div className="relative  lg:w-fit w-full">
+      <div className="relative">
         <Input
           value={timeInputValue}
           onChange={handleTimeInputChange}
           onBlur={handleTimeInputBlur}
           onClick={handleTimeInputClick}
           placeholder="Enter time"
-          className="lg:w-fit w-full lg:text-sm text-sm"
-          readOnly={window.innerWidth < 768} // Make readonly on mobile to prevent keyboard
+          // Width calculation - 8ch for text, 24px for padding, 24px for icon button
+          className="lg:text-sm text-sm lg:max-w-unset min-w-[calc(8ch+24px+24px)]"
         />
         <Popover open={isTimeOpen} onOpenChange={setIsTimeOpen}>
           <PopoverTrigger asChild>

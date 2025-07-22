@@ -58,8 +58,18 @@
       },
       "correctness": {
         "useExhaustiveDependencies": "warn",
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
+        "noUnusedVariables": {
+          "level": "error",
+          "fix": "safe",
+          "options": {
+            "ignoreRestSiblings": false
+          }
+        },
+        "noUnusedImports": {
+          "level": "error",
+          "fix": "safe",
+          "options": {}
+        }
       },
       "style": {
         "useImportType": "off",

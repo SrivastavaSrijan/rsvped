@@ -1,6 +1,8 @@
 import { Camera, Edit, Users } from 'lucide-react'
 import { headers } from 'next/headers'
+import Link from 'next/link'
 import { Button } from '@/components/ui'
+import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import { EventCard } from '../../components'
 
@@ -18,7 +20,7 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
 
   return (
     <div className="px=2 mx-auto max-w-extra-wide-page px-2 py-4 lg:px-4 lg:py-8">
-      <div className="flex flex-col-reverse gap-4 lg:grid lg:grid-cols-3 lg:gap-8">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:flex-col-reverse lg:gap-8">
         <div className="col-span-2">
           <EventCard {...event} url={url} />
         </div>
@@ -34,9 +36,11 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
 
             {/* Action Buttons */}
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 gap-2">
-                <Edit className="size-3" />
-                Edit Event
+              <Button variant="outline" className="flex-1 gap-2" asChild>
+                <Link href={Routes.Main.Events.getEdit(slug)}>
+                  <Edit className="size-3" />
+                  Edit Event
+                </Link>
               </Button>
               <Button variant="outline" className="flex-1 gap-2">
                 <Camera className="size-3" />

@@ -1,4 +1,5 @@
 export { EventCard } from './EventCard'
+export { EventForm } from './EventForm'
 export { Navbar } from './Navbar'
 export { ShareActions } from './ShareActions'
 export { ShareLink } from './ShareLink'

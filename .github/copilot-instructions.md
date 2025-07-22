@@ -239,7 +239,7 @@ export type Route = typeof Routes[keyof typeof Routes];
 - Structure:
 
   ```ts
-  // app/(static)/pricing/copy.ts
+  // app/(static)/copy.ts
   export const copy = {
     hero: {
       title: 'Simple transparent pricing',
@@ -286,21 +286,43 @@ export type Route = typeof Routes[keyof typeof Routes];
 - **Naming Conventions**: Try to be smart with names.
   - Bad - `EventCardWithShareActions`, Good - `EventCard` with `ShareEventActions` as a child component.
   - Bad - `eventUrl`, `eventName`, `eventDate`, Good - `url`, `title`, `startDate` - the context is clear.
+  - Bad - `event.title` `event.description`, Good - `title`, `description` - the context is clear. Destructure the event object in the component.
+- Commit messages: Use imperative mood, e.g., "Add event form validation" instead of "Added event form validation". Add (feat), (fix), (chore) prefixes as appropriate to every task in the commit message.
+  - Eg: 
+  ```markdown
+    feat: Implement event creation and editing
+  This commit introduces the core functionality for creating and editing events,
+  centralizing the logic in a reusable form and updating the necessary API
+  endpoints and UI components.
 
+  - (feat) Add reusable EventForm for creating and editing events
+  - (feat) Introduce LocationItem to display event locations
+  - (feat) Enhance routing to support event editing via `events/[id]/edit`
+  - (refactor) Update EventCard to render location dynamically
+  - (refactor) Modify Navbar to link to the event creation page
+  - (refactor) Update server actions and API routes to handle event updates
+  - (fix) Improve error handling for all event-related actions
+  - (chore) Refactor styles for better layout and
+    responsiveness
+```
 
 #### Tailwind Best Practices
 - Use `@theme` tokens in `app/theme.css` for colors, spacing, etc
 - Use Tailwind's responsive utilities (e.g., `px-4 lg:px-8`) for mobile-first design
 - Do not use `mb-4`, `mt-2`, etc. directly in classNames – try to use flex and gap instead. Eg: `flex flex-col gap-4`
 - Do not use `h-*`, `w-*` for SVG icons - use `size-*` instead (e.g., `size-3` for 12px)
+- We use `@theme`. NOT `tailwind.config.js`. Do not create a `tailwind.config.js` directly.
 
 ### ❌ Never Do This  
+- Just because you are an AI, do not just generate code without understanding the context. Do not generate verbose, overwritten code. Follow DRY like a pro. Try to consolidate code and avoid repetition. Eg: If I ask you to add edit functionality to an event, do not generate a new component for the edit form. Instead, reuse the existing `CreateEventForm` component and add the necessary props to handle editing. Also, you can modify the server action to handle both create and edit operations. Be frugal with code generation and avoid unnecessary complexity.
 - Direct fetch('/api/...') calls - use tRPC patterns
 - Hard-coded colors/spacing - use theme tokens
 - `var(...)` in `className` attributes.
 - CSS files outside app/theme.css & app/globals.css
 - Relative imports (../../..)
 - Inline styles or arbitrary className values
+- Do not add backward compatibility for mistakes you make. Eg: You rename a component `CreateEventForm` and then later decide to rename it to `EventForm`. Do not add an export for `CreateEventForm` as a backward compatibility. Instead, just remove the old name and update all references to the new name. If you are not sure about the change, ask for confirmation before making it.
+- We're using Next.js. We cannot access the `window` object in server components. If you need to access the `window` object, make sure to do it in a client component or use a hook that runs on the client side.
 
 ### Current Auth State
 - NextAuth v5 configured but **no providers set up yet**

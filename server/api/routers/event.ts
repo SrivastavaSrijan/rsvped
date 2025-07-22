@@ -51,9 +51,6 @@ export const eventRouter = createTRPCRouter({
         capacity: z.number().int().positive().optional(),
         requiresApproval: z.boolean().default(false),
         coverImage: z.string().optional(),
-        isPaid: z.boolean().default(false),
-        ticketPrice: z.number().optional(),
-        ticketCurrency: z.string().default('USD'),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -107,19 +104,6 @@ export const eventRouter = createTRPCRouter({
             },
           },
         })
-
-        // Create default ticket tier if it's a paid event
-        if (input.isPaid && input.ticketPrice) {
-          await ctx.prisma.ticketTier.create({
-            data: {
-              eventId: event.id,
-              name: 'General Admission',
-              priceCents: Math.round(input.ticketPrice * 100), // Convert to cents
-              currency: input.ticketCurrency,
-              quantityTotal: input.capacity,
-            },
-          })
-        }
 
         return event
       } catch (error) {
@@ -178,4 +162,81 @@ export const eventRouter = createTRPCRouter({
 
     return event
   }),
+
+  // Update an existing event (requires authentication and ownership)
+  update: protectedProcedure
+    .input(
+      z.object({
+        slug: z.string(),
+        title: z.string(),
+        description: z.string().optional(),
+        startDate: z.date(),
+        endDate: z.date(),
+        timezone: z.string(),
+        locationType: z.nativeEnum(LocationType),
+        venueName: z.string().optional(),
+        venueAddress: z.string().optional(),
+        onlineUrl: z.string().optional(),
+        capacity: z.number().int().positive().optional(),
+        requiresApproval: z.boolean().default(false),
+        coverImage: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to update an event',
+        })
+      }
+
+      const { slug, ...updateData } = input
+
+      try {
+        // First, check if the event exists and user is the owner
+        const existingEvent = await ctx.prisma.event.findUnique({
+          where: { slug, deletedAt: null },
+          select: { id: true, hostId: true },
+        })
+
+        if (!existingEvent) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Event not found',
+          })
+        }
+
+        if (existingEvent.hostId !== ctx.session.user.id) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'You are not authorized to update this event',
+          })
+        }
+
+        const event = await ctx.prisma.event.update({
+          where: { id: existingEvent.id },
+          data: updateData,
+          include: {
+            host: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        })
+
+        return event
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error
+        }
+        console.error('Error updating event:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update event',
+        })
+      }
+    }),
 })

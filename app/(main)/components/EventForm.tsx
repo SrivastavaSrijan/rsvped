@@ -1,7 +1,7 @@
 'use client'
 
 import { LocationType } from '@prisma/client'
-import { Globe, Lock, MapPin, Ticket, Users } from 'lucide-react'
+import { Globe, Lock, MapPin, Users } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import {
@@ -19,38 +19,61 @@ import {
 import { TimezoneConfig } from '@/lib/config'
 import { LocationTypeLabels } from '@/lib/constants'
 import { useActionStateWithError } from '@/lib/hooks'
-import { createEvent, EventActionErrorCodeMap, EventActionResponse } from '@/server/actions'
+import { EventActionErrorCodeMap, EventActionResponse, saveEvent } from '@/server/actions'
 
-interface CreateEventFormProps {
+interface EventFormProps {
   coverImage: {
     url: string
     alt: string
     color: string | null
   }
+  mode?: 'create' | 'edit'
+  eventSlug?: string
+  event?: {
+    title: string
+    description?: string | null
+    startDate: Date
+    endDate: Date
+    timezone: string
+    locationType: LocationType
+    venueName?: string | null
+    venueAddress?: string | null
+    onlineUrl?: string | null
+    capacity?: number | null
+    requiresApproval: boolean
+    coverImage?: string | null
+  }
 }
 
-const initialCreateEventState: EventActionResponse = {
+const initialEventState: EventActionResponse = {
   success: false,
 }
 
-export function CreateEventForm({ coverImage }: CreateEventFormProps) {
+export function EventForm({ coverImage, mode = 'create', eventSlug, event }: EventFormProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
+    if (event?.startDate) return event.startDate
     const aWeekFromNow = new Date()
     aWeekFromNow.setDate(aWeekFromNow.getDate() + 7)
     return aWeekFromNow
   })
+
   const [endDate, setEndDate] = useState<Date | undefined>(() => {
+    if (event?.endDate) return event.endDate
     const aWeekFromNowPlusAnHour = new Date()
     aWeekFromNowPlusAnHour.setDate(aWeekFromNowPlusAnHour.getDate() + 7)
     aWeekFromNowPlusAnHour.setHours(aWeekFromNowPlusAnHour.getHours() + 1)
     return aWeekFromNowPlusAnHour
   })
-  const [locationType, setLocationType] = useState<LocationType>(LocationType.PHYSICAL)
-  const [isPaid, setIsPaid] = useState(false)
+
+  const [locationType, setLocationType] = useState<LocationType>(
+    event?.locationType || LocationType.PHYSICAL
+  )
+
+  const isEditMode = mode === 'edit'
 
   const { formAction, errorComponent, isPending, state } = useActionStateWithError({
-    action: createEvent,
-    initialState: initialCreateEventState,
+    action: saveEvent,
+    initialState: initialEventState,
     errorCodeMap: EventActionErrorCodeMap,
     displayMode: 'inline',
   })
@@ -64,7 +87,7 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
       <div className="flex flex-col items-center justify-center lg:col-span-1">
         <div
-          className="relative aspect-square h-auto w-full max-w-[300px] rounded-xl shadow-lg lg:max-w-[340px]"
+          className="relative aspect-square h-auto w-full max-w-[350px] rounded-xl shadow-lg lg:max-w-[340px]"
           style={{ backgroundColor: coverImage.color || 'transparent' }}
         >
           <Image
@@ -78,13 +101,17 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
       </div>
       <div className="w-full px-2 lg:col-span-2 lg:px-0">
         <form action={formAction} className="flex flex-col gap-4">
-          <Input type="hidden" name="coverImage" value={coverImage.url} />
+          <Input type="hidden" name="coverImage" value={event?.coverImage || coverImage.url} />
+          {isEditMode && eventSlug && <Input type="hidden" name="slug" value={eventSlug} />}
 
           <div className="flex flex-col gap-1">
             <Input
               name="title"
               placeholder="Event Name"
-              className="min-h-8 w-full p-4 text-xl lg:min-h-16 lg:p-4 lg:text-3xl"
+              defaultValue={event?.title || ''}
+              variant="naked"
+              autoFocus
+              className="min-h-8 w-full p-2 font-semibold font-serif font-stretch-semi-condensed text-3xl lg:min-h-16 lg:p-2 lg:text-4xl"
             />
             {fieldErrors.title && (
               <p className="text-destructive text-sm">{fieldErrors.title[0]}</p>
@@ -93,15 +120,15 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
 
           {/* Date & Time Section */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="flex flex-col gap-4 rounded-lg bg-white/10 p-3 lg:col-span-2 lg:gap-3">
-              <div className="flex flex-col gap-1">
+            <div className="flex flex-col items-center gap-4 rounded-lg bg-white/10 p-3 lg:col-span-2 lg:gap-3">
+              <div className="flex flex-col gap-2">
                 <DateTimePicker date={startDate} setDate={setStartDate} />
                 <Input type="hidden" name="startDate" value={startDate?.toISOString()} />
                 {fieldErrors.startDate && (
                   <p className="text-destructive text-sm">{fieldErrors.startDate[0]}</p>
                 )}
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
                 <DateTimePicker date={endDate} setDate={setEndDate} />
                 <Input type="hidden" name="endDate" value={endDate?.toISOString()} />
                 {fieldErrors.endDate && (
@@ -120,7 +147,11 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Textarea name="description" placeholder="Add a description" />
+            <Textarea
+              name="description"
+              placeholder="Add a description"
+              defaultValue={event?.description || ''}
+            />
             {fieldErrors.description && (
               <p className="text-destructive text-sm">{fieldErrors.description[0]}</p>
             )}
@@ -132,7 +163,7 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
             <div className="flex flex-col gap-1">
               <Select
                 name="locationType"
-                defaultValue={LocationType.PHYSICAL}
+                defaultValue={locationType}
                 onValueChange={(value) => setLocationType(value as LocationType)}
               >
                 <SelectTrigger className="flex h-auto w-full justify-start gap-2 rounded-lg bg-white/10 p-2">
@@ -161,13 +192,22 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
             {(locationType === LocationType.PHYSICAL || locationType === LocationType.HYBRID) && (
               <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col gap-1">
-                  <Input name="venueName" placeholder="Name" className="col-span-1" />
+                  <Input
+                    name="venueName"
+                    placeholder="Name"
+                    defaultValue={event?.venueName || ''}
+                    className="col-span-1"
+                  />
                   {fieldErrors.venueName && (
                     <p className="text-destructive text-sm">{fieldErrors.venueName[0]}</p>
                   )}
                 </div>
                 <div className="col-span-2 flex flex-col gap-1">
-                  <Input name="venueAddress" placeholder="Address" />
+                  <Input
+                    name="venueAddress"
+                    placeholder="Address"
+                    defaultValue={event?.venueAddress || ''}
+                  />
                   {fieldErrors.venueAddress && (
                     <p className="text-destructive text-sm">{fieldErrors.venueAddress[0]}</p>
                   )}
@@ -177,7 +217,11 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
 
             {(locationType === LocationType.ONLINE || locationType === LocationType.HYBRID) && (
               <div className="flex flex-col gap-1">
-                <Input name="onlineUrl" placeholder="Zoom/Google Meet Link" />
+                <Input
+                  name="onlineUrl"
+                  placeholder="Zoom/Google Meet Link"
+                  defaultValue={event?.onlineUrl || ''}
+                />
                 {fieldErrors.onlineUrl && (
                   <p className="text-destructive text-sm">{fieldErrors.onlineUrl[0]}</p>
                 )}
@@ -188,43 +232,17 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
           {/* Event Options */}
           <div className="mt-2 flex flex-col gap-1 rounded-lg bg-white/10 p-2">
             <h3 className="px-2 py-1 font-semibold text-sm">Options</h3>
-            <div className="flex h-auto items-center justify-between p-2 text-left">
-              <div className="flex items-center gap-2">
-                <Ticket className="size-3" />
-                <span className="font-medium text-sm">Tickets</span>
-              </div>
-              <div className="flex flex-row items-center gap-2">
-                <span className="font-medium text-white/50 text-xs">Free</span>
-                <div className="flex items-center gap-4">
-                  <Switch name="isPaid" checked={isPaid} onCheckedChange={setIsPaid} />
-
-                  {isPaid && (
-                    <div className="flex items-center gap-1">
-                      <div className="flex flex-col gap-1">
-                        <Input
-                          name="ticketPrice"
-                          type="number"
-                          placeholder="Price"
-                          className="w-[8ch] p-2 text-xs"
-                        />
-                        {fieldErrors.ticketPrice && (
-                          <p className="text-destructive text-xs">{fieldErrors.ticketPrice[0]}</p>
-                        )}
-                      </div>
-                      <p className="text-white/50 text-xs">INR</p>
-                      <Input name="ticketCurrency" type="hidden" value="INR" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
 
             <div className="flex h-auto items-center justify-between p-2 text-left">
               <div className="flex items-center gap-2">
                 <Lock className="size-3" />
                 <span className="font-medium text-sm">Require Approval</span>
               </div>
-              <Switch name="requiresApproval" />
+              <Switch
+                name="requiresApproval"
+                defaultChecked={event?.requiresApproval || false}
+                value={event?.requiresApproval ? 'true' : 'false'}
+              />
             </div>
             <div className="flex h-auto w-full items-center justify-between p-2 text-left">
               <div className="flex items-center gap-2">
@@ -232,7 +250,15 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
                 <span className="font-medium text-sm">Capacity</span>
               </div>
               <div className="flex flex-col gap-1">
-                <Input name="capacity" type="number" placeholder="Unlimited" />
+                <Input
+                  min={1}
+                  max={10000}
+                  name="capacity"
+                  type="number"
+                  className="w-[calc(5ch+24px)] text-right text-xs"
+                  placeholder="Unlimited"
+                  defaultValue={event?.capacity?.toString() || ''}
+                />
                 {fieldErrors.capacity && (
                   <p className="text-destructive text-sm">{fieldErrors.capacity[0]}</p>
                 )}
@@ -242,8 +268,8 @@ export function CreateEventForm({ coverImage }: CreateEventFormProps) {
 
           {errorComponent}
 
-          <Button size="lg" type="submit" className="mt-4 w-full" disabled={isPending}>
-            {isPending ? 'Creating...' : 'Create Event'}
+          <Button size="lg" type="submit" disabled={isPending}>
+            Save
           </Button>
         </form>
       </div>

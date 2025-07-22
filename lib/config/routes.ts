@@ -28,6 +28,9 @@ export const Routes = {
       get Discover() {
         return `${this.Root}/discover`
       },
+      getEdit(slug: string) {
+        return `${this.Root}/${slug}/edit`
+      },
     },
   },
 } as const
