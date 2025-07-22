@@ -7,12 +7,12 @@ export const copy = {
     imagePlaceholder: 'Event illustration coming soon',
   },
   nav: {
-    logo: "rsvp'd",
+    logo: "RSVP'd",
     exploreEvents: 'Explore Events',
     signIn: 'Sign In',
   },
   footer: {
-    logo: "rsvp'd",
+    logo: "RSVP'd",
     whatsNew: "What's New",
     discover: 'Discover',
     pricing: 'Pricing',

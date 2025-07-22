@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Session } from 'next-auth'
+import { useState } from 'react'
 import {
   Button,
   DropdownMenu,
@@ -23,6 +24,7 @@ interface ProfileDropdownProps {
 }
 export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
   const { image, name } = session.user
+  const [src, setSrc] = useState<string | null>(image ?? null)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,9 +34,10 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
             unoptimized
             width={32}
             height={32}
+            onError={() => setSrc(getAvatarURL(name || ''))}
             alt={name || 'User'}
-            src={image ? image : getAvatarURL(name || 'User')}
-            className="flex items-center rounded-full object-contain"
+            src={src ?? ''}
+            className="flex h-8 w-8 items-center rounded-full object-contain"
           />
         ) : (
           <Button size="sm" variant="outline">

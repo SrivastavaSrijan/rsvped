@@ -287,7 +287,7 @@ export type Route = typeof Routes[keyof typeof Routes];
   - Bad - `EventCardWithShareActions`, Good - `EventCard` with `ShareEventActions` as a child component.
   - Bad - `eventUrl`, `eventName`, `eventDate`, Good - `url`, `title`, `startDate` - the context is clear.
   - Bad - `event.title` `event.description`, Good - `title`, `description` - the context is clear. Destructure the event object in the component.
-- Commit messages: Use imperative mood, e.g., "Add event form validation" instead of "Added event form validation". Add (feat), (fix), (chore) prefixes as appropriate to every task in the commit message.
+- Commit messages: Use imperative mood, e.g., "Add event form validation" instead of "Added event form validation". Add feat(feature_name): prefixes as appropriate to every task in the commit message. Like feat(auth): Add user authentication flow. <br /> fix(bug_name): Fix the bug in the event creation form. <br />  chore(imports): Clean up imports
   - Eg: 
   ```markdown
     feat: Implement event creation and editing

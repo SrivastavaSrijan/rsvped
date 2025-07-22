@@ -115,6 +115,31 @@ export const eventRouter = createTRPCRouter({
       }
     }),
 
+  getMetadataBySlug: publicProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const event = await ctx.prisma.event.findUnique({
+        where: {
+          slug: input.slug,
+          deletedAt: null,
+        },
+        select: {
+          title: true,
+          startDate: true,
+          endDate: true,
+        },
+      })
+
+      if (!event) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Event not found',
+        })
+      }
+
+      return event
+    }),
+
   // Get event by slug
   getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
     const event = await ctx.prisma.event.findUnique({

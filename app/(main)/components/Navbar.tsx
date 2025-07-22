@@ -63,9 +63,7 @@ export async function Navbar() {
                 <ProfileDropdown session={session} />
               ) : (
                 <Link href={Routes.Auth.SignIn} passHref>
-                  <Button size="sm" variant="outline">
-                    {copy.nav.signIn}
-                  </Button>
+                  <Button variant="outline">{copy.nav.signIn}</Button>
                 </Link>
               )}
             </div>

@@ -90,7 +90,7 @@ export default function ComponentsPreviewPage() {
             <div className="rounded-lg border bg-card p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                  <h3 className="font-bold text-primary text-xl">rsvp'd</h3>
+                  <h3 className="font-bold text-primary text-xl">RSVP'd</h3>
                   <nav className="hidden items-center gap-4 md:flex">
                     <Button variant="ghost" size="sm">
                       Discover

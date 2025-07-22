@@ -1,5 +1,5 @@
 export const copy = {
-  welcome: "Welcome to rsvp'd!",
+  welcome: "Welcome to RSVP'd!",
   description: 'Please sign in or sign up below.',
 
   buttonText: {

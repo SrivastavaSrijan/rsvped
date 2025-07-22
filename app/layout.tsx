@@ -16,9 +16,9 @@ const averia = Averia_Serif_Libre({
 })
 
 export const metadata: Metadata = {
-  title: "rsvp'd · Delightful Events Start Here",
+  title: "Delightful Events Start Here · RSVP'd",
   description:
-    "rsvp'd is an event management platform that makes organizing and attending events a breeze.",
+    "RSVP'd is an event management platform that makes organizing and attending events a breeze.",
 }
 
 export default function RootLayout({
@@ -28,7 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <meta name="apple-mobile-web-app-title" content="rsvp'd" />
+      <meta name="apple-mobile-web-app-title" content="RSVP'd" />
+      <meta name="og:image" content="/preview.jpg" />
       <body className={`${inter.variable} ${averia.variable} font-sans antialiased`}>
         <TRPCProvider>{children}</TRPCProvider>
         <Toaster />

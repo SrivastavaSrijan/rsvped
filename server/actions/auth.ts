@@ -74,7 +74,7 @@ async function performSignIn(
 
   await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
     title: name || 'Hey there.',
-    description: "Welcome to rsvp'd!",
+    description: "Welcome to RSVP'd!",
     illustration: image,
   })
 
@@ -164,7 +164,7 @@ export const verifyPassword = async ({
 export const signInWithGoogle = async (next: string | null) => {
   await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
     title: 'Hey there.',
-    description: "Welcome to rsvp'd!",
+    description: "Welcome to RSVP'd!",
   })
   const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
   const redirectTo = `${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : Routes.Home}`

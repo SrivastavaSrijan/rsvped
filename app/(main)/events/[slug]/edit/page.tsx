@@ -1,5 +1,11 @@
+import { Metadata } from 'next'
 import { getAPI } from '@/server/api'
 import { EventForm } from '../../../components/EventForm'
+
+export const metadata: Metadata = {
+  title: "Edit Event · RSVP'd",
+  description: 'Edit your event details and settings.',
+}
 
 export default async function EditEvent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

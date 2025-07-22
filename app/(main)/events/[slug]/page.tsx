@@ -6,6 +6,15 @@ import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import { EventCard } from '../../components'
 
+export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
+  const { slug } = await params
+  const api = await getAPI()
+  const event = await api.event.getMetadataBySlug({ slug })
+  return {
+    title: `${event.title} · RSVP'd`,
+    description: `View details for the event: ${event.title}`,
+  }
+}
 export default async function ViewEvent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const api = await getAPI()

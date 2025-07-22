@@ -1,6 +1,6 @@
 export const copy = {
   nav: {
-    logo: "rsvp'd",
+    logo: "RSVP'd",
     createEvent: 'Create Event',
     events: 'Events',
     communities: 'Communities',
