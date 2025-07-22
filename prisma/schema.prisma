@@ -7,6 +7,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator zod {
+  provider = "zod-prisma"
+  output   = "../server/api/routers/zod"
+}
+
+/**
+ * This is your Prisma schema file, where you define your data models and relationships.
+ * Learn more about Prisma schema syntax: https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference
+ */
+ 
 /**
  * ---------- Core identities ----------
  */
