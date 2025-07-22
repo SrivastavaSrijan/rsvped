@@ -18,7 +18,7 @@ const MainLink = ({
 }) => {
   return (
     <Link href={href} passHref>
-      <Button variant="link" size="sm">
+      <Button variant="link" size="sm" className="opacity-50 transition-colors hover:opacity-100">
         {icon}
         <span className="hidden lg:block">{children}</span>
       </Button>

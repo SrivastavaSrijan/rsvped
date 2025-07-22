@@ -94,10 +94,10 @@ export function EventCard({
       }}
     >
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col items-start gap-4 lg:flex-row lg:gap-6">
-          <div className="flex w-full flex-col justify-between gap-2 lg:w-fit lg:flex-col-reverse lg:justify-center">
+        <div className="flex flex-col items-start gap-6 lg:flex-row lg:gap-6">
+          <div className="flex w-full flex-col justify-between gap-4 lg:w-fit lg:flex-col-reverse lg:justify-center lg:gap-2">
             <ShareActions title={title} url={url} />
-            <div className="relative flex size-48 flex-shrink-0 items-center justify-center rounded-lg bg-white/20 lg:size-64">
+            <div className="relative flex size-64 flex-shrink-0 items-center justify-center rounded-lg bg-white/20 lg:size-64">
               {coverImage ? (
                 <Image
                   src={coverImage}
@@ -116,11 +116,13 @@ export function EventCard({
           </div>
 
           {/* Event Info */}
-          <div className="flex flex-1 flex-col gap-4 lg:gap-4">
-            <Stats rsvpCount={rsvpCount} viewCount={viewCount} checkInCount={checkInCount} />
-            <h1 className="font-semibold font-serif font-stretch-semi-condensed text-3xl lg:text-4xl">
-              {title}
-            </h1>
+          <div className="flex flex-1 flex-col gap-6 lg:gap-6">
+            <div className="flex flex-col-reverse gap-2 lg:flex-col lg:gap-3">
+              <Stats rsvpCount={rsvpCount} viewCount={viewCount} checkInCount={checkInCount} />
+              <h1 className="font-semibold font-serif font-stretch-semi-condensed text-3xl lg:text-4xl">
+                {title}
+              </h1>
+            </div>
 
             <div className="flex items-center gap-2 text-base">
               <div className="rounded bg-white/20 px-2 py-1 text-center">

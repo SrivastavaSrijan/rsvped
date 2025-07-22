@@ -228,14 +228,14 @@ export function DateTimePicker({
 
   return (
     <div className="flex items-center w-full flex-row gap-1">
-      <div className="relative ">
+      <div className="relative flex-1">
         <Input
           value={dateInputValue}
           onChange={handleDateInputChange}
           onBlur={handleDateInputBlur}
           onClick={handleDateInputClick}
           placeholder="Enter date"
-          className="lg:text-sm text-sm lg:max-w-unset min-w-[calc(11ch+24px+24px)]"
+          className="lg:text-sm w-full text-sm"
         />
         <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
           <PopoverTrigger asChild>
@@ -261,7 +261,7 @@ export function DateTimePicker({
           onClick={handleTimeInputClick}
           placeholder="Enter time"
           // Width calculation - 8ch for text, 24px for padding, 24px for icon button
-          className="lg:text-sm text-sm lg:max-w-unset min-w-[calc(8ch+24px+24px)]"
+          className="lg:text-sm text-sm max-w-[calc(8ch+24px+24px)]"
         />
         <Popover open={isTimeOpen} onOpenChange={setIsTimeOpen}>
           <PopoverTrigger asChild>

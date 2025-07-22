@@ -1,6 +1,6 @@
 'use client'
 
-import { Mail, MessageCircle, Share } from 'lucide-react'
+import { Mail, MessageCircle, Share, Twitter } from 'lucide-react'
 import { Button } from '@/components/ui'
 
 interface ShareActionsProps {
@@ -53,19 +53,19 @@ export function ShareActions({ title, url }: ShareActionsProps) {
 
   return (
     <div className="flex flex-row items-center justify-between gap-1 lg:gap-2">
-      <p className="text-sm">Share this event:</p>
-      <div className="flex flex-row gap-0.5 lg:gap-1">
+      <p className="hidden text-xs lg:block"></p>
+      <div className="flex flex-row gap-4 lg:gap-0.25">
         <Button variant="ghost" size="sm" onClick={handleNativeShare} title="Share">
-          <Share className="size-3.5" />
+          <Share className="size-4 lg:size-3.75" />
         </Button>
         <Button variant="ghost" size="sm" onClick={handleTwitterShare} title="Share on Twitter">
-          <span className="text-sm">𝕏</span>
+          <Twitter className="size-4 lg:size-3.75" />
         </Button>
         <Button variant="ghost" size="sm" onClick={handleWhatsAppShare} title="Share on WhatsApp">
-          <MessageCircle className="size-3.5" />
+          <MessageCircle className="size-4 lg:size-3.75" />
         </Button>
         <Button variant="ghost" size="sm" onClick={handleEmailShare} title="Share via Email">
-          <Mail className="size-3.5" />
+          <Mail className="size-4 lg:size-3.75" />
         </Button>
       </div>
     </div>

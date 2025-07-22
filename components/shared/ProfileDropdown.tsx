@@ -15,7 +15,7 @@ import { signOutAction } from '@/server/actions'
 
 const copy = {
   dashboard: 'Hey there',
-  profile: 'Settings',
+  profile: 'Profile',
   signOut: 'Sign Out',
 }
 interface ProfileDropdownProps {

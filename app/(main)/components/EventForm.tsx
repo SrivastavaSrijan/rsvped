@@ -1,7 +1,18 @@
 'use client'
 
 import { LocationType } from '@prisma/client'
-import { Globe, Lock, MapPin, Users } from 'lucide-react'
+import {
+  Globe,
+  Loader,
+  LocateIcon,
+  Lock,
+  MapPin,
+  PartyPopper,
+  Settings2,
+  Text,
+  Timer,
+  Users,
+} from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import {
@@ -119,8 +130,12 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
           </div>
 
           {/* Date & Time Section */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="flex flex-col items-center gap-4 rounded-lg bg-white/10 p-3 lg:col-span-2 lg:gap-3">
+          <div className="flex grid-cols-1 flex-col gap-4 lg:grid lg:grid-cols-3">
+            <div className="col-span-2 flex flex-col gap-3 rounded-lg bg-white/10 p-3 lg:gap-3">
+              <div className="flex items-center gap-2">
+                <Timer className="size-3" />
+                <h3 className="font-semibold text-sm">Date & Time</h3>
+              </div>
               <div className="flex flex-col gap-2">
                 <DateTimePicker date={startDate} setDate={setStartDate} />
                 <Input type="hidden" name="startDate" value={startDate?.toISOString()} />
@@ -136,140 +151,168 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
                 )}
               </div>
             </div>
-            <div className="rounded-lg bg-white/10 p-3">
+            <div className="col-span-1 flex flex-col gap-3 rounded-lg bg-white/10 p-3 lg:gap-3">
               <div className="flex items-center gap-2">
                 <Globe className="size-3" />
-                <span className="font-medium">Timezone</span>
+                <h3 className="font-semibold text-sm">Timezone</h3>
               </div>
               <span className="text-sm">{TimezoneConfig.current}</span>
               <Input type="hidden" name="timezone" value={TimezoneConfig.current} />
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <Textarea
-              name="description"
-              placeholder="Add a description"
-              defaultValue={event?.description || ''}
-            />
-            {fieldErrors.description && (
-              <p className="text-destructive text-sm">{fieldErrors.description[0]}</p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2 rounded-lg bg-white/10 p-3">
-            {/* Location & Description */}
-            <Input type="hidden" name="locationType" value={locationType} />
-            <div className="flex flex-col gap-1">
-              <Select
-                name="locationType"
-                defaultValue={locationType}
-                onValueChange={(value) => setLocationType(value as LocationType)}
-              >
-                <SelectTrigger className="flex h-auto w-full justify-start gap-2 rounded-lg bg-white/10 p-2">
-                  <MapPin className="size-3" />
-                  <SelectValue placeholder="Select event location type">
-                    {LocationTypeLabels[locationType]}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={LocationType.PHYSICAL}>
-                    {LocationTypeLabels[LocationType.PHYSICAL]}
-                  </SelectItem>
-                  <SelectItem value={LocationType.ONLINE}>
-                    {LocationTypeLabels[LocationType.ONLINE]}
-                  </SelectItem>
-                  <SelectItem value={LocationType.HYBRID}>
-                    {LocationTypeLabels[LocationType.HYBRID]}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {fieldErrors.locationType && (
-                <p className="text-destructive text-sm">{fieldErrors.locationType[0]}</p>
+          <div className="flex flex-col gap-3 rounded-lg bg-white/10 p-3 lg:gap-3">
+            <div className="flex items-center gap-2">
+              <Text className="size-3" />
+              <h3 className="font-semibold text-sm">Details</h3>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Textarea
+                name="description"
+                placeholder="Add Description"
+                variant="naked"
+                defaultValue={event?.description || ''}
+              />
+              {fieldErrors.description && (
+                <p className="text-destructive text-sm">{fieldErrors.description[0]}</p>
               )}
             </div>
+          </div>
 
-            {(locationType === LocationType.PHYSICAL || locationType === LocationType.HYBRID) && (
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col gap-1">
-                  <Input
-                    name="venueName"
-                    placeholder="Name"
-                    defaultValue={event?.venueName || ''}
-                    className="col-span-1"
-                  />
-                  {fieldErrors.venueName && (
-                    <p className="text-destructive text-sm">{fieldErrors.venueName[0]}</p>
-                  )}
-                </div>
-                <div className="col-span-2 flex flex-col gap-1">
-                  <Input
-                    name="venueAddress"
-                    placeholder="Address"
-                    defaultValue={event?.venueAddress || ''}
-                  />
-                  {fieldErrors.venueAddress && (
-                    <p className="text-destructive text-sm">{fieldErrors.venueAddress[0]}</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {(locationType === LocationType.ONLINE || locationType === LocationType.HYBRID) && (
+          <div className="flex flex-col gap-3 rounded-lg bg-white/10 p-3 lg:gap-3">
+            <div className="flex items-center gap-2">
+              <LocateIcon className="size-3" />
+              <h3 className="font-semibold text-sm">Location</h3>
+            </div>
+            <div className="flex flex-col gap-3">
+              {/* Location & Description */}
+              <Input type="hidden" name="locationType" value={locationType} />
               <div className="flex flex-col gap-1">
-                <Input
-                  name="onlineUrl"
-                  placeholder="Zoom/Google Meet Link"
-                  defaultValue={event?.onlineUrl || ''}
-                />
-                {fieldErrors.onlineUrl && (
-                  <p className="text-destructive text-sm">{fieldErrors.onlineUrl[0]}</p>
+                <Select
+                  name="locationType"
+                  defaultValue={locationType}
+                  onValueChange={(value) => setLocationType(value as LocationType)}
+                >
+                  <SelectTrigger className="flex h-auto w-full justify-start gap-2 rounded-lg bg-white/10 p-2">
+                    <MapPin className="size-3" />
+                    <SelectValue placeholder="Select event location type">
+                      {LocationTypeLabels[locationType]}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={LocationType.PHYSICAL}>
+                      {LocationTypeLabels[LocationType.PHYSICAL]}
+                    </SelectItem>
+                    <SelectItem value={LocationType.ONLINE}>
+                      {LocationTypeLabels[LocationType.ONLINE]}
+                    </SelectItem>
+                    <SelectItem value={LocationType.HYBRID}>
+                      {LocationTypeLabels[LocationType.HYBRID]}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {fieldErrors.locationType && (
+                  <p className="text-destructive text-sm">{fieldErrors.locationType[0]}</p>
                 )}
               </div>
-            )}
+
+              {(locationType === LocationType.PHYSICAL || locationType === LocationType.HYBRID) && (
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <Input
+                      name="venueName"
+                      placeholder="Name"
+                      defaultValue={event?.venueName || ''}
+                      className="col-span-1"
+                    />
+                    {fieldErrors.venueName && (
+                      <p className="text-destructive text-sm">{fieldErrors.venueName[0]}</p>
+                    )}
+                  </div>
+                  <div className="col-span-2 flex flex-col gap-1">
+                    <Input
+                      name="venueAddress"
+                      placeholder="Address"
+                      defaultValue={event?.venueAddress || ''}
+                    />
+                    {fieldErrors.venueAddress && (
+                      <p className="text-destructive text-sm">{fieldErrors.venueAddress[0]}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {(locationType === LocationType.ONLINE || locationType === LocationType.HYBRID) && (
+                <div className="flex flex-col gap-1">
+                  <Input
+                    name="onlineUrl"
+                    placeholder="Zoom/Google Meet Link"
+                    defaultValue={event?.onlineUrl || ''}
+                  />
+                  {fieldErrors.onlineUrl && (
+                    <p className="text-destructive text-sm">{fieldErrors.onlineUrl[0]}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Event Options */}
-          <div className="mt-2 flex flex-col gap-1 rounded-lg bg-white/10 p-2">
-            <h3 className="px-2 py-1 font-semibold text-sm">Options</h3>
-
-            <div className="flex h-auto items-center justify-between p-2 text-left">
-              <div className="flex items-center gap-2">
-                <Lock className="size-3" />
-                <span className="font-medium text-sm">Require Approval</span>
-              </div>
-              <Switch
-                name="requiresApproval"
-                defaultChecked={event?.requiresApproval || false}
-                value={event?.requiresApproval ? 'true' : 'false'}
-              />
+          <div className="flex flex-col gap-3 rounded-lg bg-white/10 p-3 lg:gap-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Settings2 className="size-3" />
+              <h3 className="font-semibold text-sm">Options</h3>
             </div>
-            <div className="flex h-auto w-full items-center justify-between p-2 text-left">
-              <div className="flex items-center gap-2">
-                <Users className="size-3" />
-                <span className="font-medium text-sm">Capacity</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <Input
-                  min={1}
-                  max={10000}
-                  name="capacity"
-                  type="number"
-                  className="w-[calc(5ch+24px)] text-right text-xs"
-                  placeholder="Unlimited"
-                  defaultValue={event?.capacity?.toString() || ''}
+            <div className="flex flex-col gap-3">
+              <div className="flex h-auto items-center justify-between text-left">
+                <div className="flex items-center gap-2">
+                  <Lock className="size-3" />
+                  <span className="font-medium text-sm">Require Approval</span>
+                </div>
+                <Switch
+                  name="requiresApproval"
+                  defaultChecked={event?.requiresApproval || false}
+                  value={event?.requiresApproval ? 'true' : 'false'}
                 />
-                {fieldErrors.capacity && (
-                  <p className="text-destructive text-sm">{fieldErrors.capacity[0]}</p>
-                )}
+              </div>
+              <div className="flex h-auto w-full items-center justify-between text-left">
+                <div className="flex items-center gap-2">
+                  <Users className="size-3" />
+                  <span className="font-medium text-sm">Capacity</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Input
+                    min={1}
+                    max={10000}
+                    name="capacity"
+                    variant="naked"
+                    type="number"
+                    className="w-[calc(5ch+24px)] text-right"
+                    placeholder="∞"
+                    defaultValue={event?.capacity?.toString() || ''}
+                  />
+                  {fieldErrors.capacity && (
+                    <p className="text-destructive text-sm">{fieldErrors.capacity[0]}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {errorComponent}
 
-          <Button size="lg" type="submit" disabled={isPending}>
-            Save
+          <Button
+            size="lg"
+            type="submit"
+            disabled={isPending}
+            className="flex flex-row items-center justify-center gap-2 text-base"
+          >
+            {isPending ? (
+              <Loader className="size-3 animate-spin" />
+            ) : (
+              <PartyPopper className="size-3" />
+            )}
+            {isEditMode ? 'Update Event' : 'Create Event'}
           </Button>
         </form>
       </div>

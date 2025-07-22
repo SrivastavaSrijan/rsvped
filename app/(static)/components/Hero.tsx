@@ -21,7 +21,7 @@ export default function Hero() {
               </h1>
             </div>
           </div>
-          <p className="text-lg text-muted-foreground leading-relaxed lg:text-xl">
+          <p className="px-2 text-lg text-muted-foreground leading-relaxed lg:text-xl">
             {copy.hero.description}
           </p>
           <Link href={Routes.Main.Events.Create}>
@@ -32,8 +32,8 @@ export default function Hero() {
         </div>
 
         {/* Image Column */}
-        <div className="flex justify-center lg:col-span-2 lg:justify-end">
-          <video autoPlay loop muted playsInline className="w-full max-w-lg rounded-lg shadow-lg">
+        <div className="flex justify-center px-3 lg:col-span-2 lg:justify-end">
+          <video autoPlay loop muted playsInline className="w-full max-w-lg">
             <source src="/phone-dark.webm" type="video/webm" />
           </video>
         </div>
