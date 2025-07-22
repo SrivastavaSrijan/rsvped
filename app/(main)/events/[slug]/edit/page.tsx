@@ -1,4 +1,6 @@
 import { Metadata } from 'next'
+import { notFound, unauthorized } from 'next/navigation'
+import { auth } from '@/lib/auth'
 import { getAPI } from '@/server/api'
 import { EventForm } from '../../../components/EventForm'
 
@@ -10,10 +12,15 @@ export const metadata: Metadata = {
 export default async function EditEvent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const api = await getAPI()
+  const session = await auth()
 
   const event = await api.event.getBySlug({ slug })
   if (!event) {
-    return <div>Event not found</div>
+    return notFound()
+  }
+
+  if (event.hostId !== session?.user?.id) {
+    return unauthorized()
   }
 
   return (

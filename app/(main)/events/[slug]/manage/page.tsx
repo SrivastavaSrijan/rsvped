@@ -1,10 +1,12 @@
 import { Camera, Edit, Users } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import { notFound, unauthorized } from 'next/navigation'
+import { ManageEventCard } from '@/app/(main)/components'
 import { Button } from '@/components/ui'
+import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
-import { ManageEventCard } from '../../components'
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params
@@ -18,11 +20,16 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
 export default async function ViewEvent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const api = await getAPI()
+  const session = await auth()
+
   const event = await api.event.getBySlug({ slug })
   if (!event) {
-    return <div>Event not found</div>
+    return notFound()
   }
 
+  if (event.hostId !== session?.user?.id) {
+    return unauthorized()
+  }
   const pathname = (await headers()).get('x-pathname') || ''
   const url = process.env.NEXT_PUBLIC_BASE_URL + pathname
   const { checkInCount } = event

@@ -1,7 +1,13 @@
 import bcrypt from 'bcryptjs'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { ThemeColorIntensity, ThemeColorName, themeColorNames } from './config'
+import {
+  ThemeColorIntensity,
+  ThemeColorName,
+  ThemeFaintColorName,
+  themeColorNames,
+  themeFaintColorNames,
+} from './config'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -62,21 +68,23 @@ export function getRandomColor({
   seed,
   color,
   intensity = 50,
+  faint = false,
 }: {
   seed?: string
-  color?: ThemeColorName
+  color?: ThemeColorName | ThemeFaintColorName
   intensity?: ThemeColorIntensity
+  faint?: boolean
 } = {}): string {
-  let selectedColor: ThemeColorName
-
+  let selectedColor: ThemeColorName | ThemeFaintColorName
+  const map = faint ? themeFaintColorNames : themeColorNames
   if (color) {
     selectedColor = color
   } else if (seed) {
     const hash = simpleHash(seed)
-    selectedColor = themeColorNames[hash % themeColorNames.length]
+    selectedColor = map[hash % map.length]
   } else {
-    selectedColor = themeColorNames[Math.floor(Math.random() * themeColorNames.length)]
+    selectedColor = map[Math.floor(Math.random() * map.length)]
   }
 
-  return `var(--color-${selectedColor}-${intensity})`
+  return `var(--color-${selectedColor}${!faint ? `-${intensity}` : ''})`
 }

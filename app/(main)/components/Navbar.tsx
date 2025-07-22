@@ -29,7 +29,7 @@ export async function Navbar() {
   const session = await auth()
   return (
     <nav>
-      <div className="px-4 py-3 lg:px-4">
+      <div className="sticky px-4 py-3 lg:px-4">
         <div className="flex items-center gap-2">
           <Link
             href="/"
