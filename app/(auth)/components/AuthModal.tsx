@@ -2,7 +2,7 @@
 import { AlertCircle, Loader2, LogInIcon, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { Background } from '@/components/shared'
+import { Background, Form } from '@/components/shared'
 import { Alert, AlertDescription, AlertTitle, InputWithError } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import {
@@ -80,7 +80,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
           {loginError || <QueryError />}
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <form action={formAction} className="flex flex-col gap-3 lg:gap-3">
+          <Form action={formAction} className="flex flex-col gap-3 lg:gap-3">
             <input type="hidden" name="next" value={searchParams.get('next') || ''} />
             {mode === 'register' && (
               <InputWithError
@@ -121,7 +121,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
               )}
               {mode === 'login' ? copy.buttonText.signIn : copy.buttonText.register}
             </Button>
-          </form>
+          </Form>
           <hr />
 
           <Button

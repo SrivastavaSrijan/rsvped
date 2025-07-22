@@ -306,6 +306,22 @@ export type Route = typeof Routes[keyof typeof Routes];
     responsiveness
 ```
 
+#### Best Pracices
+- Use **React Server Components** (RSC) for data fetching and rendering.
+- Use **Client Components** for interactivity (hooks, state, effects).
+- Use **Server Actions** for form submissions and mutations, following the authAction pattern.
+- Use **tRPC hooks** for client-side data fetching.
+- Use **Zod schemas** for data validation in server actions.
+- Use **ShadCN UI** components for consistent styling and accessibility.
+- Use **Tailwind CSS** for styling, leveraging the `@theme` tokens defined in `app/theme.css`.
+- Use **Prisma** for database access, with all queries going through tRPC routers.
+- Use **TypeScript** for type safety across the codebase.
+
+#### React 19 
+- Does not need to use hooks like `useCallback`, `useMemo`, etc. Use them only when necessary. React Compiler optimizes the code for you.
+- You can now pass a `ref` as a prop instead of using `forwardRef` for simple cases. 
+- Use hooks like `useTransition`, `useDeferredValue`, and `useSyncExternalStore` for advanced state management and performance optimizations.
+
 #### Tailwind Best Practices
 - Use `@theme` tokens in `app/theme.css` for colors, spacing, etc
 - Use Tailwind's responsive utilities (e.g., `px-4 lg:px-8`) for mobile-first design

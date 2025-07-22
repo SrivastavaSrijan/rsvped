@@ -15,8 +15,8 @@ export default function Hero() {
               <Image src="/logo-full.png" alt="Logo" fill className="object-cover opacity-50" />
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className="font-bold text-4xl lg:text-6xl">{copy.hero.headline1}</h1>
-              <h1 className="bg-clip-text font-bold text-4xl text-gradient-radial text-transparent lg:text-6xl">
+              <h1 className="font-bold font-serif text-4xl lg:text-6xl">{copy.hero.headline1}</h1>
+              <h1 className="bg-clip-text font-bold font-serif text-4xl text-gradient-radial text-transparent lg:text-6xl">
                 {copy.hero.headline2}
               </h1>
             </div>

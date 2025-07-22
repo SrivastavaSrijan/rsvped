@@ -16,6 +16,7 @@ interface EventCardProps extends RouterOutputEvent {
 
 export function EventCard({
   title,
+  description,
   startDate,
   endDate,
   coverImage,
@@ -28,7 +29,10 @@ export function EventCard({
   checkInCount,
   url,
 }: EventCardProps) {
-  const eventDate = dayjs(startDate).format('dddd, MMMM D')
+  const eventStartDate = dayjs(startDate).format('dddd, MMMM D')
+  const eventEndDate = dayjs(endDate).format('dddd, MMMM D')
+  const isSameDay = dayjs(startDate).isSame(endDate, 'day')
+
   const eventTime = `${dayjs(startDate).format('h:mm A')} - ${dayjs(endDate).format('h:mm A')}`
   const eventMonth = dayjs(startDate).format('MMM').toUpperCase()
   const eventDay = dayjs(startDate).format('D')
@@ -119,9 +123,12 @@ export function EventCard({
           <div className="flex flex-1 flex-col gap-6 lg:gap-6">
             <div className="flex flex-col-reverse gap-2 lg:flex-col lg:gap-3">
               <Stats rsvpCount={rsvpCount} viewCount={viewCount} checkInCount={checkInCount} />
-              <h1 className="font-semibold font-serif font-stretch-semi-condensed text-3xl lg:text-4xl">
-                {title}
-              </h1>
+              <div>
+                <h1 className="font-semibold font-serif font-stretch-semi-condensed text-3xl lg:text-4xl">
+                  {title}
+                </h1>
+                {description && <p className="mt-2 line-clamp-2 text-sm">{description}</p>}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 text-base">
@@ -130,7 +137,9 @@ export function EventCard({
                 <p className="font-bold">{eventDay}</p>
               </div>
               <div>
-                <p className="font-medium">{eventDate}</p>
+                <p className="font-medium">
+                  {isSameDay ? eventStartDate : `${eventStartDate} to ${eventEndDate}`}
+                </p>
                 <p className="">{eventTime}</p>
               </div>
             </div>

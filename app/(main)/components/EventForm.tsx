@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
+import { Form } from '@/components/shared'
 import {
   Button,
   DateTimePicker,
@@ -31,6 +32,7 @@ import { TimezoneConfig } from '@/lib/config'
 import { LocationTypeLabels } from '@/lib/constants'
 import { useActionStateWithError } from '@/lib/hooks'
 import { EventActionErrorCodeMap, EventActionResponse, saveEvent } from '@/server/actions'
+import { RouterOutput } from '@/server/api/root'
 
 interface EventFormProps {
   coverImage: {
@@ -40,20 +42,7 @@ interface EventFormProps {
   }
   mode?: 'create' | 'edit'
   eventSlug?: string
-  event?: {
-    title: string
-    description?: string | null
-    startDate: Date
-    endDate: Date
-    timezone: string
-    locationType: LocationType
-    venueName?: string | null
-    venueAddress?: string | null
-    onlineUrl?: string | null
-    capacity?: number | null
-    requiresApproval: boolean
-    coverImage?: string | null
-  }
+  event?: RouterOutput['event']['getBySlug']
 }
 
 const initialEventState: EventActionResponse = {
@@ -111,7 +100,7 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
         </div>
       </div>
       <div className="w-full px-2 lg:col-span-2 lg:px-0">
-        <form action={formAction} className="flex flex-col gap-4">
+        <Form action={formAction} className="flex flex-col gap-4">
           <Input type="hidden" name="coverImage" value={event?.coverImage || coverImage.url} />
           {isEditMode && eventSlug && <Input type="hidden" name="slug" value={eventSlug} />}
 
@@ -314,7 +303,7 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
             )}
             {isEditMode ? 'Update Event' : 'Create Event'}
           </Button>
-        </form>
+        </Form>
       </div>
     </div>
   )
