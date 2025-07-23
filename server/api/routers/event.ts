@@ -1,4 +1,5 @@
 import { TRPCError } from '@trpc/server'
+import slugify from 'slugify'
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc'
 import { EventModel } from './zod'
@@ -77,10 +78,7 @@ export const eventRouter = createTRPCRouter({
 
     try {
       // Generate unique slug from title
-      const baseSlug = input.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '')
+      const baseSlug = slugify(input.title)
 
       // Check for existing slugs and make unique
       let slug = baseSlug
@@ -267,6 +265,8 @@ export const eventRouter = createTRPCRouter({
         sort: z.enum(['asc', 'desc']).default('asc'),
         before: z.string().optional(),
         after: z.string().optional(),
+        page: z.number().int().min(1).default(1),
+        size: z.number().int().min(1).max(100).default(5),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -274,12 +274,13 @@ export const eventRouter = createTRPCRouter({
         where: {
           deletedAt: null,
           startDate: {
-            lt: input.before ? new Date(input.before) : new Date(),
-            gt: input.after ? new Date(input.after) : new Date(0),
+            ...(input.before && { lt: new Date(input.before) }),
+            ...(input.after && { gt: new Date(input.after) }),
           },
         },
         orderBy: { startDate: input.sort },
-
+        skip: (input.page - 1) * input.size,
+        take: input.size,
         include: {
           host: {
             select: {

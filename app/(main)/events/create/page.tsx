@@ -3,7 +3,7 @@ import { getAPI } from '@/server/api'
 import { EventForm } from '../../components/EventForm'
 
 export const metadata: Metadata = {
-  title: "Create Event · RSVP'd",
+  title: "Create an Event · RSVP'd",
   description: "Create a new event on RSVP'd",
 }
 

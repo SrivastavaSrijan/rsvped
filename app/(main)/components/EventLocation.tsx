@@ -1,6 +1,6 @@
 'use client'
 import { LocationType } from '@prisma/client'
-import { ExternalLink, Globe, Laptop, MapPin } from 'lucide-react'
+import { Globe, Laptop, MapPin } from 'lucide-react'
 
 const LocationIcons = {
   [LocationType.PHYSICAL]: MapPin,
@@ -8,6 +8,62 @@ const LocationIcons = {
   [LocationType.ONLINE]: Laptop,
   [LocationType.HYBRID]: Globe,
 } as const
+
+interface EventLocation {
+  locationType: LocationType
+  venueName?: string | null
+  venueAddress?: string | null
+  onlineUrl?: string | null
+}
+
+export const EventLocation = ({
+  locationType,
+  venueName,
+  venueAddress,
+  onlineUrl,
+}: EventLocation) => {
+  switch (locationType) {
+    case LocationType.PHYSICAL:
+      if (!venueName) return null
+      return (
+        <LocationItem
+          locationType={LocationType.PHYSICAL}
+          title={venueName}
+          subtitle={venueAddress}
+        />
+      )
+
+    case LocationType.ONLINE:
+      return (
+        <LocationItem locationType={LocationType.ONLINE} title="Visit Link" subtitle={onlineUrl} />
+      )
+
+    case LocationType.HYBRID:
+      return (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            {venueName && (
+              <LocationItem
+                locationType={LocationType.PHYSICAL}
+                title={venueName}
+                subtitle={venueAddress}
+              />
+            )}
+            {onlineUrl && (
+              <LocationItem
+                locationType={LocationType.ONLINE}
+                title="Visit Link"
+                subtitle={onlineUrl}
+              />
+            )}
+          </div>
+        </div>
+      )
+
+    default:
+      return null
+  }
+}
 
 interface LocationItemProps {
   locationType: LocationType
@@ -63,7 +119,6 @@ export const LocationItem = ({
           <p className="truncate font-medium leading-tight">{displayTitle}</p>
         )}
       </div>
-      <ExternalLink className="size-2.5" />
     </div>
   )
 }

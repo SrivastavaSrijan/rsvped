@@ -28,7 +28,10 @@ export const Routes = {
       get Discover() {
         return `${this.Root}/discover`
       },
-      getEdit(slug: string) {
+      get Home() {
+        return `${this.Root}/home`
+      },
+      EditBySlug(slug: string) {
         return `${this.Root}/${slug}/edit`
       },
     },
@@ -36,7 +39,7 @@ export const Routes = {
 } as const
 
 export const getAvatarURL = (name: string) => {
-  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${name}&flip=true`
+  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(name)}&flip=true`
 }
 
 export type Route = (typeof Routes)[keyof typeof Routes]

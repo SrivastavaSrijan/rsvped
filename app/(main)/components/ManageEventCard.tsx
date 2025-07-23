@@ -1,10 +1,9 @@
-import { LocationType } from '@prisma/client'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import { Card } from '@/components/ui'
 import { getRandomColor } from '@/lib/utils'
 import { RouterOutput } from '@/server/api/root'
-import { LocationItem } from './LocationItem'
+import { EventLocation } from './EventLocation'
 import { ShareActions } from './ShareActions'
 import { ShareLink } from './ShareLink'
 import { Stats } from './Stats'
@@ -40,55 +39,6 @@ export function ManageEventCard({
   // Generate gradient colors based on event title
   const gradientFrom = getRandomColor({ seed: title, intensity: 40 })
   const gradientTo = getRandomColor({ seed: title, intensity: 60 })
-
-  // Dynamic location rendering based on location type
-  const renderLocation = () => {
-    switch (locationType) {
-      case LocationType.PHYSICAL:
-        if (!venueName) return null
-        return (
-          <LocationItem
-            locationType={LocationType.PHYSICAL}
-            title={venueName}
-            subtitle={venueAddress}
-          />
-        )
-
-      case LocationType.ONLINE:
-        return (
-          <LocationItem
-            locationType={LocationType.ONLINE}
-            title="Visit Link"
-            subtitle={onlineUrl}
-          />
-        )
-
-      case LocationType.HYBRID:
-        return (
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-2">
-              {venueName && (
-                <LocationItem
-                  locationType={LocationType.PHYSICAL}
-                  title={venueName}
-                  subtitle={venueAddress}
-                />
-              )}
-              {onlineUrl && (
-                <LocationItem
-                  locationType={LocationType.ONLINE}
-                  title="Visit Link"
-                  subtitle={onlineUrl}
-                />
-              )}
-            </div>
-          </div>
-        )
-
-      default:
-        return null
-    }
-  }
 
   return (
     <Card
@@ -143,7 +93,12 @@ export function ManageEventCard({
                 <p className="">{eventTime}</p>
               </div>
             </div>
-            {renderLocation()}
+            <EventLocation
+              locationType={locationType}
+              venueName={venueName}
+              venueAddress={venueAddress}
+              onlineUrl={onlineUrl}
+            />
           </div>
         </div>
 

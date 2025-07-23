@@ -165,6 +165,21 @@ enum BillingInterval {
  * ---------- Event & taxonomy ----------
  */
 
+model Location {
+  id        String @id @default(cuid())
+  name      String // "New York City"
+  slug      String @unique // "nyc"
+  country   String // "United States"
+  continent String // "North America" 
+  timezone  String // "America/New_York"
+  iconPath  String // "/assets/location-icons/nyc-icon.png"
+  
+  events Event[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Event {
   id          String  @id @default(cuid())
   slug        String  @unique // pretty URLs
@@ -176,6 +191,10 @@ model Event {
   startDate DateTime
   endDate   DateTime
   timezone  String  @default("America/New_York") // e.g. "Asia/Kolkata"
+
+  // Location fields
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
 
   locationType LocationType
   venueName    String? // only if physical

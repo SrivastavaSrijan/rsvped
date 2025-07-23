@@ -84,6 +84,7 @@
     "lint-staged": "^16.1.2",
     "puppeteer": "^24.13.0",
     "simple-git-hooks": "^2.13.0",
+    "slugify": "^1.6.6",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",
     "tw-animate-css": "^1.3.5",

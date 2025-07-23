@@ -1,6 +1,6 @@
 import * as z from "zod"
 import { LocationType, EventStatus, EventVisibility } from "@prisma/client"
-import { CompleteUser, RelatedUserModel, CompleteCommunity, RelatedCommunityModel, CompleteEventCategory, RelatedEventCategoryModel, CompleteTicketTier, RelatedTicketTierModel, CompleteRsvp, RelatedRsvpModel, CompleteOrder, RelatedOrderModel, CompletePromoCode, RelatedPromoCodeModel, CompleteRegistrationQuestion, RelatedRegistrationQuestionModel, CompleteEventView, RelatedEventViewModel, CompleteEventDailyStat, RelatedEventDailyStatModel, CompleteEventMessage, RelatedEventMessageModel, CompleteEventReferral, RelatedEventReferralModel, CompleteEventCollaborator, RelatedEventCollaboratorModel, CompleteEventFeedback, RelatedEventFeedbackModel } from "./index"
+import { CompleteLocation, RelatedLocationModel, CompleteUser, RelatedUserModel, CompleteCommunity, RelatedCommunityModel, CompleteEventCategory, RelatedEventCategoryModel, CompleteTicketTier, RelatedTicketTierModel, CompleteRsvp, RelatedRsvpModel, CompleteOrder, RelatedOrderModel, CompletePromoCode, RelatedPromoCodeModel, CompleteRegistrationQuestion, RelatedRegistrationQuestionModel, CompleteEventView, RelatedEventViewModel, CompleteEventDailyStat, RelatedEventDailyStatModel, CompleteEventMessage, RelatedEventMessageModel, CompleteEventReferral, RelatedEventReferralModel, CompleteEventCollaborator, RelatedEventCollaboratorModel, CompleteEventFeedback, RelatedEventFeedbackModel } from "./index"
 
 export const EventModel = z.object({
   id: z.string(),
@@ -12,6 +12,7 @@ export const EventModel = z.object({
   startDate: z.date(),
   endDate: z.date(),
   timezone: z.string(),
+  locationId: z.string().nullish(),
   locationType: z.nativeEnum(LocationType),
   venueName: z.string().nullish(),
   venueAddress: z.string().nullish(),
@@ -35,6 +36,7 @@ export const EventModel = z.object({
 })
 
 export interface CompleteEvent extends z.infer<typeof EventModel> {
+  location?: CompleteLocation | null
   host: CompleteUser
   community?: CompleteCommunity | null
   categories: CompleteEventCategory[]
@@ -57,6 +59,7 @@ export interface CompleteEvent extends z.infer<typeof EventModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedEventModel: z.ZodSchema<CompleteEvent> = z.lazy(() => EventModel.extend({
+  location: RelatedLocationModel.nullish(),
   host: RelatedUserModel,
   community: RelatedCommunityModel.nullish(),
   categories: RelatedEventCategoryModel.array(),

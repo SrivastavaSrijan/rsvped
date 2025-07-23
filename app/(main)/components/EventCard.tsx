@@ -2,10 +2,10 @@ import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
 import isToday from 'dayjs/plugin/isToday'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { MapPin } from 'lucide-react'
 import { Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { RouterOutput } from '@/server/api/root'
+import { EventLocation } from './EventLocation'
 
 dayjs.extend(relativeTime)
 dayjs.extend(isBetween)
@@ -57,7 +57,16 @@ export interface EventCardProps extends RouterOutputMinimalEvent {
   isLast: boolean
 }
 
-export const EventCard = ({ title, startDate, endDate, venueName, isLast }: EventCardProps) => {
+export const EventCard = ({
+  title,
+  startDate,
+  endDate,
+  venueAddress,
+  locationType,
+  onlineUrl,
+  venueName,
+  isLast,
+}: EventCardProps) => {
   const eventStartDate = dayjs(startDate)
   const eventEndDate = endDate ? dayjs(endDate) : null
   const timeSince = formatEventDate(eventStartDate, eventEndDate)
@@ -79,14 +88,18 @@ export const EventCard = ({ title, startDate, endDate, venueName, isLast }: Even
           <p className="font-medium text-base text-bold">{timeSince}</p>
           <p className="text-muted-foreground text-sm">{dayOfStart}</p>
         </div>
-        <Card className="w-full border-0 p-2 text-white lg:p-3">
+        <Card className="mb-6 w-full border-0 p-3 text-white lg:p-6">
           <div className="grid grid-cols-3 flex-col gap-4">
             <div className="col-span-2 flex flex-col gap-2">
               <p className="text-muted-foreground text-sm">{timeRange}</p>
               <h2 className="font-semibold text-lg">{title}</h2>
               <div className="flex flex-row items-center gap-2">
-                <MapPin className="size-3 text-muted-foreground" />
-                <div className="text-muted-foreground text-sm">{venueName}</div>
+                <EventLocation
+                  locationType={locationType}
+                  venueName={venueName}
+                  venueAddress={venueAddress}
+                  onlineUrl={onlineUrl}
+                />
               </div>
             </div>
           </div>

@@ -62,6 +62,8 @@ export {
 export { Input } from './input'
 export { InputWithError } from './input-with-error'
 export { Label } from './label'
+export * from './pagination'
+export { Pagination } from './pagination'
 export { Popover, PopoverContent, PopoverTrigger } from './popover'
 export { RadioGroup, RadioGroupItem } from './radio-group'
 export {

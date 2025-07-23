@@ -53,7 +53,7 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
             {/* Action Buttons */}
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1 gap-2" asChild>
-                <Link href={Routes.Main.Events.getEdit(slug)}>
+                <Link href={Routes.Main.Events.EditBySlug(slug)}>
                   <Edit className="size-3" />
                   Edit Event
                 </Link>
