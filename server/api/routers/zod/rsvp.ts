@@ -1,6 +1,23 @@
-import * as z from "zod"
-import { RsvpStatus, PaymentState } from "@prisma/client"
-import { CompleteEvent, RelatedEventModel, CompleteTicketTier, RelatedTicketTierModel, CompleteUser, RelatedUserModel, CompleteOrder, RelatedOrderModel, CompleteEventReferral, RelatedEventReferralModel, CompleteCheckIn, RelatedCheckInModel, CompleteRegistrationAnswer, RelatedRegistrationAnswerModel, CompleteEventFeedback, RelatedEventFeedbackModel } from "./index"
+import { PaymentState, RsvpStatus } from '@prisma/client'
+import * as z from 'zod'
+import {
+  CompleteCheckIn,
+  CompleteEvent,
+  CompleteEventFeedback,
+  CompleteEventReferral,
+  CompleteOrder,
+  CompleteRegistrationAnswer,
+  CompleteTicketTier,
+  CompleteUser,
+  RelatedCheckInModel,
+  RelatedEventFeedbackModel,
+  RelatedEventModel,
+  RelatedEventReferralModel,
+  RelatedOrderModel,
+  RelatedRegistrationAnswerModel,
+  RelatedTicketTierModel,
+  RelatedUserModel,
+} from './index'
 
 export const RsvpModel = z.object({
   id: z.string(),
@@ -33,13 +50,15 @@ export interface CompleteRsvp extends z.infer<typeof RsvpModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedRsvpModel: z.ZodSchema<CompleteRsvp> = z.lazy(() => RsvpModel.extend({
-  event: RelatedEventModel,
-  ticketTier: RelatedTicketTierModel.nullish(),
-  user: RelatedUserModel.nullish(),
-  order: RelatedOrderModel.nullish(),
-  referral: RelatedEventReferralModel.nullish(),
-  checkIn: RelatedCheckInModel.nullish(),
-  registrationAnswers: RelatedRegistrationAnswerModel.array(),
-  eventFeedback: RelatedEventFeedbackModel.array(),
-}))
+export const RelatedRsvpModel: z.ZodSchema<CompleteRsvp> = z.lazy(() =>
+  RsvpModel.extend({
+    event: RelatedEventModel,
+    ticketTier: RelatedTicketTierModel.nullish(),
+    user: RelatedUserModel.nullish(),
+    order: RelatedOrderModel.nullish(),
+    referral: RelatedEventReferralModel.nullish(),
+    checkIn: RelatedCheckInModel.nullish(),
+    registrationAnswers: RelatedRegistrationAnswerModel.array(),
+    eventFeedback: RelatedEventFeedbackModel.array(),
+  })
+)

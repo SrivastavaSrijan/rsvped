@@ -1,5 +1,5 @@
-import * as z from "zod"
-import { CompleteEventCategory, RelatedEventCategoryModel } from "./index"
+import * as z from 'zod'
+import { CompleteEventCategory, RelatedEventCategoryModel } from './index'
 
 export const CategoryModel = z.object({
   id: z.string(),
@@ -16,6 +16,8 @@ export interface CompleteCategory extends z.infer<typeof CategoryModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedCategoryModel: z.ZodSchema<CompleteCategory> = z.lazy(() => CategoryModel.extend({
-  events: RelatedEventCategoryModel.array(),
-}))
+export const RelatedCategoryModel: z.ZodSchema<CompleteCategory> = z.lazy(() =>
+  CategoryModel.extend({
+    events: RelatedEventCategoryModel.array(),
+  })
+)

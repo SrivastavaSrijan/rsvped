@@ -1,5 +1,12 @@
-import * as z from "zod"
-import { CompleteEvent, RelatedEventModel, CompleteUser, RelatedUserModel, CompleteRsvp, RelatedRsvpModel } from "./index"
+import * as z from 'zod'
+import {
+  CompleteEvent,
+  CompleteRsvp,
+  CompleteUser,
+  RelatedEventModel,
+  RelatedRsvpModel,
+  RelatedUserModel,
+} from './index'
 
 export const EventReferralModel = z.object({
   id: z.string(),
@@ -21,8 +28,10 @@ export interface CompleteEventReferral extends z.infer<typeof EventReferralModel
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventReferralModel: z.ZodSchema<CompleteEventReferral> = z.lazy(() => EventReferralModel.extend({
-  event: RelatedEventModel,
-  user: RelatedUserModel.nullish(),
-  rsvps: RelatedRsvpModel.array(),
-}))
+export const RelatedEventReferralModel: z.ZodSchema<CompleteEventReferral> = z.lazy(() =>
+  EventReferralModel.extend({
+    event: RelatedEventModel,
+    user: RelatedUserModel.nullish(),
+    rsvps: RelatedRsvpModel.array(),
+  })
+)

@@ -43,3 +43,4 @@ next-env.d.ts
 /app/generated/prisma
 seed.ts
 test-accounts.json
+.githooks/pre-commit

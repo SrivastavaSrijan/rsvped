@@ -1,6 +1,11 @@
-import * as z from "zod"
-import { QuestionType } from "@prisma/client"
-import { CompleteEvent, RelatedEventModel, CompleteRegistrationAnswer, RelatedRegistrationAnswerModel } from "./index"
+import { QuestionType } from '@prisma/client'
+import * as z from 'zod'
+import {
+  CompleteEvent,
+  CompleteRegistrationAnswer,
+  RelatedEventModel,
+  RelatedRegistrationAnswerModel,
+} from './index'
 
 export const RegistrationQuestionModel = z.object({
   id: z.string(),
@@ -22,7 +27,10 @@ export interface CompleteRegistrationQuestion extends z.infer<typeof Registratio
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedRegistrationQuestionModel: z.ZodSchema<CompleteRegistrationQuestion> = z.lazy(() => RegistrationQuestionModel.extend({
-  event: RelatedEventModel,
-  answers: RelatedRegistrationAnswerModel.array(),
-}))
+export const RelatedRegistrationQuestionModel: z.ZodSchema<CompleteRegistrationQuestion> = z.lazy(
+  () =>
+    RegistrationQuestionModel.extend({
+      event: RelatedEventModel,
+      answers: RelatedRegistrationAnswerModel.array(),
+    })
+)

@@ -1,5 +1,10 @@
-import * as z from "zod"
-import { CompleteRsvp, RelatedRsvpModel, CompleteRegistrationQuestion, RelatedRegistrationQuestionModel } from "./index"
+import * as z from 'zod'
+import {
+  CompleteRegistrationQuestion,
+  CompleteRsvp,
+  RelatedRegistrationQuestionModel,
+  RelatedRsvpModel,
+} from './index'
 
 export const RegistrationAnswerModel = z.object({
   id: z.string(),
@@ -18,7 +23,9 @@ export interface CompleteRegistrationAnswer extends z.infer<typeof RegistrationA
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedRegistrationAnswerModel: z.ZodSchema<CompleteRegistrationAnswer> = z.lazy(() => RegistrationAnswerModel.extend({
-  rsvp: RelatedRsvpModel,
-  question: RelatedRegistrationQuestionModel,
-}))
+export const RelatedRegistrationAnswerModel: z.ZodSchema<CompleteRegistrationAnswer> = z.lazy(() =>
+  RegistrationAnswerModel.extend({
+    rsvp: RelatedRsvpModel,
+    question: RelatedRegistrationQuestionModel,
+  })
+)

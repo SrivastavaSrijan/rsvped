@@ -1,5 +1,26 @@
-import * as z from "zod"
-import { CompleteAccount, RelatedAccountModel, CompleteSession, RelatedSessionModel, CompleteEvent, RelatedEventModel, CompleteRsvp, RelatedRsvpModel, CompleteCommunity, RelatedCommunityModel, CompleteCommunityMembership, RelatedCommunityMembershipModel, CompleteEventMessage, RelatedEventMessageModel, CompleteEventReferral, RelatedEventReferralModel, CompleteEventCollaborator, RelatedEventCollaboratorModel, CompleteEventView, RelatedEventViewModel } from "./index"
+import * as z from 'zod'
+import {
+  CompleteAccount,
+  CompleteCommunity,
+  CompleteCommunityMembership,
+  CompleteEvent,
+  CompleteEventCollaborator,
+  CompleteEventMessage,
+  CompleteEventReferral,
+  CompleteEventView,
+  CompleteRsvp,
+  CompleteSession,
+  RelatedAccountModel,
+  RelatedCommunityMembershipModel,
+  RelatedCommunityModel,
+  RelatedEventCollaboratorModel,
+  RelatedEventMessageModel,
+  RelatedEventModel,
+  RelatedEventReferralModel,
+  RelatedEventViewModel,
+  RelatedRsvpModel,
+  RelatedSessionModel,
+} from './index'
 
 export const UserModel = z.object({
   id: z.string(),
@@ -29,15 +50,17 @@ export interface CompleteUser extends z.infer<typeof UserModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedUserModel: z.ZodSchema<CompleteUser> = z.lazy(() => UserModel.extend({
-  accounts: RelatedAccountModel.array(),
-  sessions: RelatedSessionModel.array(),
-  hostedEvents: RelatedEventModel.array(),
-  rsvps: RelatedRsvpModel.array(),
-  ownedCommunities: RelatedCommunityModel.array(),
-  communityMemberships: RelatedCommunityMembershipModel.array(),
-  eventMessages: RelatedEventMessageModel.array(),
-  eventReferrals: RelatedEventReferralModel.array(),
-  eventCollaborators: RelatedEventCollaboratorModel.array(),
-  EventView: RelatedEventViewModel.array(),
-}))
+export const RelatedUserModel: z.ZodSchema<CompleteUser> = z.lazy(() =>
+  UserModel.extend({
+    accounts: RelatedAccountModel.array(),
+    sessions: RelatedSessionModel.array(),
+    hostedEvents: RelatedEventModel.array(),
+    rsvps: RelatedRsvpModel.array(),
+    ownedCommunities: RelatedCommunityModel.array(),
+    communityMemberships: RelatedCommunityMembershipModel.array(),
+    eventMessages: RelatedEventMessageModel.array(),
+    eventReferrals: RelatedEventReferralModel.array(),
+    eventCollaborators: RelatedEventCollaboratorModel.array(),
+    EventView: RelatedEventViewModel.array(),
+  })
+)

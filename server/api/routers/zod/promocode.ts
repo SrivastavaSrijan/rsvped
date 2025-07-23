@@ -1,6 +1,13 @@
-import * as z from "zod"
-import { DiscountType } from "@prisma/client"
-import { CompleteEvent, RelatedEventModel, CompletePromoCodeTier, RelatedPromoCodeTierModel, CompleteOrder, RelatedOrderModel } from "./index"
+import { DiscountType } from '@prisma/client'
+import * as z from 'zod'
+import {
+  CompleteEvent,
+  CompleteOrder,
+  CompletePromoCodeTier,
+  RelatedEventModel,
+  RelatedOrderModel,
+  RelatedPromoCodeTierModel,
+} from './index'
 
 export const PromoCodeModel = z.object({
   id: z.string(),
@@ -27,8 +34,10 @@ export interface CompletePromoCode extends z.infer<typeof PromoCodeModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedPromoCodeModel: z.ZodSchema<CompletePromoCode> = z.lazy(() => PromoCodeModel.extend({
-  event: RelatedEventModel,
-  applicableTiers: RelatedPromoCodeTierModel.array(),
-  appliedOrders: RelatedOrderModel.array(),
-}))
+export const RelatedPromoCodeModel: z.ZodSchema<CompletePromoCode> = z.lazy(() =>
+  PromoCodeModel.extend({
+    event: RelatedEventModel,
+    applicableTiers: RelatedPromoCodeTierModel.array(),
+    appliedOrders: RelatedOrderModel.array(),
+  })
+)

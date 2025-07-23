@@ -1,5 +1,14 @@
-import * as z from "zod"
-import { CompleteUser, RelatedUserModel, CompleteCommunityMembership, RelatedCommunityMembershipModel, CompleteMembershipTier, RelatedMembershipTierModel, CompleteEvent, RelatedEventModel } from "./index"
+import * as z from 'zod'
+import {
+  CompleteCommunityMembership,
+  CompleteEvent,
+  CompleteMembershipTier,
+  CompleteUser,
+  RelatedCommunityMembershipModel,
+  RelatedEventModel,
+  RelatedMembershipTierModel,
+  RelatedUserModel,
+} from './index'
 
 export const CommunityModel = z.object({
   id: z.string(),
@@ -25,9 +34,11 @@ export interface CompleteCommunity extends z.infer<typeof CommunityModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedCommunityModel: z.ZodSchema<CompleteCommunity> = z.lazy(() => CommunityModel.extend({
-  owner: RelatedUserModel,
-  members: RelatedCommunityMembershipModel.array(),
-  membershipTiers: RelatedMembershipTierModel.array(),
-  events: RelatedEventModel.array(),
-}))
+export const RelatedCommunityModel: z.ZodSchema<CompleteCommunity> = z.lazy(() =>
+  CommunityModel.extend({
+    owner: RelatedUserModel,
+    members: RelatedCommunityMembershipModel.array(),
+    membershipTiers: RelatedMembershipTierModel.array(),
+    events: RelatedEventModel.array(),
+  })
+)

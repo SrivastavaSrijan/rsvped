@@ -1,6 +1,37 @@
-import * as z from "zod"
-import { LocationType, EventStatus, EventVisibility } from "@prisma/client"
-import { CompleteLocation, RelatedLocationModel, CompleteUser, RelatedUserModel, CompleteCommunity, RelatedCommunityModel, CompleteEventCategory, RelatedEventCategoryModel, CompleteTicketTier, RelatedTicketTierModel, CompleteRsvp, RelatedRsvpModel, CompleteOrder, RelatedOrderModel, CompletePromoCode, RelatedPromoCodeModel, CompleteRegistrationQuestion, RelatedRegistrationQuestionModel, CompleteEventView, RelatedEventViewModel, CompleteEventDailyStat, RelatedEventDailyStatModel, CompleteEventMessage, RelatedEventMessageModel, CompleteEventReferral, RelatedEventReferralModel, CompleteEventCollaborator, RelatedEventCollaboratorModel, CompleteEventFeedback, RelatedEventFeedbackModel } from "./index"
+import { EventStatus, EventVisibility, LocationType } from '@prisma/client'
+import * as z from 'zod'
+import {
+  CompleteCommunity,
+  CompleteEventCategory,
+  CompleteEventCollaborator,
+  CompleteEventDailyStat,
+  CompleteEventFeedback,
+  CompleteEventMessage,
+  CompleteEventReferral,
+  CompleteEventView,
+  CompleteLocation,
+  CompleteOrder,
+  CompletePromoCode,
+  CompleteRegistrationQuestion,
+  CompleteRsvp,
+  CompleteTicketTier,
+  CompleteUser,
+  RelatedCommunityModel,
+  RelatedEventCategoryModel,
+  RelatedEventCollaboratorModel,
+  RelatedEventDailyStatModel,
+  RelatedEventFeedbackModel,
+  RelatedEventMessageModel,
+  RelatedEventReferralModel,
+  RelatedEventViewModel,
+  RelatedLocationModel,
+  RelatedOrderModel,
+  RelatedPromoCodeModel,
+  RelatedRegistrationQuestionModel,
+  RelatedRsvpModel,
+  RelatedTicketTierModel,
+  RelatedUserModel,
+} from './index'
 
 export const EventModel = z.object({
   id: z.string(),
@@ -58,20 +89,22 @@ export interface CompleteEvent extends z.infer<typeof EventModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventModel: z.ZodSchema<CompleteEvent> = z.lazy(() => EventModel.extend({
-  location: RelatedLocationModel.nullish(),
-  host: RelatedUserModel,
-  community: RelatedCommunityModel.nullish(),
-  categories: RelatedEventCategoryModel.array(),
-  ticketTiers: RelatedTicketTierModel.array(),
-  rsvps: RelatedRsvpModel.array(),
-  orders: RelatedOrderModel.array(),
-  promoCodes: RelatedPromoCodeModel.array(),
-  registrationQuestions: RelatedRegistrationQuestionModel.array(),
-  eventViews: RelatedEventViewModel.array(),
-  eventDailyStats: RelatedEventDailyStatModel.array(),
-  eventMessages: RelatedEventMessageModel.array(),
-  eventReferrals: RelatedEventReferralModel.array(),
-  eventCollaborators: RelatedEventCollaboratorModel.array(),
-  eventFeedback: RelatedEventFeedbackModel.array(),
-}))
+export const RelatedEventModel: z.ZodSchema<CompleteEvent> = z.lazy(() =>
+  EventModel.extend({
+    location: RelatedLocationModel.nullish(),
+    host: RelatedUserModel,
+    community: RelatedCommunityModel.nullish(),
+    categories: RelatedEventCategoryModel.array(),
+    ticketTiers: RelatedTicketTierModel.array(),
+    rsvps: RelatedRsvpModel.array(),
+    orders: RelatedOrderModel.array(),
+    promoCodes: RelatedPromoCodeModel.array(),
+    registrationQuestions: RelatedRegistrationQuestionModel.array(),
+    eventViews: RelatedEventViewModel.array(),
+    eventDailyStats: RelatedEventDailyStatModel.array(),
+    eventMessages: RelatedEventMessageModel.array(),
+    eventReferrals: RelatedEventReferralModel.array(),
+    eventCollaborators: RelatedEventCollaboratorModel.array(),
+    eventFeedback: RelatedEventFeedbackModel.array(),
+  })
+)
