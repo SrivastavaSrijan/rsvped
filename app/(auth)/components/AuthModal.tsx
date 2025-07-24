@@ -103,7 +103,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
               error={state.fieldErrors?.password}
               name="password"
               type="password"
-              autoComplete="new-password"
+              autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
               placeholder={copy.placeholders.password}
               defaultValue={prefill?.password}
               required

@@ -59,7 +59,7 @@ export {
   FormMessage,
   useFormField,
 } from './form'
-export { Input } from './input'
+export { Input, inputVariants } from './input'
 export { InputWithError } from './input-with-error'
 export { Label } from './label'
 export * from './pagination'
@@ -74,6 +74,7 @@ export {
   SelectValue,
 } from './select'
 export { Separator } from './separator'
+export { Skeleton } from './skeleton'
 export { Switch } from './switch'
 export {
   Table,

@@ -35,7 +35,7 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
 
   return (
     <Tabs
-      className="mx-auto flex w-full max-w-page flex-col gap-8 px-3 lg:gap-12 lg:px-8"
+      className="mx-auto flex w-full max-w-page flex-col gap-8 px-3 pb-6 lg:gap-12 lg:px-8 lg:pb-8"
       defaultValue="details"
     >
       <div className="flex flex-col gap-4 lg:gap-6">

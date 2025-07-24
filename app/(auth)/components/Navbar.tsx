@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const Navbar = () => {
   return (
-    <nav className="sticky top-0 z-10 bg-black/10 px-4 py-2 backdrop-blur-sm lg:px-4 lg:py-3">
+    <nav className="sticky top-0 z-10 bg-black/10 px-3 py-2 backdrop-blur-sm lg:px-4 lg:py-3">
       <div className="flex items-center justify-between">
         <Link
           href="/"

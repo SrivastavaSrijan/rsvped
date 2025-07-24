@@ -10,7 +10,7 @@ import { copy } from '../copy'
 export default async function Navbar() {
   const session = await auth()
   return (
-    <nav className="sticky top-0 z-10 bg-black/10 px-4 py-2 backdrop-blur-sm lg:px-4 lg:py-3">
+    <nav className="sticky top-0 z-10 bg-black/10 px-3 py-2 backdrop-blur-sm lg:px-4 lg:py-3">
       <div className="flex items-center justify-between">
         <Link
           href="/"
@@ -32,7 +32,9 @@ export default async function Navbar() {
             <ProfileDropdown session={session} />
           ) : (
             <Link href={Routes.Auth.SignIn} passHref>
-              <Button variant="outline">{copy.nav.signIn}</Button>
+              <Button variant="link" size="sm">
+                {copy.nav.signIn}
+              </Button>
             </Link>
           )}
         </div>

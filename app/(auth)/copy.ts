@@ -8,8 +8,8 @@ export const copy = {
     google: 'Sign In With Google',
   },
   placeholders: {
-    email: 'you@example.com',
-    password: '',
-    name: '',
+    email: 'Email Address',
+    password: 'Password',
+    name: 'Name',
   },
 }
