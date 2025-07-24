@@ -1,9 +1,9 @@
-import { Camera, Edit, Users } from 'lucide-react'
+import { ArrowUpLeft } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound, unauthorized } from 'next/navigation'
 import { ManageEventCard } from '@/app/(main)/components'
-import { Button } from '@/components/ui'
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
@@ -32,43 +32,31 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
   }
   const pathname = (await headers()).get('x-pathname') || ''
   const url = process.env.NEXT_PUBLIC_BASE_URL + pathname
-  const { checkInCount } = event
 
   return (
-    <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-2 py-6 lg:gap-8 lg:px-8 lg:py-8">
-      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:flex-col-reverse lg:gap-8">
-        <div className="col-span-2">
-          <ManageEventCard {...event} url={url} />
-        </div>
-        {/* Left Column - Event Card */}
-        <div className="col-span-1 flex flex-col gap-3 px-2 lg:gap-4 lg:px-0">
-          <h2 className="font-semibold text-lg lg:text-3xl">Manage Event</h2>
-          <div className="flex w-full flex-col gap-2 lg:gap-2">
-            {/* Check In Guests */}
-            <Button variant="outline" className="w-full justify-center gap-2">
-              <Users className="size-3" />
-              Check In Guests ({checkInCount})
+    <Tabs
+      className="mx-auto flex w-full max-w-page flex-col gap-8 px-3 lg:gap-12 lg:px-8"
+      defaultValue="details"
+    >
+      <div className="flex flex-col gap-4 lg:gap-6">
+        <div className="flex flex-col gap-1">
+          <Link href={Routes.Main.Events.Home} passHref>
+            <Button variant="link" size="sm" className=" text-muted-foreground opacity-50">
+              <ArrowUpLeft className=" text-muted-foreground" /> Back home
             </Button>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 gap-2" asChild>
-                <Link href={Routes.Main.Events.EditBySlug(slug)}>
-                  <Edit className="size-3" />
-                  Edit Event
-                </Link>
-              </Button>
-              <Button variant="outline" className="flex-1 gap-2">
-                <Camera className="size-3" />
-                Change Photo
-              </Button>
-            </div>
-          </div>
-          <hr className="my-2" />
+          </Link>
+          <h1 className="font-bold text-2xl lg:text-3xl">{event.title}</h1>
         </div>
-
-        {/* Right Column - Details */}
+        <TabsList className="w-full">
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="stats">Community</TabsTrigger>
+          <TabsTrigger value="invites">Invites</TabsTrigger>
+        </TabsList>
       </div>
-    </div>
+      <TabsContent value="details">
+        <ManageEventCard {...event} url={url} />
+      </TabsContent>
+      <TabsContent value="stats"></TabsContent>
+    </Tabs>
   )
 }

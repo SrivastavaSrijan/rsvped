@@ -24,7 +24,7 @@ export default async function EditEvent({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-2 py-6 lg:gap-8 lg:px-8 lg:py-8">
+    <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
       <EventForm
         coverImage={{
           alt: 'Event cover',

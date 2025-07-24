@@ -1,5 +1,8 @@
+import { Camera, Edit } from 'lucide-react'
 import Image from 'next/image'
-import { Card } from '@/components/ui'
+import Link from 'next/link'
+import { Button, Card } from '@/components/ui'
+import { Routes } from '@/lib/config'
 import { useEventDateTime } from '@/lib/hooks'
 import { getRandomColor } from '@/lib/utils'
 import { RouterOutput } from '@/server/api/root'
@@ -15,7 +18,7 @@ interface ManageEventCardProps extends RouterOutputEvent {
 
 export function ManageEventCard({
   title,
-  description,
+  id,
   startDate,
   endDate,
   coverImage,
@@ -23,80 +26,97 @@ export function ManageEventCard({
   venueAddress,
   locationType,
   onlineUrl,
+  slug,
+  url,
+  checkInCount,
   rsvpCount,
   viewCount,
-  checkInCount,
-  url,
 }: ManageEventCardProps) {
   const { start, range } = useEventDateTime({ start: startDate, end: endDate })
 
   // Generate gradient colors based on event title
-  const gradientFrom = getRandomColor({ seed: title, intensity: 40 })
-  const gradientTo = getRandomColor({ seed: title, intensity: 60 })
+  const _gradientFrom = getRandomColor({ seed: title, intensity: 40 })
+  const _gradientTo = getRandomColor({ seed: title, intensity: 60 })
 
   return (
-    <Card
-      className="w-full border-0 p-3 text-white lg:p-6"
-      style={{
-        background: `linear-gradient(to bottom right, ${gradientFrom}, ${gradientTo})`,
-      }}
-    >
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col items-start gap-6 lg:flex-row lg:gap-6">
-          <div className="flex w-full flex-col justify-between gap-4 lg:w-fit lg:flex-col-reverse lg:justify-center lg:gap-2">
-            <ShareActions title={title} url={url} />
-            <div className="relative flex size-64 flex-shrink-0 items-center justify-center rounded-lg bg-white/20 lg:size-64">
-              {coverImage ? (
-                <Image
-                  src={coverImage}
-                  alt={title}
-                  fill
-                  className="h-full w-full rounded-lg object-cover"
-                />
-              ) : (
-                <div className="text-center font-medium text-sm tracking-wider">
-                  <p>YOU</p>
-                  <p className="my-2">ARE</p>
-                  <p>INVITED</p>
-                </div>
-              )}
+    <Card className="w-full p-3 text-white lg:p-6">
+      <div className="grid grid-cols-12 items-start justify-stretch gap-6 lg:flex-row lg:gap-6">
+        <div className="col-span-full flex w-full flex-col justify-between gap-2 lg:col-span-6 lg:w-fit lg:justify-center lg:gap-2">
+          <div className="relative flex h-72 w-full flex-shrink-0 items-center justify-between lg:size-84">
+            {coverImage ? (
+              <Image
+                src={coverImage}
+                alt={title}
+                fill
+                className="h-full w-full rounded-lg object-cover"
+              />
+            ) : (
+              <div className="aspect-square text-center font-medium text-sm tracking-wider">
+                <p>YOU</p>
+                <p className="my-2">ARE</p>
+                <p>INVITED</p>
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-end justify-end">
+              <ShareLink
+                url={`rs.vped/${id}`}
+                className="rounded-br-lg rounded-bl-lg bg-white/10"
+              />
             </div>
           </div>
+          <ShareActions title={title} url={url} />
+        </div>
 
-          {/* Event Info */}
-          <div className="flex flex-1 flex-col gap-6 lg:gap-6">
-            <div className="flex flex-col-reverse gap-2 lg:flex-col lg:gap-3">
-              <Stats rsvpCount={rsvpCount} viewCount={viewCount} checkInCount={checkInCount} />
-              <div>
-                <h1 className="font-semibold font-serif font-stretch-semi-condensed text-3xl lg:text-4xl">
-                  {title}
-                </h1>
-                {description && <p className="mt-2 line-clamp-2 text-sm">{description}</p>}
+        {/* Event Info */}
+        <div className="col-span-full flex h-full flex-1 flex-col justify-between gap-6 lg:col-span-6 lg:gap-8">
+          <div className="flex flex-col gap-6 lg:gap-8">
+            <div className="flex flex-col gap-3 lg:flex-col lg:gap-3">
+              <h1 className="font-semibold font-stretch-semi-condensed text-base lg:text-lg">
+                When & Where
+              </h1>
+              <div className="flex items-center gap-3 text-base">
+                <div className="text-center">
+                  <p className="rounded-tl-xl rounded-tr-xl bg-white/20 px-2 py-1 text-sm">
+                    {start.month}
+                  </p>
+                  <p className="rounded-br-xl rounded-bl-xl bg-white/30 px-2 py-1 text-sm">
+                    {start.dayOfMonth}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium text-base">{range.date}</p>
+                  <p className="text-muted-foreground text-sm">{range.time}</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-base">
-              <div className="rounded bg-white/20 px-2 py-1 text-center">
-                <p className="text-sm">{start.month}</p>
-                <p className="font-bold">{start.dayOfMonth}</p>
-              </div>
-              <div>
-                <p className="font-medium">{range.date}</p>
-                <p className="">{range.time}</p>
-              </div>
-            </div>
             <EventLocation
               locationType={locationType}
               venueName={venueName}
               venueAddress={venueAddress}
               onlineUrl={onlineUrl}
+              className="text-muted-foreground"
+              size="lg"
             />
+            <Stats checkInCount={checkInCount} rsvpCount={rsvpCount} viewCount={viewCount} />
+          </div>
+          <div className="flex w-full flex-col gap-2 lg:gap-2">
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Button variant="secondary" className="flex-1 gap-2" asChild>
+                <Link href={Routes.Main.Events.EditBySlug(slug)}>
+                  <Edit className="size-3" />
+                  Edit Event
+                </Link>
+              </Button>
+              <Button variant="secondary" className="flex-1 gap-2">
+                <Camera className="size-3" />
+                Change Photo
+              </Button>
+            </div>
           </div>
         </div>
-
-        {/* Share Link */}
       </div>
-      <ShareLink url={url} />
     </Card>
   )
 }

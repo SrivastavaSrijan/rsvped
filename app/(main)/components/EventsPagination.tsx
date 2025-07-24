@@ -43,7 +43,7 @@ export function EventsPagination({
   const showNext = hasMore || (totalPages && currentPage < totalPages)
 
   return (
-    <Pagination className="sticky bottom-0 z-10 w-full bg-black/10 p-2 backdrop-blur-sm">
+    <Pagination className="sticky bottom-0 z-10 w-full bg-black/10 p-1.5 backdrop-blur-sm lg:p-2">
       <PaginationContent className="gap-2 lg:gap-3">
         <PaginationItem>
           <PaginationPrevious

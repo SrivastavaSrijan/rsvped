@@ -1,3 +1,4 @@
+import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Session } from 'next-auth'
@@ -52,17 +53,19 @@ export const EventCard = ({
     user?.id === host?.id || (eventCollaborators ?? []).some((collab) => collab.userId === user?.id)
 
   return (
-    <div className="grid w-full grid-cols-12 gap-x-2 lg:gap-x-2">
-      <div className="col-span-0 hidden flex-row gap-2 lg:col-span-2 lg:flex lg:flex-col">
+    <div className="grid w-full grid-cols-[repeat(24,_1fr)] gap-x-1 lg:gap-x-2">
+      <div className="col-span-0 hidden flex-row gap-2 lg:col-span-3 lg:flex lg:flex-col">
         <p className="font-medium text-base text-bold">{relative}</p>
         <p className="text-muted-foreground text-sm">{start.dayOfWeek}</p>
       </div>
-      <div className={cn(isLast && 'mask-b-from-1', 'relative flex justify-center')}>
-        <div className="absolute top-1.5 size-2 rounded-full bg-white/30" />
+      <div
+        className={cn(isLast && 'mask-b-from-1', 'relative flex justify-start lg:justify-center')}
+      >
+        <div className="-left-1 absolute top-1.5 size-2 rounded-full bg-white/30 lg:left-[unset]" />
         <div className="mt-3 h-[calc(100%-10px)] w-px border-white/20 border-l border-dashed" />
       </div>
 
-      <div className="col-span-11 flex w-full flex-col gap-3 lg:col-span-9">
+      <div className="col-span-23 flex w-full flex-col gap-3 lg:col-span-20">
         <div className="flex items-center gap-2 text-left lg:hidden lg:flex-col">
           <p className="font-medium text-base text-bold">{relative}</p>
           <p className="text-muted-foreground text-sm">{start.dayOfWeek}</p>
@@ -72,8 +75,8 @@ export const EventCard = ({
             <div className="col-span-2 flex flex-col gap-3.5 lg:gap-3.5">
               <p className="text-muted-foreground text-sm">{range.time}</p>
               <h2 className="font-semibold text-xl">{title}</h2>
-              <div className="flex flex-row items-center gap-2">
-                {host?.image && host?.name && (
+              {host?.image && host?.name && !canManage && (
+                <div className="flex flex-row items-center gap-2">
                   <div className="flex items-center gap-2">
                     <div className="-space-x-1 flex">
                       {(eventCollaborators ?? []).map(
@@ -94,14 +97,14 @@ export const EventCard = ({
                       )}
                       <AvatarWithFallback src={host.image} name={host.name} className="size-4" />
                     </div>
+
                     <p className="truncate font-medium text-muted-foreground text-sm">
                       By {host.name}{' '}
                       {eventCollaborators?.length > 0 && `& ${eventCollaborators?.length} others`}
                     </p>
                   </div>
-                )}
-              </div>
-              <hr className="my-1" />
+                </div>
+              )}
               <div className="flex flex-row items-center gap-2">
                 <EventLocation
                   className="text-muted-foreground"
@@ -144,10 +147,11 @@ export const EventCard = ({
                 <div className="mt-2 flex flex-row gap-2">
                   <Link
                     passHref
-                    href={`${Routes.Main.Events.EditBySlug(slug)}?next=${Routes.Main.Events.Home}`}
+                    href={`${Routes.Main.Events.ManageBySlug(slug)}?next=${encodeURIComponent(Routes.Main.Events.Home)}`}
                   >
-                    <Button className="bg-white/10 text-muted-foreground hover:bg-white/20">
+                    <Button variant="secondary">
                       Manage Event
+                      <ArrowUpRight />
                     </Button>
                   </Link>
                 </div>
@@ -158,8 +162,8 @@ export const EventCard = ({
                 <Image
                   src={coverImage}
                   alt={title}
-                  height={120}
-                  width={120}
+                  height={240}
+                  width={240}
                   className="aspect-square rounded-md object-cover"
                 />
               )}

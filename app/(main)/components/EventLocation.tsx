@@ -15,6 +15,7 @@ interface EventLocation {
   venueAddress?: string | null
   onlineUrl?: string | null
   className?: string
+  size?: 'sm' | 'lg'
 }
 
 export const EventLocation = ({
@@ -23,6 +24,7 @@ export const EventLocation = ({
   venueAddress,
   onlineUrl,
   className,
+  size = 'sm',
 }: EventLocation) => {
   switch (locationType) {
     case LocationType.PHYSICAL:
@@ -33,6 +35,7 @@ export const EventLocation = ({
           locationType={LocationType.PHYSICAL}
           title={venueName}
           subtitle={venueAddress}
+          size={size}
         />
       )
 
@@ -43,6 +46,7 @@ export const EventLocation = ({
           locationType={LocationType.ONLINE}
           title="Zoom"
           subtitle={onlineUrl}
+          size={size}
         />
       )
 
@@ -56,6 +60,7 @@ export const EventLocation = ({
                 locationType={LocationType.PHYSICAL}
                 title={venueName}
                 subtitle={venueAddress}
+                size={size}
               />
             )}
             {onlineUrl && (
@@ -64,6 +69,7 @@ export const EventLocation = ({
                 locationType={LocationType.ONLINE}
                 title="Zoom"
                 subtitle={onlineUrl}
+                size={size}
               />
             )}
           </div>
@@ -81,36 +87,35 @@ interface LocationItemProps {
   subtitle?: string | null
   href?: string | null
   className?: string
+  size?: 'sm' | 'lg'
 }
 
 export const LocationItem = ({
   locationType,
-  title: itemTitle,
+  title,
   subtitle,
   href,
   className,
+  size = 'sm',
 }: LocationItemProps) => {
   const Icon = LocationIcons[locationType]
 
-  const getDisplayTitle = () => {
-    return itemTitle
-  }
-
   const getHref = () => {
     if (locationType === LocationType.PHYSICAL && subtitle) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${itemTitle} ${subtitle}`)}`
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${subtitle}`)}`
     }
     return href || subtitle
   }
 
   const linkHref = getHref()
-  const displayTitle = getDisplayTitle()
 
   return (
     <div
       className={cn('grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 text-sm', className)}
     >
-      <Icon className="size-3" />
+      <div className={size === 'lg' ? 'rounded-xl border border-muted p-2' : ''}>
+        <Icon className={size === 'sm' ? 'size-3' : 'size-4'} />
+      </div>
       <div className="flex min-w-0 flex-col gap-1">
         {linkHref ? (
           <a
@@ -119,10 +124,13 @@ export const LocationItem = ({
             rel="noopener noreferrer"
             className="truncate font-medium hover:underline hover:underline-offset-2"
           >
-            {displayTitle}
+            {title}
           </a>
         ) : (
-          <p className="truncate font-medium leading-tight">{displayTitle}</p>
+          <>
+            <p className="truncate font-medium leading-tight">{title}</p>
+            {size === 'lg' && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+          </>
         )}
       </div>
     </div>

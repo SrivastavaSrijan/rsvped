@@ -127,7 +127,7 @@ export async function saveEvent(
   const next = formData.get('next') as string | null
   const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
   if (event) {
-    redirect(hasValidNext ? next : Routes.Main.Events.EditBySlug(event.slug))
+    redirect(hasValidNext ? next : Routes.Main.Events.ManageBySlug(event.slug))
   }
   return {
     success: true,

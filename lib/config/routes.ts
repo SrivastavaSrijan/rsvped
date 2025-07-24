@@ -31,6 +31,9 @@ export const Routes = {
       get Home() {
         return `${this.Root}/home`
       },
+      ManageBySlug(slug: string) {
+        return `${this.Root}/${slug}/manage`
+      },
       EditBySlug(slug: string) {
         return `${this.Root}/${slug}/edit`
       },

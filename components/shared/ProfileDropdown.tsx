@@ -29,11 +29,7 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {image && name ? (
-          <AvatarWithFallback
-            name={name}
-            src={src ?? ''}
-            className="flex h-8 w-8 items-center rounded-full object-contain"
-          />
+          <AvatarWithFallback name={name} src={src ?? ''} />
         ) : (
           <Button size="sm" variant="outline">
             {`${copy.dashboard}, ${name || '!'}`}
