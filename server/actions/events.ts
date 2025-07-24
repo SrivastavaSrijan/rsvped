@@ -124,9 +124,10 @@ export async function saveEvent(
       error: isUpdate ? EventErrorCodes.UPDATE_FAILED : EventErrorCodes.CREATION_FAILED,
     }
   }
-
+  const next = formData.get('next') as string | null
+  const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
   if (event) {
-    redirect(`${Routes.Main.Events.Root}/${event.slug}`)
+    redirect(hasValidNext ? next : Routes.Main.Events.EditBySlug(event.slug))
   }
   return {
     success: true,

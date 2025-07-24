@@ -3,7 +3,7 @@
 import * as AvatarPrimitive from '@radix-ui/react-avatar'
 import * as React from 'react'
 
-import { cn } from '@/lib/utils'
+import { cn, getRandomColor } from '@/lib/utils'
 
 function Avatar({ className, ...props }: React.ComponentProps<typeof AvatarPrimitive.Root>) {
   return (
@@ -38,4 +38,27 @@ function AvatarFallback({
   )
 }
 
-export { Avatar, AvatarImage, AvatarFallback }
+function AvatarWithFallback({
+  className,
+  src,
+  name,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
+  src?: string
+  name?: string
+  alt?: string
+}) {
+  const initials = name?.charAt(0).toUpperCase() ?? ''
+  return (
+    <Avatar
+      className={className}
+      style={{ backgroundColor: getRandomColor({ seed: name, intensity: 30 }) }}
+      {...props}
+    >
+      <AvatarImage src={src} alt={name} />
+      <AvatarFallback className="bg-[unset]">{initials}</AvatarFallback>
+    </Avatar>
+  )
+}
+
+export { Avatar, AvatarImage, AvatarFallback, AvatarWithFallback }

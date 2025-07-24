@@ -12,6 +12,8 @@ import { getAPI } from '@/server/api'
 import { AuthActionErrorCodeMap } from './constants'
 import { AuthErrorCodes, ServerActionResponse } from './types'
 
+const DefaultNextRoute = Routes.Main.Events.Home
+
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(4, 'Password must be at least 4 characters'),
@@ -79,7 +81,9 @@ async function performSignIn(
   })
 
   const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
-  redirect(`${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : Routes.Home}`)
+  redirect(
+    `${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : DefaultNextRoute}`
+  )
 }
 
 export async function authAction(
@@ -167,6 +171,6 @@ export const signInWithGoogle = async (next: string | null) => {
     description: "Welcome to RSVP'd!",
   })
   const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
-  const redirectTo = `${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : Routes.Home}`
+  const redirectTo = `${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : DefaultNextRoute}`
   await signIn('google', { redirectTo })
 }

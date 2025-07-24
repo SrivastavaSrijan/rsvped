@@ -14,6 +14,7 @@ import {
   Users,
 } from 'lucide-react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Form } from '@/components/shared'
 import {
@@ -78,6 +79,8 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
     displayMode: 'inline',
   })
 
+  const searchParams = useSearchParams()
+
   // Extract field errors from state
   const fieldErrors = state?.fieldErrors || {}
 
@@ -102,6 +105,8 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
       <div className="w-full px-2 lg:col-span-2 lg:px-0">
         <Form action={formAction} className="flex flex-col gap-4">
           <Input type="hidden" name="coverImage" value={event?.coverImage || coverImage.url} />
+          <Input type="hidden" name="next" value={searchParams.get('next') || ''} />
+
           {isEditMode && eventSlug && <Input type="hidden" name="slug" value={eventSlug} />}
 
           <div className="flex flex-col gap-1">

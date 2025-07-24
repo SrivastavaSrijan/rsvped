@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
+import { auth } from '@/lib/auth'
 import { AssetMap, Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import { EventCard, EventsPagination, PeriodTabs } from '../../components'
@@ -19,17 +20,21 @@ export default async function EventsHome({
 }) {
   const { period = 'upcoming', page = '1' } = await searchParams
   const api = await getAPI()
-  const events = await api.event.getAllEvents({
+  const session = await auth()
+  const events = await api.event.getUserEvents({
     sort: 'asc',
     after: period === 'upcoming' ? now : undefined,
     before: period === 'past' ? now : undefined,
     page: parseInt(page, 10) || 1,
+    attendee: true,
+    manager: true,
+    cohost: true,
   })
 
   return (
-    <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-4 py-6 lg:gap-8 lg:px-8 lg:py-8">
+    <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-2 py-6 lg:gap-8 lg:px-8 lg:py-8">
       <div className="flex w-full flex-row justify-between gap-4">
-        <h1 className="font-bold text-2xl lg:text-4xl">Events</h1>
+        <h1 className="px-2 font-bold text-2xl lg:px-0 lg:text-4xl">Events</h1>
         <PeriodTabs currentPeriod={period as 'upcoming' | 'past'} />
       </div>
 
@@ -54,9 +59,16 @@ export default async function EventsHome({
           </div>
         )}
 
-        {events.map((event, index) => (
-          <EventCard key={event.slug} {...event} isLast={index === events.length - 1} />
-        ))}
+        {events.map((event, index) => {
+          return (
+            <EventCard
+              key={event.slug}
+              {...event}
+              isLast={index === events.length - 1}
+              user={session?.user}
+            />
+          )
+        })}
 
         {events.length > 0 && (
           <EventsPagination

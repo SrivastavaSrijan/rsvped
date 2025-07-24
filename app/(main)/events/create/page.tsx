@@ -11,7 +11,7 @@ export default async function CreateEvent() {
   const api = await getAPI()
   const { alt, url, color } = await api.image.getRandom()
   return (
-    <div className="mx-auto w-full max-w-wide-page py-4 lg:py-8">
+    <div className="mx-auto flex w-full max-w-page flex-col gap-4 px-2 py-6 lg:gap-8 lg:px-8 lg:py-8">
       <EventForm coverImage={{ alt, url, color }} />
     </div>
   )

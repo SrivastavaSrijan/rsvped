@@ -5,10 +5,4 @@ export const metadata: Metadata = {
   description: 'Explore upcoming and past events in the community and RSVP to join.',
 }
 
-export default async function DiscoverEvents({
-  searchParams,
-}: {
-  searchParams: Promise<{ period?: string; page?: string }>
-}) {
-  return null
-}
+export default async function DiscoverEvents() {}

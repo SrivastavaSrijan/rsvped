@@ -1,3 +1,4 @@
+import { EventRole, Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import slugify from 'slugify'
 import { z } from 'zod'
@@ -33,6 +34,17 @@ const CreateEventInput = EventModel.pick({
 // Update input schema includes slug for identification
 const UpdateEventInput = CreateEventInput.extend({
   slug: z.string(),
+})
+
+const GetUserEventsInput = z.object({
+  sort: z.enum(['asc', 'desc']).default('asc'),
+  before: z.string().optional(),
+  after: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  size: z.number().int().min(1).max(100).default(5),
+  attendee: z.boolean().default(true),
+  manager: z.boolean().default(true),
+  cohost: z.boolean().default(true),
 })
 
 export const eventRouter = createTRPCRouter({
@@ -259,37 +271,107 @@ export const eventRouter = createTRPCRouter({
     }
   }),
 
-  getAllEvents: publicProcedure
-    .input(
-      z.object({
-        sort: z.enum(['asc', 'desc']).default('asc'),
-        before: z.string().optional(),
-        after: z.string().optional(),
-        page: z.number().int().min(1).default(1),
-        size: z.number().int().min(1).max(100).default(5),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      return ctx.prisma.event.findMany({
-        where: {
-          deletedAt: null,
-          startDate: {
-            ...(input.before && { lt: new Date(input.before) }),
-            ...(input.after && { gt: new Date(input.after) }),
+  getUserEvents: publicProcedure.input(GetUserEventsInput).query(async ({ ctx, input }) => {
+    // If no user session, return empty array
+    if (!ctx.session?.user?.id) {
+      return []
+    }
+
+    const { attendee, manager, cohost, page, size, sort, before, after } = input
+
+    const orConditions: Prisma.EventWhereInput[] = []
+
+    if (attendee) {
+      const attendeeCondition: Prisma.EventWhereInput = {
+        rsvps: {
+          some: {
+            userId: ctx.session.user.id,
           },
         },
-        orderBy: { startDate: input.sort },
-        skip: (input.page - 1) * input.size,
-        take: input.size,
-        include: {
-          host: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
+      }
+      orConditions.push(attendeeCondition)
+    }
+
+    if (manager || cohost) {
+      const roles: EventRole[] = []
+      if (manager) roles.push('MANAGER')
+      if (cohost) roles.push('CO_HOST')
+
+      if (roles.length > 0) {
+        const managementCondition: Prisma.EventWhereInput = {
+          OR: [
+            // User is the host
+            {
+              hostId: ctx.session.user.id,
+            },
+            // User is a collaborator with specified roles
+            {
+              eventCollaborators: {
+                some: {
+                  userId: ctx.session.user.id,
+                  role: {
+                    in: roles,
+                  },
+                },
+              },
+            },
+          ],
+        }
+        orConditions.push(managementCondition)
+      }
+    }
+
+    // If no conditions are enabled, return empty array
+    if (orConditions.length === 0) {
+      return []
+    }
+
+    const whereClause: Prisma.EventWhereInput = {
+      deletedAt: null,
+      OR: orConditions,
+      startDate: {
+        ...(before && { lt: new Date(before) }),
+        ...(after && { gt: new Date(after) }),
+      },
+    }
+
+    return await ctx.prisma.event.findMany({
+      where: whereClause,
+      orderBy: { startDate: sort },
+      skip: (page - 1) * size,
+      take: size,
+      include: {
+        rsvps: {
+          take: 5,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
             },
           },
         },
-      })
-    }),
+        eventCollaborators: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        host: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+    })
+  }),
 })

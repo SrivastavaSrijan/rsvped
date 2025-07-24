@@ -11,7 +11,7 @@ import { ActiveLink } from './ActiveLink'
 export async function Navbar() {
   const session = await auth()
   return (
-    <nav className="sticky top-0 z-10 bg-black/10 px-4 py-3 backdrop-blur-sm lg:px-4">
+    <nav className="sticky top-0 z-10 bg-black/10 px-4 py-2 backdrop-blur-sm lg:px-4 lg:py-3">
       <div className="flex items-center gap-2">
         <Link
           href="/"

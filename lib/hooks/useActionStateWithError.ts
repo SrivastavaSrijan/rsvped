@@ -1,3 +1,4 @@
+'use client'
 import { useActionState } from 'react'
 import { ServerActionResponse } from '@/server/actions/types'
 import { useServerActionErrorHandler } from './useServerActionErrorHandler'

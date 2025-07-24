@@ -1,11 +1,11 @@
 'use client'
 import { LocationType } from '@prisma/client'
-import { Globe, Laptop, MapPin } from 'lucide-react'
+import { Globe, MapPin, Video } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const LocationIcons = {
   [LocationType.PHYSICAL]: MapPin,
-
-  [LocationType.ONLINE]: Laptop,
+  [LocationType.ONLINE]: Video,
   [LocationType.HYBRID]: Globe,
 } as const
 
@@ -14,6 +14,7 @@ interface EventLocation {
   venueName?: string | null
   venueAddress?: string | null
   onlineUrl?: string | null
+  className?: string
 }
 
 export const EventLocation = ({
@@ -21,12 +22,14 @@ export const EventLocation = ({
   venueName,
   venueAddress,
   onlineUrl,
+  className,
 }: EventLocation) => {
   switch (locationType) {
     case LocationType.PHYSICAL:
       if (!venueName) return null
       return (
         <LocationItem
+          className={className}
           locationType={LocationType.PHYSICAL}
           title={venueName}
           subtitle={venueAddress}
@@ -35,7 +38,12 @@ export const EventLocation = ({
 
     case LocationType.ONLINE:
       return (
-        <LocationItem locationType={LocationType.ONLINE} title="Visit Link" subtitle={onlineUrl} />
+        <LocationItem
+          className={className}
+          locationType={LocationType.ONLINE}
+          title="Zoom"
+          subtitle={onlineUrl}
+        />
       )
 
     case LocationType.HYBRID:
@@ -44,6 +52,7 @@ export const EventLocation = ({
           <div className="flex flex-col gap-2">
             {venueName && (
               <LocationItem
+                className={className}
                 locationType={LocationType.PHYSICAL}
                 title={venueName}
                 subtitle={venueAddress}
@@ -51,8 +60,9 @@ export const EventLocation = ({
             )}
             {onlineUrl && (
               <LocationItem
+                className={className}
                 locationType={LocationType.ONLINE}
-                title="Visit Link"
+                title="Zoom"
                 subtitle={onlineUrl}
               />
             )}
@@ -70,6 +80,7 @@ interface LocationItemProps {
   title: string
   subtitle?: string | null
   href?: string | null
+  className?: string
 }
 
 export const LocationItem = ({
@@ -77,18 +88,11 @@ export const LocationItem = ({
   title: itemTitle,
   subtitle,
   href,
+  className,
 }: LocationItemProps) => {
   const Icon = LocationIcons[locationType]
 
   const getDisplayTitle = () => {
-    if (locationType === LocationType.ONLINE && subtitle) {
-      try {
-        const domain = new URL(subtitle).hostname.replace('www.', '')
-        return domain
-      } catch {
-        return itemTitle
-      }
-    }
     return itemTitle
   }
 
@@ -103,7 +107,9 @@ export const LocationItem = ({
   const displayTitle = getDisplayTitle()
 
   return (
-    <div className="grid w-full grid-cols-[auto_1fr_auto] gap-2 text-sm">
+    <div
+      className={cn('grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 text-sm', className)}
+    >
       <Icon className="size-3" />
       <div className="flex min-w-0 flex-col gap-1">
         {linkHref ? (

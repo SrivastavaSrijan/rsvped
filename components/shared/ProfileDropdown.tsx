@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Session } from 'next-auth'
 import { useState } from 'react'
@@ -10,13 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui'
-import { getAvatarURL, Routes } from '@/lib/config'
-import { getRandomColor } from '@/lib/utils'
+import { Routes } from '@/lib/config'
 import { signOutAction } from '@/server/actions'
+import { AvatarWithFallback } from '../ui'
 
 const copy = {
   dashboard: 'Hey there',
   profile: 'Profile',
+  events: 'My Events',
   signOut: 'Sign Out',
 }
 interface ProfileDropdownProps {
@@ -24,18 +24,13 @@ interface ProfileDropdownProps {
 }
 export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
   const { image, name } = session.user
-  const [src, setSrc] = useState<string | null>(image ?? null)
+  const [src, _setSrc] = useState<string | null>(image ?? null)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {image && name ? (
-          <Image
-            style={{ backgroundColor: getRandomColor({ seed: name }) }}
-            unoptimized
-            width={32}
-            height={32}
-            onError={() => setSrc(getAvatarURL(name || ''))}
-            alt={name || 'User'}
+          <AvatarWithFallback
+            name={name}
             src={src ?? ''}
             className="flex h-8 w-8 items-center rounded-full object-contain"
           />
@@ -46,6 +41,9 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <Link href={Routes.Main.Events.Home} passHref>
+          <DropdownMenuItem>{copy.events}</DropdownMenuItem>
+        </Link>
         <Link href={Routes.Auth.Profile} passHref>
           <DropdownMenuItem>{copy.profile}</DropdownMenuItem>
         </Link>

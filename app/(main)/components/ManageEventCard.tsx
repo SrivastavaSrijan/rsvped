@@ -1,6 +1,6 @@
-import dayjs from 'dayjs'
 import Image from 'next/image'
 import { Card } from '@/components/ui'
+import { useEventDateTime } from '@/lib/hooks'
 import { getRandomColor } from '@/lib/utils'
 import { RouterOutput } from '@/server/api/root'
 import { EventLocation } from './EventLocation'
@@ -28,13 +28,7 @@ export function ManageEventCard({
   checkInCount,
   url,
 }: ManageEventCardProps) {
-  const eventStartDate = dayjs(startDate).format('dddd, MMMM D')
-  const eventEndDate = dayjs(endDate).format('dddd, MMMM D')
-  const isSameDay = dayjs(startDate).isSame(endDate, 'day')
-
-  const eventTime = `${dayjs(startDate).format('h:mm A')} - ${dayjs(endDate).format('h:mm A')}`
-  const eventMonth = dayjs(startDate).format('MMM').toUpperCase()
-  const eventDay = dayjs(startDate).format('D')
+  const { start, range } = useEventDateTime({ start: startDate, end: endDate })
 
   // Generate gradient colors based on event title
   const gradientFrom = getRandomColor({ seed: title, intensity: 40 })
@@ -83,14 +77,12 @@ export function ManageEventCard({
 
             <div className="flex items-center gap-2 text-base">
               <div className="rounded bg-white/20 px-2 py-1 text-center">
-                <p className="text-sm">{eventMonth}</p>
-                <p className="font-bold">{eventDay}</p>
+                <p className="text-sm">{start.month}</p>
+                <p className="font-bold">{start.dayOfMonth}</p>
               </div>
               <div>
-                <p className="font-medium">
-                  {isSameDay ? eventStartDate : `${eventStartDate} to ${eventEndDate}`}
-                </p>
-                <p className="">{eventTime}</p>
+                <p className="font-medium">{range.date}</p>
+                <p className="">{range.time}</p>
               </div>
             </div>
             <EventLocation

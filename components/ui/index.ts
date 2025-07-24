@@ -14,7 +14,7 @@ export {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './alert-dialog'
-export { Avatar, AvatarFallback, AvatarImage } from './avatar'
+export { Avatar, AvatarFallback, AvatarImage, AvatarWithFallback } from './avatar'
 export { Badge, badgeVariants } from './badge'
 export { Button, buttonVariants } from './button'
 export { Calendar } from './calendar'
@@ -87,3 +87,4 @@ export {
 } from './table'
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 export { Textarea } from './textarea'
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
