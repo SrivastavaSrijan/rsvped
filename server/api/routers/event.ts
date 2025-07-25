@@ -1,4 +1,4 @@
-import { EventRole, Prisma } from '@prisma/client'
+import type { EventRole, Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import slugify from 'slugify'
 import { z } from 'zod'
@@ -7,380 +7,380 @@ import { EventModel } from './zod'
 
 // Create input schema from the EventModel, picking only the fields we want for creation
 const CreateEventInput = EventModel.pick({
-  title: true,
-  subtitle: true,
-  description: true,
-  startDate: true,
-  endDate: true,
-  timezone: true,
-  locationType: true,
-  venueName: true,
-  venueAddress: true,
-  onlineUrl: true,
-  capacity: true,
-  requiresApproval: true,
-  coverImage: true,
+	title: true,
+	subtitle: true,
+	description: true,
+	startDate: true,
+	endDate: true,
+	timezone: true,
+	locationType: true,
+	venueName: true,
+	venueAddress: true,
+	onlineUrl: true,
+	capacity: true,
+	requiresApproval: true,
+	coverImage: true,
 }).partial({
-  subtitle: true,
-  description: true,
-  venueName: true,
-  venueAddress: true,
-  onlineUrl: true,
-  capacity: true,
-  requiresApproval: true,
-  coverImage: true,
+	subtitle: true,
+	description: true,
+	venueName: true,
+	venueAddress: true,
+	onlineUrl: true,
+	capacity: true,
+	requiresApproval: true,
+	coverImage: true,
 })
 
 // Update input schema includes slug for identification
 const UpdateEventInput = CreateEventInput.extend({
-  slug: z.string(),
+	slug: z.string(),
 })
 
 const GetUserEventsInput = z.object({
-  sort: z.enum(['asc', 'desc']).default('asc'),
-  before: z.string().optional(),
-  after: z.string().optional(),
-  page: z.number().int().min(1).default(1),
-  size: z.number().int().min(1).max(100).default(5),
-  attendee: z.boolean().default(true),
-  manager: z.boolean().default(true),
-  cohost: z.boolean().default(true),
+	sort: z.enum(['asc', 'desc']).default('asc'),
+	before: z.string().optional(),
+	after: z.string().optional(),
+	page: z.number().int().min(1).default(1),
+	size: z.number().int().min(1).max(100).default(5),
+	attendee: z.boolean().default(true),
+	manager: z.boolean().default(true),
+	cohost: z.boolean().default(true),
 })
 
 export const eventRouter = createTRPCRouter({
-  // Get all events
-  list: publicProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.event.findMany({
-      where: {
-        deletedAt: null,
-        isPublished: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        host: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        categories: {
-          include: {
-            category: true,
-          },
-        },
-        ticketTiers: true,
-        _count: {
-          select: {
-            rsvps: true,
-          },
-        },
-      },
-    })
-  }),
+	// Get all events
+	list: publicProcedure.query(async ({ ctx }) => {
+		return ctx.prisma.event.findMany({
+			where: {
+				deletedAt: null,
+				isPublished: true,
+			},
+			orderBy: { createdAt: 'desc' },
+			include: {
+				host: {
+					select: {
+						id: true,
+						name: true,
+						image: true,
+					},
+				},
+				categories: {
+					include: {
+						category: true,
+					},
+				},
+				ticketTiers: true,
+				_count: {
+					select: {
+						rsvps: true,
+					},
+				},
+			},
+		})
+	}),
 
-  // Create a new event (requires authentication)
-  create: protectedProcedure.input(CreateEventInput).mutation(async ({ ctx, input }) => {
-    if (!ctx.session?.user?.id) {
-      throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message: 'You must be logged in to create an event',
-      })
-    }
+	// Create a new event (requires authentication)
+	create: protectedProcedure.input(CreateEventInput).mutation(async ({ ctx, input }) => {
+		if (!ctx.session?.user?.id) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You must be logged in to create an event',
+			})
+		}
 
-    try {
-      // Generate unique slug from title
-      const baseSlug = slugify(input.title)
+		try {
+			// Generate unique slug from title
+			const baseSlug = slugify(input.title)
 
-      // Check for existing slugs and make unique
-      let slug = baseSlug
-      let counter = 1
-      while (await ctx.prisma.event.findUnique({ where: { slug } })) {
-        slug = `${baseSlug}-${counter}`
-        counter++
-      }
+			// Check for existing slugs and make unique
+			let slug = baseSlug
+			let counter = 1
+			while (await ctx.prisma.event.findUnique({ where: { slug } })) {
+				slug = `${baseSlug}-${counter}`
+				counter++
+			}
 
-      const event = await ctx.prisma.event.create({
-        data: {
-          title: input.title,
-          description: input.description,
-          slug,
-          startDate: input.startDate,
-          endDate: input.endDate,
-          timezone: input.timezone,
-          locationType: input.locationType,
-          venueName: input.venueName,
-          venueAddress: input.venueAddress,
-          onlineUrl: input.onlineUrl,
-          capacity: input.capacity,
-          requiresApproval: input.requiresApproval,
-          coverImage: input.coverImage,
-          hostId: ctx.session.user.id,
-          isPublished: false, // Events start as drafts
-        },
-        include: {
-          host: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      })
+			const event = await ctx.prisma.event.create({
+				data: {
+					title: input.title,
+					description: input.description,
+					slug,
+					startDate: input.startDate,
+					endDate: input.endDate,
+					timezone: input.timezone,
+					locationType: input.locationType,
+					venueName: input.venueName,
+					venueAddress: input.venueAddress,
+					onlineUrl: input.onlineUrl,
+					capacity: input.capacity,
+					requiresApproval: input.requiresApproval,
+					coverImage: input.coverImage,
+					hostId: ctx.session.user.id,
+					isPublished: false, // Events start as drafts
+				},
+				include: {
+					host: {
+						select: {
+							id: true,
+							name: true,
+							image: true,
+						},
+					},
+				},
+			})
 
-      return event
-    } catch (error) {
-      console.error('Error creating event:', error)
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create event',
-      })
-    }
-  }),
+			return event
+		} catch (error) {
+			console.error('Error creating event:', error)
+			throw new TRPCError({
+				code: 'INTERNAL_SERVER_ERROR',
+				message: 'Failed to create event',
+			})
+		}
+	}),
 
-  getMetadataBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const event = await ctx.prisma.event.findUnique({
-        where: {
-          slug: input.slug,
-          deletedAt: null,
-        },
-        select: {
-          title: true,
-          startDate: true,
-          endDate: true,
-        },
-      })
+	getMetadataBySlug: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const event = await ctx.prisma.event.findUnique({
+				where: {
+					slug: input.slug,
+					deletedAt: null,
+				},
+				select: {
+					title: true,
+					startDate: true,
+					endDate: true,
+				},
+			})
 
-      if (!event) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Event not found',
-        })
-      }
+			if (!event) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Event not found',
+				})
+			}
 
-      return event
-    }),
+			return event
+		}),
 
-  // Get event by slug
-  getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
-    const event = await ctx.prisma.event.findUnique({
-      where: {
-        slug: input.slug,
-        deletedAt: null,
-      },
-      include: {
-        eventCollaborators: {
-          select: {
-            user: {
-              select: {
-                id: true,
-              },
-            },
-          },
-        },
-        host: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        categories: {
-          include: {
-            category: true,
-          },
-        },
-        ticketTiers: true,
-        rsvps: {
-          where: {
-            status: 'CONFIRMED',
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
-    })
+	// Get event by slug
+	getBySlug: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+		const event = await ctx.prisma.event.findUnique({
+			where: {
+				slug: input.slug,
+				deletedAt: null,
+			},
+			include: {
+				eventCollaborators: {
+					select: {
+						user: {
+							select: {
+								id: true,
+							},
+						},
+					},
+				},
+				host: {
+					select: {
+						id: true,
+						name: true,
+						image: true,
+					},
+				},
+				categories: {
+					include: {
+						category: true,
+					},
+				},
+				ticketTiers: true,
+				rsvps: {
+					where: {
+						status: 'CONFIRMED',
+					},
+					include: {
+						user: {
+							select: {
+								id: true,
+								name: true,
+								image: true,
+							},
+						},
+					},
+				},
+			},
+		})
 
-    if (!event) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Event not found',
-      })
-    }
+		if (!event) {
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Event not found',
+			})
+		}
 
-    return event
-  }),
+		return event
+	}),
 
-  // Update an existing event (requires authentication and ownership)
-  update: protectedProcedure.input(UpdateEventInput).mutation(async ({ ctx, input }) => {
-    if (!ctx.session?.user?.id) {
-      throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message: 'You must be logged in to update an event',
-      })
-    }
+	// Update an existing event (requires authentication and ownership)
+	update: protectedProcedure.input(UpdateEventInput).mutation(async ({ ctx, input }) => {
+		if (!ctx.session?.user?.id) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You must be logged in to update an event',
+			})
+		}
 
-    const { slug, ...updateData } = input
+		const { slug, ...updateData } = input
 
-    try {
-      // First, check if the event exists and user is the owner
-      const existingEvent = await ctx.prisma.event.findUnique({
-        where: { slug, deletedAt: null },
-        select: { id: true, hostId: true },
-      })
+		try {
+			// First, check if the event exists and user is the owner
+			const existingEvent = await ctx.prisma.event.findUnique({
+				where: { slug, deletedAt: null },
+				select: { id: true, hostId: true },
+			})
 
-      if (!existingEvent) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Event not found',
-        })
-      }
+			if (!existingEvent) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Event not found',
+				})
+			}
 
-      if (existingEvent.hostId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'You are not authorized to update this event',
-        })
-      }
+			if (existingEvent.hostId !== ctx.session.user.id) {
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'You are not authorized to update this event',
+				})
+			}
 
-      const event = await ctx.prisma.event.update({
-        where: { id: existingEvent.id },
-        data: updateData,
-        include: {
-          host: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      })
+			const event = await ctx.prisma.event.update({
+				where: { id: existingEvent.id },
+				data: updateData,
+				include: {
+					host: {
+						select: {
+							id: true,
+							name: true,
+							image: true,
+						},
+					},
+				},
+			})
 
-      return event
-    } catch (error) {
-      if (error instanceof TRPCError) {
-        throw error
-      }
-      console.error('Error updating event:', error)
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to update event',
-      })
-    }
-  }),
+			return event
+		} catch (error) {
+			if (error instanceof TRPCError) {
+				throw error
+			}
+			console.error('Error updating event:', error)
+			throw new TRPCError({
+				code: 'INTERNAL_SERVER_ERROR',
+				message: 'Failed to update event',
+			})
+		}
+	}),
 
-  getUserEvents: publicProcedure.input(GetUserEventsInput).query(async ({ ctx, input }) => {
-    // If no user session, return empty array
-    if (!ctx.session?.user?.id) {
-      return []
-    }
+	getUserEvents: publicProcedure.input(GetUserEventsInput).query(async ({ ctx, input }) => {
+		// If no user session, return empty array
+		if (!ctx.session?.user?.id) {
+			return []
+		}
 
-    const { attendee, manager, cohost, page, size, sort, before, after } = input
+		const { attendee, manager, cohost, page, size, sort, before, after } = input
 
-    const orConditions: Prisma.EventWhereInput[] = []
+		const orConditions: Prisma.EventWhereInput[] = []
 
-    if (attendee) {
-      const attendeeCondition: Prisma.EventWhereInput = {
-        rsvps: {
-          some: {
-            userId: ctx.session.user.id,
-          },
-        },
-      }
-      orConditions.push(attendeeCondition)
-    }
+		if (attendee) {
+			const attendeeCondition: Prisma.EventWhereInput = {
+				rsvps: {
+					some: {
+						userId: ctx.session.user.id,
+					},
+				},
+			}
+			orConditions.push(attendeeCondition)
+		}
 
-    if (manager || cohost) {
-      const roles: EventRole[] = []
-      if (manager) roles.push('MANAGER')
-      if (cohost) roles.push('CO_HOST')
+		if (manager || cohost) {
+			const roles: EventRole[] = []
+			if (manager) roles.push('MANAGER')
+			if (cohost) roles.push('CO_HOST')
 
-      if (roles.length > 0) {
-        const managementCondition: Prisma.EventWhereInput = {
-          OR: [
-            // User is the host
-            {
-              hostId: ctx.session.user.id,
-            },
-            // User is a collaborator with specified roles
-            {
-              eventCollaborators: {
-                some: {
-                  userId: ctx.session.user.id,
-                  role: {
-                    in: roles,
-                  },
-                },
-              },
-            },
-          ],
-        }
-        orConditions.push(managementCondition)
-      }
-    }
+			if (roles.length > 0) {
+				const managementCondition: Prisma.EventWhereInput = {
+					OR: [
+						// User is the host
+						{
+							hostId: ctx.session.user.id,
+						},
+						// User is a collaborator with specified roles
+						{
+							eventCollaborators: {
+								some: {
+									userId: ctx.session.user.id,
+									role: {
+										in: roles,
+									},
+								},
+							},
+						},
+					],
+				}
+				orConditions.push(managementCondition)
+			}
+		}
 
-    // If no conditions are enabled, return empty array
-    if (orConditions.length === 0) {
-      return []
-    }
+		// If no conditions are enabled, return empty array
+		if (orConditions.length === 0) {
+			return []
+		}
 
-    const whereClause: Prisma.EventWhereInput = {
-      deletedAt: null,
-      OR: orConditions,
-      startDate: {
-        ...(before && { lt: new Date(before) }),
-        ...(after && { gt: new Date(after) }),
-      },
-    }
+		const whereClause: Prisma.EventWhereInput = {
+			deletedAt: null,
+			OR: orConditions,
+			startDate: {
+				...(before && { lt: new Date(before) }),
+				...(after && { gt: new Date(after) }),
+			},
+		}
 
-    return await ctx.prisma.event.findMany({
-      where: whereClause,
-      orderBy: { startDate: sort },
-      skip: (page - 1) * size,
-      take: size,
-      include: {
-        rsvps: {
-          take: 5,
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-        eventCollaborators: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-        host: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-      },
-    })
-  }),
+		return await ctx.prisma.event.findMany({
+			where: whereClause,
+			orderBy: { startDate: sort },
+			skip: (page - 1) * size,
+			take: size,
+			include: {
+				rsvps: {
+					take: 5,
+					include: {
+						user: {
+							select: {
+								id: true,
+								name: true,
+								image: true,
+							},
+						},
+					},
+				},
+				eventCollaborators: {
+					include: {
+						user: {
+							select: {
+								id: true,
+								name: true,
+								image: true,
+							},
+						},
+					},
+				},
+				host: {
+					select: {
+						id: true,
+						name: true,
+						image: true,
+					},
+				},
+			},
+		})
+	}),
 })

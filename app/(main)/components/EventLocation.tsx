@@ -4,135 +4,135 @@ import { Globe, MapPin, Video } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LocationIcons = {
-  [LocationType.PHYSICAL]: MapPin,
-  [LocationType.ONLINE]: Video,
-  [LocationType.HYBRID]: Globe,
+	[LocationType.PHYSICAL]: MapPin,
+	[LocationType.ONLINE]: Video,
+	[LocationType.HYBRID]: Globe,
 } as const
 
 interface EventLocation {
-  locationType: LocationType
-  venueName?: string | null
-  venueAddress?: string | null
-  onlineUrl?: string | null
-  className?: string
-  size?: 'sm' | 'lg'
+	locationType: LocationType
+	venueName?: string | null
+	venueAddress?: string | null
+	onlineUrl?: string | null
+	className?: string
+	size?: 'sm' | 'lg'
 }
 
 export const EventLocation = ({
-  locationType,
-  venueName,
-  venueAddress,
-  onlineUrl,
-  className,
-  size = 'sm',
+	locationType,
+	venueName,
+	venueAddress,
+	onlineUrl,
+	className,
+	size = 'sm',
 }: EventLocation) => {
-  switch (locationType) {
-    case LocationType.PHYSICAL:
-      if (!venueName) return null
-      return (
-        <LocationItem
-          className={className}
-          locationType={LocationType.PHYSICAL}
-          title={venueName}
-          subtitle={venueAddress}
-          size={size}
-        />
-      )
+	switch (locationType) {
+		case LocationType.PHYSICAL:
+			if (!venueName) return null
+			return (
+				<LocationItem
+					className={className}
+					locationType={LocationType.PHYSICAL}
+					title={venueName}
+					subtitle={venueAddress}
+					size={size}
+				/>
+			)
 
-    case LocationType.ONLINE:
-      return (
-        <LocationItem
-          className={className}
-          locationType={LocationType.ONLINE}
-          title="Zoom"
-          subtitle={onlineUrl}
-          size={size}
-        />
-      )
+		case LocationType.ONLINE:
+			return (
+				<LocationItem
+					className={className}
+					locationType={LocationType.ONLINE}
+					title="Zoom"
+					subtitle={onlineUrl}
+					size={size}
+				/>
+			)
 
-    case LocationType.HYBRID:
-      return (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-2">
-            {venueName && (
-              <LocationItem
-                className={className}
-                locationType={LocationType.PHYSICAL}
-                title={venueName}
-                subtitle={venueAddress}
-                size={size}
-              />
-            )}
-            {onlineUrl && (
-              <LocationItem
-                className={className}
-                locationType={LocationType.ONLINE}
-                title="Zoom"
-                subtitle={onlineUrl}
-                size={size}
-              />
-            )}
-          </div>
-        </div>
-      )
+		case LocationType.HYBRID:
+			return (
+				<div className="flex flex-col gap-3">
+					<div className="flex flex-col gap-2">
+						{venueName && (
+							<LocationItem
+								className={className}
+								locationType={LocationType.PHYSICAL}
+								title={venueName}
+								subtitle={venueAddress}
+								size={size}
+							/>
+						)}
+						{onlineUrl && (
+							<LocationItem
+								className={className}
+								locationType={LocationType.ONLINE}
+								title="Zoom"
+								subtitle={onlineUrl}
+								size={size}
+							/>
+						)}
+					</div>
+				</div>
+			)
 
-    default:
-      return null
-  }
+		default:
+			return null
+	}
 }
 
 interface LocationItemProps {
-  locationType: LocationType
-  title: string
-  subtitle?: string | null
-  href?: string | null
-  className?: string
-  size?: 'sm' | 'lg'
+	locationType: LocationType
+	title: string
+	subtitle?: string | null
+	href?: string | null
+	className?: string
+	size?: 'sm' | 'lg'
 }
 
 export const LocationItem = ({
-  locationType,
-  title,
-  subtitle,
-  href,
-  className,
-  size = 'sm',
+	locationType,
+	title,
+	subtitle,
+	href,
+	className,
+	size = 'sm',
 }: LocationItemProps) => {
-  const Icon = LocationIcons[locationType]
+	const Icon = LocationIcons[locationType]
 
-  const getHref = () => {
-    if (locationType === LocationType.PHYSICAL && subtitle) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${subtitle}`)}`
-    }
-    return href || subtitle
-  }
+	const getHref = () => {
+		if (locationType === LocationType.PHYSICAL && subtitle) {
+			return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${subtitle}`)}`
+		}
+		return href || subtitle
+	}
 
-  const linkHref = getHref()
+	const linkHref = getHref()
 
-  return (
-    <div
-      className={cn('grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 text-sm', className)}
-    >
-      <div className={size === 'lg' ? 'rounded-xl border border-muted p-2' : ''}>
-        <Icon className={size === 'sm' ? 'size-3' : 'size-4'} />
-      </div>
-      <div className="flex min-w-0 flex-col gap-1">
-        {linkHref ? (
-          <a
-            href={linkHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="truncate font-medium hover:underline hover:underline-offset-2"
-          >
-            {title}
-          </a>
-        ) : (
-          <>
-            <p className="truncate font-medium leading-tight">{title}</p>
-            {size === 'lg' && <p className="text-muted-foreground text-sm">{subtitle}</p>}
-          </>
-        )}
-      </div>
-    </div>
-  )
+	return (
+		<div
+			className={cn('grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 text-sm', className)}
+		>
+			<div className={size === 'lg' ? 'rounded-xl border border-muted p-2' : ''}>
+				<Icon className={size === 'sm' ? 'size-3' : 'size-4'} />
+			</div>
+			<div className="flex min-w-0 flex-col gap-1">
+				{linkHref ? (
+					<a
+						href={linkHref}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="truncate font-medium hover:underline hover:underline-offset-2"
+					>
+						{title}
+					</a>
+				) : (
+					<>
+						<p className="truncate font-medium leading-tight">{title}</p>
+						{size === 'lg' && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+					</>
+				)}
+			</div>
+		</div>
+	)
 }

@@ -1,5 +1,6 @@
 export * from './assets'
 export * from './colors'
 export * from './cookies'
+export * from './pageStyles'
 export * from './routes'
 export * from './time'

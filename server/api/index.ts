@@ -6,6 +6,6 @@ import { createTRPCContext } from '@/server/api/trpc'
  * Simplifies the tRPC caller pattern
  */
 export async function getAPI() {
-  const ctx = await createTRPCContext()
-  return createCaller(ctx)
+	const ctx = await createTRPCContext()
+	return createCaller(ctx)
 }

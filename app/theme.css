@@ -1,308 +1,308 @@
 @theme static {
-  /* ===== CRANBERRY (brand) ===== */
-  --color-cranberry-5: #fef4f9;
-  --color-cranberry-10: #fde2ef;
-  --color-cranberry-20: #fcc6de;
-  --color-cranberry-30: #f98dbe;
-  --color-cranberry-40: #f6539d;
-  --color-cranberry-50: #f31a7c;
-  --color-cranberry-60: #d5176d;
-  --color-cranberry-70: #b6145d;
-  --color-cranberry-80: #98104e;
-  --color-cranberry-90: #790d3e;
+	/* ===== CRANBERRY (brand) ===== */
+	--color-cranberry-5: #fef4f9;
+	--color-cranberry-10: #fde2ef;
+	--color-cranberry-20: #fcc6de;
+	--color-cranberry-30: #f98dbe;
+	--color-cranberry-40: #f6539d;
+	--color-cranberry-50: #f31a7c;
+	--color-cranberry-60: #d5176d;
+	--color-cranberry-70: #b6145d;
+	--color-cranberry-80: #98104e;
+	--color-cranberry-90: #790d3e;
 
-  /* ===== BARNEY ===== */
-  --color-barney-5: #faeeff;
-  --color-barney-10: #f0d3ff;
-  --color-barney-20: #e1a8fe;
-  --color-barney-30: #d27cfe;
-  --color-barney-40: #c350fd;
-  --color-barney-50: #ab46dd;
-  --color-barney-60: #923cbe;
-  --color-barney-70: #7a329e;
-  --color-barney-80: #62287f;
-  --color-barney-90: #491e5f;
+	/* ===== BARNEY ===== */
+	--color-barney-5: #faeeff;
+	--color-barney-10: #f0d3ff;
+	--color-barney-20: #e1a8fe;
+	--color-barney-30: #d27cfe;
+	--color-barney-40: #c350fd;
+	--color-barney-50: #ab46dd;
+	--color-barney-60: #923cbe;
+	--color-barney-70: #7a329e;
+	--color-barney-80: #62287f;
+	--color-barney-90: #491e5f;
 
-  /* ===== PURPLE ===== */
-  --color-purple-5: #f4f3fe;
-  --color-purple-10: #e3defd;
-  --color-purple-20: #d4c4ff;
-  --color-purple-30: #b596ff;
-  --color-purple-40: #7b49ff;
-  --color-purple-50: #682fff;
-  --color-purple-60: #5b29df;
-  --color-purple-70: #4b23bf;
-  --color-purple-80: #2f1880;
-  --color-purple-90: #231260;
+	/* ===== PURPLE ===== */
+	--color-purple-5: #f4f3fe;
+	--color-purple-10: #e3defd;
+	--color-purple-20: #d4c4ff;
+	--color-purple-30: #b596ff;
+	--color-purple-40: #7b49ff;
+	--color-purple-50: #682fff;
+	--color-purple-60: #5b29df;
+	--color-purple-70: #4b23bf;
+	--color-purple-80: #2f1880;
+	--color-purple-90: #231260;
 
-  /* ===== LU.MA TRANSLUCENT & PALE COLORS ===== */
-  --color-pale-cranberry: rgba(243, 26, 124, 0.133);
-  --color-faint-cranberry: rgba(243, 26, 124, 0.067);
-  --color-pale-blue: rgba(50, 95, 250, 0.133);
-  --color-faint-blue: rgba(50, 95, 250, 0.067);
-  --color-pale-green: rgba(60, 189, 44, 0.133);
-  --color-faint-green: rgba(60, 189, 44, 0.067);
-  --color-darker-pale-green: rgba(60, 189, 44, 0.267);
-  --color-pale-red: rgba(237, 43, 50, 0.133);
-  --color-faint-red: rgba(237, 43, 50, 0.067);
-  --color-darker-pale-red: rgba(237, 43, 50, 0.267);
-  --color-half-red: rgba(237, 43, 50, 0.467);
-  --color-pale-yellow: rgba(214, 151, 18, 0.133);
-  --color-faint-yellow: rgba(214, 151, 18, 0.067);
-  --color-pale-orange: rgba(217, 99, 38, 0.133);
-  --color-faint-orange: rgba(217, 99, 38, 0.067);
-  --color-pale-purple: rgba(104, 47, 255, 0.133);
-  --color-faint-purple: rgba(104, 47, 255, 0.067);
-  --color-pale-barney: rgba(171, 70, 221, 0.133);
-  --color-faint-barney: rgba(171, 70, 221, 0.067);
-  --color-pale-gray: rgba(147, 149, 151, 0.133);
-  --color-faint-gray: rgba(147, 149, 151, 0);
-  --color-darker-pale-gray: rgba(147, 149, 151, 0.267);
+	/* ===== LU.MA TRANSLUCENT & PALE COLORS ===== */
+	--color-pale-cranberry: rgba(243, 26, 124, 0.133);
+	--color-faint-cranberry: rgba(243, 26, 124, 0.067);
+	--color-pale-blue: rgba(50, 95, 250, 0.133);
+	--color-faint-blue: rgba(50, 95, 250, 0.067);
+	--color-pale-green: rgba(60, 189, 44, 0.133);
+	--color-faint-green: rgba(60, 189, 44, 0.067);
+	--color-darker-pale-green: rgba(60, 189, 44, 0.267);
+	--color-pale-red: rgba(237, 43, 50, 0.133);
+	--color-faint-red: rgba(237, 43, 50, 0.067);
+	--color-darker-pale-red: rgba(237, 43, 50, 0.267);
+	--color-half-red: rgba(237, 43, 50, 0.467);
+	--color-pale-yellow: rgba(214, 151, 18, 0.133);
+	--color-faint-yellow: rgba(214, 151, 18, 0.067);
+	--color-pale-orange: rgba(217, 99, 38, 0.133);
+	--color-faint-orange: rgba(217, 99, 38, 0.067);
+	--color-pale-purple: rgba(104, 47, 255, 0.133);
+	--color-faint-purple: rgba(104, 47, 255, 0.067);
+	--color-pale-barney: rgba(171, 70, 221, 0.133);
+	--color-faint-barney: rgba(171, 70, 221, 0.067);
+	--color-pale-gray: rgba(147, 149, 151, 0.133);
+	--color-faint-gray: rgba(147, 149, 151, 0);
+	--color-darker-pale-gray: rgba(147, 149, 151, 0.267);
 }
 
 @theme {
-  /* Font sizes (Lu.ma inspired) */
-  --font-size-xs: 0.75rem; /* 12px */
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1rem; /* 16px */
-  --font-size-lg: 1.125rem; /* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
-  --font-size-2xl: 1.5rem; /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-  --font-size-4xl: 2.25rem; /* 36px */
-  --font-size-5xl: 3rem; /* 48px */
+	/* Font sizes (Lu.ma inspired) */
+	--font-size-xs: 0.75rem; /* 12px */
+	--font-size-sm: 0.875rem; /* 14px */
+	--font-size-base: 1rem; /* 16px */
+	--font-size-lg: 1.125rem; /* 18px */
+	--font-size-xl: 1.25rem; /* 20px */
+	--font-size-2xl: 1.5rem; /* 24px */
+	--font-size-3xl: 1.875rem; /* 30px */
+	--font-size-4xl: 2.25rem; /* 36px */
+	--font-size-5xl: 3rem; /* 48px */
 
-  --text-base--line-height: calc(1.125 / 1);
+	--text-base--line-height: calc(1.125 / 1);
 
-  /* Font weights */
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+	/* Font weights */
+	--font-weight-light: 300;
+	--font-weight-normal: 400;
+	--font-weight-medium: 500;
+	--font-weight-semibold: 600;
+	--font-weight-bold: 700;
 
-  /* Line heights */
-  --line-height-tight: 1.25;
-  --line-height-snug: 1.375;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  --line-height-loose: 2;
+	/* Line heights */
+	--line-height-tight: 1.25;
+	--line-height-snug: 1.375;
+	--line-height-normal: 1.5;
+	--line-height-relaxed: 1.625;
+	--line-height-loose: 2;
 
-  /* Letter spacing */
-  --letter-spacing-tighter: -0.05em;
-  --letter-spacing-tight: -0.025em;
-  --letter-spacing-normal: 0em;
-  --letter-spacing-wide: 0.025em;
-  --letter-spacing-wider: 0.05em;
+	/* Letter spacing */
+	--letter-spacing-tighter: -0.05em;
+	--letter-spacing-tight: -0.025em;
+	--letter-spacing-normal: 0em;
+	--letter-spacing-wide: 0.025em;
+	--letter-spacing-wider: 0.05em;
 
-  /* ===== BLUE ===== */
-  --color-blue-5: #eff5ff;
-  --color-blue-10: #d4e5ff;
-  --color-blue-20: #b6d3ff;
-  --color-blue-30: #76adff;
-  --color-blue-40: #287eff;
-  --color-blue-50: #146aeb;
-  --color-blue-60: #125dce;
-  --color-blue-70: #0546a6;
-  --color-blue-80: #033889;
-  --color-blue-90: #002b6b;
+	/* ===== BLUE ===== */
+	--color-blue-5: #eff5ff;
+	--color-blue-10: #d4e5ff;
+	--color-blue-20: #b6d3ff;
+	--color-blue-30: #76adff;
+	--color-blue-40: #287eff;
+	--color-blue-50: #146aeb;
+	--color-blue-60: #125dce;
+	--color-blue-70: #0546a6;
+	--color-blue-80: #033889;
+	--color-blue-90: #002b6b;
 
-  /* ===== GREEN ===== */
-  --color-green-5: #e7f7e5;
-  --color-green-10: #ccf0c7;
-  --color-green-20: #99e290;
-  --color-green-30: #77d86b;
-  --color-green-40: #54c546;
-  --color-green-50: #3cbd2c;
-  --color-green-60: #35a527;
-  --color-green-70: #2d8e21;
-  --color-green-80: #25761b;
-  --color-green-90: #14550c;
+	/* ===== GREEN ===== */
+	--color-green-5: #e7f7e5;
+	--color-green-10: #ccf0c7;
+	--color-green-20: #99e290;
+	--color-green-30: #77d86b;
+	--color-green-40: #54c546;
+	--color-green-50: #3cbd2c;
+	--color-green-60: #35a527;
+	--color-green-70: #2d8e21;
+	--color-green-80: #25761b;
+	--color-green-90: #14550c;
 
-  /* ===== YELLOW ===== */
-  --color-yellow-5: #fcf4e4;
-  --color-yellow-10: #faeac9;
-  --color-yellow-20: #f7dfae;
-  --color-yellow-30: #f2ca77;
-  --color-yellow-40: #edb541;
-  --color-yellow-50: #eaab26;
-  --color-yellow-60: #d69712;
-  --color-yellow-70: #b98a27;
-  --color-yellow-80: #926b18;
-  --color-yellow-90: #755513;
+	/* ===== YELLOW ===== */
+	--color-yellow-5: #fcf4e4;
+	--color-yellow-10: #faeac9;
+	--color-yellow-20: #f7dfae;
+	--color-yellow-30: #f2ca77;
+	--color-yellow-40: #edb541;
+	--color-yellow-50: #eaab26;
+	--color-yellow-60: #d69712;
+	--color-yellow-70: #b98a27;
+	--color-yellow-80: #926b18;
+	--color-yellow-90: #755513;
 
-  /* ===== ORANGE ===== */
-  --color-orange-5: #feede4;
-  --color-orange-10: #fddbca;
-  --color-orange-20: #fccaaf;
-  --color-orange-30: #fba67a;
-  --color-orange-40: #f98346;
-  --color-orange-50: #f8712b;
-  --color-orange-60: #d96326;
-  --color-orange-70: #ba5520;
-  --color-orange-80: #9b471b;
-  --color-orange-90: #722e0b;
+	/* ===== ORANGE ===== */
+	--color-orange-5: #feede4;
+	--color-orange-10: #fddbca;
+	--color-orange-20: #fccaaf;
+	--color-orange-30: #fba67a;
+	--color-orange-40: #f98346;
+	--color-orange-50: #f8712b;
+	--color-orange-60: #d96326;
+	--color-orange-70: #ba5520;
+	--color-orange-80: #9b471b;
+	--color-orange-90: #722e0b;
 
-  /* ===== RED ===== */
-  --color-red-5: #ffeeef;
-  --color-red-10: #fde4e5;
-  --color-red-20: #f8afb2;
-  --color-red-30: #ff766d;
-  --color-red-40: #f9524e;
-  --color-red-50: #ed2b32;
-  --color-red-60: #cf2c31;
-  --color-red-70: #b1262a;
-  --color-red-80: #93080c;
-  --color-red-90: #750000;
+	/* ===== RED ===== */
+	--color-red-5: #ffeeef;
+	--color-red-10: #fde4e5;
+	--color-red-20: #f8afb2;
+	--color-red-30: #ff766d;
+	--color-red-40: #f9524e;
+	--color-red-50: #ed2b32;
+	--color-red-60: #cf2c31;
+	--color-red-70: #b1262a;
+	--color-red-80: #93080c;
+	--color-red-90: #750000;
 
-  /* ===== GREYSCALE ===== */
-  --color-gray-10: #f7f8f9;
-  --color-gray-20: #ebeced;
-  --color-gray-30: #dee0e2;
-  --color-gray-40: #d2d4d7;
-  --color-gray-50: #b3b5b7;
-  --color-gray-60: #939597;
-  --color-gray-70: #737577;
-  --color-gray-80: #535557;
-  --color-gray-90: #333537;
-  --color-gray-100: #212325;
+	/* ===== GREYSCALE ===== */
+	--color-gray-10: #f7f8f9;
+	--color-gray-20: #ebeced;
+	--color-gray-30: #dee0e2;
+	--color-gray-40: #d2d4d7;
+	--color-gray-50: #b3b5b7;
+	--color-gray-60: #939597;
+	--color-gray-70: #737577;
+	--color-gray-80: #535557;
+	--color-gray-90: #333537;
+	--color-gray-100: #212325;
 
-  --color-white: #ffffff;
-  --color-black: #131517;
+	--color-white: #ffffff;
+	--color-black: #131517;
 
-  /* ===== LU.MA SEMANTIC SYSTEM (Corrected) ===== */
-  /* Text Colors (from Lu.ma) */
-  --color-text-primary: var(--color-black);
-  --color-text-secondary: var(--color-gray-70);
-  --color-text-tertiary: var(--color-gray-50);
-  --color-text-quaternary: var(--color-gray-30);
+	/* ===== LU.MA SEMANTIC SYSTEM (Corrected) ===== */
+	/* Text Colors (from Lu.ma) */
+	--color-text-primary: var(--color-black);
+	--color-text-secondary: var(--color-gray-70);
+	--color-text-tertiary: var(--color-gray-50);
+	--color-text-quaternary: var(--color-gray-30);
 
-  /* Background Colors (from Lu.ma) */
-  --color-bg-primary: var(--color-white);
-  --color-bg-secondary: var(--color-gray-10);
-  --color-bg-tertiary: var(--color-gray-20);
-  --color-bg-quaternary: var(--color-gray-30);
+	/* Background Colors (from Lu.ma) */
+	--color-bg-primary: var(--color-white);
+	--color-bg-secondary: var(--color-gray-10);
+	--color-bg-tertiary: var(--color-gray-20);
+	--color-bg-quaternary: var(--color-gray-30);
 
-  /* Border Colors (from Lu.ma) */
-  --color-border-primary: var(--color-gray-40);
-  --color-border-secondary: var(--color-gray-20);
-  --color-border-subtle: var(--color-gray-10);
-  --color-border-tertiary: var(--color-gray-10);
-  --color-border-active: var(--color-black);
+	/* Border Colors (from Lu.ma) */
+	--color-border-primary: var(--color-gray-40);
+	--color-border-secondary: var(--color-gray-20);
+	--color-border-subtle: var(--color-gray-10);
+	--color-border-tertiary: var(--color-gray-10);
+	--color-border-active: var(--color-black);
 
-  /* Brand System (from Lu.ma) */
-  --color-brand: var(--color-cranberry-50);
-  --color-brand-content: var(--color-cranberry-50);
-  --color-brand-active: var(--color-cranberry-60);
-  --color-brand-pale-bg: var(--color-pale-cranberry);
-  --color-brand-faint-bg: var(--color-faint-cranberry);
+	/* Brand System (from Lu.ma) */
+	--color-brand: var(--color-cranberry-50);
+	--color-brand-content: var(--color-cranberry-50);
+	--color-brand-active: var(--color-cranberry-60);
+	--color-brand-pale-bg: var(--color-pale-cranberry);
+	--color-brand-faint-bg: var(--color-faint-cranberry);
 
-  /* Success System */
-  --color-success: var(--color-green-50);
-  --color-success-pale-bg: var(--color-pale-green);
-  --color-success-faint-bg: var(--color-faint-green);
+	/* Success System */
+	--color-success: var(--color-green-50);
+	--color-success-pale-bg: var(--color-pale-green);
+	--color-success-faint-bg: var(--color-faint-green);
 
-  /* Error System */
-  --color-error: var(--color-red-50);
-  --color-error-pale-bg: var(--color-pale-red);
-  --color-error-faint-bg: var(--color-faint-red);
+	/* Error System */
+	--color-error: var(--color-red-50);
+	--color-error-pale-bg: var(--color-pale-red);
+	--color-error-faint-bg: var(--color-faint-red);
 
-  /* Warning System */
-  --color-warning: var(--color-yellow-60);
-  --color-warning-pale-bg: var(--color-pale-yellow);
-  --color-warning-faint-bg: var(--color-faint-yellow);
+	/* Warning System */
+	--color-warning: var(--color-yellow-60);
+	--color-warning-pale-bg: var(--color-pale-yellow);
+	--color-warning-faint-bg: var(--color-faint-yellow);
 
-  /* Info System */
-  --color-info: var(--color-blue-50);
-  --color-info-pale-bg: var(--color-pale-blue);
-  --color-info-faint-bg: var(--color-faint-blue);
+	/* Info System */
+	--color-info: var(--color-blue-50);
+	--color-info-pale-bg: var(--color-pale-blue);
+	--color-info-faint-bg: var(--color-faint-blue);
 
-  /* ===== DIRECT COLOR MAPPINGS FOR SHORT SYNTAX ===== */
-  /* For text-cranberry, bg-blue, etc. - these map to the main color */
-  --color-cranberry: var(--color-cranberry-50);
-  --color-barney: var(--color-barney-50);
-  --color-purple: var(--color-purple-50);
-  --color-blue: var(--color-blue-50);
-  --color-green: var(--color-green-50);
-  --color-yellow: var(--color-yellow-60);
-  --color-orange: var(--color-orange-50);
-  --color-red: var(--color-red-50);
+	/* ===== DIRECT COLOR MAPPINGS FOR SHORT SYNTAX ===== */
+	/* For text-cranberry, bg-blue, etc. - these map to the main color */
+	--color-cranberry: var(--color-cranberry-50);
+	--color-barney: var(--color-barney-50);
+	--color-purple: var(--color-purple-50);
+	--color-blue: var(--color-blue-50);
+	--color-green: var(--color-green-50);
+	--color-yellow: var(--color-yellow-60);
+	--color-orange: var(--color-orange-50);
+	--color-red: var(--color-red-50);
 
-  /* Translucent mappings for bg-cranberry-translucent, etc. */
-  --color-cranberry-translucent: var(--color-pale-cranberry);
-  --color-barney-translucent: var(--color-pale-barney);
-  --color-purple-translucent: var(--color-pale-purple);
-  --color-blue-translucent: var(--color-pale-blue);
-  --color-green-translucent: var(--color-pale-green);
-  --color-yellow-translucent: var(--color-pale-yellow);
-  --color-orange-translucent: var(--color-pale-orange);
-  --color-red-translucent: var(--color-pale-red);
-  --color-gray-translucent: var(--color-pale-gray);
+	/* Translucent mappings for bg-cranberry-translucent, etc. */
+	--color-cranberry-translucent: var(--color-pale-cranberry);
+	--color-barney-translucent: var(--color-pale-barney);
+	--color-purple-translucent: var(--color-pale-purple);
+	--color-blue-translucent: var(--color-pale-blue);
+	--color-green-translucent: var(--color-pale-green);
+	--color-yellow-translucent: var(--color-pale-yellow);
+	--color-orange-translucent: var(--color-pale-orange);
+	--color-red-translucent: var(--color-pale-red);
+	--color-gray-translucent: var(--color-pale-gray);
 
-  /* ===== SHADCN SEMANTIC MAPPINGS (Lu.ma colors) ===== */
-  /* Map Lu.ma colors to ShadCN's existing variant system */
+	/* ===== SHADCN SEMANTIC MAPPINGS (Lu.ma colors) ===== */
+	/* Map Lu.ma colors to ShadCN's existing variant system */
 
-  /* Background & Foreground */
-  --color-background: var(--color-bg-primary);
-  --color-foreground: var(--color-text-primary);
+	/* Background & Foreground */
+	--color-background: var(--color-bg-primary);
+	--color-foreground: var(--color-text-primary);
 
-  /* Card */
-  --color-card: var(--color-bg-primary);
-  --color-card-foreground: var(--color-text-primary);
+	/* Card */
+	--color-card: var(--color-bg-primary);
+	--color-card-foreground: var(--color-text-primary);
 
-  /* Popover */
-  --color-popover: var(--color-bg-primary);
-  --color-popover-foreground: var(--color-text-primary);
+	/* Popover */
+	--color-popover: var(--color-bg-primary);
+	--color-popover-foreground: var(--color-text-primary);
 
-  /* Primary = Lu.ma's NEUTRAL color system (e.g., black text on white bg) */
-  --color-primary: var(--color-text-primary);
-  --color-primary-foreground: var(--color-bg-primary);
+	/* Primary = Lu.ma's NEUTRAL color system (e.g., black text on white bg) */
+	--color-primary: var(--color-text-primary);
+	--color-primary-foreground: var(--color-bg-primary);
 
-  /* Secondary = Lu.ma's secondary backgrounds (e.g., gray bg with dark text) */
-  --color-secondary: var(--color-bg-secondary);
-  --color-secondary-foreground: var(--color-text-secondary);
+	/* Secondary = Lu.ma's secondary backgrounds (e.g., gray bg with dark text) */
+	--color-secondary: var(--color-bg-secondary);
+	--color-secondary-foreground: var(--color-text-secondary);
 
-  /* Muted = Lu.ma tertiary colors */
-  --color-muted: var(--color-bg-tertiary);
-  --color-muted-foreground: var(--color-text-tertiary);
+	/* Muted = Lu.ma tertiary colors */
+	--color-muted: var(--color-bg-tertiary);
+	--color-muted-foreground: var(--color-text-tertiary);
 
-  /* Accent = Lu.ma's BRAND color (Cranberry) */
-  --color-accent: var(--color-brand);
-  --color-accent-foreground: var(--color-white);
+	/* Accent = Lu.ma's BRAND color (Cranberry) */
+	--color-accent: var(--color-brand);
+	--color-accent-foreground: var(--color-white);
 
-  /* Destructive = Lu.ma error red */
-  --color-destructive: var(--color-error);
-  --color-destructive-foreground: var(--color-white);
+	/* Destructive = Lu.ma error red */
+	--color-destructive: var(--color-error);
+	--color-destructive-foreground: var(--color-white);
 
-  /* Border & Input */
-  --color-border: var(--color-border-secondary);
-  --color-input: var(--color-border-secondary);
-  --color-ring: var(--color-secondary);
+	/* Border & Input */
+	--color-border: var(--color-border-secondary);
+	--color-input: var(--color-border-secondary);
+	--color-ring: var(--color-secondary);
 
-  /* Charts */
-  --color-chart-1: var(--color-blue-50);
-  --color-chart-2: var(--color-green-50);
+	/* Charts */
+	--color-chart-1: var(--color-blue-50);
+	--color-chart-2: var(--color-green-50);
 
-  /* Radius */
-  --radius-sm: 0.25rem;
-  --radius: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-card: 0.75rem;
+	/* Radius */
+	--radius-sm: 0.25rem;
+	--radius: 0.5rem;
+	--radius-lg: 1rem;
+	--radius-card: 0.75rem;
 
-  /* Spacing */
-  --spacing-xs: 0.125rem;
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-25: 0.75rem;
-  --spacing-3: 1rem;
-  --spacing-35: 1.25rem;
-  --spacing-4: 1.5rem;
-  --spacing-45: 2rem;
-  --spacing-5: 3rem;
+	/* Spacing */
+	--spacing-xs: 0.125rem;
+	--spacing-1: 0.25rem;
+	--spacing-2: 0.5rem;
+	--spacing-25: 0.75rem;
+	--spacing-3: 1rem;
+	--spacing-35: 1.25rem;
+	--spacing-4: 1.5rem;
+	--spacing-45: 2rem;
+	--spacing-5: 3rem;
 
-  /* Layout breakpoints */
-  --max-width-page: 820px;
-  --max-width-wide-page: 960px;
-  --max-width-extra-wide-page: 1080px;
-  --horizontal-padding: 1rem;
+	/* Layout breakpoints */
+	--max-width-page: 820px;
+	--max-width-wide-page: 960px;
+	--max-width-extra-wide-page: 1080px;
+	--horizontal-padding: 1rem;
 }

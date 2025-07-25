@@ -5,22 +5,22 @@
 export const themeColorNames = ['cranberry', 'barney', 'purple'] as const
 
 export const themeFaintColorNames = [
-  'pale-cranberry',
-  'faint-cranberry',
-  'pale-blue',
-  'faint-blue',
-  'pale-red',
-  'faint-red',
-  'darker-pale-red',
-  'half-red',
-  'pale-yellow',
-  'faint-yellow',
-  'pale-orange',
-  'faint-orange',
-  'pale-purple',
-  'faint-purple',
-  'pale-barney',
-  'faint-barney',
+	'pale-cranberry',
+	'faint-cranberry',
+	'pale-blue',
+	'faint-blue',
+	'pale-red',
+	'faint-red',
+	'darker-pale-red',
+	'half-red',
+	'pale-yellow',
+	'faint-yellow',
+	'pale-orange',
+	'faint-orange',
+	'pale-purple',
+	'faint-purple',
+	'pale-barney',
+	'faint-barney',
 ] as const
 
 /**

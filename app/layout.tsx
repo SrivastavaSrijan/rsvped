@@ -5,35 +5,35 @@ import { Toaster } from 'sonner'
 import { TRPCProvider } from '@/lib/trpc'
 
 const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
+	subsets: ['latin'],
+	variable: '--font-inter',
 })
 
 const averia = Averia_Serif_Libre({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-averia',
+	subsets: ['latin'],
+	weight: ['400', '700'],
+	variable: '--font-averia',
 })
 
 export const metadata: Metadata = {
-  title: "Delightful Events Start Here · RSVP'd",
-  description:
-    "RSVP'd is an event management platform that makes organizing and attending events a breeze.",
+	title: "Delightful Events Start Here · RSVP'd",
+	description:
+		"RSVP'd is an event management platform that makes organizing and attending events a breeze.",
 }
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode
+	children: React.ReactNode
 }>) {
-  return (
-    <html lang="en" className="dark">
-      <meta name="apple-mobile-web-app-title" content="RSVP'd" />
-      <meta name="og:image" content="/preview.jpg" />
-      <body className={`${inter.variable} ${averia.variable} font-sans antialiased`}>
-        <TRPCProvider>{children}</TRPCProvider>
-        <Toaster />
-      </body>
-    </html>
-  )
+	return (
+		<html lang="en" className="dark">
+			<meta name="apple-mobile-web-app-title" content="RSVP'd" />
+			<meta name="og:image" content="/preview.jpg" />
+			<body className={`${inter.variable} ${averia.variable} font-sans antialiased`}>
+				<TRPCProvider>{children}</TRPCProvider>
+				<Toaster />
+			</body>
+		</html>
+	)
 }

@@ -1,22 +1,22 @@
 import * as z from 'zod'
 import {
-  CompleteOrder,
-  CompleteTicketTier,
-  RelatedOrderModel,
-  RelatedTicketTierModel,
+	type CompleteOrder,
+	type CompleteTicketTier,
+	RelatedOrderModel,
+	RelatedTicketTierModel,
 } from './index'
 
 export const OrderItemModel = z.object({
-  id: z.string(),
-  orderId: z.string(),
-  ticketTierId: z.string(),
-  quantity: z.number().int(),
-  priceCents: z.number().int(),
+	id: z.string(),
+	orderId: z.string(),
+	ticketTierId: z.string(),
+	quantity: z.number().int(),
+	priceCents: z.number().int(),
 })
 
 export interface CompleteOrderItem extends z.infer<typeof OrderItemModel> {
-  order: CompleteOrder
-  ticketTier: CompleteTicketTier
+	order: CompleteOrder
+	ticketTier: CompleteTicketTier
 }
 
 /**
@@ -25,8 +25,8 @@ export interface CompleteOrderItem extends z.infer<typeof OrderItemModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedOrderItemModel: z.ZodSchema<CompleteOrderItem> = z.lazy(() =>
-  OrderItemModel.extend({
-    order: RelatedOrderModel,
-    ticketTier: RelatedTicketTierModel,
-  })
+	OrderItemModel.extend({
+		order: RelatedOrderModel,
+		ticketTier: RelatedTicketTierModel,
+	})
 )

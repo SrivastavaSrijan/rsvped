@@ -1,3 +1,3 @@
 export default function HoldOnPage() {
-  return null
+	return null
 }

@@ -5,99 +5,99 @@
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
-  /* Some reasonable defaults */
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  /* Lu.ma Dark Theme Overrides */
-  .dark {
-    /* Dark theme base colors */
-    --color-primary-color: var(--color-white);
-    --color-secondary-color: var(--color-gray-40);
-    --color-tertiary-color: var(--color-gray-60);
-    --color-quaternary-color: var(--color-gray-80);
-    --color-primary-bg-color: var(--color-black);
-    --color-secondary-bg-color: var(--color-gray-100);
-    --color-tertiary-bg-color: var(--color-gray-90);
-    --color-quaternary-bg-color: var(--color-gray-80);
-    --color-primary-border-color: var(--color-gray-60);
-    --color-secondary-border-color: var(--color-gray-90);
-    --color-tertiary-border-color: var(--color-gray-80);
-    --color-active-border-color: var(--color-white);
-    --color-brand-color: var(--color-cranberry-50);
-    --color-brand-content-color: var(--color-cranberry-40);
-    --color-brand-active-color: var(--color-cranberry-40);
+	/* Some reasonable defaults */
+	input[type="number"]::-webkit-inner-spin-button,
+	input[type="number"]::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	/* Lu.ma Dark Theme Overrides */
+	.dark {
+		/* Dark theme base colors */
+		--color-primary-color: var(--color-white);
+		--color-secondary-color: var(--color-gray-40);
+		--color-tertiary-color: var(--color-gray-60);
+		--color-quaternary-color: var(--color-gray-80);
+		--color-primary-bg-color: var(--color-black);
+		--color-secondary-bg-color: var(--color-gray-100);
+		--color-tertiary-bg-color: var(--color-gray-90);
+		--color-quaternary-bg-color: var(--color-gray-80);
+		--color-primary-border-color: var(--color-gray-60);
+		--color-secondary-border-color: var(--color-gray-90);
+		--color-tertiary-border-color: var(--color-gray-80);
+		--color-active-border-color: var(--color-white);
+		--color-brand-color: var(--color-cranberry-50);
+		--color-brand-content-color: var(--color-cranberry-40);
+		--color-brand-active-color: var(--color-cranberry-40);
 
-    /* CORRECTED Dark Semantic Mappings for ShadCN */
-    --color-background: var(--color-primary-bg-color);
-    --color-foreground: var(--color-primary-color);
-    --color-card: var(--color-secondary-bg-color);
-    --color-card-foreground: var(--color-primary-color);
-    --color-popover: var(--color-secondary-bg-color);
-    --color-popover-foreground: var(--color-primary-color);
+		/* CORRECTED Dark Semantic Mappings for ShadCN */
+		--color-background: var(--color-primary-bg-color);
+		--color-foreground: var(--color-primary-color);
+		--color-card: var(--color-secondary-bg-color);
+		--color-card-foreground: var(--color-primary-color);
+		--color-popover: var(--color-secondary-bg-color);
+		--color-popover-foreground: var(--color-primary-color);
 
-    /* Primary is now the neutral color system */
-    --color-primary: var(--color-primary-color);
-    --color-primary-foreground: var(--color-primary-bg-color);
+		/* Primary is now the neutral color system */
+		--color-primary: var(--color-primary-color);
+		--color-primary-foreground: var(--color-primary-bg-color);
 
-    /* Secondary is the secondary background system */
-    --color-secondary: var(--color-secondary-bg-color);
-    --color-secondary-foreground: var(--color-primary-color);
+		/* Secondary is the secondary background system */
+		--color-secondary: var(--color-secondary-bg-color);
+		--color-secondary-foreground: var(--color-primary-color);
 
-    --color-muted: var(--color-tertiary-bg-color);
-    --color-muted-foreground: var(--color-secondary-color);
+		--color-muted: var(--color-tertiary-bg-color);
+		--color-muted-foreground: var(--color-secondary-color);
 
-    /* Accent is now the brand color (Cranberry) */
-    --color-accent: var(--color-brand-color);
-    --color-accent-foreground: var(--color-white);
+		/* Accent is now the brand color (Cranberry) */
+		--color-accent: var(--color-brand-color);
+		--color-accent-foreground: var(--color-white);
 
-    --color-border: var(--color-secondary-border-color);
-    --color-input: rgba(255, 255, 255, 0.15);
-    --color-ring: var(--color-primary);
-  }
+		--color-border: var(--color-secondary-border-color);
+		--color-input: rgba(255, 255, 255, 0.15);
+		--color-ring: var(--color-primary);
+	}
 
-  /* Lu.ma Mobile Responsive */
-  @media (max-width: 450px) {
-    :root {
-      --base-list-row-vertical-padding: 0.6875rem;
-      --base-list-row-horizontal-padding: 0.875rem;
-    }
-  }
+	/* Lu.ma Mobile Responsive */
+	@media (max-width: 450px) {
+		:root {
+			--base-list-row-vertical-padding: 0.6875rem;
+			--base-list-row-horizontal-padding: 0.875rem;
+		}
+	}
 
-  /* Base element styling */
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+	/* Base element styling */
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  /* ===== TYPOGRAPHY ===== */
-  --font-sans: var(--font-inter);
-  --font-mono:
-    "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
-  --font-serif: var(--font-averia);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	/* ===== TYPOGRAPHY ===== */
+	--font-sans: var(--font-inter);
+	--font-mono:
+		"SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+	--font-serif: var(--font-averia);
 }
 
 @layer utilities {
-  .text-gradient-radial {
-    background-image: radial-gradient(
-      circle at 0 0,
-      var(--color-blue-40) 0%,
-      var(--color-purple-50) 18.82%,
-      var(--color-barney-30) 32.6%,
-      var(--color-cranberry-40) 52.83%,
-      var(--color-red-40) 68.03%,
-      var(--color-red-30) 87.66%,
-      var(--color-orange-40) 100%
-    );
-  }
+	.text-gradient-radial {
+		background-image: radial-gradient(
+			circle at 0 0,
+			var(--color-blue-40) 0%,
+			var(--color-purple-50) 18.82%,
+			var(--color-barney-30) 32.6%,
+			var(--color-cranberry-40) 52.83%,
+			var(--color-red-40) 68.03%,
+			var(--color-red-30) 87.66%,
+			var(--color-orange-40) 100%
+		);
+	}
 }

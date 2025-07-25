@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run vercel:build",
-  "installCommand": "yarn",
-  "env": {
-    "SKIP_ENV_VALIDATION": "true"
-  }
+	"buildCommand": "npm run vercel:build",
+	"installCommand": "yarn",
+	"env": {
+		"SKIP_ENV_VALIDATION": "true"
+	}
 }

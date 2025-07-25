@@ -1,19 +1,19 @@
 import * as z from 'zod'
-import { CompleteEvent, CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
+import { type CompleteEvent, type CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
 
 export const EventViewModel = z.object({
-  id: z.string(),
-  eventId: z.string(),
-  userId: z.string().nullish(),
-  ipAddress: z.string().nullish(),
-  userAgent: z.string().nullish(),
-  referrer: z.string().nullish(),
-  viewedAt: z.date(),
+	id: z.string(),
+	eventId: z.string(),
+	userId: z.string().nullish(),
+	ipAddress: z.string().nullish(),
+	userAgent: z.string().nullish(),
+	referrer: z.string().nullish(),
+	viewedAt: z.date(),
 })
 
 export interface CompleteEventView extends z.infer<typeof EventViewModel> {
-  event: CompleteEvent
-  user?: CompleteUser | null
+	event: CompleteEvent
+	user?: CompleteUser | null
 }
 
 /**
@@ -22,8 +22,8 @@ export interface CompleteEventView extends z.infer<typeof EventViewModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedEventViewModel: z.ZodSchema<CompleteEventView> = z.lazy(() =>
-  EventViewModel.extend({
-    event: RelatedEventModel,
-    user: RelatedUserModel.nullish(),
-  })
+	EventViewModel.extend({
+		event: RelatedEventModel,
+		user: RelatedUserModel.nullish(),
+	})
 )
