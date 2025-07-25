@@ -20,8 +20,8 @@ import { canUserManageEvent, cn } from '@/lib/utils'
 import type { RouterOutput } from '@/server/api/root'
 import { EventLocation } from './EventLocation'
 
-type RouterOutputMinimalEvent = RouterOutput['event']['getUserEvents'][number]
-export interface EventCardProps extends RouterOutputMinimalEvent {
+type EventCardData = RouterOutput['event']['getUserEvents'][number]
+export interface EventCardProps extends EventCardData {
 	isLast: boolean
 	user?: Session['user']
 }
@@ -94,7 +94,11 @@ export const EventCard = ({
 				<Card className="mb-3 w-full border-0 p-3 text-white lg:mb-6 lg:p-6">
 					<div className="grid grid-cols-3 flex-col justify-between gap-4">
 						<div className="col-span-2 flex flex-col gap-3.5 lg:gap-3.5">
-							<Link href={Routes.Main.Events.ViewBySlug(slug)} passHref className="contents">
+							<Link
+								href={Routes.Main.Events.ViewBySlug(slug)}
+								passHref
+								className="contents hover:[&_h2]:underline underline-offset-2"
+							>
 								<p className="text-muted-foreground text-sm">{range.time}</p>
 								<h2 className="font-semibold text-xl">{title}</h2>
 								{!canManage && (
@@ -109,45 +113,46 @@ export const EventCard = ({
 										</div>
 									</div>
 								)}
-								<div className="flex flex-row items-center gap-2">
-									<EventLocation
-										className="text-muted-foreground"
-										locationType={locationType}
-										venueName={venueName}
-										venueAddress={venueAddress}
-										onlineUrl={onlineUrl}
-									/>
-								</div>
-								<div className="flex flex-row items-center gap-2">
-									{status && <Badge variant={rsvpBadgeVariant}>{status}</Badge>}
-									{rsvps.length > 0 && (
-										<div className="-space-x-1 flex">
-											{(rsvps ?? []).map(
-												({ user: guestUser, name: guestName }) =>
-													(guestUser?.name || guestName) && (
-														<Tooltip key={guestUser?.id ?? guestName}>
-															<TooltipTrigger>
-																<AvatarWithFallback
-																	className="size-4"
-																	src={guestUser?.image ?? undefined}
-																	name={guestUser?.name ?? guestName ?? undefined}
-																/>
-															</TooltipTrigger>
-															<TooltipContent>{guestUser?.name ?? guestName}</TooltipContent>
-														</Tooltip>
-													)
-											)}
-											{rsvpCount > 5 && (
-												<Avatar>
-													<AvatarFallback>
-														<p className="text-[10px] text-muted-foreground">+{rsvpCount - 5}</p>
-													</AvatarFallback>
-												</Avatar>
-											)}
-										</div>
-									)}
-								</div>
 							</Link>
+
+							<div className="flex flex-row items-center gap-2">
+								<EventLocation
+									className="text-muted-foreground"
+									locationType={locationType}
+									venueName={venueName}
+									venueAddress={venueAddress}
+									onlineUrl={onlineUrl}
+								/>
+							</div>
+							<div className="flex flex-row items-center gap-2">
+								{status && <Badge variant={rsvpBadgeVariant}>{status}</Badge>}
+								{rsvps.length > 0 && (
+									<div className="-space-x-1 flex">
+										{(rsvps ?? []).map(
+											({ user: guestUser, name: guestName }) =>
+												(guestUser?.name || guestName) && (
+													<Tooltip key={guestUser?.id ?? guestName}>
+														<TooltipTrigger>
+															<AvatarWithFallback
+																className="size-4"
+																src={guestUser?.image ?? undefined}
+																name={guestUser?.name ?? guestName ?? undefined}
+															/>
+														</TooltipTrigger>
+														<TooltipContent>{guestUser?.name ?? guestName}</TooltipContent>
+													</Tooltip>
+												)
+										)}
+										{rsvpCount > 5 && (
+											<Avatar>
+												<AvatarFallback>
+													<p className="text-[10px] text-muted-foreground">+{rsvpCount - 5}</p>
+												</AvatarFallback>
+											</Avatar>
+										)}
+									</div>
+								)}
+							</div>
 							{canManage && (
 								<div className="mt-2 flex flex-row gap-3">
 									<Link
@@ -169,17 +174,19 @@ export const EventCard = ({
 								</div>
 							)}
 						</div>
-						<div className=" col-span-1 flex flex-col items-end">
-							{coverImage && (
-								<Image
-									src={coverImage}
-									alt={title}
-									height={240}
-									width={240}
-									className="aspect-square rounded-md object-cover"
-								/>
-							)}
-						</div>
+						<Link href={Routes.Main.Events.ViewBySlug(slug)} passHref className="contents">
+							<div className=" col-span-1 flex flex-col items-end">
+								{coverImage && (
+									<Image
+										src={coverImage}
+										alt={title}
+										height={240}
+										width={240}
+										className="aspect-square rounded-md object-cover"
+									/>
+								)}
+							</div>
+						</Link>
 					</div>
 				</Card>
 			</div>

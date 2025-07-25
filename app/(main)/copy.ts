@@ -10,4 +10,13 @@ export const copy = {
 		profile: 'Settings',
 		signOut: 'Sign Out',
 	},
+	placeholders: {
+		email: 'Email Address',
+		password: 'Password',
+		name: 'Name',
+	},
+	welcome: 'Welcome! To register for this event, please click below.',
+	register: {
+		description: 'Please enter your details to register.',
+	},
 }

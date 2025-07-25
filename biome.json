@@ -6,7 +6,8 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!.next", "!node_modules", "!dist", "!.vercel"]
+		"includes": ["**", "!.next", "!node_modules", "!dist", "!.vercel"],
+		"experimentalScannerIgnores": ["node_modules/", ".next/"]
 	},
 	"formatter": {
 		"enabled": true,

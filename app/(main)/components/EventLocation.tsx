@@ -111,9 +111,13 @@ export const LocationItem = ({
 
 	return (
 		<div
-			className={cn('grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 text-sm', className)}
+			className={cn(
+				'grid w-full grid-cols-[auto_1fr_auto] items-center text-sm',
+				{ 'gap-3': size === 'lg', 'gap-2': size === 'sm' },
+				className
+			)}
 		>
-			<div className={size === 'lg' ? 'rounded-xl border border-muted p-2' : ''}>
+			<div className={size === 'lg' ? 'rounded-xl border border-white/5 foreground p-2' : ''}>
 				<Icon className={size === 'sm' ? 'size-3' : 'size-4'} />
 			</div>
 			<div className="flex min-w-0 flex-col gap-1">

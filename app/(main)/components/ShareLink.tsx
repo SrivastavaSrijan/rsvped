@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, Copy } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui'
 
@@ -27,9 +28,11 @@ export function ShareLink({ display, url, className }: ShareLinkProps) {
 		<div
 			className={`flex w-full items-center justify-between gap-2 px-2 py-2 lg:px-3 ${className}`}
 		>
-			<p className="max-w-[calc(100vw-8rem)] flex-1 truncate text-xs lg:max-w-[50ch] lg:text-sm">
-				{display}
-			</p>
+			<Link href={url}>
+				<p className="max-w-[calc(100vw-8rem)] flex-1 truncate text-xs lg:max-w-[50ch] lg:text-sm underline underline-offset-2">
+					{display}
+				</p>
+			</Link>
 			<Button variant="ghost" size="icon" className="size-2.5" onClick={handleCopy}>
 				{copied ? <Check className="size-2.5" /> : <Copy className="size-2.5" />}
 			</Button>

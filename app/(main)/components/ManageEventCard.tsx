@@ -3,9 +3,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button, Card } from '@/components/ui'
 import { Routes } from '@/lib/config'
-import { useEventDateTime } from '@/lib/hooks'
-import { getRandomColor } from '@/lib/utils'
 import type { RouterOutput } from '@/server/api/root'
+import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 import { ShareActions } from './ShareActions'
 import { ShareLink } from './ShareLink'
@@ -32,12 +31,6 @@ export function ManageEventCard({
 	rsvpCount,
 	viewCount,
 }: ManageEventCardProps) {
-	const { start, range } = useEventDateTime({ start: startDate, end: endDate })
-
-	// Generate gradient colors based on event title
-	const _gradientFrom = getRandomColor({ seed: title, intensity: 40 })
-	const _gradientTo = getRandomColor({ seed: title, intensity: 60 })
-
 	return (
 		<Card className="w-full p-3 text-white lg:p-6">
 			<div className="grid grid-cols-12 items-start justify-stretch gap-6 lg:flex-row lg:gap-6">
@@ -75,20 +68,7 @@ export function ManageEventCard({
 							<h1 className="font-semibold font-stretch-semi-condensed text-base lg:text-lg">
 								When & Where
 							</h1>
-							<div className="flex items-center gap-3 text-base">
-								<div className="text-center">
-									<p className="rounded-tl-xl rounded-tr-xl bg-white/20 px-2 py-1 text-sm">
-										{start.month}
-									</p>
-									<p className="rounded-br-xl rounded-bl-xl bg-white/30 px-2 py-1 text-sm">
-										{start.dayOfMonth}
-									</p>
-								</div>
-								<div className="flex flex-col gap-1">
-									<p className="font-medium text-base">{range.date}</p>
-									<p className="text-muted-foreground text-sm">{range.time}</p>
-								</div>
-							</div>
+							<EventDateTime startDate={startDate} endDate={endDate} />
 						</div>
 
 						<EventLocation

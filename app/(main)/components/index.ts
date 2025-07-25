@@ -1,5 +1,7 @@
 export { EventCard } from './EventCard'
 export { EventForm } from './EventForm'
+export { EventPage } from './EventPage'
+export { EventRegisterModal } from './EventRegisterModal'
 export { EventsPagination } from './EventsPagination'
 export { ManageEventCard } from './ManageEventCard'
 export { Navbar } from './Navbar'

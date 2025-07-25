@@ -2,7 +2,7 @@
 
 import { useParams, usePathname } from 'next/navigation'
 import { type CSSProperties, useEffect, useState } from 'react'
-import { getStylesForRoute } from '@/lib/config/pageStyles'
+import { getStylesForRoute } from '@/lib/config'
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname()
@@ -14,11 +14,11 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
 	const [isLoaded, setIsLoaded] = useState(false)
 
 	useEffect(() => {
-		const matchingStyles = getStylesForRoute(pathname, params)
-
+		const { pseudoElement, background, key = '' } = getStylesForRoute(pathname, params)
+		const seed = key && typeof params[key] === 'string' ? params[key] : undefined
 		setStyles({
-			background: matchingStyles.background ? matchingStyles.background() : {},
-			pseudoElement: matchingStyles.pseudoElement ? matchingStyles.pseudoElement() : {},
+			background: background ? background(seed) : {},
+			pseudoElement: pseudoElement ? pseudoElement(seed) : {},
 		})
 
 		setIsLoaded(true)

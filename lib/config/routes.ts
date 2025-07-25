@@ -34,6 +34,9 @@ export const Routes = {
 			ViewBySlug(slug: string) {
 				return `${this.Root}/${slug}`
 			},
+			ViewBySlugWithRegister(slug: string) {
+				return `${this.ViewBySlug(slug)}?register=true`
+			},
 			ManageBySlug(slug: string) {
 				return `${this.Root}/${slug}/manage`
 			},
