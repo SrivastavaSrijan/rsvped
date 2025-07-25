@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { type ClassValue, clsx } from 'clsx'
+import { Session } from 'next-auth'
 import { twMerge } from 'tailwind-merge'
 import {
   ThemeColorIntensity,
@@ -87,4 +88,14 @@ export function getRandomColor({
   }
 
   return `var(--color-${selectedColor}${!faint ? `-${intensity}` : ''})`
+}
+
+export const canUserManageEvent = (
+  event?: { eventCollaborators: { user: { id: string } }[]; host: { id: string } },
+  user?: Session['user']
+) => {
+  if (!user || !event) return false
+  const isHost = event.host.id === user.id
+  const isCollaborator = event.eventCollaborators.some((collab) => collab.user.id === user.id)
+  return isCollaborator || isHost
 }

@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { notFound, unauthorized } from 'next/navigation'
 import { auth } from '@/lib/auth'
+import { canUserManageEvent } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 import { EventForm } from '../../../components/EventForm'
 
@@ -19,7 +20,7 @@ export default async function EditEvent({ params }: { params: Promise<{ slug: st
     return notFound()
   }
 
-  if (event.hostId !== session?.user?.id) {
+  if (!canUserManageEvent(event, session?.user)) {
     return unauthorized()
   }
 

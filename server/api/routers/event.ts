@@ -172,6 +172,15 @@ export const eventRouter = createTRPCRouter({
         deletedAt: null,
       },
       include: {
+        eventCollaborators: {
+          select: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
         host: {
           select: {
             id: true,

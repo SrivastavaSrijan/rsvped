@@ -16,7 +16,7 @@ import {
 import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
 import { useEventDateTime } from '@/lib/hooks'
-import { cn } from '@/lib/utils'
+import { canUserManageEvent, cn } from '@/lib/utils'
 import { RouterOutput } from '@/server/api/root'
 import { EventLocation } from './EventLocation'
 
@@ -49,8 +49,29 @@ export const EventCard = ({
   const status = rsvpStatus ? RSVPLabels[rsvpStatus] : null
   const rsvpBadgeVariant = rsvpStatus ? RSVPBadgeVariants[rsvpStatus] : 'default'
 
-  const canManage =
-    user?.id === host?.id || (eventCollaborators ?? []).some((collab) => collab.userId === user?.id)
+  const canManage = canUserManageEvent({ eventCollaborators, host }, user)
+
+  const renderEventCollaborators = () => (
+    <div className="-space-x-1 flex">
+      {(eventCollaborators ?? []).map(
+        ({ user: collaborator }) =>
+          collaborator?.image &&
+          collaborator?.name && (
+            <Tooltip key={collaborator.id}>
+              <TooltipTrigger>
+                <AvatarWithFallback
+                  className="size-4"
+                  src={collaborator.image}
+                  name={collaborator.name}
+                />
+              </TooltipTrigger>
+              <TooltipContent>{collaborator.name}</TooltipContent>
+            </Tooltip>
+          )
+      )}
+      {host?.name && <AvatarWithFallback src={host?.image} name={host?.name} className="size-4" />}
+    </div>
+  )
 
   return (
     <div className="grid w-full grid-cols-[repeat(24,_1fr)] gap-x-1 lg:gap-x-2">
@@ -75,28 +96,10 @@ export const EventCard = ({
             <div className="col-span-2 flex flex-col gap-3.5 lg:gap-3.5">
               <p className="text-muted-foreground text-sm">{range.time}</p>
               <h2 className="font-semibold text-xl">{title}</h2>
-              {host?.image && host?.name && !canManage && (
+              {!canManage && (
                 <div className="flex flex-row items-center gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="-space-x-1 flex">
-                      {(eventCollaborators ?? []).map(
-                        ({ user: collaborator }) =>
-                          collaborator?.image &&
-                          collaborator?.name && (
-                            <Tooltip key={collaborator.id}>
-                              <TooltipTrigger>
-                                <AvatarWithFallback
-                                  className="size-4"
-                                  src={collaborator.image}
-                                  name={collaborator.name}
-                                />
-                              </TooltipTrigger>
-                              <TooltipContent>{collaborator.name}</TooltipContent>
-                            </Tooltip>
-                          )
-                      )}
-                      <AvatarWithFallback src={host.image} name={host.name} className="size-4" />
-                    </div>
+                    {renderEventCollaborators()}
 
                     <p className="truncate font-medium text-muted-foreground text-sm">
                       By {host.name}{' '}
@@ -144,7 +147,7 @@ export const EventCard = ({
                 )}
               </div>
               {canManage && (
-                <div className="mt-2 flex flex-row gap-2">
+                <div className="mt-2 flex flex-row gap-3">
                   <Link
                     passHref
                     href={`${Routes.Main.Events.ManageBySlug(slug)}?next=${encodeURIComponent(Routes.Main.Events.Home)}`}
@@ -154,6 +157,13 @@ export const EventCard = ({
                       <ArrowUpRight />
                     </Button>
                   </Link>
+                  <div className="flex flex-col items-start gap-2 lg:flex-row lg:items-center">
+                    {renderEventCollaborators()}
+                    <p className="truncate font-medium text-muted-foreground text-sm">
+                      By you
+                      {eventCollaborators?.length > 0 && ` & ${eventCollaborators?.length} others`}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

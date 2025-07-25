@@ -6,6 +6,7 @@ import { ManageEventCard } from '@/app/(main)/components'
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
+import { canUserManageEvent } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
@@ -27,7 +28,7 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
     return notFound()
   }
 
-  if (event.hostId !== session?.user?.id) {
+  if (!canUserManageEvent(event, session?.user)) {
     return unauthorized()
   }
   const pathname = (await headers()).get('x-pathname') || ''

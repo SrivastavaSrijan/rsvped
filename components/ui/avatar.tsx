@@ -44,7 +44,7 @@ function AvatarWithFallback({
   name,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root> & {
-  src?: string
+  src?: string | null
   name?: string
   alt?: string
 }) {
@@ -55,7 +55,7 @@ function AvatarWithFallback({
       style={{ backgroundColor: getRandomColor({ seed: name, intensity: 30 }) }}
       {...props}
     >
-      <AvatarImage src={src} alt={name} />
+      <AvatarImage src={src ?? undefined} alt={name} />
       <AvatarFallback className="bg-[unset]">{initials}</AvatarFallback>
     </Avatar>
   )
