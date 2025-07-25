@@ -32,10 +32,10 @@ export const Routes = {
 				return `${this.Root}/home`
 			},
 			ViewBySlug(slug: string) {
-				return `${this.Root}/${slug}`
+				return `${this.Root}/${slug}/view`
 			},
 			ViewBySlugWithRegister(slug: string) {
-				return `${this.ViewBySlug(slug)}?register=true`
+				return `${this.ViewBySlug(slug)}?form=true`
 			},
 			ManageBySlug(slug: string) {
 				return `${this.Root}/${slug}/manage`
@@ -46,6 +46,19 @@ export const Routes = {
 		},
 	},
 } as const
+
+export const RouteDefs = {
+	Protected: [
+		Routes.Main.Events.Root,
+		Routes.Main.Events.Create,
+		Routes.Main.Events.Home,
+		Routes.Main.Events.EditBySlug('[slug]'),
+	],
+	Public: [
+		Routes.Main.Events.ViewBySlug('[slug]'),
+		Routes.Main.Events.ViewBySlugWithRegister('[slug]'),
+	],
+}
 
 export const getAvatarURL = (name: string) => {
 	return `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(name)}&flip=true`

@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs'
 import { type ClassValue, clsx } from 'clsx'
-import type { Session } from 'next-auth'
 import { twMerge } from 'tailwind-merge'
 import {
 	type ThemeColorIntensity,
@@ -90,12 +89,32 @@ export function getRandomColor({
 	return `var(--color-${selectedColor}${!faint ? `-${intensity}` : ''})`
 }
 
-export const canUserManageEvent = (
-	event?: { eventCollaborators: { user: { id: string } }[]; host: { id: string } },
-	user?: Session['user']
-) => {
-	if (!user || !event) return false
-	const isHost = event.host.id === user.id
-	const isCollaborator = event.eventCollaborators.some((collab) => collab.user.id === user.id)
-	return isCollaborator || isHost
+/**
+ * Matches a pathname against a pattern containing dynamic segments like [slug].
+ * This provides a reliable way to check for dynamic routes inside middleware.
+ *
+ * @example
+ * matchPathSegments('/events/123/view', '/events/[slug]/view') // true
+ * matchPathSegments('/events/create', '/events/[slug]/view')   // false
+ *
+ * @param pathname The actual URL path from the request.
+ * @param pattern The route pattern to match against.
+ * @returns `true` if the pathname matches the pattern.
+ */
+export function matchPathSegments(pathname: string, pattern: string): boolean {
+	const pathSegments = pathname.split('/').filter(Boolean)
+	const patternSegments = pattern.split('/').filter(Boolean)
+
+	if (pathSegments.length !== patternSegments.length) {
+		return false
+	}
+
+	return patternSegments.every((segment, i) => {
+		// A dynamic segment (e.g., [slug]) is a wildcard for one segment.
+		if (segment.startsWith('[') && segment.endsWith(']')) {
+			return true
+		}
+		// Static segments must match exactly.
+		return segment === pathSegments[i]
+	})
 }

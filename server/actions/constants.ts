@@ -1,4 +1,4 @@
-import { AuthErrorCodes, EventErrorCodes } from './types'
+import { AuthErrorCodes, EventErrorCodes, RsvpErrorCodes } from './types'
 
 export const AuthActionErrorCodeMap: Record<AuthErrorCodes, string> = {
 	[AuthErrorCodes.REGISTRATION_REQUIRED]: 'Please sign in to continue.',
@@ -19,4 +19,11 @@ export const EventActionErrorCodeMap: Record<EventErrorCodes, string> = {
 	[EventErrorCodes.UPDATE_FAILED]: 'Failed to update the event. Please try again.',
 	[EventErrorCodes.NOT_FOUND]: 'Event not found.',
 	[EventErrorCodes.UNAUTHORIZED]: 'You are not authorized to perform this action.',
+}
+
+export const RsvpActionErrorCodeMap: Record<RsvpErrorCodes, string> = {
+	[RsvpErrorCodes.ALREADY_REGISTERED]: 'You have already registered for this event.',
+	[RsvpErrorCodes.EVENT_FULL]: 'This event is full.',
+	[RsvpErrorCodes.VALIDATION_ERROR]: 'Please check the fields and try again.',
+	[RsvpErrorCodes.UNEXPECTED_ERROR]: 'An unexpected error occurred. Please try again.',
 }

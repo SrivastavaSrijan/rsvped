@@ -10,7 +10,7 @@ import { ShareActions } from './ShareActions'
 import { ShareLink } from './ShareLink'
 import { Stats } from './Stats'
 
-type RouterOutputEvent = RouterOutput['event']['getBySlug']
+type RouterOutputEvent = RouterOutput['event']['getEvent']
 interface ManageEventCardProps extends RouterOutputEvent {
 	url: string
 }

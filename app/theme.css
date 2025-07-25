@@ -58,6 +58,8 @@
 	--color-pale-gray: rgba(147, 149, 151, 0.133);
 	--color-faint-gray: rgba(147, 149, 151, 0);
 	--color-darker-pale-gray: rgba(147, 149, 151, 0.267);
+	--color-faint-white: rgba(255, 255, 255, 0.067);
+	--color-pale-white: rgba(255, 255, 255, 0.133);
 }
 
 @theme {

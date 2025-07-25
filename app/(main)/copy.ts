@@ -14,6 +14,7 @@ export const copy = {
 		email: 'Email Address',
 		password: 'Password',
 		name: 'Name',
+		ticket: 'Select Ticket',
 	},
 	welcome: 'Welcome! To register for this event, please click below.',
 	register: {

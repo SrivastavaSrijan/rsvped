@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
@@ -20,7 +21,10 @@ export const rsvpRouter = createTRPCRouter({
 		})
 
 		if (existingRsvp) {
-			throw new Error("You have already RSVP'd to this event")
+			throw new TRPCError({
+				code: 'CONFLICT',
+				message: 'ALREADY_REGISTERED',
+			})
 		}
 
 		// Check event capacity
@@ -34,36 +38,52 @@ export const rsvpRouter = createTRPCRouter({
 		})
 
 		if (!event) {
-			throw new Error('Event not found')
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'EVENT_NOT_FOUND',
+			})
 		}
 
 		if (event.capacity && event._count.rsvps >= event.capacity) {
-			throw new Error('Event is at capacity')
+			throw new TRPCError({
+				code: 'PRECONDITION_FAILED',
+				message: 'EVENT_FULL',
+			})
 		}
 
-		// Create RSVP
-		return ctx.prisma.rsvp.create({
-			data: {
-				eventId: input.eventId,
-				name: input.name,
-				email: input.email,
-				ticketTierId: input.ticketTierId,
-			},
-			include: {
-				event: {
-					select: {
-						title: true,
-						startDate: true,
+		// transaction to update RSVP count and create RSVP
+		return ctx.prisma.$transaction([
+			ctx.prisma.event.update({
+				where: { id: input.eventId },
+				data: {
+					rsvpCount: {
+						increment: 1,
 					},
 				},
-				ticketTier: {
-					select: {
-						name: true,
-						priceCents: true,
+			}),
+			ctx.prisma.rsvp.create({
+				data: {
+					eventId: input.eventId,
+					name: input.name,
+					email: input.email,
+					ticketTierId: input.ticketTierId,
+				},
+				include: {
+					event: {
+						select: {
+							title: true,
+							startDate: true,
+						},
+					},
+					ticketTier: {
+						select: {
+							name: true,
+							priceCents: true,
+						},
 					},
 				},
-			},
-		})
+			}),
+		])
 	}),
 
 	getByEmail: publicProcedure

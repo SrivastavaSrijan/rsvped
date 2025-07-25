@@ -1,7 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Session } from 'next-auth'
 import {
 	Avatar,
 	AvatarFallback,
@@ -16,14 +15,13 @@ import {
 import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
 import { useEventDateTime } from '@/lib/hooks'
-import { canUserManageEvent, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import type { RouterOutput } from '@/server/api/root'
 import { EventLocation } from './EventLocation'
 
-type EventCardData = RouterOutput['event']['getUserEvents'][number]
+type EventCardData = RouterOutput['event']['getEvents'][number]
 export interface EventCardProps extends EventCardData {
 	isLast: boolean
-	user?: Session['user']
 }
 
 export const EventCard = ({
@@ -40,16 +38,16 @@ export const EventCard = ({
 	rsvps,
 	rsvpCount,
 	eventCollaborators,
+	metadata,
 	isLast,
-	user,
 }: EventCardProps) => {
 	const { start, relative, range } = useEventDateTime({ start: startDate, end: endDate })
 
-	const rsvpStatus = rsvps.find((rsvp) => rsvp?.user?.id === user?.id)?.status
-	const status = rsvpStatus ? RSVPLabels[rsvpStatus] : null
-	const rsvpBadgeVariant = rsvpStatus ? RSVPBadgeVariants[rsvpStatus] : 'default'
+	const canManage = metadata?.user?.access?.manager
+	const rsvp = metadata?.user?.rsvp
 
-	const canManage = canUserManageEvent({ eventCollaborators, host }, user)
+	const status = rsvp?.status ? RSVPLabels[rsvp.status] : null
+	const rsvpBadgeVariant = rsvp?.status ? RSVPBadgeVariants[rsvp.status] : 'default'
 
 	const renderEventCollaborators = () => (
 		<div className="-space-x-1 flex">

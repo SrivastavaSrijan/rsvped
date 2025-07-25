@@ -43,7 +43,7 @@ interface EventFormProps {
 	}
 	mode?: 'create' | 'edit'
 	eventSlug?: string
-	event?: RouterOutput['event']['getBySlug']
+	event?: RouterOutput['event']['getEvent']
 }
 
 const initialEventState: EventActionResponse = {

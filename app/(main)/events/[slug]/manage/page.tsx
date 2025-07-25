@@ -4,9 +4,7 @@ import Link from 'next/link'
 import { notFound, unauthorized } from 'next/navigation'
 import { ManageEventCard } from '@/app/(main)/components'
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
-import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
-import { canUserManageEvent } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
@@ -21,14 +19,12 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
 export default async function ViewEvent({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params
 	const api = await getAPI()
-	const session = await auth()
-
-	const event = await api.event.getBySlug({ slug })
+	const event = await api.event.getEvent({ slug })
 	if (!event) {
 		return notFound()
 	}
 
-	if (!canUserManageEvent(event, session?.user)) {
+	if (!event?.metadata?.user?.access?.manager) {
 		return unauthorized()
 	}
 	const pathname = (await headers()).get('x-pathname') || ''

@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound, unauthorized } from 'next/navigation'
-import { auth } from '@/lib/auth'
-import { canUserManageEvent } from '@/lib/utils'
 import { getAPI } from '@/server/api'
-import { EventForm } from '../../../components/EventForm'
+import { EventForm } from '../../../components'
 
 export const metadata: Metadata = {
 	title: "Edit Event · RSVP'd",
@@ -13,14 +11,13 @@ export const metadata: Metadata = {
 export default async function EditEvent({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params
 	const api = await getAPI()
-	const session = await auth()
 
-	const event = await api.event.getBySlug({ slug })
+	const event = await api.event.getEvent({ slug })
 	if (!event) {
 		return notFound()
 	}
 
-	if (!canUserManageEvent(event, session?.user)) {
+	if (!event?.metadata?.user?.access?.manager) {
 		return unauthorized()
 	}
 

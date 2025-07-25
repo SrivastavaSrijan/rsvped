@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
-import { auth } from '@/lib/auth'
 import { AssetMap, Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import { EventCard, EventsPagination, PeriodTabs } from '../../components'
@@ -20,8 +19,7 @@ export default async function EventsHome({
 }) {
 	const { period = 'upcoming', page = '1' } = await searchParams
 	const api = await getAPI()
-	const session = await auth()
-	const events = await api.event.getUserEvents({
+	const events = await api.event.getEvents({
 		sort: 'asc',
 		after: period === 'upcoming' ? now : undefined,
 		before: period === 'past' ? now : undefined,
@@ -60,14 +58,7 @@ export default async function EventsHome({
 				)}
 
 				{events.map((event, index) => {
-					return (
-						<EventCard
-							key={event.slug}
-							{...event}
-							isLast={index === events.length - 1}
-							user={session?.user}
-						/>
-					)
+					return <EventCard key={event.slug} {...event} isLast={index === events.length - 1} />
 				})}
 
 				{events.length > 0 && (

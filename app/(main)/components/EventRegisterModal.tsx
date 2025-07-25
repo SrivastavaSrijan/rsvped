@@ -1,9 +1,16 @@
 'use client'
-import { AlertCircle, Loader2, LogInIcon, Mail, Tickets } from 'lucide-react'
-import Image from 'next/image'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { Background, Form } from '@/components/shared'
-import { Alert, AlertDescription, AlertTitle, InputWithError } from '@/components/ui'
+import { Check, Loader2, Ticket } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
+import { Form } from '@/components/shared'
+import {
+	Badge,
+	InputWithError,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import {
 	Dialog,
@@ -15,79 +22,128 @@ import {
 import { Routes } from '@/lib/config'
 import { useActionStateWithError } from '@/lib/hooks'
 import {
-	AuthActionErrorCodeMap,
-	type AuthActionResponse,
-	type AuthFormData,
-	authAction,
-	signInWithGoogle,
+	createRsvpAction,
+	RsvpActionErrorCodeMap,
+	type RsvpActionResponse,
+	type RsvpFormData,
 } from '@/server/actions'
-import type { AuthErrorCodes } from '@/server/actions/types'
+import type { RouterOutput } from '@/server/api/root'
 import { copy } from '../copy'
 
-const initalState: AuthActionResponse = {
+const initalState: RsvpActionResponse = {
 	success: false,
 	fieldErrors: {},
 }
 
-interface AuthModalProps {
-	prefill?: Partial<AuthFormData>
+type EventRegisterData = RouterOutput['event']['getEvent']
+
+interface EventRegisterModalProps extends EventRegisterData {
+	prefill?: Partial<RsvpFormData>
 }
 
-export const EventRegisterModal = ({ prefill }: AuthModalProps) => {
-	const { push } = useRouter()
-	const searchParams = useSearchParams()
+export const EventRegisterModal = ({
+	prefill: propPrefill,
+	ticketTiers,
+	id,
+	metadata,
+}: EventRegisterModalProps) => {
+	const { replace } = useRouter()
 	const { slug } = useParams()
+
+	const prefill = propPrefill || {
+		name: metadata?.user?.name || '',
+		email: metadata?.user?.email || '',
+	}
 
 	const {
 		state,
 		formAction,
 		isPending: isFormPending,
-		errorComponent: loginError,
+		errorComponent: rsvpError,
 	} = useActionStateWithError({
-		action: authAction,
+		action: createRsvpAction,
 		initialState: initalState,
-		errorCodeMap: AuthActionErrorCodeMap,
+		errorCodeMap: RsvpActionErrorCodeMap,
 		displayMode: 'inline',
 	})
 
+	const handleClose = (open: boolean) => {
+		if (!open && slug && typeof slug === 'string') {
+			replace(Routes.Main.Events.ViewBySlug(slug))
+		}
+	}
+
+	if (state.success || metadata?.user?.rsvp) {
+		return (
+			<Dialog open onOpenChange={handleClose}>
+				<DialogContent>
+					<DialogHeader className="text-center items-center">
+						<div className="mb-3 flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-green-500/20 text-green-500 p-2">
+							<Check />
+						</div>
+						<DialogTitle>You're In!</DialogTitle>
+						<DialogDescription>
+							You have successfully registered for this event. A confirmation has been sent to your
+							email.
+						</DialogDescription>
+					</DialogHeader>
+				</DialogContent>
+			</Dialog>
+		)
+	}
+
 	return (
-		<Dialog
-			open
-			onOpenChange={(open) => {
-				if (!open && slug && typeof slug === 'string') {
-					push(Routes.Main.Events.ViewBySlug(slug))
-				}
-			}}
-		>
+		<Dialog open onOpenChange={handleClose}>
 			<DialogContent>
 				<DialogHeader className="text-left">
-					<div className="mb-3 flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-white/50 p-2">
-						<Tickets />
-					</div>
-					<DialogTitle>Your Info</DialogTitle>
+					<DialogTitle>Register for Event</DialogTitle>
 					<DialogDescription>{copy.register.description}</DialogDescription>
-					{loginError}
+					{rsvpError}
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
 					<Form action={formAction} className="flex flex-col gap-3 lg:gap-3">
-						<input type="hidden" name="next" value={searchParams.get('next') || ''} />
+						<input type="hidden" name="eventId" value={id} />
 						<InputWithError
-							error={state.fieldErrors?.password}
-							name="password"
-							type="password"
-							placeholder={copy.placeholders.password}
-							defaultValue={prefill?.password}
+							error={state.fieldErrors?.name}
+							name="name"
+							type="text"
+							placeholder="Your Name"
+							defaultValue={prefill?.name}
 							required
 						/>
 						<InputWithError
 							error={state.fieldErrors?.email}
 							name="email"
 							type="email"
-							placeholder={copy.placeholders.email}
+							placeholder="Your Email"
 							defaultValue={prefill?.email}
 							required
 						/>
-
+						<Select name="ticketTierId">
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder={copy.placeholders.ticket} />
+							</SelectTrigger>
+							<SelectContent>
+								{ticketTiers.map(
+									({ name, id, priceCents, quantitySold = 0, quantityTotal = 1, currency }) => (
+										<SelectItem key={id} value={id}>
+											{name} -{' '}
+											{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
+												priceCents / 100
+											)}
+											<Badge
+												className="ml-2"
+												variant={
+													(quantitySold / (quantityTotal ?? 1)) * 100 > 100 ? 'default' : 'outline'
+												}
+											>
+												{(quantitySold / (quantityTotal ?? 1)) * 100}% Sold
+											</Badge>
+										</SelectItem>
+									)
+								)}
+							</SelectContent>
+						</Select>
 						<Button
 							type="submit"
 							disabled={isFormPending}
@@ -96,12 +152,11 @@ export const EventRegisterModal = ({ prefill }: AuthModalProps) => {
 							{isFormPending ? (
 								<Loader2 className="size-3 animate-spin" />
 							) : (
-								<Mail className="size-3" />
+								<Ticket className="size-3" />
 							)}
 							Register
 						</Button>
 					</Form>
-					<hr />
 				</div>
 			</DialogContent>
 		</Dialog>
