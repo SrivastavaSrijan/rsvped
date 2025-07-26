@@ -5,11 +5,9 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
-		"postinstall": "prisma generate && simple-git-hooks",
+		"postinstall": "prisma generate && yarn format && simple-git-hooks",
 		"start": "next start",
-		"lint": "biome check --write .",
-		"lint:check": "biome check .",
-		"format": "biome format --write .",
+		"format": "biome check --write .",
 		"db:generate": "prisma generate",
 		"db:push": "prisma db push",
 		"db:migrate": "prisma migrate dev",
@@ -23,6 +21,7 @@
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.10.0",
+		"@bprogress/next": "^3.2.12",
 		"@hookform/resolvers": "^5.1.1",
 		"@prisma/client": "^6.11.1",
 		"@radix-ui/react-alert-dialog": "^1.1.14",
@@ -71,7 +70,7 @@
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": [
-			"biome check --write"
+			"biome format --write"
 		]
 	},
 	"devDependencies": {

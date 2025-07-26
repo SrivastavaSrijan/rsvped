@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Averia_Serif_Libre, Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
-import { TRPCProvider } from '@/lib/trpc'
+import Providers from './providers'
 
 const inter = Inter({
 	subsets: ['latin'],
@@ -31,8 +31,10 @@ export default function RootLayout({
 			<meta name="apple-mobile-web-app-title" content="RSVP'd" />
 			<meta name="og:image" content="/preview.jpg" />
 			<body className={`${inter.variable} ${averia.variable} font-sans antialiased`}>
-				<TRPCProvider>{children}</TRPCProvider>
-				<Toaster />
+				<Providers>
+					{children}
+					<Toaster />
+				</Providers>
 			</body>
 		</html>
 	)
