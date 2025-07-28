@@ -6,7 +6,7 @@ import { TRPCProvider } from '@/lib/trpc'
 const Providers = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<TRPCProvider>
-			<ProgressProvider height="4px" color="#fef4f9" delay={1000}>
+			<ProgressProvider height="4px" color="#fef4f9" delay={1000} options={{ showSpinner: false }}>
 				{children}
 			</ProgressProvider>
 		</TRPCProvider>

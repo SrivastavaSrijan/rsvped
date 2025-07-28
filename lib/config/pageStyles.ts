@@ -9,7 +9,7 @@ type PageStyle = {
 }
 
 const getRandomGradient = (seed?: string) => ({
-	background: `linear-gradient(${getRandomColor({ faint: true, seed })} 0%, ${getRandomColor({ faint: true, seed })} 50%, var(--color-faint-gray) 100%)`,
+	background: `linear-gradient(${getRandomColor({ palette: 'faint', seed })} 0%, ${getRandomColor({ palette: 'faint', seed })} 50%, var(--color-faint-gray) 100%)`,
 })
 const getRandomBackground = (seed?: string) => ({
 	backgroundColor: getRandomColor({ seed, intensity: 80 }),

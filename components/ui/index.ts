@@ -19,7 +19,16 @@ export { Badge, badgeVariants } from './badge'
 export { Button, buttonVariants } from './button'
 export { Calendar } from './calendar'
 export { DateTimePicker } from './calendar-with-time'
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
+export {
+	Card,
+	CardAction,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from './card'
+export { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './carousel'
 export { Checkbox } from './checkbox'
 export {
 	Dialog,

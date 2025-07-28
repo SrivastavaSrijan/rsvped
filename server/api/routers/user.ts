@@ -5,6 +5,21 @@ import { hashPassword } from '@/lib/utils'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
 export const userRouter = createTRPCRouter({
+	getCurrentUser: publicProcedure.query(async ({ ctx, input }) => {
+		if (!ctx.session?.user) {
+			throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not authenticated' })
+		}
+		const user = await ctx.prisma.user.findUnique({
+			where: { id: ctx.session.user.id },
+			include: {
+				location: true,
+			},
+		})
+		if (!user) {
+			throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' })
+		}
+		return user
+	}),
 	findByEmail: publicProcedure
 		.input(
 			z.object({

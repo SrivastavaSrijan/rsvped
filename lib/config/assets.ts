@@ -9,4 +9,7 @@ export const AssetMap = {
 	get NoEvents() {
 		return `${this.root}/no-events.svg`
 	},
+	get Locations() {
+		return `${this.root}/location-icons`
+	},
 }

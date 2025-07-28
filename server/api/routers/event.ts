@@ -65,7 +65,7 @@ const eventInclude = {
 	location: true,
 	categories: { include: { category: true } },
 	rsvps: {
-		take: 10,
+		take: 5,
 		orderBy: { createdAt: 'desc' },
 		where: { status: 'CONFIRMED' },
 		select: {
@@ -366,4 +366,39 @@ export const eventRouter = createTRPCRouter({
 
 		return eventsWithContext
 	}),
+
+	getEventsByLocation: publicProcedure
+		.input(z.object({ locationId: z.string().optional().nullable() }))
+		.query(async ({ ctx, input }) => {
+			const { locationId } = input
+			if (!locationId) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'User location not found',
+				})
+			}
+
+			const events = await ctx.prisma.event.findMany({
+				where: {
+					location: {
+						id: locationId,
+					},
+				},
+				select: {
+					id: true,
+					title: true,
+					slug: true,
+					startDate: true,
+					endDate: true,
+					coverImage: true,
+				},
+			})
+			if (events.length === 0) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'No nearby events found',
+				})
+			}
+			return events
+		}),
 })

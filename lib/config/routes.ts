@@ -25,8 +25,21 @@ export const Routes = {
 			get Create() {
 				return `${this.Root}/create`
 			},
+
 			get Discover() {
 				return `${this.Root}/discover`
+			},
+			get DiscoverErrorNoLocation() {
+				return `${this.Discover}?form=no-location`
+			},
+			get DiscoverAllCategories() {
+				return `${this.Root}/discover`
+			},
+			DiscoverByCategory(slug: string) {
+				return `${this.Discover}/category/${slug}`
+			},
+			DiscoverByLocation(slug: string) {
+				return `${this.Discover}/location/${slug}`
 			},
 			get Home() {
 				return `${this.Root}/home`
@@ -35,7 +48,7 @@ export const Routes = {
 				return `${this.Root}/${slug}/view`
 			},
 			ViewBySlugWithRegister(slug: string) {
-				return `${this.ViewBySlug(slug)}?form=true`
+				return `${this.ViewBySlug(slug)}?form=register`
 			},
 			ManageBySlug(slug: string) {
 				return `${this.Root}/${slug}/manage`

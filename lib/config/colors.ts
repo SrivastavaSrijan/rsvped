@@ -2,7 +2,15 @@
  * A curated list of theme color names suitable for random selection.
  * This list should be manually kept in sync with `app/theme.css`.
  */
-export const themeColorNames = ['cranberry', 'barney', 'purple'] as const
+export const mainThemeColorNames = ['cranberry', 'barney', 'purple'] as const
+export const extendedThemeColorNames = [
+	...mainThemeColorNames,
+	'blue',
+	'red',
+	'yellow',
+	'orange',
+	'green',
+] as const
 
 export const themeFaintColorNames = [
 	'pale-cranberry',
@@ -28,7 +36,8 @@ export const themeFaintColorNames = [
  */
 export const themeColorIntensities = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90] as const
 
-export type ThemeColorName = (typeof themeColorNames)[number]
-export type ThemeColorIntensity = (typeof themeColorIntensities)[number]
-
+export type MainThemeColorName = (typeof mainThemeColorNames)[number]
+export type ExtendedThemeColorName = (typeof extendedThemeColorNames)[number]
 export type ThemeFaintColorName = (typeof themeFaintColorNames)[number]
+
+export type ThemeColorIntensity = (typeof themeColorIntensities)[number]

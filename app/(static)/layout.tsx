@@ -1,5 +1,5 @@
-import { Background } from '@/components/shared'
-import { Footer, Navbar } from './components'
+import { Background, Footer } from '@/components/shared'
+import { Navbar } from './components'
 
 export default function StaticLayout({ children }: { children: React.ReactNode }) {
 	return (

@@ -1,6 +1,13 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { createTRPCRouter } from '@/server/api/trpc'
-import { eventRouter, imageRouter, rsvpRouter, userRouter } from './routers'
+import {
+	categoryRouter,
+	eventRouter,
+	imageRouter,
+	locationRouter,
+	rsvpRouter,
+	userRouter,
+} from './routers'
 import type { createTRPCContext } from './trpc'
 
 /**
@@ -12,7 +19,8 @@ export const appRouter = createTRPCRouter({
 	event: eventRouter,
 	rsvp: rsvpRouter,
 	image: imageRouter,
-
+	category: categoryRouter,
+	location: locationRouter,
 	user: userRouter,
 })
 

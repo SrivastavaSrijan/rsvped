@@ -7,7 +7,7 @@ import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
 import { copy } from '../copy'
 
-export default async function Navbar() {
+export const Navbar = async () => {
 	const session = await auth()
 	return (
 		<nav className="sticky top-0 z-10 bg-black/10 px-3 py-2 backdrop-blur-sm lg:px-4 lg:py-3">

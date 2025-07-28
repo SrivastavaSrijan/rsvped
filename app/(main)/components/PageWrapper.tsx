@@ -26,7 +26,7 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div
-			className={`min-h-screen w-full transition-colors duration-500 ease-in-out ${
+			className={`min-h-screen w-full transition-colors duration-500 ease-in-out  lg:pb-16 pb-4 ${
 				isLoaded ? 'opacity-100' : 'opacity-0'
 			}`}
 			style={styles.background}

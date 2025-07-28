@@ -27,5 +27,9 @@ export const copy = {
 		title: 'Discover Events',
 		description:
 			'Explore popular events near you, browse by category, or check out some of the great community calendars.',
+		upcoming: 'Upcoming Events',
+		viewAll: 'View All',
+		category: 'Browse by Category',
+		location: 'Explore Local Events',
 	},
 }

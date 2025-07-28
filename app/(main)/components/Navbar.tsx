@@ -8,7 +8,7 @@ import { Routes } from '@/lib/config'
 import { copy } from '../copy'
 import { ActiveLink } from './ActiveLink'
 
-export async function Navbar() {
+export const Navbar = async () => {
 	const session = await auth()
 	return (
 		<nav className="sticky top-0 z-10 bg-black/10 px-3 py-2 backdrop-blur-sm lg:px-4 lg:py-3">
@@ -22,7 +22,7 @@ export async function Navbar() {
 					<Image src="/logo.svg" alt="Background pattern" width={24} height={24} priority />
 				</Link>
 				<div className="flex-1" />
-				<div className="flex w-fullmax-w-extra-wide-page items-center justify-between">
+				<div className="flex w-full max-w-extra-wide-page items-center justify-between">
 					<div className="flex items-center space-x-1 lg:space-x-2">
 						<ActiveLink href={Routes.Main.Events.Home} icon={<Calendar className="size-3" />}>
 							{copy.nav.events}
@@ -34,6 +34,7 @@ export async function Navbar() {
 							{copy.nav.discover}
 						</ActiveLink>
 					</div>
+					<div className="flex-1" />
 					<div className="flex items-center space-x-2 lg:space-x-4">
 						<Link href={Routes.Main.Events.Create} passHref>
 							<Button variant="link" size="sm">

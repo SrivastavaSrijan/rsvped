@@ -2,10 +2,12 @@ import bcrypt from 'bcryptjs'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import {
+	type ExtendedThemeColorName,
+	extendedThemeColorNames,
+	type MainThemeColorName,
+	mainThemeColorNames,
 	type ThemeColorIntensity,
-	type ThemeColorName,
 	type ThemeFaintColorName,
-	themeColorNames,
 	themeFaintColorNames,
 } from './config'
 
@@ -37,7 +39,7 @@ export async function comparePasswords(password: string, hash: string): Promise<
  *
  * @param {object} options - The options for generating the color.
  * @param {string} [options.seed] - An input string (e.g., user ID) to deterministically select a color.
- * @param {ThemeColorName} [options.color] - A specific color name to force.
+ * @param {MainThemeColorName} [options.color] - A specific color name to force.
  * @param {ThemeColorIntensity} [options.intensity=50] - The color intensity.
  * @returns {string} A CSS variable string (e.g., "var(--color-cranberry-50)").
  */
@@ -51,6 +53,11 @@ function simpleHash(str: string): number {
 	return Math.abs(hash)
 }
 
+const ColorConfig = {
+	main: mainThemeColorNames,
+	faint: themeFaintColorNames,
+	extended: extendedThemeColorNames,
+}
 /**
  * Generates a CSS variable string for a theme color.
  *
@@ -60,7 +67,7 @@ function simpleHash(str: string): number {
  *
  * @param {object} options - The options for generating the color.
  * @param {string} [options.seed] - An input string (e.g., user ID) to deterministically select a color.
- * @param {ThemeColorName} [options.color] - A specific color name to force.
+ * @param {MainThemeColorName} [options.color] - A specific color name to force.
  * @param {ThemeColorIntensity} [options.intensity=50] - The color intensity.
  * @returns {string} A CSS variable string (e.g., "var(--color-cranberry-50)").
  */
@@ -68,15 +75,15 @@ export function getRandomColor({
 	seed,
 	color,
 	intensity = 50,
-	faint = false,
+	palette = 'main',
 }: {
 	seed?: string
-	color?: ThemeColorName | ThemeFaintColorName
+	color?: MainThemeColorName | ThemeFaintColorName
 	intensity?: ThemeColorIntensity
-	faint?: boolean
+	palette?: keyof typeof ColorConfig
 } = {}): string {
-	let selectedColor: ThemeColorName | ThemeFaintColorName
-	const map = faint ? themeFaintColorNames : themeColorNames
+	let selectedColor: MainThemeColorName | ThemeFaintColorName | ExtendedThemeColorName
+	const map = ColorConfig[palette]
 	if (color) {
 		selectedColor = color
 	} else if (seed) {
@@ -86,7 +93,7 @@ export function getRandomColor({
 		selectedColor = map[Math.floor(Math.random() * map.length)]
 	}
 
-	return `var(--color-${selectedColor}${!faint ? `-${intensity}` : ''})`
+	return `var(--color-${selectedColor}${palette !== 'faint' ? `-${intensity}` : ''})`
 }
 
 /**

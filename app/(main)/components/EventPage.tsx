@@ -99,7 +99,7 @@ export const EventPage = ({
 									.map((rsvp) => rsvp?.name)
 									.filter((value): value is string => !!value)
 									.join(', ')}
-								{(rsvps ?? []).length > 2 && ` and ${rsvps.length - 2} others`}
+								{(rsvps ?? []).length > 2 && ` and ${rsvpCount - 2} others`}
 							</p>
 						</div>
 					</div>

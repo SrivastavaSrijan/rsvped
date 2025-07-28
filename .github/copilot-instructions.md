@@ -328,6 +328,7 @@ export type Route = typeof Routes[keyof typeof Routes];
 - Do not use `mb-4`, `mt-2`, etc. directly in classNames – try to use flex and gap instead. Eg: `flex flex-col gap-4`
 - Do not use `h-*`, `w-*` for SVG icons - use `size-*` instead (e.g., `size-3` for 12px)
 - We use `@theme`. NOT `tailwind.config.js`. Do not create a `tailwind.config.js` directly.
+- When creating responsive styles, use only `lg:` to target larger screens. Do not use `md:` or `sm:` prefixes. Let the design be mobile-first. Use `sm:` only when absolutely necessary.
 
 ### ❌ Never Do This  
 - Just because you are an AI, do not just generate code without understanding the context. Do not generate verbose, overwritten code. Follow DRY like a pro. Try to consolidate code and avoid repetition. Eg: If I ask you to add edit functionality to an event, do not generate a new component for the edit form. Instead, reuse the existing `CreateEventForm` component and add the necessary props to handle editing. Also, you can modify the server action to handle both create and edit operations. Be frugal with code generation and avoid unnecessary complexity.

@@ -5,7 +5,7 @@ import { Routes } from '@/lib/config'
 import { AssetMap } from '@/lib/config/assets'
 import { copy } from '../copy'
 
-export default function Hero() {
+export const Hero = () => {
 	return (
 		<section className="container mx-auto w-full max-w-extra-wide-page">
 			<div className="grid grid-cols-1 items-center gap-8 py-4 lg:grid-cols-3 lg:gap-16 lg:py-12">
