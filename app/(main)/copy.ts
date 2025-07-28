@@ -20,4 +20,12 @@ export const copy = {
 	register: {
 		description: 'Please enter your details to register.',
 	},
+	home: {
+		title: 'Events',
+	},
+	discover: {
+		title: 'Discover Events',
+		description:
+			'Explore popular events near you, browse by category, or check out some of the great community calendars.',
+	},
 }

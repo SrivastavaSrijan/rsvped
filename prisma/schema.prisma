@@ -35,6 +35,10 @@ model User {
   hostedEvents Event[] @relation("Host")
   rsvps        Rsvp[]
 
+  // Location
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
   // Community features
   ownedCommunities     Community[]           @relation("CommunityOwner")
   communityMemberships CommunityMembership[]
@@ -175,6 +179,7 @@ model Location {
   iconPath  String // "/assets/location-icons/nyc-icon.png"
   
   events Event[]
+  users  User[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

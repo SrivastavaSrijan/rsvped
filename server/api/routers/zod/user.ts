@@ -8,6 +8,7 @@ import {
 	type CompleteEventMessage,
 	type CompleteEventReferral,
 	type CompleteEventView,
+	type CompleteLocation,
 	type CompleteRsvp,
 	type CompleteSession,
 	RelatedAccountModel,
@@ -18,6 +19,7 @@ import {
 	RelatedEventModel,
 	RelatedEventReferralModel,
 	RelatedEventViewModel,
+	RelatedLocationModel,
 	RelatedRsvpModel,
 	RelatedSessionModel,
 } from './index'
@@ -29,6 +31,7 @@ export const UserModel = z.object({
 	emailVerified: z.date().nullish(),
 	image: z.string().nullish(),
 	password: z.string().nullish(),
+	locationId: z.string().nullish(),
 	createdAt: z.date(),
 })
 
@@ -37,6 +40,7 @@ export interface CompleteUser extends z.infer<typeof UserModel> {
 	sessions: CompleteSession[]
 	hostedEvents: CompleteEvent[]
 	rsvps: CompleteRsvp[]
+	location?: CompleteLocation | null
 	ownedCommunities: CompleteCommunity[]
 	communityMemberships: CompleteCommunityMembership[]
 	eventMessages: CompleteEventMessage[]
@@ -56,6 +60,7 @@ export const RelatedUserModel: z.ZodSchema<CompleteUser> = z.lazy(() =>
 		sessions: RelatedSessionModel.array(),
 		hostedEvents: RelatedEventModel.array(),
 		rsvps: RelatedRsvpModel.array(),
+		location: RelatedLocationModel.nullish(),
 		ownedCommunities: RelatedCommunityModel.array(),
 		communityMemberships: RelatedCommunityMembershipModel.array(),
 		eventMessages: RelatedEventMessageModel.array(),

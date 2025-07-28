@@ -27,6 +27,7 @@ export const EventPage = ({
 	host,
 	rsvps,
 	venueName,
+	location,
 	venueAddress,
 	locationType,
 	onlineUrl,
@@ -106,12 +107,13 @@ export const EventPage = ({
 			</div>
 			<div className="col-span-full lg:col-span-7 flex flex-col gap-3 lg:gap-4">
 				<h1 className="lg:text-4xl text-2xl font-serif font-semibold">{title}</h1>
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-3 lg:gap-4">
 					<EventDateTime startDate={startDate} endDate={endDate} />
 					<EventLocation
 						locationType={locationType}
 						venueName={venueName}
 						venueAddress={venueAddress}
+						location={location}
 						onlineUrl={onlineUrl}
 						className="text-muted-foreground"
 						size="lg"

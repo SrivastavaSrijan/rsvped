@@ -62,6 +62,7 @@ const eventInclude = {
 			user: { select: { id: true, name: true, image: true } },
 		},
 	},
+	location: true,
 	categories: { include: { category: true } },
 	rsvps: {
 		take: 10,

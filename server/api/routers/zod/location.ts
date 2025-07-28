@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { type CompleteEvent, RelatedEventModel } from './index'
+import { type CompleteEvent, type CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
 
 export const LocationModel = z.object({
 	id: z.string(),
@@ -15,6 +15,7 @@ export const LocationModel = z.object({
 
 export interface CompleteLocation extends z.infer<typeof LocationModel> {
 	events: CompleteEvent[]
+	users: CompleteUser[]
 }
 
 /**
@@ -25,5 +26,6 @@ export interface CompleteLocation extends z.infer<typeof LocationModel> {
 export const RelatedLocationModel: z.ZodSchema<CompleteLocation> = z.lazy(() =>
 	LocationModel.extend({
 		events: RelatedEventModel.array(),
+		users: RelatedUserModel.array(),
 	})
 )
