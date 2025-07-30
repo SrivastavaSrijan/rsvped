@@ -9,6 +9,7 @@ export const CookieNames = {
 	 */
 	PrefillForm: 'prefill-form',
 	RedirectTimeoutProps: 'redirect-timeout-props',
+	PrefillLocation: 'prefill-location',
 } as const
 
 export type CookieName = (typeof CookieNames)[keyof typeof CookieNames]

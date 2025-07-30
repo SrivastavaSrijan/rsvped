@@ -16,6 +16,14 @@ export {
 } from './alert-dialog'
 export { Avatar, AvatarFallback, AvatarImage, AvatarWithFallback } from './avatar'
 export { Badge, badgeVariants } from './badge'
+export {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from './breadcrumb'
 export { Button, buttonVariants } from './button'
 export { Calendar } from './calendar'
 export { DateTimePicker } from './calendar-with-time'
@@ -75,6 +83,7 @@ export * from './pagination'
 export { Pagination } from './pagination'
 export { Popover, PopoverContent, PopoverTrigger } from './popover'
 export { RadioGroup, RadioGroupItem } from './radio-group'
+export { ScrollArea } from './scroll-area'
 export {
 	Select,
 	SelectContent,

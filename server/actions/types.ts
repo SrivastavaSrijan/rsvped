@@ -36,3 +36,18 @@ export enum RsvpErrorCodes {
 	VALIDATION_ERROR = 'VALIDATION_ERROR',
 	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 }
+
+export enum LocationUpdateActionErrorCode {
+	SERVER_ERROR = 'SERVER_ERROR',
+	FORBIDDEN = 'FORBIDDEN',
+}
+
+export type LocationFormData = {
+	locationId: string
+}
+
+export type LocationUpdateActionResponse = ServerActionResponse<
+	never,
+	LocationUpdateActionErrorCode,
+	LocationFormData
+>

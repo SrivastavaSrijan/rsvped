@@ -1,4 +1,4 @@
-import { chunk } from 'lodash'
+import { chunk } from 'es-toolkit/array'
 import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -43,10 +43,13 @@ export const Categories = ({ categories }: CategoriesProps) => {
 							className="pl-1 basis-2/5 flex flex-col gap-1"
 						>
 							{page.map(({ slug, name, _count: count, id }) => (
-								<Card key={id} className="h-full">
+								<Card key={id} className="h-full p-3 lg:p-6">
 									<Link href={Routes.Main.Events.DiscoverByCategory(slug)} passHref>
-										<CardHeader>
-											<CardTitle>{name}</CardTitle>
+										<CardHeader className="lg:px-2 px-2">
+											<CardTitle>
+												{' '}
+												<p className="text-sm lg:text-base">{name}</p>
+											</CardTitle>
 											<CardDescription>{count.events} events</CardDescription>
 											<CardAction></CardAction>
 										</CardHeader>
@@ -72,7 +75,9 @@ export const Categories = ({ categories }: CategoriesProps) => {
 							{page.map(({ slug, name, _count: count, id }) => (
 								<Card key={id}>
 									<CardHeader>
-										<CardTitle>{name}</CardTitle>
+										<CardTitle>
+											<p className="text-sm lg:text-base">{name}</p>
+										</CardTitle>
 										<CardDescription>{count.events} events</CardDescription>
 										<CardAction>
 											<Link href={Routes.Main.Events.DiscoverByCategory(slug)}>

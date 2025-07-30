@@ -1,4 +1,9 @@
-import { AuthErrorCodes, EventErrorCodes, RsvpErrorCodes } from './types'
+import {
+	AuthErrorCodes,
+	EventErrorCodes,
+	LocationUpdateActionErrorCode,
+	RsvpErrorCodes,
+} from './types'
 
 export const AuthActionErrorCodeMap: Record<AuthErrorCodes, string> = {
 	[AuthErrorCodes.REGISTRATION_REQUIRED]: 'Please sign in to continue.',
@@ -26,4 +31,9 @@ export const RsvpActionErrorCodeMap: Record<RsvpErrorCodes, string> = {
 	[RsvpErrorCodes.EVENT_FULL]: 'This event is full.',
 	[RsvpErrorCodes.VALIDATION_ERROR]: 'Please check the fields and try again.',
 	[RsvpErrorCodes.UNEXPECTED_ERROR]: 'An unexpected error occurred. Please try again.',
+}
+
+export const LocationActionErrorCodeMap: Record<LocationUpdateActionErrorCode, string> = {
+	[LocationUpdateActionErrorCode.SERVER_ERROR]: 'An unexpected error occurred. Please try again.',
+	[LocationUpdateActionErrorCode.FORBIDDEN]: 'You do not have permission to perform this action.',
 }

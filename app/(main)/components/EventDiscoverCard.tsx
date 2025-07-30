@@ -20,7 +20,7 @@ export const EventDiscoverCard = ({
 	})
 	return (
 		<Link href={Routes.Main.Events.ViewBySlug(slug)}>
-			<div className="flex flex-row gap-3 lg:gap-3 items-start">
+			<div className="flex flex-row gap-2 lg:gap-3 items-center">
 				<div className="shrink-0">
 					{coverImage && (
 						<Image
@@ -33,7 +33,7 @@ export const EventDiscoverCard = ({
 					)}
 				</div>
 				<div className="flex-1 items-center">
-					<h3 className="font-medium line-clamp-2">{title}</h3>
+					<h3 className="font-medium lg:text-base text-sm line-clamp-1">{title}</h3>
 					<p className="text-sm text-muted-foreground">{range.date}</p>
 					<p className="text-xs text-muted-foreground">{range.time}</p>
 				</div>

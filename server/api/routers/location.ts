@@ -1,8 +1,100 @@
-import { groupBy } from 'lodash'
+import type { Prisma } from '@prisma/client'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
+type Location = Prisma.LocationGetPayload<{
+	select: {
+		id: true
+		name: true
+		slug: true
+		country: true
+		continent: true
+		iconPath: true
+		_count: true
+	}
+}>
+
+// ────────────────────────────────────────────────────────────────────────────
+// Strongly‑typed structures with counts
+// continents → { _count, locations[] }
+// countries  → continent → { _count, countries }
+// countries[c].countries[country] → { _count, locations[] }
+
+interface ContinentsMap {
+	[continent: string]: {
+		_count: { countries: number; locations: number }
+		locations: Location[]
+	}
+}
+
+interface CountriesMap {
+	[continent: string]: {
+		_count: { locations: number }
+		countries: {
+			[country: string]: {
+				_count: { locations: number }
+				locations: Location[]
+			}
+		}
+	}
+}
+
+export const groupLocations = (locations: readonly Location[]) =>
+	locations.reduce<{
+		continents: ContinentsMap
+		countries: CountriesMap
+	}>(
+		(acc, loc) => {
+			const { continent, country } = loc
+
+			/* ── CONTINENTS ─────────────────────── */
+			const prevContinent = acc.continents[continent]
+			const isNewCountry = !acc.countries[continent]?.countries?.[country]
+
+			const updatedContinent: ContinentsMap[string] = {
+				_count: {
+					countries: (prevContinent?._count.countries ?? 0) + (isNewCountry ? 1 : 0),
+					locations: (prevContinent?._count.locations ?? 0) + 1,
+				},
+				locations: [...(prevContinent?.locations ?? []), loc],
+			}
+			const newContinents = { ...acc.continents, [continent]: updatedContinent }
+
+			/* ── COUNTRIES ──────────────────────── */
+			const prevContinentCountries = acc.countries[continent] ?? {
+				_count: { locations: 0 },
+				countries: {},
+			}
+
+			const prevCountry = prevContinentCountries.countries[country]
+			const updatedCountry = {
+				_count: {
+					locations: (prevCountry?._count.locations ?? 0) + 1,
+				},
+				locations: [...(prevCountry?.locations ?? []), loc],
+			}
+
+			const newCountriesForContinent = {
+				...prevContinentCountries.countries,
+				[country]: updatedCountry,
+			}
+
+			const updatedCountriesEntry = {
+				_count: { locations: prevContinentCountries._count.locations + 1 },
+				countries: newCountriesForContinent,
+			}
+
+			const newCountries = {
+				...acc.countries,
+				[continent]: updatedCountriesEntry,
+			}
+
+			return { continents: newContinents, countries: newCountries }
+		},
+		{ continents: {}, countries: {} }
+	)
+
 export const locationRouter = createTRPCRouter({
-	// Get all locations
+	// Get all locations with both continent and country groupings
 	list: publicProcedure.query(async ({ ctx }) => {
 		const locationsData = await ctx.prisma.location.findMany({
 			where: {
@@ -13,7 +105,7 @@ export const locationRouter = createTRPCRouter({
 					},
 				},
 			},
-			orderBy: [{ continent: 'asc' }, { name: 'asc' }],
+			orderBy: [{ continent: 'asc' }, { country: 'asc' }, { name: 'asc' }],
 			select: {
 				_count: true,
 				id: true,
@@ -24,7 +116,7 @@ export const locationRouter = createTRPCRouter({
 				continent: true,
 			},
 		})
-		const groupedContinents = groupBy(locationsData, 'continent')
-		return groupedContinents
+		const { continents, countries } = groupLocations(locationsData)
+		return { continents, countries }
 	}),
 })

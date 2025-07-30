@@ -2,10 +2,10 @@ import type { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/utils'
-import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
+import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc'
 
 export const userRouter = createTRPCRouter({
-	getCurrentUser: publicProcedure.query(async ({ ctx, input }) => {
+	getCurrentUser: publicProcedure.query(async ({ ctx }) => {
 		if (!ctx.session?.user) {
 			throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not authenticated' })
 		}
@@ -89,6 +89,22 @@ export const userRouter = createTRPCRouter({
 					email: true,
 					name: true,
 					createdAt: true,
+				},
+			})
+		}),
+
+	updateLocation: protectedProcedure
+		.input(
+			z.object({
+				locationId: z.string().min(1, 'Location is required'),
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			return ctx.prisma.user.update({
+				where: { id: ctx.session.user.id },
+				data: { locationId: input.locationId },
+				include: {
+					location: true,
 				},
 			})
 		}),

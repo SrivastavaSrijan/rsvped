@@ -1,5 +1,5 @@
 'use client'
-import { chunk } from 'lodash'
+import { chunk } from 'es-toolkit/array'
 import {
 	Carousel,
 	CarouselContent,
@@ -51,7 +51,7 @@ export const NearbyEvents = ({ nearbyEvents }: NearbyEventsProps) => {
 								// biome-ignore lint/suspicious/noArrayIndexKey: reasonable use of index as key
 								index
 							}`}
-							className="grid grid-cols-2 gap-4"
+							className="grid grid-cols-2 gap-6"
 						>
 							{page.map((event) => (
 								<EventDiscoverCard key={event.id} {...event} />

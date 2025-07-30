@@ -21,7 +21,7 @@ const formatDateTime = (date: dayjs.Dayjs) => ({
 	dayOfWeek: date.format('ddd'),
 	dayOfWeekFull: date.format('dddd'),
 	time: date.format('h:mm A'),
-	dateFormatted: date.format('dddd, MMMM D'),
+	dateFormatted: date.format('ddd, MMM D'),
 	dayjs: date,
 })
 

@@ -1,3 +1,4 @@
+import { Edit3 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -22,7 +23,7 @@ export default async function DiscoverEvents() {
 	const nearbyEvents = await api.event.getEventsByLocation({ locationId })
 
 	const categories = await api.category.list()
-	const locations = await api.location.list()
+	const { continents } = await api.location.list()
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
 			<div className="flex flex-col gap-2 lg:gap-3">
@@ -31,10 +32,22 @@ export default async function DiscoverEvents() {
 			</div>
 			<div className="flex flex-col gap-4 lg:gap-6">
 				<div className="flex w-full flex-row justify-between gap-4">
-					<div className="flex flex-col">
+					<div className="flex flex-col gap-2 lg:gap-2">
 						<h2 className="text-xl font-semibold">{copy.discover.upcoming}</h2>
-						<p className="text-lg text-muted-foreground">{location?.name}</p>
+						<div className="flex items-center flex-row gap-2">
+							<p className="text-lg text-muted-foreground">{location?.name}</p>
+							<Link href={Routes.Main.Events.DiscoverErrorNoLocation} passHref>
+								<Button variant="link" size="sm">
+									<Edit3 className="size-3" />
+									{copy.discover.changeLocation.replace(
+										'{location}',
+										location?.name || 'your location'
+									)}
+								</Button>
+							</Link>
+						</div>
 					</div>
+
 					<Link href={Routes.Main.Events.DiscoverByLocation(location?.slug)} passHref>
 						<Button variant="secondary">{copy.discover.viewAll}</Button>
 					</Link>
@@ -57,7 +70,7 @@ export default async function DiscoverEvents() {
 						<h2 className="text-xl font-semibold">{copy.discover.location}</h2>
 					</div>
 				</div>
-				<Locations locations={locations} defaultValue={location.continent} />
+				<Locations continents={continents} defaultValue={location.continent} />
 			</div>
 		</div>
 	)
