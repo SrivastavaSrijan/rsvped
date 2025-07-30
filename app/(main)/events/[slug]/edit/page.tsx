@@ -12,7 +12,7 @@ export default async function EditEvent({ params }: { params: Promise<{ slug: st
 	const { slug } = await params
 	const api = await getAPI()
 
-	const event = await api.event.getEvent({ slug })
+	const event = await api.event.get({ slug })
 	if (!event) {
 		return notFound()
 	}

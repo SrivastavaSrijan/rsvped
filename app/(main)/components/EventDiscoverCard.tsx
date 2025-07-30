@@ -3,9 +3,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Routes } from '@/lib/config'
 import { useEventDateTime } from '@/lib/hooks'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 
-type EventDiscoverCardData = RouterOutput['event']['getEventsByLocation'][number]
+type EventDiscoverCardData = RouterOutput['event']['listNearby'][number]
 interface EventDiscoverCardProps extends EventDiscoverCardData {}
 export const EventDiscoverCard = ({
 	startDate,

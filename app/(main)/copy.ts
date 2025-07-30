@@ -29,8 +29,9 @@ export const copy = {
 			'Explore popular events near you, browse by category, or check out some of the great community calendars.',
 		upcoming: 'Upcoming Events',
 		viewAll: 'View All',
-		changeLocation: 'Not in {location}?',
+		changeLocation: 'Not here?',
 		category: 'Browse by Category',
+		communities: 'Featured Communities',
 		location: 'Explore Local Events',
 	},
 }

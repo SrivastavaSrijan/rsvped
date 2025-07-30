@@ -38,6 +38,9 @@ export const Routes = {
 			DiscoverByCategory(slug: string) {
 				return `${this.Discover}/category/${slug}`
 			},
+			DiscoverByCommunity(slug: string) {
+				return `${this.Discover}/community/${slug}`
+			},
 			DiscoverByLocation(slug: string) {
 				return `${this.Discover}/location/${slug}`
 			},

@@ -16,10 +16,10 @@ import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
 import { useEventDateTime } from '@/lib/hooks'
 import { cn } from '@/lib/utils'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 import { EventLocation } from './EventLocation'
 
-type EventCardData = RouterOutput['event']['getEvents'][number]
+type EventCardData = RouterOutput['event']['list'][number]
 export interface EventCardProps extends EventCardData {
 	isLast: boolean
 }

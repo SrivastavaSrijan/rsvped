@@ -9,7 +9,7 @@ interface ManageFormProps {
 export default async function ManageForm({ params }: ManageFormProps) {
 	const api = await getAPI()
 	const { slug } = await params
-	const event = await api.event.getEvent({ slug })
+	const event = await api.event.get({ slug })
 
 	if (!event || !event.ticketTiers.length) {
 		// Or handle case where there are no ticket tiers

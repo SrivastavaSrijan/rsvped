@@ -5,12 +5,48 @@ import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
-import { Categories, Locations, NearbyEvents } from '../../components'
+import {
+	CategoryDiscoverCard,
+	CommunityDiscoverCard,
+	EventDiscoverCard,
+	Locations,
+	ResponsiveGridCarousel,
+} from '../../components'
 import { copy } from '../../copy'
 
 export const metadata: Metadata = {
 	title: "Discover Events  · RSVP'd",
 	description: 'Explore upcoming and past events in the community and RSVP to join.',
+}
+
+const PageConfig = {
+	nearbyEvents: {
+		pageSize: 12,
+		get lg() {
+			return this.pageSize / 2
+		},
+		get sm() {
+			return this.pageSize / 3
+		},
+	},
+	categories: {
+		pageSize: 12,
+		get lg() {
+			return this.pageSize / 2
+		},
+		get sm() {
+			return this.pageSize / 12
+		},
+	},
+	communities: {
+		pageSize: 12,
+		get lg() {
+			return this.pageSize / 2
+		},
+		get sm() {
+			return this.pageSize / 3
+		},
+	},
 }
 
 export default async function DiscoverEvents() {
@@ -20,10 +56,14 @@ export default async function DiscoverEvents() {
 	if (!locationId || !location) {
 		redirect(Routes.Main.Events.DiscoverErrorNoLocation)
 	}
-	const nearbyEvents = await api.event.getEventsByLocation({ locationId })
+	const nearbyEvents = await api.event.listNearby({
+		locationId,
+		take: PageConfig.nearbyEvents.pageSize,
+	})
 
-	const categories = await api.category.list()
+	const categories = await api.category.list({ take: PageConfig.categories.pageSize })
 	const { continents } = await api.location.list()
+	const communities = await api.community.list({ take: PageConfig.communities.pageSize })
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
 			<div className="flex flex-col gap-2 lg:gap-3">
@@ -39,10 +79,7 @@ export default async function DiscoverEvents() {
 							<Link href={Routes.Main.Events.DiscoverErrorNoLocation} passHref>
 								<Button variant="link" size="sm">
 									<Edit3 className="size-3" />
-									{copy.discover.changeLocation.replace(
-										'{location}',
-										location?.name || 'your location'
-									)}
+									{copy.discover.changeLocation}
 								</Button>
 							</Link>
 						</div>
@@ -52,7 +89,42 @@ export default async function DiscoverEvents() {
 						<Button variant="secondary">{copy.discover.viewAll}</Button>
 					</Link>
 				</div>
-				<NearbyEvents nearbyEvents={nearbyEvents} />
+				<ResponsiveGridCarousel
+					config={{
+						pageSize: {
+							lg: PageConfig.nearbyEvents.lg,
+							sm: PageConfig.nearbyEvents.sm,
+						},
+					}}
+					data={nearbyEvents}
+					item={EventDiscoverCard}
+				/>
+			</div>
+			<hr />
+			<div className="flex flex-col gap-4 lg:gap-6">
+				<div className="flex w-full flex-row justify-between gap-4">
+					<div className="flex flex-col">
+						<h2 className="text-xl font-semibold">{copy.discover.communities}</h2>
+					</div>
+				</div>
+				<ResponsiveGridCarousel
+					config={{
+						pageSize: {
+							lg: PageConfig.communities.lg,
+							sm: PageConfig.communities.sm,
+						},
+						gap: {
+							sm: 2,
+							lg: 2,
+						},
+						cols: {
+							lg: 3,
+							sm: 2,
+						},
+					}}
+					data={communities}
+					item={CommunityDiscoverCard}
+				/>
 			</div>
 			<hr />
 			<div className="flex flex-col gap-4 lg:gap-6">
@@ -61,7 +133,24 @@ export default async function DiscoverEvents() {
 						<h2 className="text-xl font-semibold">{copy.discover.category}</h2>
 					</div>
 				</div>
-				<Categories categories={categories} />
+				<ResponsiveGridCarousel
+					config={{
+						pageSize: {
+							lg: PageConfig.categories.lg,
+							sm: PageConfig.categories.sm,
+						},
+						gap: {
+							sm: 2,
+							lg: 2,
+						},
+						cols: {
+							lg: 3,
+							sm: 2,
+						},
+					}}
+					data={categories}
+					item={CategoryDiscoverCard}
+				/>
 			</div>
 			<hr />
 			<div className="flex flex-col gap-2 lg:gap-3">

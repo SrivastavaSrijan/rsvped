@@ -5,7 +5,7 @@
 		"clientKind": "git"
 	},
 	"files": {
-		"ignoreUnknown": false,
+		"ignoreUnknown": true,
 		"includes": ["**", "!.next", "!node_modules", "!dist", "!.vercel"],
 		"experimentalScannerIgnores": ["node_modules/", ".next/"]
 	},

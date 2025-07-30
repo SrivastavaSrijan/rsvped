@@ -27,7 +27,7 @@ import {
 	type RsvpActionResponse,
 	type RsvpFormData,
 } from '@/server/actions'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 import { copy } from '../copy'
 
 const initalState: RsvpActionResponse = {
@@ -35,7 +35,7 @@ const initalState: RsvpActionResponse = {
 	fieldErrors: {},
 }
 
-type EventRegisterData = RouterOutput['event']['getEvent']
+type EventRegisterData = RouterOutput['event']['get']
 
 interface EventRegisterModalProps extends EventRegisterData {
 	prefill?: Partial<RsvpFormData>

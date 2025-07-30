@@ -14,7 +14,7 @@ const now = new Date().toISOString()
 
 export const EventList = async ({ period, page }: EventListProps) => {
 	const api = await getAPI()
-	const events = await api.event.getEvents({
+	const events = await api.event.list({
 		sort: 'asc',
 		after: period === 'upcoming' ? now : undefined,
 		before: period === 'past' ? now : undefined,

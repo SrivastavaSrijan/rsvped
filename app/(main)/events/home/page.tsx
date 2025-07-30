@@ -20,7 +20,7 @@ export default async function EventsHome({
 }) {
 	const { period = 'upcoming', page = '1' } = await searchParams
 	const api = await getAPI()
-	const events = await api.event.getEvents({
+	const events = await api.event.list({
 		sort: 'asc',
 		after: period === 'upcoming' ? now : undefined,
 		before: period === 'past' ? now : undefined,

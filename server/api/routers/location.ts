@@ -1,4 +1,6 @@
 import type { Prisma } from '@prisma/client'
+import { TRPCError } from '@trpc/server'
+import z from 'zod'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
 type Location = Prisma.LocationGetPayload<{
@@ -118,5 +120,20 @@ export const locationRouter = createTRPCRouter({
 		})
 		const { continents, countries } = groupLocations(locationsData)
 		return { continents, countries }
+	}),
+
+	get: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+		const location = await ctx.prisma.location.findUnique({
+			where: { slug: input.slug, events: { some: { isPublished: true, deletedAt: null } } },
+			include: {
+				events: true,
+			},
+		})
+
+		if (!location) {
+			throw new TRPCError({ code: 'NOT_FOUND', message: 'Location not found' })
+		}
+
+		return location
 	}),
 })

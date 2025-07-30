@@ -77,37 +77,6 @@ const eventInclude = {
 } satisfies Prisma.EventInclude
 
 export const eventRouter = createTRPCRouter({
-	// Get all events
-	list: publicProcedure.query(async ({ ctx }) => {
-		return ctx.prisma.event.findMany({
-			where: {
-				deletedAt: null,
-				isPublished: true,
-			},
-			orderBy: { createdAt: 'desc' },
-			include: {
-				host: {
-					select: {
-						id: true,
-						name: true,
-						image: true,
-					},
-				},
-				categories: {
-					include: {
-						category: true,
-					},
-				},
-				ticketTiers: true,
-				_count: {
-					select: {
-						rsvps: true,
-					},
-				},
-			},
-		})
-	}),
-
 	// Create a new event (requires authentication)
 	create: protectedProcedure.input(CreateEventInput).mutation(async ({ ctx, input }) => {
 		if (!ctx.session?.user?.id) {
@@ -227,7 +196,7 @@ export const eventRouter = createTRPCRouter({
 		}
 	}),
 
-	getMetadataBySlug: publicProcedure
+	getMetadata: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const event = await ctx.prisma.event.findUnique({
@@ -252,7 +221,7 @@ export const eventRouter = createTRPCRouter({
 			return event
 		}),
 
-	getEvent: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
+	get: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
 		const event = await ctx.prisma.event.findUnique({
 			where: { slug: input.slug, deletedAt: null },
 			include: eventInclude,
@@ -289,7 +258,7 @@ export const eventRouter = createTRPCRouter({
 		return { ...event, metadata }
 	}),
 
-	getEvents: publicProcedure.input(GetEventsInput).query(async ({ ctx, input }) => {
+	list: publicProcedure.input(GetEventsInput).query(async ({ ctx, input }) => {
 		const user = ctx.session?.user
 		if (!user) return []
 
@@ -367,10 +336,15 @@ export const eventRouter = createTRPCRouter({
 		return eventsWithContext
 	}),
 
-	getEventsByLocation: publicProcedure
-		.input(z.object({ locationId: z.string().optional().nullable() }))
+	listNearby: publicProcedure
+		.input(
+			z.object({
+				locationId: z.string().optional().nullable(),
+				take: z.number().min(1).max(100).default(10),
+			})
+		)
 		.query(async ({ ctx, input }) => {
-			const { locationId } = input
+			const { locationId, take } = input
 			if (!locationId) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
@@ -384,6 +358,7 @@ export const eventRouter = createTRPCRouter({
 						id: locationId,
 					},
 				},
+				take,
 				select: {
 					id: true,
 					title: true,

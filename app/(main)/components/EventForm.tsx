@@ -33,7 +33,7 @@ import { TimezoneConfig } from '@/lib/config'
 import { LocationTypeLabels } from '@/lib/constants'
 import { useActionStateWithError } from '@/lib/hooks'
 import { EventActionErrorCodeMap, type EventActionResponse, saveEvent } from '@/server/actions'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 
 interface EventFormProps {
 	coverImage: {
@@ -43,7 +43,7 @@ interface EventFormProps {
 	}
 	mode?: 'create' | 'edit'
 	eventSlug?: string
-	event?: RouterOutput['event']['getEvent']
+	event?: RouterOutput['event']['get']
 }
 
 const initialEventState: EventActionResponse = {

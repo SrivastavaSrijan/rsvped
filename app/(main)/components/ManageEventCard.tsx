@@ -3,14 +3,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button, Card } from '@/components/ui'
 import { Routes } from '@/lib/config'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 import { ShareActions } from './ShareActions'
 import { ShareLink } from './ShareLink'
 import { Stats } from './Stats'
 
-type RouterOutputEvent = RouterOutput['event']['getEvent']
+type RouterOutputEvent = RouterOutput['event']['get']
 interface ManageEventCardProps extends RouterOutputEvent {
 	url: string
 }

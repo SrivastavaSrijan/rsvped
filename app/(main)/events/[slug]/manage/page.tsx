@@ -10,7 +10,7 @@ import { getAPI } from '@/server/api'
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
 	const { slug } = await params
 	const api = await getAPI()
-	const event = await api.event.getMetadataBySlug({ slug })
+	const event = await api.event.getMetadata({ slug })
 	return {
 		title: `${event.title} · RSVP'd`,
 		description: `View details for the event: ${event.title}`,
@@ -19,7 +19,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
 export default async function ViewEvent({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params
 	const api = await getAPI()
-	const event = await api.event.getEvent({ slug })
+	const event = await api.event.get({ slug })
 	if (!event) {
 		return notFound()
 	}

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
 import { getRandomColor } from '@/lib/utils'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 
 const MOBILE_PAGE_SIZE = 6 // 2 column * 3 rows
 

@@ -10,12 +10,12 @@ import {
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { useEventDateTime } from '@/lib/hooks'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 import { copy } from '../copy'
 import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 
-type EventPageData = RouterOutput['event']['getEvent']
+type EventPageData = RouterOutput['event']['get']
 interface EventPageProps extends EventPageData {}
 export const EventPage = ({
 	startDate,

@@ -27,7 +27,7 @@ import { useActionStateWithError } from '@/lib/hooks'
 import { type LocationFormData, updateLocationAction } from '@/server/actions'
 import { LocationActionErrorCodeMap } from '@/server/actions/constants'
 import type { LocationUpdateActionResponse } from '@/server/actions/types'
-import type { RouterOutput } from '@/server/api/root'
+import type { RouterOutput } from '@/server/api'
 import { Location } from './Locations'
 
 const initialState: LocationUpdateActionResponse = {
