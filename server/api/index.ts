@@ -10,4 +10,4 @@ export async function getAPI() {
 	return createCaller(ctx)
 }
 
-export { RouterInput, RouterOutput } from './root'
+export type { RouterInput, RouterOutput } from './root'

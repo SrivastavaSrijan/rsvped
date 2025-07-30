@@ -5,7 +5,7 @@ import { Button, Card, CardAction, CardDescription, CardHeader, CardTitle } from
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
 
-type CategoriesData = RouterOutput['category']['list']
+type CategoriesData = RouterOutput['category']['listNearby']
 
 type CategoryDiscoverCardProps = CategoriesData[number]
 export const CategoryDiscoverCard = ({ slug, name, _count: count }: CategoryDiscoverCardProps) => {

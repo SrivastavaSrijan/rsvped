@@ -12,7 +12,7 @@ import {
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import type { RouterOutput } from '@/server/api'
 
-type CommunityData = RouterOutput['community']['list'][number]
+type CommunityData = RouterOutput['community']['listNearby'][number]
 interface CommunityDiscoverCardProps extends CommunityData {}
 export const CommunityDiscoverCard = ({
 	name,

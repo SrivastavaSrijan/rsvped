@@ -7,7 +7,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/
 export const userRouter = createTRPCRouter({
 	getCurrentUser: publicProcedure.query(async ({ ctx }) => {
 		if (!ctx.session?.user) {
-			throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not authenticated' })
+			return null
 		}
 		const user = await ctx.prisma.user.findUnique({
 			where: { id: ctx.session.user.id },

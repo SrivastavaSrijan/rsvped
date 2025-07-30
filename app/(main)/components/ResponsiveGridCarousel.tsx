@@ -1,6 +1,9 @@
 'use client'
 import { chunk } from 'es-toolkit/array'
 import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
 	Carousel,
 	CarouselContent,
 	CarouselItem,
@@ -44,6 +47,15 @@ export const ResponsiveGridCarousel = <T extends { id: string | number }>({
 
 	return (
 		<>
+			{data?.length === 0 && (
+				<Alert variant="default" className="w-full">
+					<AlertTitle>Nothing here!</AlertTitle>
+					<AlertDescription>
+						There are no items to display in this section. Please check back later or explore other
+						sections.
+					</AlertDescription>
+				</Alert>
+			)}
 			{/* Mobile Carousel: Hidden on sm screens and up. */}
 			<Carousel opts={{ align: 'start' }} className="w-full sm:hidden">
 				<CarouselContent className="-ml-2">

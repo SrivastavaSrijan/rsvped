@@ -36,4 +36,5 @@ export const RsvpActionErrorCodeMap: Record<RsvpErrorCodes, string> = {
 export const LocationActionErrorCodeMap: Record<LocationUpdateActionErrorCode, string> = {
 	[LocationUpdateActionErrorCode.SERVER_ERROR]: 'An unexpected error occurred. Please try again.',
 	[LocationUpdateActionErrorCode.FORBIDDEN]: 'You do not have permission to perform this action.',
+	[LocationUpdateActionErrorCode.VALIDATION_ERROR]: 'Please check the fields and try again.',
 }

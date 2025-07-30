@@ -1,4 +1,5 @@
 import { chunk } from 'es-toolkit/array'
+import { trackFallbackParamAccessed } from 'next/dist/server/app-render/dynamic-rendering'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -17,10 +18,13 @@ import type { RouterOutput } from '@/server/api'
 const MOBILE_PAGE_SIZE = 6 // 2 column * 3 rows
 
 type LocationsData = RouterOutput['location']['list']['continents']
-type Location = LocationsData[number]['locations'][number]
+type LocationData = LocationsData[number]['locations'][number]
+interface Location extends LocationData {
+	link?: boolean
+}
 
-export const Location = ({ id, name, slug, iconPath, _count: count }: Location) => (
-	<Link key={id} href={Routes.Main.Events.DiscoverByLocation(slug)} className="contents">
+export const Location = ({ id, name, slug, iconPath, _count: count, link = false }: Location) => {
+	const renderContent = (
 		<div className="flex flex-row  gap-2 lg:gap-2 items-center">
 			<div
 				className="rounded-full flex items-center aspect-square lg:w-10 lg:h-10 w-9 h-9 justify-center relative"
@@ -42,8 +46,16 @@ export const Location = ({ id, name, slug, iconPath, _count: count }: Location) 
 				<p className="lg:text-sm text-sm text-muted-foreground">{count?.events} events</p>
 			</div>
 		</div>
-	</Link>
-)
+	)
+
+	return link ? (
+		<Link key={id} href={Routes.Main.Events.DiscoverByLocation(slug)} className="contents">
+			{renderContent}
+		</Link>
+	) : (
+		renderContent
+	)
+}
 
 interface LocationsProps {
 	continents: LocationsData
@@ -79,7 +91,7 @@ export const Locations = ({ continents, defaultValue }: LocationsProps) => {
 										className="pl-3 basis-10/12 grid grid-cols-2 gap-3"
 									>
 										{chunkedLocations.map((location) => (
-											<Location key={location.id} {...location} />
+											<Location key={location.id} link {...location} />
 										))}
 									</CarouselItem>
 								))}

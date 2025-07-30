@@ -28,9 +28,8 @@ export const appRouter = createTRPCRouter({
 
 // export type definition of API
 export type AppRouter = typeof appRouter
-type RouterInput = inferRouterInputs<AppRouter>
-type RouterOutput = inferRouterOutputs<AppRouter>
-export type { RouterInput, RouterOutput }
+export type RouterInput = inferRouterInputs<AppRouter>
+export type RouterOutput = inferRouterOutputs<AppRouter>
 /**
  * Create a server-side caller for the tRPC API.
  */

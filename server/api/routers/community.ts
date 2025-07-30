@@ -3,14 +3,17 @@ import { createTRPCRouter, publicProcedure } from '../trpc'
 
 export const communityRouter = createTRPCRouter({
 	// Get all communities
-	list: publicProcedure
+	listNearby: publicProcedure
 		.input(
 			z
-				.object({ take: z.number().min(1).max(100).default(10) })
+				.object({
+					take: z.number().min(1).max(100).default(10),
+					locationId: z.string().optional().nullable(),
+				})
 				.optional()
 				.default({ take: 10 })
 		)
-		.query(async ({ ctx, input: { take } }) => {
+		.query(async ({ ctx, input: { take, locationId } }) => {
 			const user = ctx.session?.user
 			const communities = await ctx.prisma.community.findMany({
 				take,
@@ -32,6 +35,7 @@ export const communityRouter = createTRPCRouter({
 						some: {
 							deletedAt: null,
 							isPublished: true,
+							OR: [{ locationId: locationId }, { locationType: { in: ['ONLINE', 'HYBRID'] } }],
 						},
 					},
 				},

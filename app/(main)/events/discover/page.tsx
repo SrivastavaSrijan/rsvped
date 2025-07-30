@@ -3,7 +3,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui'
-import { Routes } from '@/lib/config'
+import { CookieNames, Routes } from '@/lib/config'
+import { getEncryptedCookie } from '@/lib/cookies'
+import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
 import {
 	CategoryDiscoverCard,
@@ -49,21 +51,64 @@ const PageConfig = {
 	},
 }
 
-export default async function DiscoverEvents() {
+/**
+ * Resolves the user's location based on a priority order:
+ * 1. Authenticated user's saved location.
+ * 2. Location ID stored in the unauthenticated user's cookie.
+ * 3. A default location from the system.
+ * Redirects to an error page if no location can be determined.
+ */
+async function resolveUserLocation() {
 	const api = await getAPI()
 	const user = await api.user.getCurrentUser()
-	const { locationId, location } = user || {}
-	if (!locationId || !location) {
-		redirect(Routes.Main.Events.DiscoverErrorNoLocation)
-	}
-	const nearbyEvents = await api.event.listNearby({
-		locationId,
-		take: PageConfig.nearbyEvents.pageSize,
-	})
 
-	const categories = await api.category.list({ take: PageConfig.categories.pageSize })
-	const { continents } = await api.location.list()
-	const communities = await api.community.list({ take: PageConfig.communities.pageSize })
+	// 1. Use authenticated user's location if available
+	if (user?.locationId && user.location) {
+		return { locationId: user.locationId, location: user.location }
+	}
+
+	// 2. Try to find location from cookie for guests
+	const { locationId: savedLocationId } =
+		(await getEncryptedCookie<Partial<LocationFormData>>(CookieNames.PrefillLocation)) ?? {}
+
+	if (savedLocationId) {
+		try {
+			const location = await api.location.byId({ id: savedLocationId })
+			if (location) {
+				return { locationId: savedLocationId, location }
+			}
+		} catch (error) {
+			console.error('Error fetching location by ID from cookie:', error)
+			// Could log this error. Cookie might contain an old/invalid ID.
+			// Proceed to fallback.
+		}
+	}
+
+	// 3. Fallback to the first available location in the system
+	const defaultLocation = await api.location.getDefault()
+	if (defaultLocation) {
+		return { locationId: defaultLocation.id, location: defaultLocation }
+	}
+
+	// If no location can be found, redirect
+	redirect(Routes.Main.Events.DiscoverErrorNoLocation)
+}
+
+export default async function DiscoverEvents() {
+	const api = await getAPI()
+	const { locationId, location } = await resolveUserLocation()
+
+	// Fetch all data in parallel
+	const [nearbyEvents, categories, communities, { continents }] = await Promise.all([
+		api.event.listNearby({
+			locationId,
+			take: PageConfig.nearbyEvents.pageSize,
+		}),
+		api.category.listNearby({ locationId, take: PageConfig.categories.pageSize }),
+		api.community.listNearby({ locationId, take: PageConfig.communities.pageSize }),
+		api.location.list(),
+	])
+
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
 			<div className="flex flex-col gap-2 lg:gap-3">
@@ -75,7 +120,7 @@ export default async function DiscoverEvents() {
 					<div className="flex flex-col gap-2 lg:gap-2">
 						<h2 className="text-xl font-semibold">{copy.discover.upcoming}</h2>
 						<div className="flex items-center flex-row gap-2">
-							<p className="text-lg text-muted-foreground">{location?.name}</p>
+							<p className="text-lg text-muted-foreground">{location.name}</p>
 							<Link href={Routes.Main.Events.DiscoverErrorNoLocation} passHref>
 								<Button variant="link" size="sm">
 									<Edit3 className="size-3" />
@@ -85,7 +130,7 @@ export default async function DiscoverEvents() {
 						</div>
 					</div>
 
-					<Link href={Routes.Main.Events.DiscoverByLocation(location?.slug)} passHref>
+					<Link href={Routes.Main.Events.DiscoverByLocation(location.slug)} passHref>
 						<Button variant="secondary">{copy.discover.viewAll}</Button>
 					</Link>
 				</div>

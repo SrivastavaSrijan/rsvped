@@ -71,6 +71,11 @@ export const RouteDefs = {
 		Routes.Main.Events.EditBySlug('[slug]'),
 	],
 	Public: [
+		Routes.Main.Events.Discover,
+		Routes.Main.Events.DiscoverByCategory('[slug]'),
+		Routes.Main.Events.DiscoverByCommunity('[slug]'),
+		Routes.Main.Events.DiscoverByLocation('[slug]'),
+
 		Routes.Main.Events.ViewBySlug('[slug]'),
 		Routes.Main.Events.ViewBySlugWithRegister('[slug]'),
 	],
