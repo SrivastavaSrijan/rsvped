@@ -156,7 +156,7 @@ export const EventPage = ({
 						) : (
 							<>
 								<p className="text-sm">{copy.welcome}</p>
-								<Link href={Routes.Main.Events.ViewBySlugWithRegister(slug)} passHref replace>
+								<Link href={Routes.Main.Events.ViewBySlugRegister(slug)} passHref replace>
 									<Button className="w-full">Register Now</Button>
 								</Link>
 							</>

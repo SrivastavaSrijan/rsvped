@@ -91,7 +91,7 @@ async function resolveUserLocation() {
 	}
 
 	// If no location can be found, redirect
-	redirect(Routes.Main.Events.DiscoverErrorNoLocation)
+	redirect(Routes.Main.Events.DiscoverLocationSelect)
 }
 
 export default async function DiscoverEvents() {
@@ -121,7 +121,7 @@ export default async function DiscoverEvents() {
 						<h2 className="text-xl font-semibold">{copy.discover.upcoming}</h2>
 						<div className="flex items-center flex-row gap-2">
 							<p className="text-lg text-muted-foreground">{location.name}</p>
-							<Link href={Routes.Main.Events.DiscoverErrorNoLocation} passHref>
+							<Link href={Routes.Main.Events.DiscoverLocationSelect} passHref>
 								<Button variant="link" size="sm">
 									<Edit3 className="size-3" />
 									{copy.discover.changeLocation}
@@ -129,10 +129,6 @@ export default async function DiscoverEvents() {
 							</Link>
 						</div>
 					</div>
-
-					<Link href={Routes.Main.Events.DiscoverByLocation(location.slug)} passHref>
-						<Button variant="secondary">{copy.discover.viewAll}</Button>
-					</Link>
 				</div>
 				<ResponsiveGridCarousel
 					config={{

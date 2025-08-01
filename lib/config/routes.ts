@@ -17,32 +17,46 @@ export const Routes = {
 		WhatsNew: '/whats-new',
 	},
 	Main: {
-		Events: {
-			Root: '/events',
-			get Communities() {
-				return `${this.Root}/communities`
+		Communities: {
+			Root: '/communities',
+			SubscribeTo(slug: string) {
+				return `${this.Root}/${slug}/subscribe`
 			},
-			get Create() {
-				return `${this.Root}/create`
-			},
-
 			get Discover() {
 				return `${this.Root}/discover`
 			},
-			get DiscoverErrorNoLocation() {
-				return `${this.Discover}?form=no-location`
+			ViewBySlug(slug: string) {
+				return `${this.Root}/${slug}/view`
 			},
-			get DiscoverAllCategories() {
+		},
+		Categories: {
+			Root: '/categories',
+			get Discover() {
 				return `${this.Root}/discover`
 			},
-			DiscoverByCategory(slug: string) {
-				return `${this.Discover}/category/${slug}`
+			ViewBySlug(slug: string) {
+				return `${this.Root}/${slug}/view`
 			},
-			DiscoverByCommunity(slug: string) {
-				return `${this.Discover}/community/${slug}`
+		},
+		Locations: {
+			Root: '/locations',
+			get Discover() {
+				return `${this.Root}/discover`
 			},
-			DiscoverByLocation(slug: string) {
-				return `${this.Discover}/location/${slug}`
+			ViewBySlug(slug: string) {
+				return `${this.Root}/${slug}/view`
+			},
+		},
+		Events: {
+			Root: '/events',
+			get Create() {
+				return `${this.Root}/create`
+			},
+			get Discover() {
+				return `${this.Root}/discover`
+			},
+			get DiscoverLocationSelect() {
+				return `${this.Discover}/select-location`
 			},
 			get Home() {
 				return `${this.Root}/home`
@@ -50,8 +64,8 @@ export const Routes = {
 			ViewBySlug(slug: string) {
 				return `${this.Root}/${slug}/view`
 			},
-			ViewBySlugWithRegister(slug: string) {
-				return `${this.ViewBySlug(slug)}?form=register`
+			ViewBySlugRegister(slug: string) {
+				return `${this.ViewBySlug(slug)}/register`
 			},
 			ManageBySlug(slug: string) {
 				return `${this.Root}/${slug}/manage`
@@ -72,12 +86,10 @@ export const RouteDefs = {
 	],
 	Public: [
 		Routes.Main.Events.Discover,
-		Routes.Main.Events.DiscoverByCategory('[slug]'),
-		Routes.Main.Events.DiscoverByCommunity('[slug]'),
-		Routes.Main.Events.DiscoverByLocation('[slug]'),
-
 		Routes.Main.Events.ViewBySlug('[slug]'),
-		Routes.Main.Events.ViewBySlugWithRegister('[slug]'),
+
+		Routes.Main.Events.ViewBySlugRegister('[slug]'),
+		Routes.Main.Communities.Discover,
 	],
 }
 

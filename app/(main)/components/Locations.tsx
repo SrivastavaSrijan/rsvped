@@ -1,5 +1,4 @@
 import { chunk } from 'es-toolkit/array'
-import { trackFallbackParamAccessed } from 'next/dist/server/app-render/dynamic-rendering'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -49,7 +48,7 @@ export const Location = ({ id, name, slug, iconPath, _count: count, link = false
 	)
 
 	return link ? (
-		<Link key={id} href={Routes.Main.Events.DiscoverByLocation(slug)} className="contents">
+		<Link key={id} href={Routes.Main.Locations.ViewBySlug(slug)} className="contents">
 			{renderContent}
 		</Link>
 	) : (
@@ -78,7 +77,7 @@ export const Locations = ({ continents, defaultValue }: LocationsProps) => {
 				<TabsContent key={continent} value={continent}>
 					<div className="lg:grid hidden lg:grid-cols-4 grid-cols-2 lg:gap-4 gap-2">
 						{locations.map((location) => (
-							<Location key={location.id} {...location} />
+							<Location link key={location.id} {...location} />
 						))}
 					</div>
 					<div className="lg:hidden flex flex-row">

@@ -17,7 +17,7 @@ export const CategoryDiscoverCard = ({ slug, name, _count: count }: CategoryDisc
 				</CardTitle>
 				<CardDescription>{count.events} events</CardDescription>
 				<CardAction>
-					<Link href={Routes.Main.Events.DiscoverByCategory(slug)}>
+					<Link href={Routes.Main.Categories.ViewBySlug(slug)}>
 						<Button size="icon" variant="ghost">
 							<ArrowUpRight />
 						</Button>

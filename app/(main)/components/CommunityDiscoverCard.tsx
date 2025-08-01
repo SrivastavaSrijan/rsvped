@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
 	Badge,
 	Button,
@@ -9,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui'
+import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import type { RouterOutput } from '@/server/api'
 
@@ -19,6 +21,7 @@ export const CommunityDiscoverCard = ({
 	coverImage,
 	description,
 	metadata,
+	slug,
 }: CommunityDiscoverCardProps) => {
 	const role = metadata?.role ? MembershipLabels[metadata.role] : null
 	const membershipBadgeVariant = metadata?.role ? MembershipBadgeVariants[metadata.role] : 'default'
@@ -26,9 +29,11 @@ export const CommunityDiscoverCard = ({
 		<Card className="lg:bg-card bg-transparent items-center w-full lg:flex-col flex-row lg:gap-6 gap-2 lg:py-6 py-2">
 			<CardHeader className="w-full lg:px-6 px-0">
 				<CardAction className="w-full justify-between lg:flex flex-row hidden">
-					<Button size="sm" variant="secondary">
-						Subscribe
-					</Button>
+					<Link href={Routes.Main.Communities.SubscribeTo(slug)} passHref>
+						<Button size="sm" variant="secondary">
+							Subscribe
+						</Button>
+					</Link>
 				</CardAction>
 				<CardTitle className="relative lg:w-[50px] lg:h-[50px]  h-full w-full aspect-square">
 					{coverImage && (
