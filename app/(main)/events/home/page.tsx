@@ -1,3 +1,4 @@
+import { EventRole } from '@prisma/client'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -25,9 +26,7 @@ export default async function EventsHome({
 		after: period === 'upcoming' ? now : undefined,
 		before: period === 'past' ? now : undefined,
 		page: parseInt(page, 10) || 1,
-		attendee: true,
-		manager: true,
-		cohost: true,
+		roles: [EventRole.CHECKIN, EventRole.MANAGER, EventRole.CO_HOST],
 	})
 
 	return (

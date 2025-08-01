@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server'
 import z from 'zod'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
@@ -73,5 +74,38 @@ export const communityRouter = createTRPCRouter({
 				}
 			})
 			return communitiesWithMembership
+		}),
+
+	get: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const { slug } = input
+			const community = await ctx.prisma.community.findUnique({
+				where: { slug },
+				select: {
+					id: true,
+					name: true,
+					slug: true,
+					description: true,
+					coverImage: true,
+					owner: {
+						select: {
+							image: true,
+							location: true,
+							name: true,
+							email: true,
+						},
+					},
+				},
+			})
+
+			if (!community) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Community not found',
+				})
+			}
+
+			return community
 		}),
 })

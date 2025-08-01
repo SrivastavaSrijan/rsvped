@@ -1,4 +1,4 @@
-import type { EventRole, Prisma } from '@prisma/client'
+import { EventRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import slugify from 'slugify'
 import { z } from 'zod'
@@ -46,16 +46,24 @@ const GetEventsInput = z.object({
 	after: z.string().optional(),
 	page: z.number().int().min(1).default(1),
 	size: z.number().int().min(1).max(100).default(5),
-	attendee: z.boolean().default(true),
-	manager: z.boolean().default(true),
-	cohost: z.boolean().default(true),
+	roles: z.array(z.enum(EventRole)).optional(),
+	where: z
+		.object({
+			locationId: z.string().optional().nullable(),
+			communityId: z.string().optional().nullable(),
+			deletedAt: z.date().nullish().default(null),
+			isPublished: z.boolean().optional().default(true),
+		})
+		.partial()
+		.optional()
+		.default({ isPublished: true, deletedAt: null }),
 })
 
 /**
  * Reusable Prisma include object to ensure a consistent event data structure across the API.
  * This is the single source of truth for what an 'event' object contains.
  */
-const eventInclude = {
+export const eventInclude = {
 	host: {
 		select: { id: true, name: true, image: true, email: true },
 	},
@@ -274,16 +282,19 @@ export const eventRouter = createTRPCRouter({
 		const user = ctx.session?.user
 		if (!user) return []
 
-		const { attendee, manager, cohost, page, size, sort, before, after } = input
+		const { roles, page, size, sort, before, after } = input
 
 		const orConditions: Prisma.EventWhereInput[] = []
-		if (attendee) {
+		if (roles?.includes(EventRole.CHECKIN)) {
 			orConditions.push({ rsvps: { some: { userId: user.id } } })
 		}
-		if (manager || cohost) {
+		if (
+			roles?.includes(EventRole.MANAGER) ||
+			roles?.includes(EventRole.CO_HOST)
+		) {
 			const roles: EventRole[] = []
-			if (manager) roles.push('MANAGER')
-			if (cohost) roles.push('CO_HOST')
+			if (roles?.includes(EventRole.MANAGER)) roles.push(EventRole.MANAGER)
+			if (roles?.includes(EventRole.CO_HOST)) roles.push(EventRole.CO_HOST)
 			if (roles.length > 0) {
 				orConditions.push({
 					OR: [
@@ -298,11 +309,9 @@ export const eventRouter = createTRPCRouter({
 			}
 		}
 
-		if (orConditions.length === 0) return []
-
 		const whereClause: Prisma.EventWhereInput = {
-			deletedAt: null,
-			OR: orConditions,
+			...(orConditions.length && { OR: orConditions }),
+			communityId: input?.where?.communityId ?? undefined,
 			startDate: {
 				...(before && { lt: new Date(before) }),
 				...(after && { gt: new Date(after) }),
@@ -343,8 +352,8 @@ export const eventRouter = createTRPCRouter({
 					email: user.email,
 					rsvp: rsvpMap.get(event.id) ?? null,
 					access: {
-						manager: isHost || collaboratorRole === 'MANAGER',
-						cohost: collaboratorRole === 'CO_HOST',
+						manager: isHost || collaboratorRole === EventRole.MANAGER,
+						cohost: collaboratorRole === EventRole.CO_HOST,
 					},
 				},
 			}

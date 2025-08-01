@@ -37,23 +37,27 @@ export const CommunityDiscoverCard = ({
 						</Button>
 					</Link>
 				</CardAction>
-				<CardTitle className="relative lg:w-[50px] lg:h-[50px]  h-full w-full aspect-square">
-					{coverImage && (
-						<Image
-							src={coverImage}
-							alt={`Cover image for ${name}`}
-							fill
-							sizes="100px"
-							className="rounded-lg aspect-square"
-						/>
-					)}
-				</CardTitle>
+				<Link href={Routes.Main.Communities.ViewBySlug(slug)} passHref>
+					<CardTitle className="relative lg:w-[50px] lg:h-[50px]  h-full w-full aspect-square">
+						{coverImage && (
+							<Image
+								src={coverImage}
+								alt={`Cover image for ${name}`}
+								fill
+								sizes="100px"
+								className="rounded-lg aspect-square"
+							/>
+						)}
+					</CardTitle>
+				</Link>
 			</CardHeader>
-			<CardContent className="lg:px-6 px-0 lg:gap-1 gap-2 items-start">
-				{role && <Badge variant={membershipBadgeVariant}>{role}</Badge>}
-				<p className="text-sm lg:text-base line-clamp-1">{name}</p>
-				<p className="line-clamp-2 lg:text-sm text-xs">{description}</p>
-			</CardContent>
+			<Link href={Routes.Main.Communities.ViewBySlug(slug)} passHref>
+				<CardContent className="lg:px-6 px-0 lg:gap-1 gap-2 items-start">
+					{role && <Badge variant={membershipBadgeVariant}>{role}</Badge>}
+					<p className="text-sm lg:text-base line-clamp-1">{name}</p>
+					<p className="line-clamp-2 lg:text-sm text-xs">{description}</p>
+				</CardContent>
+			</Link>
 		</Card>
 	)
 }
