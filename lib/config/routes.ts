@@ -56,7 +56,7 @@ export const Routes = {
 				return `${this.Root}/discover`
 			},
 			get DiscoverLocationSelect() {
-				return `${this.Discover}/select-location`
+				return `${this.Discover}?action=select-location`
 			},
 			get Home() {
 				return `${this.Root}/home`
@@ -65,7 +65,7 @@ export const Routes = {
 				return `${this.Root}/${slug}/view`
 			},
 			ViewBySlugRegister(slug: string) {
-				return `${this.ViewBySlug(slug)}/register`
+				return `${this.ViewBySlug(slug)}?action=register`
 			},
 			ManageBySlug(slug: string) {
 				return `${this.Root}/${slug}/manage`
