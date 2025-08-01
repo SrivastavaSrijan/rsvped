@@ -25,7 +25,8 @@ export const useServerActionErrorHandler = <T extends ServerActionResponse>({
 		return null
 	}
 
-	const errorMessage = errorCodeMap[state.error] || 'An unexpected error occurred.'
+	const errorMessage =
+		errorCodeMap[state.error] || 'An unexpected error occurred.'
 
 	if (displayMode === 'inline') {
 		return (

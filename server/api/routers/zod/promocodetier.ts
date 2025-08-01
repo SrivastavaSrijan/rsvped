@@ -11,7 +11,8 @@ export const PromoCodeTierModel = z.object({
 	ticketTierId: z.string(),
 })
 
-export interface CompletePromoCodeTier extends z.infer<typeof PromoCodeTierModel> {
+export interface CompletePromoCodeTier
+	extends z.infer<typeof PromoCodeTierModel> {
 	promoCode: CompletePromoCode
 	ticketTier: CompleteTicketTier
 }
@@ -21,9 +22,10 @@ export interface CompletePromoCodeTier extends z.infer<typeof PromoCodeTierModel
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedPromoCodeTierModel: z.ZodSchema<CompletePromoCodeTier> = z.lazy(() =>
-	PromoCodeTierModel.extend({
-		promoCode: RelatedPromoCodeModel,
-		ticketTier: RelatedTicketTierModel,
-	})
-)
+export const RelatedPromoCodeTierModel: z.ZodSchema<CompletePromoCodeTier> =
+	z.lazy(() =>
+		PromoCodeTierModel.extend({
+			promoCode: RelatedPromoCodeModel,
+			ticketTier: RelatedTicketTierModel,
+		})
+	)

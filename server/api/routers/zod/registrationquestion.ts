@@ -17,7 +17,8 @@ export const RegistrationQuestionModel = z.object({
 	options: z.string().array(),
 })
 
-export interface CompleteRegistrationQuestion extends z.infer<typeof RegistrationQuestionModel> {
+export interface CompleteRegistrationQuestion
+	extends z.infer<typeof RegistrationQuestionModel> {
 	event: CompleteEvent
 	answers: CompleteRegistrationAnswer[]
 }
@@ -27,10 +28,10 @@ export interface CompleteRegistrationQuestion extends z.infer<typeof Registratio
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedRegistrationQuestionModel: z.ZodSchema<CompleteRegistrationQuestion> = z.lazy(
-	() =>
+export const RelatedRegistrationQuestionModel: z.ZodSchema<CompleteRegistrationQuestion> =
+	z.lazy(() =>
 		RegistrationQuestionModel.extend({
 			event: RelatedEventModel,
 			answers: RelatedRegistrationAnswerModel.array(),
 		})
-)
+	)

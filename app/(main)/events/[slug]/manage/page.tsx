@@ -3,11 +3,21 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound, unauthorized } from 'next/navigation'
 import { ManageEventCard } from '@/app/(main)/components'
-import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
+import {
+	Button,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 
-export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
+export const generateMetadata = async ({
+	params,
+}: {
+	params: Promise<{ slug: string }>
+}) => {
 	const { slug } = await params
 	const api = await getAPI()
 	const event = await api.event.getMetadata({ slug })
@@ -16,7 +26,11 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
 		description: `View details for the event: ${event.title}`,
 	}
 }
-export default async function ViewEvent({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ViewEvent({
+	params,
+}: {
+	params: Promise<{ slug: string }>
+}) {
 	const { slug } = await params
 	const api = await getAPI()
 	const event = await api.event.get({ slug })
@@ -38,7 +52,11 @@ export default async function ViewEvent({ params }: { params: Promise<{ slug: st
 			<div className="flex flex-col gap-4 lg:gap-6">
 				<div className="flex flex-col gap-1">
 					<Link href={Routes.Main.Events.Home} passHref>
-						<Button variant="link" size="sm" className=" text-muted-foreground opacity-50">
+						<Button
+							variant="link"
+							size="sm"
+							className=" text-muted-foreground opacity-50"
+						>
 							<ArrowUpLeft className=" text-muted-foreground" /> Back home
 						</Button>
 					</Link>

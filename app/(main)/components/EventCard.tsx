@@ -41,13 +41,18 @@ export const EventCard = ({
 	metadata,
 	isLast,
 }: EventCardProps) => {
-	const { start, relative, range } = useEventDateTime({ start: startDate, end: endDate })
+	const { start, relative, range } = useEventDateTime({
+		start: startDate,
+		end: endDate,
+	})
 
 	const canManage = metadata?.user?.access?.manager
 	const rsvp = metadata?.user?.rsvp
 
 	const status = rsvp?.status ? RSVPLabels[rsvp.status] : null
-	const rsvpBadgeVariant = rsvp?.status ? RSVPBadgeVariants[rsvp.status] : 'default'
+	const rsvpBadgeVariant = rsvp?.status
+		? RSVPBadgeVariants[rsvp.status]
+		: 'default'
 
 	const renderEventCollaborators = () => (
 		<div className="-space-x-1 flex">
@@ -67,7 +72,13 @@ export const EventCard = ({
 						</Tooltip>
 					)
 			)}
-			{host?.name && <AvatarWithFallback src={host?.image} name={host?.name} className="size-4" />}
+			{host?.name && (
+				<AvatarWithFallback
+					src={host?.image}
+					name={host?.name}
+					className="size-4"
+				/>
+			)}
 		</div>
 	)
 
@@ -78,7 +89,10 @@ export const EventCard = ({
 				<p className="text-muted-foreground text-sm">{start.dayOfWeek}</p>
 			</div>
 			<div
-				className={cn(isLast && 'mask-b-from-1', 'relative flex justify-start lg:justify-center')}
+				className={cn(
+					isLast && 'mask-b-from-1',
+					'relative flex justify-start lg:justify-center'
+				)}
 			>
 				<div className="-left-1 absolute top-1.5 size-2 rounded-full bg-white/30 lg:left-[unset]" />
 				<div className="mt-3 h-[calc(100%-10px)] w-px border-white/20 border-l border-dashed" />
@@ -106,7 +120,8 @@ export const EventCard = ({
 
 											<p className="truncate font-medium text-muted-foreground text-sm">
 												By {host.name}{' '}
-												{eventCollaborators?.length > 0 && `& ${eventCollaborators?.length} others`}
+												{eventCollaborators?.length > 0 &&
+													`& ${eventCollaborators?.length} others`}
 											</p>
 										</div>
 									</div>
@@ -137,14 +152,18 @@ export const EventCard = ({
 																name={guestUser?.name ?? guestName ?? undefined}
 															/>
 														</TooltipTrigger>
-														<TooltipContent>{guestUser?.name ?? guestName}</TooltipContent>
+														<TooltipContent>
+															{guestUser?.name ?? guestName}
+														</TooltipContent>
 													</Tooltip>
 												)
 										)}
 										{rsvpCount > 5 && (
 											<Avatar>
 												<AvatarFallback>
-													<p className="text-[10px] text-muted-foreground">+{rsvpCount - 5}</p>
+													<p className="text-[10px] text-muted-foreground">
+														+{rsvpCount - 5}
+													</p>
 												</AvatarFallback>
 											</Avatar>
 										)}
@@ -166,13 +185,18 @@ export const EventCard = ({
 										{renderEventCollaborators()}
 										<p className="truncate font-medium text-muted-foreground text-sm">
 											By you
-											{eventCollaborators?.length > 0 && ` & ${eventCollaborators?.length} others`}
+											{eventCollaborators?.length > 0 &&
+												` & ${eventCollaborators?.length} others`}
 										</p>
 									</div>
 								</div>
 							)}
 						</div>
-						<Link href={Routes.Main.Events.ViewBySlug(slug)} passHref className="contents">
+						<Link
+							href={Routes.Main.Events.ViewBySlug(slug)}
+							passHref
+							className="contents"
+						>
 							<div className=" col-span-1 flex flex-col items-end">
 								{coverImage && (
 									<Image

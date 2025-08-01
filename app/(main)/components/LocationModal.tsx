@@ -69,7 +69,9 @@ const STEP_CONFIG = {
 
 export const LocationModal = ({ locations }: LocationModalProps) => {
 	const { replace } = useRouter()
-	const [currentStep, setCurrentStep] = useState<LocationStep>(LocationStep.CONTINENT)
+	const [currentStep, setCurrentStep] = useState<LocationStep>(
+		LocationStep.CONTINENT
+	)
 	const [stepState, setStepState] = useState<StepState>({
 		selectedContinent: null,
 		selectedCountry: null,
@@ -185,13 +187,18 @@ export const LocationModal = ({ locations }: LocationModalProps) => {
 									<BreadcrumbSeparator />
 									<BreadcrumbItem>
 										{currentStep === LocationStep.COUNTRY ? (
-											<BreadcrumbPage>{stepState.selectedContinent}</BreadcrumbPage>
+											<BreadcrumbPage>
+												{stepState.selectedContinent}
+											</BreadcrumbPage>
 										) : (
 											<BreadcrumbLink
 												onClick={() => {
 													if (currentStep === LocationStep.LOCATION) {
 														setCurrentStep(LocationStep.COUNTRY)
-														setStepState((prev) => ({ ...prev, selectedLocationId: null }))
+														setStepState((prev) => ({
+															...prev,
+															selectedLocationId: null,
+														}))
 													}
 												}}
 											>
@@ -227,7 +234,9 @@ export const LocationModal = ({ locations }: LocationModalProps) => {
 					)}
 
 					<DialogTitle>{STEP_CONFIG[currentStep].title}</DialogTitle>
-					<DialogDescription>{STEP_CONFIG[currentStep].description}</DialogDescription>
+					<DialogDescription>
+						{STEP_CONFIG[currentStep].description}
+					</DialogDescription>
 					{locationError}
 				</DialogHeader>
 
@@ -237,50 +246,58 @@ export const LocationModal = ({ locations }: LocationModalProps) => {
 						{/* Continent Selection */}
 						{currentStep === LocationStep.CONTINENT && (
 							<div className="grid grid-cols-1 lg:grid-cols-1 gap-3">
-								{Object.entries(locations.continents).map(([continent, data]) => (
-									<Card
-										key={continent}
-										className="cursor-pointer hover:border-primary transition-colors p-3 lg:p-6"
-										onClick={() => handleContinentSelect(continent)}
-									>
-										<CardContent className="flex flex-col items-center justify-center gap-3 p-0 text-center">
-											<div>
-												<h4 className="font-medium text-lg">{continent}</h4>
-												<p className="text-sm text-muted-foreground mt-1">
-													{data._count.countries}{' '}
-													{data._count.countries === 1 ? 'country' : 'countries'}
-												</p>
-											</div>
-										</CardContent>
-									</Card>
-								))}
+								{Object.entries(locations.continents).map(
+									([continent, data]) => (
+										<Card
+											key={continent}
+											className="cursor-pointer hover:border-primary transition-colors p-3 lg:p-6"
+											onClick={() => handleContinentSelect(continent)}
+										>
+											<CardContent className="flex flex-col items-center justify-center gap-3 p-0 text-center">
+												<div>
+													<h4 className="font-medium text-lg">{continent}</h4>
+													<p className="text-sm text-muted-foreground mt-1">
+														{data._count.countries}{' '}
+														{data._count.countries === 1
+															? 'country'
+															: 'countries'}
+													</p>
+												</div>
+											</CardContent>
+										</Card>
+									)
+								)}
 							</div>
 						)}
 
 						{/* Country Selection */}
-						{currentStep === LocationStep.COUNTRY && stepState.selectedContinent && (
-							<div className="grid grid-cols-1 lg:grid-cols-1 gap-3">
-								{Object.entries(
-									locations.countries[stepState.selectedContinent]?.countries || {}
-								).map(([country, data]) => (
-									<Card
-										key={country}
-										className="cursor-pointer hover:border-primary transition-colors p-3 lg:p-6"
-										onClick={() => handleCountrySelect(country)}
-									>
-										<CardContent className="flex flex-col items-center justify-center gap-3 p-0 text-center">
-											<div>
-												<h4 className="font-medium text-lg">{country}</h4>
-												<p className="text-sm text-muted-foreground mt-1">
-													{data._count.locations}{' '}
-													{data._count.locations === 1 ? 'location' : 'locations'}
-												</p>
-											</div>
-										</CardContent>
-									</Card>
-								))}
-							</div>
-						)}
+						{currentStep === LocationStep.COUNTRY &&
+							stepState.selectedContinent && (
+								<div className="grid grid-cols-1 lg:grid-cols-1 gap-3">
+									{Object.entries(
+										locations.countries[stepState.selectedContinent]
+											?.countries || {}
+									).map(([country, data]) => (
+										<Card
+											key={country}
+											className="cursor-pointer hover:border-primary transition-colors p-3 lg:p-6"
+											onClick={() => handleCountrySelect(country)}
+										>
+											<CardContent className="flex flex-col items-center justify-center gap-3 p-0 text-center">
+												<div>
+													<h4 className="font-medium text-lg">{country}</h4>
+													<p className="text-sm text-muted-foreground mt-1">
+														{data._count.locations}{' '}
+														{data._count.locations === 1
+															? 'location'
+															: 'locations'}
+													</p>
+												</div>
+											</CardContent>
+										</Card>
+									))}
+								</div>
+							)}
 
 						{/* Location Selection - Using the existing Location component */}
 						{currentStep === LocationStep.LOCATION &&
@@ -288,22 +305,24 @@ export const LocationModal = ({ locations }: LocationModalProps) => {
 							stepState.selectedCountry && (
 								<div className="flex flex-col gap-4">
 									<div className="grid grid-cols-1 lg:grid-cols-1 gap-3">
-										{locations.countries[stepState.selectedContinent]?.countries[
-											stepState.selectedCountry
-										]?.locations.map((location) => (
-											<Card
-												key={location.id}
-												className="cursor-pointer transition-colors p-3 lg:p-6"
-												onClick={() => handleLocationSelect(location.id)}
-											>
-												<CardContent className="flex items-center justify-between p-0">
-													<Location {...location} />
-													{stepState.selectedLocationId === location.id && (
-														<Check className="size-4 text-primary" />
-													)}
-												</CardContent>
-											</Card>
-										))}
+										{locations.countries[
+											stepState.selectedContinent
+										]?.countries[stepState.selectedCountry]?.locations.map(
+											(location) => (
+												<Card
+													key={location.id}
+													className="cursor-pointer transition-colors p-3 lg:p-6"
+													onClick={() => handleLocationSelect(location.id)}
+												>
+													<CardContent className="flex items-center justify-between p-0">
+														<Location {...location} />
+														{stepState.selectedLocationId === location.id && (
+															<Check className="size-4 text-primary" />
+														)}
+													</CardContent>
+												</Card>
+											)
+										)}
 									</div>
 								</div>
 							)}
@@ -311,7 +330,11 @@ export const LocationModal = ({ locations }: LocationModalProps) => {
 				</ScrollArea>
 				{/* Submit Button */}
 				<Form action={formAction} className="mt-2 ">
-					<input type="hidden" name="locationId" value={stepState.selectedLocationId ?? ''} />
+					<input
+						type="hidden"
+						name="locationId"
+						value={stepState.selectedLocationId ?? ''}
+					/>
 					<Button
 						type="submit"
 						disabled={isFormPending || stepState.selectedLocationId === null}

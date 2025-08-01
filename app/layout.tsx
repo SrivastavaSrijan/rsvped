@@ -30,7 +30,9 @@ export default function RootLayout({
 		<html lang="en" className="dark">
 			<meta name="apple-mobile-web-app-title" content="RSVP'd" />
 			<meta name="og:image" content="/preview.jpg" />
-			<body className={`${inter.variable} ${averia.variable} font-sans antialiased`}>
+			<body
+				className={`${inter.variable} ${averia.variable} font-sans antialiased`}
+			>
 				<Providers>
 					{children}
 					<Toaster />

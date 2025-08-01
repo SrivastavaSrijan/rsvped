@@ -25,7 +25,11 @@ const registrationSchema = loginSchema.extend({
 })
 
 export type AuthFormData = z.infer<typeof registrationSchema>
-export type AuthActionResponse = ServerActionResponse<never, AuthErrorCodes, AuthFormData>
+export type AuthActionResponse = ServerActionResponse<
+	never,
+	AuthErrorCodes,
+	AuthFormData
+>
 
 async function checkUserExists(email: string) {
 	try {
@@ -69,7 +73,11 @@ async function performSignIn(
 		if (error instanceof AuthError && error.type === 'CredentialsSignin') {
 			return {
 				success: false,
-				fieldErrors: { password: [AuthActionErrorCodeMap[AuthErrorCodes.INVALID_CREDENTIALS]] },
+				fieldErrors: {
+					password: [
+						AuthActionErrorCodeMap[AuthErrorCodes.INVALID_CREDENTIALS],
+					],
+				},
 			}
 		}
 	}
@@ -112,7 +120,11 @@ export async function authAction(
 		const avatar = getAvatarURL(name)
 
 		await createUser({ email, name, password, image: avatar })
-		return await performSignIn({ email, password }, { name, image: avatar }, next)
+		return await performSignIn(
+			{ email, password },
+			{ name, image: avatar },
+			next
+		)
 	}
 	// --- Path B: Login Attempt ---
 	const validation = loginSchema.safeParse(rawData)
@@ -130,7 +142,11 @@ export async function authAction(
 		await setEncryptedCookie(CookieNames.PrefillForm, { email, password })
 		redirect(Routes.Auth.SignUp)
 	}
-	return await performSignIn({ email, password }, { name: user.name, image: user.image }, next)
+	return await performSignIn(
+		{ email, password },
+		{ name: user.name, image: user.image },
+		next
+	)
 }
 
 export async function signOutAction(): Promise<void> {

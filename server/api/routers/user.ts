@@ -2,7 +2,11 @@ import type { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/utils'
-import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc'
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	publicProcedure,
+} from '@/server/api/trpc'
 
 export const userRouter = createTRPCRouter({
 	getCurrentUser: publicProcedure.query(async ({ ctx }) => {

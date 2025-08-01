@@ -32,7 +32,11 @@ import {
 import { TimezoneConfig } from '@/lib/config'
 import { LocationTypeLabels } from '@/lib/constants'
 import { useActionStateWithError } from '@/lib/hooks'
-import { EventActionErrorCodeMap, type EventActionResponse, saveEvent } from '@/server/actions'
+import {
+	EventActionErrorCodeMap,
+	type EventActionResponse,
+	saveEvent,
+} from '@/server/actions'
 import type { RouterOutput } from '@/server/api'
 
 interface EventFormProps {
@@ -50,7 +54,12 @@ const initialEventState: EventActionResponse = {
 	success: false,
 }
 
-export function EventForm({ coverImage, mode = 'create', eventSlug, event }: EventFormProps) {
+export function EventForm({
+	coverImage,
+	mode = 'create',
+	eventSlug,
+	event,
+}: EventFormProps) {
 	const [startDate, setStartDate] = useState<Date | undefined>(() => {
 		if (event?.startDate) return event.startDate
 		const aWeekFromNow = new Date()
@@ -72,12 +81,13 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 
 	const isEditMode = mode === 'edit'
 
-	const { formAction, errorComponent, isPending, state } = useActionStateWithError({
-		action: saveEvent,
-		initialState: initialEventState,
-		errorCodeMap: EventActionErrorCodeMap,
-		displayMode: 'inline',
-	})
+	const { formAction, errorComponent, isPending, state } =
+		useActionStateWithError({
+			action: saveEvent,
+			initialState: initialEventState,
+			errorCodeMap: EventActionErrorCodeMap,
+			displayMode: 'inline',
+		})
 
 	const searchParams = useSearchParams()
 
@@ -104,10 +114,20 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 			</div>
 			<div className="w-full px-2 lg:col-span-2 lg:px-0">
 				<Form action={formAction} className="flex flex-col gap-4">
-					<Input type="hidden" name="coverImage" value={event?.coverImage || coverImage.url} />
-					<Input type="hidden" name="next" value={searchParams.get('next') || ''} />
+					<Input
+						type="hidden"
+						name="coverImage"
+						value={event?.coverImage || coverImage.url}
+					/>
+					<Input
+						type="hidden"
+						name="next"
+						value={searchParams.get('next') || ''}
+					/>
 
-					{isEditMode && eventSlug && <Input type="hidden" name="slug" value={eventSlug} />}
+					{isEditMode && eventSlug && (
+						<Input type="hidden" name="slug" value={eventSlug} />
+					)}
 
 					<div className="flex flex-col gap-1">
 						<Input
@@ -132,16 +152,28 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 							</div>
 							<div className="flex flex-col gap-2">
 								<DateTimePicker date={startDate} setDate={setStartDate} />
-								<Input type="hidden" name="startDate" value={startDate?.toISOString()} />
+								<Input
+									type="hidden"
+									name="startDate"
+									value={startDate?.toISOString()}
+								/>
 								{fieldErrors.startDate && (
-									<p className="text-destructive text-sm">{fieldErrors.startDate[0]}</p>
+									<p className="text-destructive text-sm">
+										{fieldErrors.startDate[0]}
+									</p>
 								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<DateTimePicker date={endDate} setDate={setEndDate} />
-								<Input type="hidden" name="endDate" value={endDate?.toISOString()} />
+								<Input
+									type="hidden"
+									name="endDate"
+									value={endDate?.toISOString()}
+								/>
 								{fieldErrors.endDate && (
-									<p className="text-destructive text-sm">{fieldErrors.endDate[0]}</p>
+									<p className="text-destructive text-sm">
+										{fieldErrors.endDate[0]}
+									</p>
 								)}
 							</div>
 						</div>
@@ -151,7 +183,11 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 								<h3 className="font-semibold text-sm">Timezone</h3>
 							</div>
 							<span className="text-sm">{TimezoneConfig.current}</span>
-							<Input type="hidden" name="timezone" value={TimezoneConfig.current} />
+							<Input
+								type="hidden"
+								name="timezone"
+								value={TimezoneConfig.current}
+							/>
 						</div>
 					</div>
 
@@ -168,7 +204,9 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 								defaultValue={event?.description || ''}
 							/>
 							{fieldErrors.description && (
-								<p className="text-destructive text-sm">{fieldErrors.description[0]}</p>
+								<p className="text-destructive text-sm">
+									{fieldErrors.description[0]}
+								</p>
 							)}
 						</div>
 					</div>
@@ -185,7 +223,9 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 								<Select
 									name="locationType"
 									defaultValue={locationType}
-									onValueChange={(value) => setLocationType(value as LocationType)}
+									onValueChange={(value) =>
+										setLocationType(value as LocationType)
+									}
 								>
 									<SelectTrigger className="flex h-auto w-full justify-start gap-2 rounded-lg bg-white/10 p-2">
 										<MapPin className="size-3" />
@@ -206,11 +246,14 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 									</SelectContent>
 								</Select>
 								{fieldErrors.locationType && (
-									<p className="text-destructive text-sm">{fieldErrors.locationType[0]}</p>
+									<p className="text-destructive text-sm">
+										{fieldErrors.locationType[0]}
+									</p>
 								)}
 							</div>
 
-							{(locationType === LocationType.PHYSICAL || locationType === LocationType.HYBRID) && (
+							{(locationType === LocationType.PHYSICAL ||
+								locationType === LocationType.HYBRID) && (
 								<div className="grid grid-cols-3 gap-2">
 									<div className="flex flex-col gap-1">
 										<Input
@@ -220,7 +263,9 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 											className="col-span-1"
 										/>
 										{fieldErrors.venueName && (
-											<p className="text-destructive text-sm">{fieldErrors.venueName[0]}</p>
+											<p className="text-destructive text-sm">
+												{fieldErrors.venueName[0]}
+											</p>
 										)}
 									</div>
 									<div className="col-span-2 flex flex-col gap-1">
@@ -230,13 +275,16 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 											defaultValue={event?.venueAddress || ''}
 										/>
 										{fieldErrors.venueAddress && (
-											<p className="text-destructive text-sm">{fieldErrors.venueAddress[0]}</p>
+											<p className="text-destructive text-sm">
+												{fieldErrors.venueAddress[0]}
+											</p>
 										)}
 									</div>
 								</div>
 							)}
 
-							{(locationType === LocationType.ONLINE || locationType === LocationType.HYBRID) && (
+							{(locationType === LocationType.ONLINE ||
+								locationType === LocationType.HYBRID) && (
 								<div className="flex flex-col gap-1">
 									<Input
 										name="onlineUrl"
@@ -244,7 +292,9 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 										defaultValue={event?.onlineUrl || ''}
 									/>
 									{fieldErrors.onlineUrl && (
-										<p className="text-destructive text-sm">{fieldErrors.onlineUrl[0]}</p>
+										<p className="text-destructive text-sm">
+											{fieldErrors.onlineUrl[0]}
+										</p>
 									)}
 								</div>
 							)}
@@ -286,7 +336,9 @@ export function EventForm({ coverImage, mode = 'create', eventSlug, event }: Eve
 										defaultValue={event?.capacity?.toString() || ''}
 									/>
 									{fieldErrors.capacity && (
-										<p className="text-destructive text-sm">{fieldErrors.capacity[0]}</p>
+										<p className="text-destructive text-sm">
+											{fieldErrors.capacity[0]}
+										</p>
 									)}
 								</div>
 							</div>

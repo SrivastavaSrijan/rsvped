@@ -86,7 +86,10 @@ export const EventPage = ({
 										guestName && (
 											<Tooltip key={guestEmail}>
 												<TooltipTrigger>
-													<AvatarWithFallback className="size-4 mt-1" name={guestName} />
+													<AvatarWithFallback
+														className="size-4 mt-1"
+														name={guestName}
+													/>
 												</TooltipTrigger>
 												<TooltipContent>{guestName}</TooltipContent>
 											</Tooltip>
@@ -106,7 +109,9 @@ export const EventPage = ({
 				</div>
 			</div>
 			<div className="col-span-full lg:col-span-7 flex flex-col gap-3 lg:gap-4">
-				<h1 className="lg:text-4xl text-2xl font-serif font-semibold">{title}</h1>
+				<h1 className="lg:text-4xl text-2xl font-serif font-semibold">
+					{title}
+				</h1>
 				<div className="flex flex-col gap-3 lg:gap-4">
 					<EventDateTime startDate={startDate} endDate={endDate} />
 					<EventLocation
@@ -143,7 +148,9 @@ export const EventPage = ({
 										<div className="flex flex-row gap-2 items-center">
 											<Clock className="size-3 text-muted-foreground" />
 
-											<p className="font-semibold text-muted-foreground text-sm">Starting In</p>
+											<p className="font-semibold text-muted-foreground text-sm">
+												Starting In
+											</p>
 										</div>
 										<p className="text-sm text-muted-foreground">{relative}</p>
 									</div>
@@ -156,7 +163,11 @@ export const EventPage = ({
 						) : (
 							<>
 								<p className="text-sm">{copy.welcome}</p>
-								<Link href={Routes.Main.Events.ViewBySlugRegister(slug)} passHref replace>
+								<Link
+									href={Routes.Main.Events.ViewBySlugRegister(slug)}
+									passHref
+									replace
+								>
 									<Button className="w-full">Register Now</Button>
 								</Link>
 							</>

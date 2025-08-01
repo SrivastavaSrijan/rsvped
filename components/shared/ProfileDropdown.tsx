@@ -43,7 +43,9 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
 				<Link href={Routes.Auth.Profile} passHref>
 					<DropdownMenuItem>{copy.profile}</DropdownMenuItem>
 				</Link>
-				<DropdownMenuItem onClick={() => signOutAction()}>{copy.signOut}</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => signOutAction()}>
+					{copy.signOut}
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

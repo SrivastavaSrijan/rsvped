@@ -43,7 +43,8 @@ export const ResponsiveGridCarousel = <T extends { id: string | number }>({
 	const mobilePages = chunk(data, config.pageSize.sm)
 	const desktopPages = chunk(data, config.pageSize.lg)
 
-	const renderPage = (page: T[]) => page.map((item) => <ItemComponent key={item.id} {...item} />)
+	const renderPage = (page: T[]) =>
+		page.map((item) => <ItemComponent key={item.id} {...item} />)
 
 	return (
 		<>
@@ -51,8 +52,8 @@ export const ResponsiveGridCarousel = <T extends { id: string | number }>({
 				<Alert variant="default" className="w-full">
 					<AlertTitle>Nothing here!</AlertTitle>
 					<AlertDescription>
-						There are no items to display in this section. Please check back later or explore other
-						sections.
+						There are no items to display in this section. Please check back
+						later or explore other sections.
 					</AlertDescription>
 				</Alert>
 			)}

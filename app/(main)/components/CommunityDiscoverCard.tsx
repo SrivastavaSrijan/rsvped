@@ -24,7 +24,9 @@ export const CommunityDiscoverCard = ({
 	slug,
 }: CommunityDiscoverCardProps) => {
 	const role = metadata?.role ? MembershipLabels[metadata.role] : null
-	const membershipBadgeVariant = metadata?.role ? MembershipBadgeVariants[metadata.role] : 'default'
+	const membershipBadgeVariant = metadata?.role
+		? MembershipBadgeVariants[metadata.role]
+		: 'default'
 	return (
 		<Card className="lg:bg-card bg-transparent items-center w-full lg:flex-col flex-row lg:gap-6 gap-2 lg:py-6 py-2">
 			<CardHeader className="w-full lg:px-6 px-0">

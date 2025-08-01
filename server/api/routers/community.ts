@@ -35,7 +35,10 @@ export const communityRouter = createTRPCRouter({
 						some: {
 							deletedAt: null,
 							isPublished: true,
-							OR: [{ locationId: locationId }, { locationType: { in: ['ONLINE', 'HYBRID'] } }],
+							OR: [
+								{ locationId: locationId },
+								{ locationType: { in: ['ONLINE', 'HYBRID'] } },
+							],
 						},
 					},
 				},
@@ -59,7 +62,9 @@ export const communityRouter = createTRPCRouter({
 				: []
 
 			const communitiesWithMembership = communities.map((community) => {
-				const membership = userCommunities.find((m) => m.communityId === community.id)
+				const membership = userCommunities.find(
+					(m) => m.communityId === community.id
+				)
 				return {
 					...community,
 					metadata: {

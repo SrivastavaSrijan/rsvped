@@ -33,5 +33,6 @@ export type RouterOutput = inferRouterOutputs<AppRouter>
 /**
  * Create a server-side caller for the tRPC API.
  */
-export const createCaller = (ctx: Awaited<ReturnType<typeof createTRPCContext>>) =>
-	appRouter.createCaller(ctx)
+export const createCaller = (
+	ctx: Awaited<ReturnType<typeof createTRPCContext>>
+) => appRouter.createCaller(ctx)

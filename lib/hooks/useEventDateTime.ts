@@ -52,7 +52,9 @@ export function useEventDateTime({ start, end }: EventDateTimeInput) {
 			? startDetails.dateFormatted
 			: `${startDetails.dateFormatted} to ${endDetails?.dateFormatted}`
 
-		const timeRange = endDetails ? `${startDetails.time} - ${endDetails.time}` : startDetails.time
+		const timeRange = endDetails
+			? `${startDetails.time} - ${endDetails.time}`
+			: startDetails.time
 
 		return {
 			start: startDetails,

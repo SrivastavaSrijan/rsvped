@@ -33,7 +33,10 @@ export const categoryRouter = createTRPCRouter({
 							event: {
 								deletedAt: null,
 								isPublished: true,
-								OR: [{ locationId: locationId }, { locationType: { in: ['ONLINE', 'HYBRID'] } }],
+								OR: [
+									{ locationId: locationId },
+									{ locationType: { in: ['ONLINE', 'HYBRID'] } },
+								],
 							},
 						},
 					},

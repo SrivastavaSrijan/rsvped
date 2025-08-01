@@ -8,7 +8,9 @@ import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 // globalThis.fetch = fetch;
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY
 if (!UNSPLASH_ACCESS_KEY) {
-	throw new Error('UNSPLASH_ACCESS_KEY is not defined in the environment variables.')
+	throw new Error(
+		'UNSPLASH_ACCESS_KEY is not defined in the environment variables.'
+	)
 }
 
 const unsplash = createApi({
@@ -20,7 +22,8 @@ const collectionIds = process.env.UNSPLASH_COLLECTION_IDS?.split(',') ?? []
 export const imageRouter = createTRPCRouter({
 	getRandom: publicProcedure
 		.meta({
-			description: 'Get a random abstract image from a predefined Unsplash collection.',
+			description:
+				'Get a random abstract image from a predefined Unsplash collection.',
 		})
 		.output(
 			z.object({
@@ -45,7 +48,9 @@ export const imageRouter = createTRPCRouter({
 			}
 
 			// The API returns an array even for a count of 1
-			const photo = Array.isArray(result.response) ? result.response[0] : result.response
+			const photo = Array.isArray(result.response)
+				? result.response[0]
+				: result.response
 
 			if (!photo) {
 				throw new Error('No photo returned from Unsplash.')

@@ -8,7 +8,11 @@ export const metadata: Metadata = {
 	description: 'Edit your event details and settings.',
 }
 
-export default async function EditEvent({ params }: { params: Promise<{ slug: string }> }) {
+export default async function EditEvent({
+	params,
+}: {
+	params: Promise<{ slug: string }>
+}) {
 	const { slug } = await params
 	const api = await getAPI()
 

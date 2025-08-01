@@ -6,18 +6,19 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"includes": ["**", "!.next", "!node_modules", "!dist", "!.vercel"],
-		"experimentalScannerIgnores": ["node_modules/", ".next/"]
-	},
-	"formatter": {
-		"enabled": true,
-		"indentWidth": 2,
-		"lineWidth": 100
+		"includes": ["app/**", "components/**", "lib/**", "server/**"],
+		"experimentalScannerIgnores": ["node_modules", ".next"]
 	},
 	"linter": {
 		"enabled": true,
+		"domains": {
+			"next": "all"
+		},
 		"rules": {
-			"recommended": true
+			"nursery": {
+				"noUnknownAtRule": "off",
+				"recommended": true
+			}
 		}
 	},
 	"javascript": {
@@ -32,8 +33,9 @@
 		"enabled": true,
 		"actions": {
 			"source": {
-				"organizeImports": "on"
-			}
+				"recommended": true
+			},
+			"recommended": true
 		}
 	},
 	"overrides": [
@@ -42,7 +44,7 @@
 			"linter": {
 				"rules": {
 					"nursery": {
-						"useSortedClasses": "off"
+						"recommended": false
 					}
 				}
 			}

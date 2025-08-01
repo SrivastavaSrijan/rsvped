@@ -13,7 +13,11 @@ const rsvpSchema = z.object({
 })
 
 export type RsvpFormData = z.infer<typeof rsvpSchema>
-export type RsvpActionResponse = ServerActionResponse<never, RsvpErrorCodes, RsvpFormData>
+export type RsvpActionResponse = ServerActionResponse<
+	never,
+	RsvpErrorCodes,
+	RsvpFormData
+>
 
 export async function createRsvpAction(
 	_prevState: RsvpActionResponse,

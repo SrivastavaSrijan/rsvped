@@ -6,7 +6,10 @@ import { auth } from '@/lib/auth'
 import { CookieNames, Routes } from '@/lib/config'
 import { setEncryptedCookie } from '@/lib/cookies'
 import { getAPI } from '@/server/api'
-import { LocationUpdateActionErrorCode, type LocationUpdateActionResponse } from './types'
+import {
+	LocationUpdateActionErrorCode,
+	type LocationUpdateActionResponse,
+} from './types'
 
 const updateLocationSchema = z.object({
 	locationId: z.string().min(1, 'Location is required.'),

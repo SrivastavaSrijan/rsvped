@@ -1,5 +1,10 @@
 import * as z from 'zod'
-import { type CompleteEvent, type CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
+import {
+	type CompleteEvent,
+	type CompleteUser,
+	RelatedEventModel,
+	RelatedUserModel,
+} from './index'
 
 export const EventMessageModel = z.object({
 	id: z.string(),
@@ -10,7 +15,8 @@ export const EventMessageModel = z.object({
 	createdAt: z.date(),
 })
 
-export interface CompleteEventMessage extends z.infer<typeof EventMessageModel> {
+export interface CompleteEventMessage
+	extends z.infer<typeof EventMessageModel> {
 	event: CompleteEvent
 	user?: CompleteUser | null
 	parent?: CompleteEventMessage | null
@@ -22,11 +28,12 @@ export interface CompleteEventMessage extends z.infer<typeof EventMessageModel> 
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventMessageModel: z.ZodSchema<CompleteEventMessage> = z.lazy(() =>
-	EventMessageModel.extend({
-		event: RelatedEventModel,
-		user: RelatedUserModel.nullish(),
-		parent: RelatedEventMessageModel.nullish(),
-		replies: RelatedEventMessageModel.array(),
-	})
-)
+export const RelatedEventMessageModel: z.ZodSchema<CompleteEventMessage> =
+	z.lazy(() =>
+		EventMessageModel.extend({
+			event: RelatedEventModel,
+			user: RelatedUserModel.nullish(),
+			parent: RelatedEventMessageModel.nullish(),
+			replies: RelatedEventMessageModel.array(),
+		})
+	)

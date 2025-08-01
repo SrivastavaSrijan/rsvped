@@ -28,7 +28,13 @@ export const EventList = async ({ period, page }: EventListProps) => {
 	if (events.length === 0) {
 		return (
 			<div className="flex h-[90vw] w-full flex-col items-center justify-center gap-4 lg:h-[50vw]">
-				<Image src={AssetMap.NoEvents} alt="No events" width={200} height={200} className="mb-4" />
+				<Image
+					src={AssetMap.NoEvents}
+					alt="No events"
+					width={200}
+					height={200}
+					className="mb-4"
+				/>
 				<p className="text-muted-foreground text-sm">
 					{period === 'upcoming'
 						? 'Looks like there are no upcoming events!'
@@ -44,7 +50,11 @@ export const EventList = async ({ period, page }: EventListProps) => {
 	return (
 		<>
 			{events.map((event, index) => (
-				<EventCard key={event.slug} {...event} isLast={index === events.length - 1} />
+				<EventCard
+					key={event.slug}
+					{...event}
+					isLast={index === events.length - 1}
+				/>
 			))}
 			<EventsPagination
 				currentPage={page}

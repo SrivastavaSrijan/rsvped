@@ -18,7 +18,8 @@ import { copy } from '../../copy'
 
 export const metadata: Metadata = {
 	title: "Discover Events  · RSVP'd",
-	description: 'Explore upcoming and past events in the community and RSVP to join.',
+	description:
+		'Explore upcoming and past events in the community and RSVP to join.',
 }
 
 const PageConfig = {
@@ -69,7 +70,9 @@ async function resolveUserLocation() {
 
 	// 2. Try to find location from cookie for guests
 	const { locationId: savedLocationId } =
-		(await getEncryptedCookie<Partial<LocationFormData>>(CookieNames.PrefillLocation)) ?? {}
+		(await getEncryptedCookie<Partial<LocationFormData>>(
+			CookieNames.PrefillLocation
+		)) ?? {}
 
 	if (savedLocationId) {
 		try {
@@ -99,21 +102,32 @@ export default async function DiscoverEvents() {
 	const { locationId, location } = await resolveUserLocation()
 
 	// Fetch all data in parallel
-	const [nearbyEvents, categories, communities, { continents }] = await Promise.all([
-		api.event.listNearby({
-			locationId,
-			take: PageConfig.nearbyEvents.pageSize,
-		}),
-		api.category.listNearby({ locationId, take: PageConfig.categories.pageSize }),
-		api.community.listNearby({ locationId, take: PageConfig.communities.pageSize }),
-		api.location.list(),
-	])
+	const [nearbyEvents, categories, communities, { continents }] =
+		await Promise.all([
+			api.event.listNearby({
+				locationId,
+				take: PageConfig.nearbyEvents.pageSize,
+			}),
+			api.category.listNearby({
+				locationId,
+				take: PageConfig.categories.pageSize,
+			}),
+			api.community.listNearby({
+				locationId,
+				take: PageConfig.communities.pageSize,
+			}),
+			api.location.list(),
+		])
 
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
 			<div className="flex flex-col gap-2 lg:gap-3">
-				<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">{copy.discover.title}</h1>
-				<p className="text-muted-foreground text-sm lg:text-base">{copy.discover.description}</p>
+				<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
+					{copy.discover.title}
+				</h1>
+				<p className="text-muted-foreground text-sm lg:text-base">
+					{copy.discover.description}
+				</p>
 			</div>
 			<div className="flex flex-col gap-4 lg:gap-6">
 				<div className="flex w-full flex-row justify-between gap-4">
@@ -145,7 +159,9 @@ export default async function DiscoverEvents() {
 			<div className="flex flex-col gap-4 lg:gap-6">
 				<div className="flex w-full flex-row justify-between gap-4">
 					<div className="flex flex-col">
-						<h2 className="text-xl font-semibold">{copy.discover.communities}</h2>
+						<h2 className="text-xl font-semibold">
+							{copy.discover.communities}
+						</h2>
 					</div>
 				</div>
 				<ResponsiveGridCarousel

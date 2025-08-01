@@ -28,7 +28,9 @@ export const EventLocation = ({
 	className,
 	size = 'sm',
 }: EventLocation) => {
-	const physicalAddress = location ? ` ${location.name}, ${location.country}` : venueAddress
+	const physicalAddress = location
+		? ` ${location.name}, ${location.country}`
+		: venueAddress
 	const physicalUrl = venueAddress
 		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venueAddress)}`
 		: undefined
@@ -109,7 +111,10 @@ export const LocationItem = ({
 	const Icon = LocationIcons[locationType]
 	const titleElement = (
 		<p
-			className={cn('truncate font-medium leading-tight', size === 'lg' && 'font-serif text-base')}
+			className={cn(
+				'truncate font-medium leading-tight',
+				size === 'lg' && 'font-serif text-base'
+			)}
 		>
 			{title}
 		</p>
@@ -122,7 +127,11 @@ export const LocationItem = ({
 				className
 			)}
 		>
-			<div className={size === 'lg' ? 'rounded-xl border border-white/5 foreground p-2' : ''}>
+			<div
+				className={
+					size === 'lg' ? 'rounded-xl border border-white/5 foreground p-2' : ''
+				}
+			>
 				<Icon className={size === 'sm' ? 'size-3' : 'size-4'} />
 			</div>
 			<div className="flex min-w-0 flex-col gap-1">
@@ -139,7 +148,9 @@ export const LocationItem = ({
 					titleElement
 				)}
 
-				{size === 'lg' && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+				{size === 'lg' && (
+					<p className="text-muted-foreground text-sm">{subtitle}</p>
+				)}
 			</div>
 		</div>
 	)

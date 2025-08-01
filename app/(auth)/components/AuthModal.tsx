@@ -3,7 +3,12 @@ import { AlertCircle, Loader2, LogInIcon, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { Background, Form } from '@/components/shared'
-import { Alert, AlertDescription, AlertTitle, InputWithError } from '@/components/ui'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	InputWithError,
+} from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import {
 	Dialog,
@@ -81,7 +86,11 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
 					<Form action={formAction} className="flex flex-col gap-3 lg:gap-3">
-						<input type="hidden" name="next" value={searchParams.get('next') || ''} />
+						<input
+							type="hidden"
+							name="next"
+							value={searchParams.get('next') || ''}
+						/>
 						{mode === 'register' && (
 							<InputWithError
 								error={state.fieldErrors?.name}
@@ -103,7 +112,9 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 							error={state.fieldErrors?.password}
 							name="password"
 							type="password"
-							autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+							autoComplete={
+								mode === 'register' ? 'new-password' : 'current-password'
+							}
 							placeholder={copy.placeholders.password}
 							defaultValue={prefill?.password}
 							required
@@ -119,7 +130,9 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 							) : (
 								<Mail className="size-3" />
 							)}
-							{mode === 'login' ? copy.buttonText.signIn : copy.buttonText.register}
+							{mode === 'login'
+								? copy.buttonText.signIn
+								: copy.buttonText.register}
 						</Button>
 					</Form>
 					<hr />

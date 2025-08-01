@@ -7,7 +7,11 @@ import { type ChangeEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 // Enable custom parsing for date formats
@@ -69,7 +73,10 @@ export function DateTimePicker({
 	}
 
 	// Time picker handlers
-	const handleTimeChange = (type: 'hour' | 'minute' | 'ampm', value: string | number) => {
+	const handleTimeChange = (
+		type: 'hour' | 'minute' | 'ampm',
+		value: string | number
+	) => {
 		if (!date) {
 			// If no date exists, create one with today's date
 			const newDate = dayjs().hour(0).minute(0).second(0)
@@ -167,7 +174,9 @@ export function DateTimePicker({
 			// Keep the current time if a date already exists
 			if (date) {
 				const currentTime = dayjs(date)
-				parsedDate = parsedDate.hour(currentTime.hour()).minute(currentTime.minute())
+				parsedDate = parsedDate
+					.hour(currentTime.hour())
+					.minute(currentTime.minute())
 			}
 
 			setDate(parsedDate.toDate())
@@ -205,7 +214,10 @@ export function DateTimePicker({
 		if (parsedTime) {
 			if (date) {
 				// Keep the current date, update only time
-				const newDate = dayjs(date).hour(parsedTime.hour()).minute(parsedTime.minute()).toDate()
+				const newDate = dayjs(date)
+					.hour(parsedTime.hour())
+					.minute(parsedTime.minute())
+					.toDate()
 
 				setDate(newDate)
 				setTimeInputValue(dayjs(newDate).format(timeFormat))
@@ -249,7 +261,12 @@ export function DateTimePicker({
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-auto p-0">
-						<Calendar mode="single" selected={date} onSelect={handleDateSelect} autoFocus />
+						<Calendar
+							mode="single"
+							selected={date}
+							onSelect={handleDateSelect}
+							autoFocus
+						/>
 					</PopoverContent>
 				</Popover>
 			</div>
@@ -282,7 +299,11 @@ export function DateTimePicker({
 										<Button
 											type="button"
 											key={hour}
-											variant={date && date.getHours() % 12 === hour % 12 ? 'default' : 'ghost'}
+											variant={
+												date && date.getHours() % 12 === hour % 12
+													? 'default'
+													: 'ghost'
+											}
 											className="shrink-0"
 											onClick={() => handleTimeChange('hour', hour)}
 										>
@@ -298,7 +319,11 @@ export function DateTimePicker({
 										<Button
 											type="button"
 											key={minute}
-											variant={date && date.getMinutes() === minute ? 'default' : 'ghost'}
+											variant={
+												date && date.getMinutes() === minute
+													? 'default'
+													: 'ghost'
+											}
 											className="shrink-0"
 											onClick={() => handleTimeChange('minute', minute)}
 										>

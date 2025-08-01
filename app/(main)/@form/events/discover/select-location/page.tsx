@@ -8,7 +8,9 @@ import { getAPI } from '@/server/api'
 export default async function LocationForm() {
 	const api = await getAPI()
 	const locations = await api.location.list()
-	const prefill = await getEncryptedCookie<Partial<LocationFormData>>(CookieNames.PrefillLocation)
+	const prefill = await getEncryptedCookie<Partial<LocationFormData>>(
+		CookieNames.PrefillLocation
+	)
 
 	if (!locations || Object.keys(locations).length === 0) {
 		return notFound()

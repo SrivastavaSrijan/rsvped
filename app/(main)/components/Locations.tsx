@@ -22,13 +22,24 @@ interface Location extends LocationData {
 	link?: boolean
 }
 
-export const Location = ({ id, name, slug, iconPath, _count: count, link = false }: Location) => {
+export const Location = ({
+	id,
+	name,
+	slug,
+	iconPath,
+	_count: count,
+	link = false,
+}: Location) => {
 	const renderContent = (
 		<div className="flex flex-row  gap-2 lg:gap-2 items-center">
 			<div
 				className="rounded-full flex items-center aspect-square lg:w-10 lg:h-10 w-9 h-9 justify-center relative"
 				style={{
-					backgroundColor: getRandomColor({ seed: id, palette: 'extended', intensity: 60 }),
+					backgroundColor: getRandomColor({
+						seed: id,
+						palette: 'extended',
+						intensity: 60,
+					}),
 				}}
 			>
 				<Image
@@ -41,14 +52,22 @@ export const Location = ({ id, name, slug, iconPath, _count: count, link = false
 				/>
 			</div>
 			<div className="flex flex-col">
-				<p className="lg:text-base text-sm line-clamp-1 font-semibold">{name}</p>
-				<p className="lg:text-sm text-sm text-muted-foreground">{count?.events} events</p>
+				<p className="lg:text-base text-sm line-clamp-1 font-semibold">
+					{name}
+				</p>
+				<p className="lg:text-sm text-sm text-muted-foreground">
+					{count?.events} events
+				</p>
 			</div>
 		</div>
 	)
 
 	return link ? (
-		<Link key={id} href={Routes.Main.Locations.ViewBySlug(slug)} className="contents">
+		<Link
+			key={id}
+			href={Routes.Main.Locations.ViewBySlug(slug)}
+			className="contents"
+		>
 			{renderContent}
 		</Link>
 	) : (
@@ -83,17 +102,19 @@ export const Locations = ({ continents, defaultValue }: LocationsProps) => {
 					<div className="lg:hidden flex flex-row">
 						<Carousel opts={{ align: 'start' }} className="w-full">
 							<CarouselContent className="-ml-3">
-								{chunk(locations, MOBILE_PAGE_SIZE).map((chunkedLocations, index) => (
-									<CarouselItem
-										// biome-ignore lint/suspicious/noArrayIndexKey: reasonable use of index as key
-										key={`mobile-locations-${index}`}
-										className="pl-3 basis-10/12 grid grid-cols-2 gap-3"
-									>
-										{chunkedLocations.map((location) => (
-											<Location key={location.id} link {...location} />
-										))}
-									</CarouselItem>
-								))}
+								{chunk(locations, MOBILE_PAGE_SIZE).map(
+									(chunkedLocations, index) => (
+										<CarouselItem
+											// biome-ignore lint/suspicious/noArrayIndexKey: reasonable use of index as key
+											key={`mobile-locations-${index}`}
+											className="pl-3 basis-10/12 grid grid-cols-2 gap-3"
+										>
+											{chunkedLocations.map((location) => (
+												<Location key={location.id} link {...location} />
+											))}
+										</CarouselItem>
+									)
+								)}
 							</CarouselContent>
 						</Carousel>
 					</div>

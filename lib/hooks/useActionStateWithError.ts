@@ -8,7 +8,9 @@ type UseServerActionErrorHandlerParams<T extends ServerActionResponse> = Omit<
 	'state' | 'isPending'
 >
 
-type UseActionStateParams<TState> = Parameters<typeof useActionState<TState, FormData>>
+type UseActionStateParams<TState> = Parameters<
+	typeof useActionState<TState, FormData>
+>
 
 interface UseActionStateWithErrorParams<TState extends ServerActionResponse>
 	extends UseServerActionErrorHandlerParams<TState> {

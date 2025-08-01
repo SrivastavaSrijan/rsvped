@@ -26,7 +26,10 @@ export async function hashPassword(password: string): Promise<string> {
 /**
  * Verify a password against a hash
  */
-export async function comparePasswords(password: string, hash: string): Promise<boolean> {
+export async function comparePasswords(
+	password: string,
+	hash: string
+): Promise<boolean> {
 	return bcrypt.compare(password, hash)
 }
 
@@ -82,7 +85,10 @@ export function getRandomColor({
 	intensity?: ThemeColorIntensity
 	palette?: keyof typeof ColorConfig
 } = {}): string {
-	let selectedColor: MainThemeColorName | ThemeFaintColorName | ExtendedThemeColorName
+	let selectedColor:
+		| MainThemeColorName
+		| ThemeFaintColorName
+		| ExtendedThemeColorName
 	const map = ColorConfig[palette]
 	if (color) {
 		selectedColor = color

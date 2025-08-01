@@ -34,11 +34,12 @@ export interface CompleteCommunity extends z.infer<typeof CommunityModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedCommunityModel: z.ZodSchema<CompleteCommunity> = z.lazy(() =>
-	CommunityModel.extend({
-		owner: RelatedUserModel,
-		members: RelatedCommunityMembershipModel.array(),
-		membershipTiers: RelatedMembershipTierModel.array(),
-		events: RelatedEventModel.array(),
-	})
+export const RelatedCommunityModel: z.ZodSchema<CompleteCommunity> = z.lazy(
+	() =>
+		CommunityModel.extend({
+			owner: RelatedUserModel,
+			members: RelatedCommunityMembershipModel.array(),
+			membershipTiers: RelatedMembershipTierModel.array(),
+			events: RelatedEventModel.array(),
+		})
 )

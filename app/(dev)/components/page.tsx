@@ -35,7 +35,13 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
 	Dialog,
@@ -73,7 +79,9 @@ export default function ComponentsPreviewPage() {
 			<div className="mx-auto max-w-6xl space-y-12">
 				{/* Header */}
 				<div className="space-y-4">
-					<h1 className="font-bold text-4xl">Lu.ma Design System - Complete Component Library</h1>
+					<h1 className="font-bold text-4xl">
+						Lu.ma Design System - Complete Component Library
+					</h1>
 					<p className="text-lg text-muted-foreground">
 						All UI components needed for an event platform (RSVP'd)
 					</p>
@@ -83,7 +91,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Navigation & Header</CardTitle>
-						<CardDescription>Top navigation, search, and user menus</CardDescription>
+						<CardDescription>
+							Top navigation, search, and user menus
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Main Navigation */}
@@ -106,7 +116,10 @@ export default function ComponentsPreviewPage() {
 								<div className="flex items-center gap-3">
 									<div className="relative">
 										<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
-										<Input placeholder="Search events..." className="w-64 pl-10" />
+										<Input
+											placeholder="Search events..."
+											className="w-64 pl-10"
+										/>
 									</div>
 									<Button variant="ghost" size="icon">
 										<Bell className="h-4 w-4" />
@@ -148,7 +161,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Event Cards</CardTitle>
-						<CardDescription>Various event card layouts and states</CardDescription>
+						<CardDescription>
+							Various event card layouts and states
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-8">
 						{/* Featured Event Card */}
@@ -165,9 +180,12 @@ export default function ComponentsPreviewPage() {
 											</Badge>
 											<Badge variant="outline">Free</Badge>
 										</div>
-										<h3 className="font-bold text-2xl">AI & Design: The Future of Creativity</h3>
+										<h3 className="font-bold text-2xl">
+											AI & Design: The Future of Creativity
+										</h3>
 										<p className="text-muted-foreground">
-											Explore how artificial intelligence is reshaping the creative industry
+											Explore how artificial intelligence is reshaping the
+											creative industry
 										</p>
 									</div>
 									<div className="flex gap-2">
@@ -202,7 +220,9 @@ export default function ComponentsPreviewPage() {
 										</Avatar>
 										<div>
 											<p className="font-medium">Sarah Miller</p>
-											<p className="text-muted-foreground text-sm">AI Research Lead</p>
+											<p className="text-muted-foreground text-sm">
+												AI Research Lead
+											</p>
 										</div>
 									</div>
 									<Button>Register Free</Button>
@@ -223,11 +243,16 @@ export default function ComponentsPreviewPage() {
 											<Badge className="border-green-30 bg-green-translucent text-green">
 												Workshop
 											</Badge>
-											<Badge variant="outline" className="border-cranberry text-cranberry">
+											<Badge
+												variant="outline"
+												className="border-cranberry text-cranberry"
+											>
 												$49
 											</Badge>
 										</div>
-										<h4 className="font-semibold">React Performance Workshop</h4>
+										<h4 className="font-semibold">
+											React Performance Workshop
+										</h4>
 										<div className="space-y-1 text-muted-foreground text-sm">
 											<div className="flex items-center gap-2">
 												<Clock className="h-3 w-3" />
@@ -267,7 +292,12 @@ export default function ComponentsPreviewPage() {
 												<span>50/50 attending</span>
 											</div>
 										</div>
-										<Button size="sm" className="w-full" variant="secondary" disabled>
+										<Button
+											size="sm"
+											className="w-full"
+											variant="secondary"
+											disabled
+										>
 											Waitlist
 										</Button>
 									</div>
@@ -312,7 +342,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>RSVP & Ticketing</CardTitle>
-						<CardDescription>Registration flows and ticket management</CardDescription>
+						<CardDescription>
+							Registration flows and ticket management
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* RSVP Form */}
@@ -331,7 +363,11 @@ export default function ComponentsPreviewPage() {
 								</div>
 								<div>
 									<Label htmlFor="email">Email</Label>
-									<Input id="email" type="email" placeholder="john@example.com" />
+									<Input
+										id="email"
+										type="email"
+										placeholder="john@example.com"
+									/>
 								</div>
 								<div>
 									<Label htmlFor="company">Company (Optional)</Label>
@@ -354,7 +390,9 @@ export default function ComponentsPreviewPage() {
 								<div className="flex items-center justify-between rounded-lg border p-4">
 									<div>
 										<h5 className="font-medium">General Admission</h5>
-										<p className="text-muted-foreground text-sm">Access to all sessions</p>
+										<p className="text-muted-foreground text-sm">
+											Access to all sessions
+										</p>
 									</div>
 									<div className="flex items-center gap-3">
 										<span className="font-semibold">$49</span>
@@ -373,7 +411,9 @@ export default function ComponentsPreviewPage() {
 								<div className="flex items-center justify-between rounded-lg border p-4">
 									<div>
 										<h5 className="font-medium">VIP Pass</h5>
-										<p className="text-muted-foreground text-sm">Includes networking dinner</p>
+										<p className="text-muted-foreground text-sm">
+											Includes networking dinner
+										</p>
 									</div>
 									<div className="flex items-center gap-3">
 										<span className="font-semibold">$149</span>
@@ -407,13 +447,18 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Filters & Discovery</CardTitle>
-						<CardDescription>Event discovery and filtering components</CardDescription>
+						<CardDescription>
+							Event discovery and filtering components
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Search Bar */}
 						<div className="relative">
 							<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
-							<Input placeholder="Search events, topics, or locations..." className="pl-10" />
+							<Input
+								placeholder="Search events, topics, or locations..."
+								className="pl-10"
+							/>
 						</div>
 
 						{/* Filter Bar */}
@@ -481,7 +526,11 @@ export default function ComponentsPreviewPage() {
 								Free
 								<X className="h-3 w-3 cursor-pointer" />
 							</Badge>
-							<Button variant="ghost" size="sm" className="h-auto p-1 text-muted-foreground">
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-auto p-1 text-muted-foreground"
+							>
 								Clear all
 							</Button>
 						</div>
@@ -492,7 +541,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Host Dashboard</CardTitle>
-						<CardDescription>Event management and analytics for organizers</CardDescription>
+						<CardDescription>
+							Event management and analytics for organizers
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Dashboard Stats */}
@@ -501,7 +552,9 @@ export default function ComponentsPreviewPage() {
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
-											<p className="text-muted-foreground text-sm">Total Events</p>
+											<p className="text-muted-foreground text-sm">
+												Total Events
+											</p>
 											<p className="font-bold text-2xl">12</p>
 										</div>
 										<Calendar className="h-8 w-8 text-muted-foreground" />
@@ -513,7 +566,9 @@ export default function ComponentsPreviewPage() {
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
-											<p className="text-muted-foreground text-sm">Total RSVPs</p>
+											<p className="text-muted-foreground text-sm">
+												Total RSVPs
+											</p>
 											<p className="font-bold text-2xl">1,234</p>
 										</div>
 										<Users className="h-8 w-8 text-muted-foreground" />
@@ -560,7 +615,9 @@ export default function ComponentsPreviewPage() {
 										</div>
 										<div>
 											<h5 className="font-medium">Design Systems Workshop</h5>
-											<p className="text-muted-foreground text-sm">Dec 20, 2024 · 45 registered</p>
+											<p className="text-muted-foreground text-sm">
+												Dec 20, 2024 · 45 registered
+											</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-2">
@@ -604,7 +661,9 @@ export default function ComponentsPreviewPage() {
 										</div>
 										<div>
 											<h5 className="font-medium">React Conference 2025</h5>
-											<p className="text-muted-foreground text-sm">Draft · Not published</p>
+											<p className="text-muted-foreground text-sm">
+												Draft · Not published
+											</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-2">
@@ -623,7 +682,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>User Profiles & Social</CardTitle>
-						<CardDescription>User management and social features</CardDescription>
+						<CardDescription>
+							User management and social features
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* User Profile Card */}
@@ -635,11 +696,13 @@ export default function ComponentsPreviewPage() {
 								<div className="flex-1">
 									<div className="mb-2 flex items-center gap-3">
 										<h4 className="font-semibold text-xl">John Doe</h4>
-										<Badge className="border-blue-30 bg-blue-translucent text-blue">Host</Badge>
+										<Badge className="border-blue-30 bg-blue-translucent text-blue">
+											Host
+										</Badge>
 									</div>
 									<p className="mb-3 text-muted-foreground">
-										Senior Product Designer at TechCorp. Passionate about design systems and user
-										experience.
+										Senior Product Designer at TechCorp. Passionate about design
+										systems and user experience.
 									</p>
 									<div className="flex items-center gap-4 text-muted-foreground text-sm">
 										<span>12 events hosted</span>
@@ -677,8 +740,11 @@ export default function ComponentsPreviewPage() {
 							</div>
 							<div className="max-h-64 divide-y overflow-y-auto">
 								{Array.from({ length: 5 }).map((_, i) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: just testing!
-									<div key={i} className="flex items-center justify-between p-4">
+									<div
+										// biome-ignore lint/suspicious/noArrayIndexKey: just testing!
+										key={i}
+										className="flex items-center justify-between p-4"
+									>
 										<div className="flex items-center gap-3">
 											<Avatar className="h-10 w-10">
 												<AvatarFallback>
@@ -688,13 +754,17 @@ export default function ComponentsPreviewPage() {
 											</Avatar>
 											<div>
 												<p className="font-medium">Attendee {i + 1}</p>
-												<p className="text-muted-foreground text-sm">attendee{i + 1}@example.com</p>
+												<p className="text-muted-foreground text-sm">
+													attendee{i + 1}@example.com
+												</p>
 											</div>
 										</div>
 										<div className="flex items-center gap-2">
 											<Badge
 												className={
-													i % 2 === 0 ? 'border-green-30 bg-green-translucent text-green' : ''
+													i % 2 === 0
+														? 'border-green-30 bg-green-translucent text-green'
+														: ''
 												}
 												variant={i % 2 === 0 ? 'outline' : 'secondary'}
 											>
@@ -715,7 +785,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Notifications & Communication</CardTitle>
-						<CardDescription>Alerts, messages, and communication components</CardDescription>
+						<CardDescription>
+							Alerts, messages, and communication components
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Notification List */}
@@ -723,7 +795,9 @@ export default function ComponentsPreviewPage() {
 							<div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-brand p-3">
 								<Bell className="mt-0.5 h-5 w-5 text-blue-600" />
 								<div className="flex-1">
-									<p className="font-medium text-blue-900">New RSVP for Design Workshop</p>
+									<p className="font-medium text-blue-900">
+										New RSVP for Design Workshop
+									</p>
 									<p className="text-blue-700 text-sm">
 										Sarah Johnson just registered for your event
 									</p>
@@ -738,8 +812,12 @@ export default function ComponentsPreviewPage() {
 								<Calendar className="mt-0.5 h-5 w-5 text-muted-foreground" />
 								<div className="flex-1">
 									<p className="font-medium">Event reminder</p>
-									<p className="text-muted-foreground text-sm">React Workshop starts in 2 hours</p>
-									<p className="mt-1 text-muted-foreground text-xs">1 hour ago</p>
+									<p className="text-muted-foreground text-sm">
+										React Workshop starts in 2 hours
+									</p>
+									<p className="mt-1 text-muted-foreground text-xs">
+										1 hour ago
+									</p>
 								</div>
 							</div>
 
@@ -750,7 +828,9 @@ export default function ComponentsPreviewPage() {
 									<p className="text-muted-foreground text-sm">
 										5 new reviews for Design Systems Meetup
 									</p>
-									<p className="mt-1 text-muted-foreground text-xs">3 hours ago</p>
+									<p className="mt-1 text-muted-foreground text-xs">
+										3 hours ago
+									</p>
 								</div>
 							</div>
 						</div>
@@ -787,7 +867,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Advanced Form Components</CardTitle>
-						<CardDescription>Complex forms for event creation and management</CardDescription>
+						<CardDescription>
+							Complex forms for event creation and management
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Event Creation Form */}
@@ -806,7 +888,10 @@ export default function ComponentsPreviewPage() {
 								</div>
 								<div>
 									<Label htmlFor="event-subtitle">Subtitle (Optional)</Label>
-									<Input id="event-subtitle" placeholder="Short description..." />
+									<Input
+										id="event-subtitle"
+										placeholder="Short description..."
+									/>
 								</div>
 								<div className="grid grid-cols-2 gap-4">
 									<div>
@@ -823,7 +908,11 @@ export default function ComponentsPreviewPage() {
 							<TabsContent value="details" className="space-y-4">
 								<div>
 									<Label htmlFor="description">Event Description</Label>
-									<Textarea id="description" placeholder="Describe your event..." rows={4} />
+									<Textarea
+										id="description"
+										placeholder="Describe your event..."
+										rows={4}
+									/>
 								</div>
 								<div>
 									<Label htmlFor="category">Category</Label>
@@ -847,7 +936,11 @@ export default function ComponentsPreviewPage() {
 								</div>
 								<div>
 									<Label htmlFor="capacity">Event Capacity</Label>
-									<Input id="capacity" type="number" placeholder="Maximum attendees..." />
+									<Input
+										id="capacity"
+										type="number"
+										placeholder="Maximum attendees..."
+									/>
 								</div>
 							</TabsContent>
 
@@ -858,11 +951,15 @@ export default function ComponentsPreviewPage() {
 								</div>
 								<div className="flex items-center space-x-2">
 									<Switch id="allow-waitlist" />
-									<Label htmlFor="allow-waitlist">Allow waitlist when sold out</Label>
+									<Label htmlFor="allow-waitlist">
+										Allow waitlist when sold out
+									</Label>
 								</div>
 								<div className="flex items-center space-x-2">
 									<Switch id="require-approval" />
-									<Label htmlFor="require-approval">Require approval for registration</Label>
+									<Label htmlFor="require-approval">
+										Require approval for registration
+									</Label>
 								</div>
 							</TabsContent>
 						</Tabs>
@@ -873,15 +970,21 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Status & Badge System</CardTitle>
-						<CardDescription>All possible states and status indicators</CardDescription>
+						<CardDescription>
+							All possible states and status indicators
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Event Status Badges */}
 						<div>
 							<h4 className="mb-3 font-medium">Event Status</h4>
 							<div className="flex flex-wrap gap-2">
-								<Badge className="border-green-30 bg-green-translucent text-green">Live</Badge>
-								<Badge className="border-blue-30 bg-blue-translucent text-blue">Published</Badge>
+								<Badge className="border-green-30 bg-green-translucent text-green">
+									Live
+								</Badge>
+								<Badge className="border-blue-30 bg-blue-translucent text-blue">
+									Published
+								</Badge>
 								<Badge variant="outline">Draft</Badge>
 								<Badge className="border-orange-30 bg-orange-translucent text-orange">
 									Upcoming
@@ -901,9 +1004,15 @@ export default function ComponentsPreviewPage() {
 								<Badge className="border-cranberry-30 bg-cranberry-translucent text-cranberry">
 									Host
 								</Badge>
-								<Badge className="border-blue-30 bg-blue-translucent text-blue">Co-host</Badge>
-								<Badge className="border-green-30 bg-green-translucent text-green">Attendee</Badge>
-								<Badge className="border-orange-30 bg-orange-translucent text-orange">VIP</Badge>
+								<Badge className="border-blue-30 bg-blue-translucent text-blue">
+									Co-host
+								</Badge>
+								<Badge className="border-green-30 bg-green-translucent text-green">
+									Attendee
+								</Badge>
+								<Badge className="border-orange-30 bg-orange-translucent text-orange">
+									VIP
+								</Badge>
 								<Badge className="border-purple-30 bg-purple-translucent text-purple">
 									Speaker
 								</Badge>
@@ -927,7 +1036,9 @@ export default function ComponentsPreviewPage() {
 									<X className="mr-1 h-3 w-3" />
 									Failed
 								</Badge>
-								<Badge className="border-blue-30 bg-blue-translucent text-blue">Free</Badge>
+								<Badge className="border-blue-30 bg-blue-translucent text-blue">
+									Free
+								</Badge>
 								<Badge variant="outline">Refunded</Badge>
 							</div>
 						</div>
@@ -938,7 +1049,9 @@ export default function ComponentsPreviewPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Interactive Components</CardTitle>
-						<CardDescription>Modals, dropdowns, and interactive elements</CardDescription>
+						<CardDescription>
+							Modals, dropdowns, and interactive elements
+						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						{/* Dialog Example */}
@@ -953,7 +1066,8 @@ export default function ComponentsPreviewPage() {
 										<DialogHeader>
 											<DialogTitle>Cancel Event</DialogTitle>
 											<DialogDescription>
-												Are you sure you want to cancel this event? This action cannot be undone.
+												Are you sure you want to cancel this event? This action
+												cannot be undone.
 											</DialogDescription>
 										</DialogHeader>
 										<div className="mt-6 flex justify-end gap-3">
@@ -970,11 +1084,16 @@ export default function ComponentsPreviewPage() {
 									<DialogContent>
 										<DialogHeader>
 											<DialogTitle>Share Event</DialogTitle>
-											<DialogDescription>Share this event with others</DialogDescription>
+											<DialogDescription>
+												Share this event with others
+											</DialogDescription>
 										</DialogHeader>
 										<div className="mt-4 space-y-4">
 											<div className="flex gap-2">
-												<Input value="https://rsvpd.app/events/design-workshop" readOnly />
+												<Input
+													value="https://rsvpd.app/events/design-workshop"
+													readOnly
+												/>
 												<Button variant="outline">
 													<Copy className="h-4 w-4" />
 												</Button>

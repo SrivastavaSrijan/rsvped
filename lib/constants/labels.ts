@@ -15,7 +15,10 @@ export const RSVPLabels: Record<RsvpStatus, string> = {
 }
 
 type BadgeVariantProps = VariantProps<typeof badgeVariants>
-export const RSVPBadgeVariants: Record<RsvpStatus, BadgeVariantProps['variant']> = {
+export const RSVPBadgeVariants: Record<
+	RsvpStatus,
+	BadgeVariantProps['variant']
+> = {
 	[RsvpStatus.CONFIRMED]: 'success',
 	[RsvpStatus.WAITLIST]: 'secondary',
 	[RsvpStatus.CANCELLED]: 'destructive',
@@ -27,7 +30,10 @@ export const MembershipLabels: Record<MembershipRole, string> = {
 	[MembershipRole.MODERATOR]: 'Moderator',
 }
 
-export const MembershipBadgeVariants: Record<MembershipRole, BadgeVariantProps['variant']> = {
+export const MembershipBadgeVariants: Record<
+	MembershipRole,
+	BadgeVariantProps['variant']
+> = {
 	[MembershipRole.ADMIN]: 'success',
 	[MembershipRole.MEMBER]: 'secondary',
 	[MembershipRole.MODERATOR]: 'outline',

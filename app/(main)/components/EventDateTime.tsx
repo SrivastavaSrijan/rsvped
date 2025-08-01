@@ -11,7 +11,9 @@ export const EventDateTime = (params: EventDateTimeProps) => {
 	return (
 		<div className="flex items-center gap-3 text-base">
 			<div className="text-center">
-				<p className="rounded-tl-xl rounded-tr-xl bg-white/20 px-2 py-1 text-sm">{start.month}</p>
+				<p className="rounded-tl-xl rounded-tr-xl bg-white/20 px-2 py-1 text-sm">
+					{start.month}
+				</p>
 				<p className="rounded-br-xl rounded-bl-xl bg-white/30 px-2 py-1 text-sm">
 					{start.dayOfMonth}
 				</p>

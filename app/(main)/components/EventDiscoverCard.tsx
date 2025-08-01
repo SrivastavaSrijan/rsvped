@@ -33,7 +33,9 @@ export const EventDiscoverCard = ({
 					)}
 				</div>
 				<div className="flex-1 items-center">
-					<h3 className="font-medium lg:text-base text-sm line-clamp-1">{title}</h3>
+					<h3 className="font-medium lg:text-base text-sm line-clamp-1">
+						{title}
+					</h3>
 					<p className="text-sm text-muted-foreground">{range.date}</p>
 					<p className="text-xs text-muted-foreground">{range.time}</p>
 				</div>

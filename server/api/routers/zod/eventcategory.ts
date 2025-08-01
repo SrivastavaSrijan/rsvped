@@ -11,7 +11,8 @@ export const EventCategoryModel = z.object({
 	categoryId: z.string(),
 })
 
-export interface CompleteEventCategory extends z.infer<typeof EventCategoryModel> {
+export interface CompleteEventCategory
+	extends z.infer<typeof EventCategoryModel> {
 	event: CompleteEvent
 	category: CompleteCategory
 }
@@ -21,9 +22,10 @@ export interface CompleteEventCategory extends z.infer<typeof EventCategoryModel
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventCategoryModel: z.ZodSchema<CompleteEventCategory> = z.lazy(() =>
-	EventCategoryModel.extend({
-		event: RelatedEventModel,
-		category: RelatedCategoryModel,
-	})
-)
+export const RelatedEventCategoryModel: z.ZodSchema<CompleteEventCategory> =
+	z.lazy(() =>
+		EventCategoryModel.extend({
+			event: RelatedEventModel,
+			category: RelatedCategoryModel,
+		})
+	)

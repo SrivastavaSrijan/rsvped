@@ -11,7 +11,8 @@ export const EventDailyStatModel = z.object({
 	paidRsvps: z.number().int(),
 })
 
-export interface CompleteEventDailyStat extends z.infer<typeof EventDailyStatModel> {
+export interface CompleteEventDailyStat
+	extends z.infer<typeof EventDailyStatModel> {
 	event: CompleteEvent
 }
 
@@ -20,8 +21,9 @@ export interface CompleteEventDailyStat extends z.infer<typeof EventDailyStatMod
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventDailyStatModel: z.ZodSchema<CompleteEventDailyStat> = z.lazy(() =>
-	EventDailyStatModel.extend({
-		event: RelatedEventModel,
-	})
-)
+export const RelatedEventDailyStatModel: z.ZodSchema<CompleteEventDailyStat> =
+	z.lazy(() =>
+		EventDailyStatModel.extend({
+			event: RelatedEventModel,
+		})
+	)

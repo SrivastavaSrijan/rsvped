@@ -83,8 +83,8 @@ export const EventRegisterModal = ({
 						</div>
 						<DialogTitle>You're In!</DialogTitle>
 						<DialogDescription>
-							You have successfully registered for this event. A confirmation has been sent to your
-							email.
+							You have successfully registered for this event. A confirmation
+							has been sent to your email.
 						</DialogDescription>
 					</DialogHeader>
 				</DialogContent>
@@ -125,16 +125,26 @@ export const EventRegisterModal = ({
 							</SelectTrigger>
 							<SelectContent>
 								{ticketTiers.map(
-									({ name, id, priceCents, quantitySold = 0, quantityTotal = 1, currency }) => (
+									({
+										name,
+										id,
+										priceCents,
+										quantitySold = 0,
+										quantityTotal = 1,
+										currency,
+									}) => (
 										<SelectItem key={id} value={id}>
 											{name} -{' '}
-											{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-												priceCents / 100
-											)}
+											{new Intl.NumberFormat('en-US', {
+												style: 'currency',
+												currency,
+											}).format(priceCents / 100)}
 											<Badge
 												className="ml-2"
 												variant={
-													(quantitySold / (quantityTotal ?? 1)) * 100 > 100 ? 'default' : 'outline'
+													(quantitySold / (quantityTotal ?? 1)) * 100 > 100
+														? 'default'
+														: 'outline'
 												}
 											>
 												{(quantitySold / (quantityTotal ?? 1)) * 100}% Sold

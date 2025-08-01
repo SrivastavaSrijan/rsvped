@@ -11,80 +11,82 @@ const CreateRsvpInput = z.object({
 })
 
 export const rsvpRouter = createTRPCRouter({
-	create: publicProcedure.input(CreateRsvpInput).mutation(async ({ ctx, input }) => {
-		// Check if RSVP already exists
-		const existingRsvp = await ctx.prisma.rsvp.findFirst({
-			where: {
-				eventId: input.eventId,
-				email: input.email,
-			},
-		})
-
-		if (existingRsvp) {
-			throw new TRPCError({
-				code: 'CONFLICT',
-				message: 'ALREADY_REGISTERED',
-			})
-		}
-
-		// Check event capacity
-		const event = await ctx.prisma.event.findUnique({
-			where: { id: input.eventId },
-			include: {
-				_count: {
-					select: { rsvps: true },
-				},
-			},
-		})
-
-		if (!event) {
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: 'EVENT_NOT_FOUND',
-			})
-		}
-
-		if (event.capacity && event._count.rsvps >= event.capacity) {
-			throw new TRPCError({
-				code: 'PRECONDITION_FAILED',
-				message: 'EVENT_FULL',
-			})
-		}
-
-		// transaction to update RSVP count and create RSVP
-		return ctx.prisma.$transaction([
-			ctx.prisma.event.update({
-				where: { id: input.eventId },
-				data: {
-					rsvpCount: {
-						increment: 1,
-					},
-				},
-			}),
-			ctx.prisma.rsvp.create({
-				data: {
+	create: publicProcedure
+		.input(CreateRsvpInput)
+		.mutation(async ({ ctx, input }) => {
+			// Check if RSVP already exists
+			const existingRsvp = await ctx.prisma.rsvp.findFirst({
+				where: {
 					eventId: input.eventId,
-					name: input.name,
 					email: input.email,
-					ticketTierId: input.ticketTierId,
 				},
+			})
+
+			if (existingRsvp) {
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'ALREADY_REGISTERED',
+				})
+			}
+
+			// Check event capacity
+			const event = await ctx.prisma.event.findUnique({
+				where: { id: input.eventId },
 				include: {
-					event: {
-						select: {
-							title: true,
-							startDate: true,
-						},
-					},
-					ticketTier: {
-						select: {
-							name: true,
-							priceCents: true,
-						},
+					_count: {
+						select: { rsvps: true },
 					},
 				},
-			}),
-		])
-	}),
+			})
+
+			if (!event) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'EVENT_NOT_FOUND',
+				})
+			}
+
+			if (event.capacity && event._count.rsvps >= event.capacity) {
+				throw new TRPCError({
+					code: 'PRECONDITION_FAILED',
+					message: 'EVENT_FULL',
+				})
+			}
+
+			// transaction to update RSVP count and create RSVP
+			return ctx.prisma.$transaction([
+				ctx.prisma.event.update({
+					where: { id: input.eventId },
+					data: {
+						rsvpCount: {
+							increment: 1,
+						},
+					},
+				}),
+				ctx.prisma.rsvp.create({
+					data: {
+						eventId: input.eventId,
+						name: input.name,
+						email: input.email,
+						ticketTierId: input.ticketTierId,
+					},
+					include: {
+						event: {
+							select: {
+								title: true,
+								startDate: true,
+							},
+						},
+						ticketTier: {
+							select: {
+								name: true,
+								priceCents: true,
+							},
+						},
+					},
+				}),
+			])
+		}),
 
 	getByEmail: publicProcedure
 		.input(

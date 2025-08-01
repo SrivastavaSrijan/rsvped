@@ -37,11 +37,12 @@ export interface CompleteTicketTier extends z.infer<typeof TicketTierModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedTicketTierModel: z.ZodSchema<CompleteTicketTier> = z.lazy(() =>
-	TicketTierModel.extend({
-		event: RelatedEventModel,
-		rsvps: RelatedRsvpModel.array(),
-		orderItems: RelatedOrderItemModel.array(),
-		promoCodeTiers: RelatedPromoCodeTierModel.array(),
-	})
+export const RelatedTicketTierModel: z.ZodSchema<CompleteTicketTier> = z.lazy(
+	() =>
+		TicketTierModel.extend({
+			event: RelatedEventModel,
+			rsvps: RelatedRsvpModel.array(),
+			orderItems: RelatedOrderItemModel.array(),
+			promoCodeTiers: RelatedPromoCodeTierModel.array(),
+		})
 )

@@ -1,5 +1,10 @@
 import * as z from 'zod'
-import { type CompleteEvent, type CompleteUser, RelatedEventModel, RelatedUserModel } from './index'
+import {
+	type CompleteEvent,
+	type CompleteUser,
+	RelatedEventModel,
+	RelatedUserModel,
+} from './index'
 
 export const LocationModel = z.object({
 	id: z.string(),

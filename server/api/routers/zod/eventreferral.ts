@@ -17,7 +17,8 @@ export const EventReferralModel = z.object({
 	createdAt: z.date(),
 })
 
-export interface CompleteEventReferral extends z.infer<typeof EventReferralModel> {
+export interface CompleteEventReferral
+	extends z.infer<typeof EventReferralModel> {
 	event: CompleteEvent
 	user?: CompleteUser | null
 	rsvps: CompleteRsvp[]
@@ -28,10 +29,11 @@ export interface CompleteEventReferral extends z.infer<typeof EventReferralModel
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedEventReferralModel: z.ZodSchema<CompleteEventReferral> = z.lazy(() =>
-	EventReferralModel.extend({
-		event: RelatedEventModel,
-		user: RelatedUserModel.nullish(),
-		rsvps: RelatedRsvpModel.array(),
-	})
-)
+export const RelatedEventReferralModel: z.ZodSchema<CompleteEventReferral> =
+	z.lazy(() =>
+		EventReferralModel.extend({
+			event: RelatedEventModel,
+			user: RelatedUserModel.nullish(),
+			rsvps: RelatedRsvpModel.array(),
+		})
+	)

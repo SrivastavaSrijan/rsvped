@@ -54,7 +54,8 @@ export const groupLocations = (locations: readonly Location[]) =>
 
 			const updatedContinent: ContinentsMap[string] = {
 				_count: {
-					countries: (prevContinent?._count.countries ?? 0) + (isNewCountry ? 1 : 0),
+					countries:
+						(prevContinent?._count.countries ?? 0) + (isNewCountry ? 1 : 0),
 					locations: (prevContinent?._count.locations ?? 0) + 1,
 				},
 				locations: [...(prevContinent?.locations ?? []), loc],
@@ -123,17 +124,22 @@ export const locationRouter = createTRPCRouter({
 	}),
 
 	// Get a single location by its unique ID
-	byId: publicProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
-		const location = await ctx.prisma.location.findUnique({
-			where: { id: input.id },
-		})
+	byId: publicProcedure
+		.input(z.object({ id: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const location = await ctx.prisma.location.findUnique({
+				where: { id: input.id },
+			})
 
-		if (!location) {
-			throw new TRPCError({ code: 'NOT_FOUND', message: 'Location not found' })
-		}
+			if (!location) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Location not found',
+				})
+			}
 
-		return location
-	}),
+			return location
+		}),
 
 	// Get the first available location as a system-wide default
 	getDefault: publicProcedure.query(async ({ ctx }) => {
@@ -152,23 +158,34 @@ export const locationRouter = createTRPCRouter({
 		})
 
 		if (!location) {
-			throw new TRPCError({ code: 'NOT_FOUND', message: 'No default location available' })
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'No default location available',
+			})
 		}
 		return location
 	}),
 
-	get: publicProcedure.input(z.object({ slug: z.string() })).query(async ({ ctx, input }) => {
-		const location = await ctx.prisma.location.findUnique({
-			where: { slug: input.slug, events: { some: { isPublished: true, deletedAt: null } } },
-			include: {
-				events: true,
-			},
-		})
+	get: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const location = await ctx.prisma.location.findUnique({
+				where: {
+					slug: input.slug,
+					events: { some: { isPublished: true, deletedAt: null } },
+				},
+				include: {
+					events: true,
+				},
+			})
 
-		if (!location) {
-			throw new TRPCError({ code: 'NOT_FOUND', message: 'Location not found' })
-		}
+			if (!location) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Location not found',
+				})
+			}
 
-		return location
-	}),
+			return location
+		}),
 })

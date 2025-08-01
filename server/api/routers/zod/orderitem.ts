@@ -24,9 +24,10 @@ export interface CompleteOrderItem extends z.infer<typeof OrderItemModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedOrderItemModel: z.ZodSchema<CompleteOrderItem> = z.lazy(() =>
-	OrderItemModel.extend({
-		order: RelatedOrderModel,
-		ticketTier: RelatedTicketTierModel,
-	})
+export const RelatedOrderItemModel: z.ZodSchema<CompleteOrderItem> = z.lazy(
+	() =>
+		OrderItemModel.extend({
+			order: RelatedOrderModel,
+			ticketTier: RelatedTicketTierModel,
+		})
 )

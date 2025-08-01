@@ -11,8 +11,8 @@ export const config = {
 		authorized({ auth, request: { nextUrl } }) {
 			const isLoggedIn = !!auth?.user
 			const { pathname, search } = nextUrl
-			const isAuthRoute = (Object.values(Routes.Auth) as string[]).some((route) =>
-				pathname.startsWith(route)
+			const isAuthRoute = (Object.values(Routes.Auth) as string[]).some(
+				(route) => pathname.startsWith(route)
 			)
 
 			if (isAuthRoute) {
@@ -40,13 +40,17 @@ export const config = {
 			if (isProtectedRoute && !isLoggedIn) {
 				const next = pathname + search
 				const encodedNext = encodeURIComponent(next)
-				return NextResponse.redirect(new URL(`${Routes.Auth.SignIn}?next=${encodedNext}`, nextUrl))
+				return NextResponse.redirect(
+					new URL(`${Routes.Auth.SignIn}?next=${encodedNext}`, nextUrl)
+				)
 			}
 
 			if (isProtectedRoute && !isLoggedIn) {
 				const next = pathname + search
 				const encodedNext = encodeURIComponent(next)
-				return NextResponse.redirect(new URL(`${Routes.Auth.SignIn}?next=${encodedNext}`, nextUrl))
+				return NextResponse.redirect(
+					new URL(`${Routes.Auth.SignIn}?next=${encodedNext}`, nextUrl)
+				)
 			}
 
 			return true

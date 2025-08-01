@@ -12,7 +12,9 @@ export default async function MainLayout({
 		<PageWrapper>
 			<Navbar />
 			{form}
-			<main className="flex flex-1 items-center justify-center">{children}</main>
+			<main className="flex flex-1 items-center justify-center">
+				{children}
+			</main>
 			<Footer />
 		</PageWrapper>
 	)

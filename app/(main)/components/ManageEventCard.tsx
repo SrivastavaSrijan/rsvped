@@ -79,7 +79,11 @@ export function ManageEventCard({
 							className="text-muted-foreground"
 							size="lg"
 						/>
-						<Stats checkInCount={checkInCount} rsvpCount={rsvpCount} viewCount={viewCount} />
+						<Stats
+							checkInCount={checkInCount}
+							rsvpCount={rsvpCount}
+							viewCount={viewCount}
+						/>
 					</div>
 					<div className="flex w-full flex-col gap-2 lg:gap-2">
 						{/* Action Buttons */}

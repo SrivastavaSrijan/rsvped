@@ -6,7 +6,9 @@ import type { AuthFormData } from '@/server/actions'
 import { AuthModal } from '../../components/AuthModal'
 
 export default async function RegisterModal() {
-	const prefill = await getEncryptedCookie<Partial<AuthFormData>>(CookieNames.PrefillForm)
+	const prefill = await getEncryptedCookie<Partial<AuthFormData>>(
+		CookieNames.PrefillForm
+	)
 	return (
 		<Suspense fallback={null}>
 			<AuthModal mode="register" prefill={prefill ?? undefined} />

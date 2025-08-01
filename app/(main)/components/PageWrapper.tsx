@@ -14,8 +14,13 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
 	const [isLoaded, setIsLoaded] = useState(false)
 
 	useEffect(() => {
-		const { pseudoElement, background, key = '' } = getStylesForRoute(pathname, params)
-		const seed = key && typeof params[key] === 'string' ? params[key] : undefined
+		const {
+			pseudoElement,
+			background,
+			key = '',
+		} = getStylesForRoute(pathname, params)
+		const seed =
+			key && typeof params[key] === 'string' ? params[key] : undefined
 		setStyles({
 			background: background ? background(seed) : {},
 			pseudoElement: pseudoElement ? pseudoElement(seed) : {},

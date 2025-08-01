@@ -14,8 +14,8 @@ export const ActiveLink = ({ href, icon, children }: ActiveLinkProps) => {
 	return (
 		<Link href={href} passHref>
 			<Button
-				variant="link"
 				size="sm"
+				variant="link"
 				className={cn('opacity-50 transition-colors hover:opacity-100', {
 					'underline underline-offset-2 opacity-100': pathname === href,
 				})}

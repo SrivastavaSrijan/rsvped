@@ -55,16 +55,36 @@ export function ShareActions({ title, url }: ShareActionsProps) {
 		<div className="flex w-full flex-row items-center justify-between gap-1 lg:gap-2">
 			<p className="text-xs">Share event</p>
 			<div className="flex flex-row gap-2 lg:gap-2">
-				<Button variant="ghost" size="sm" onClick={handleNativeShare} title="Share">
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={handleNativeShare}
+					title="Share"
+				>
 					<Share className="size-3.75" />
 				</Button>
-				<Button variant="ghost" size="sm" onClick={handleTwitterShare} title="Share on Twitter">
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={handleTwitterShare}
+					title="Share on Twitter"
+				>
 					<Twitter className="size-3.75" />
 				</Button>
-				<Button variant="ghost" size="sm" onClick={handleWhatsAppShare} title="Share on WhatsApp">
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={handleWhatsAppShare}
+					title="Share on WhatsApp"
+				>
 					<MessageCircle className="size-3.75" />
 				</Button>
-				<Button variant="ghost" size="sm" onClick={handleEmailShare} title="Share via Email">
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={handleEmailShare}
+					title="Share via Email"
+				>
 					<Mail className="size-3.75" />
 				</Button>
 			</div>

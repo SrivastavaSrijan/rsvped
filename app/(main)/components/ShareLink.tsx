@@ -33,8 +33,17 @@ export function ShareLink({ display, url, className }: ShareLinkProps) {
 					{display}
 				</p>
 			</Link>
-			<Button variant="ghost" size="icon" className="size-2.5" onClick={handleCopy}>
-				{copied ? <Check className="size-2.5" /> : <Copy className="size-2.5" />}
+			<Button
+				variant="ghost"
+				size="icon"
+				className="size-2.5"
+				onClick={handleCopy}
+			>
+				{copied ? (
+					<Check className="size-2.5" />
+				) : (
+					<Copy className="size-2.5" />
+				)}
 			</Button>
 		</div>
 	)

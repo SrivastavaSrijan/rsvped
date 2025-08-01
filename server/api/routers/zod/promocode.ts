@@ -34,10 +34,11 @@ export interface CompletePromoCode extends z.infer<typeof PromoCodeModel> {
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedPromoCodeModel: z.ZodSchema<CompletePromoCode> = z.lazy(() =>
-	PromoCodeModel.extend({
-		event: RelatedEventModel,
-		applicableTiers: RelatedPromoCodeTierModel.array(),
-		appliedOrders: RelatedOrderModel.array(),
-	})
+export const RelatedPromoCodeModel: z.ZodSchema<CompletePromoCode> = z.lazy(
+	() =>
+		PromoCodeModel.extend({
+			event: RelatedEventModel,
+			applicableTiers: RelatedPromoCodeTierModel.array(),
+			appliedOrders: RelatedOrderModel.array(),
+		})
 )

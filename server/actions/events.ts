@@ -18,7 +18,11 @@ const eventSchema = z
 		locationType: z.nativeEnum(LocationType),
 		venueName: z.string().optional(),
 		venueAddress: z.string().optional(),
-		onlineUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+		onlineUrl: z
+			.string()
+			.url('Please enter a valid URL.')
+			.optional()
+			.or(z.literal('')),
 		description: z.string().optional(),
 		requiresApproval: z.boolean().optional(),
 		capacity: z
@@ -54,7 +58,8 @@ const eventSchema = z
 	.refine(
 		(data) => {
 			if (
-				(data.locationType === LocationType.ONLINE || data.locationType === LocationType.HYBRID) &&
+				(data.locationType === LocationType.ONLINE ||
+					data.locationType === LocationType.HYBRID) &&
 				!data.onlineUrl
 			) {
 				return false
@@ -68,8 +73,14 @@ const eventSchema = z
 	)
 
 export type EventFormData = z.infer<typeof eventSchema>
-type EventData = RouterOutput['event']['create'] | RouterOutput['event']['update']
-export type EventActionResponse = ServerActionResponse<EventData, EventErrorCodes, EventFormData>
+type EventData =
+	| RouterOutput['event']['create']
+	| RouterOutput['event']['update']
+export type EventActionResponse = ServerActionResponse<
+	EventData,
+	EventErrorCodes,
+	EventFormData
+>
 
 export async function saveEvent(
 	_: EventActionResponse | null,
@@ -121,7 +132,9 @@ export async function saveEvent(
 		}
 		return {
 			success: false,
-			error: isUpdate ? EventErrorCodes.UPDATE_FAILED : EventErrorCodes.CREATION_FAILED,
+			error: isUpdate
+				? EventErrorCodes.UPDATE_FAILED
+				: EventErrorCodes.CREATION_FAILED,
 		}
 	}
 	const next = formData.get('next') as string | null

@@ -21,7 +21,8 @@ export const MembershipTierModel = z.object({
 	createdAt: z.date(),
 })
 
-export interface CompleteMembershipTier extends z.infer<typeof MembershipTierModel> {
+export interface CompleteMembershipTier
+	extends z.infer<typeof MembershipTierModel> {
 	community: CompleteCommunity
 	memberships: CompleteCommunityMembership[]
 }
@@ -31,9 +32,10 @@ export interface CompleteMembershipTier extends z.infer<typeof MembershipTierMod
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedMembershipTierModel: z.ZodSchema<CompleteMembershipTier> = z.lazy(() =>
-	MembershipTierModel.extend({
-		community: RelatedCommunityModel,
-		memberships: RelatedCommunityMembershipModel.array(),
-	})
-)
+export const RelatedMembershipTierModel: z.ZodSchema<CompleteMembershipTier> =
+	z.lazy(() =>
+		MembershipTierModel.extend({
+			community: RelatedCommunityModel,
+			memberships: RelatedCommunityMembershipModel.array(),
+		})
+	)

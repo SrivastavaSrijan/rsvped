@@ -14,7 +14,12 @@ export {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from './alert-dialog'
-export { Avatar, AvatarFallback, AvatarImage, AvatarWithFallback } from './avatar'
+export {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	AvatarWithFallback,
+} from './avatar'
 export { Badge, badgeVariants } from './badge'
 export {
 	Breadcrumb,
@@ -36,7 +41,13 @@ export {
 	CardHeader,
 	CardTitle,
 } from './card'
-export { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './carousel'
+export {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from './carousel'
 export { Checkbox } from './checkbox'
 export {
 	Dialog,
@@ -106,4 +117,9 @@ export {
 } from './table'
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 export { Textarea } from './textarea'
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
+export {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from './tooltip'

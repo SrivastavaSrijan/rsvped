@@ -66,7 +66,9 @@ export function EventsPagination({
 
 				{currentPage > 2 && (
 					<PaginationItem>
-						<PaginationLink href={buildUrl(currentPage - 1)}>{currentPage - 1}</PaginationLink>
+						<PaginationLink href={buildUrl(currentPage - 1)}>
+							{currentPage - 1}
+						</PaginationLink>
 					</PaginationItem>
 				)}
 
@@ -79,7 +81,10 @@ export function EventsPagination({
 				)}
 
 				<PaginationItem>
-					<PaginationNext size="sm" href={showNext ? buildUrl(currentPage + 1) : undefined} />
+					<PaginationNext
+						size="sm"
+						href={showNext ? buildUrl(currentPage + 1) : undefined}
+					/>
 				</PaginationItem>
 			</PaginationContent>
 		</Pagination>
