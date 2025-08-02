@@ -1,0 +1,120 @@
+'use client'
+
+import { Check, Loader2 } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
+import { Form } from '@/components/shared'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog'
+import { Routes } from '@/lib/config'
+import { useActionStateWithError } from '@/lib/hooks'
+import {
+	MembershipActionErrorCodeMap,
+	type MembershipActionResponse,
+	subscribeToCommunityAction,
+} from '@/server/actions'
+import type { RouterOutput } from '@/server/api'
+import { copy } from '../copy'
+
+const initialState: MembershipActionResponse = {
+	success: false,
+	fieldErrors: {},
+}
+
+type CommunitySubscribeData = RouterOutput['community']['get']
+
+export const CommunitySubscribeModal = ({
+	id,
+	name,
+	membershipTiers,
+}: CommunitySubscribeData) => {
+	const { replace } = useRouter()
+	const { slug } = useParams()
+
+	const { state, formAction, isPending, errorComponent } =
+		useActionStateWithError({
+			action: subscribeToCommunityAction,
+			initialState,
+			errorCodeMap: MembershipActionErrorCodeMap,
+			displayMode: 'inline',
+		})
+
+	const handleClose = (open: boolean) => {
+		if (!open && slug && typeof slug === 'string') {
+			replace(Routes.Main.Communities.ViewBySlug(slug))
+		}
+	}
+
+	if (state.success) {
+		return (
+			<Dialog open onOpenChange={handleClose}>
+				<DialogContent>
+					<DialogHeader className="items-center text-center">
+						<div className="mb-3 flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-green-500/20 p-2 text-green-500">
+							<Check />
+						</div>
+						<DialogTitle>Subscribed!</DialogTitle>
+						<DialogDescription>You have joined {name}.</DialogDescription>
+					</DialogHeader>
+				</DialogContent>
+			</Dialog>
+		)
+	}
+
+	return (
+		<Dialog open onOpenChange={handleClose}>
+			<DialogContent>
+				<DialogHeader className="text-left">
+					<DialogTitle>Subscribe to {name}</DialogTitle>
+					<DialogDescription>{copy.subscribe.description}</DialogDescription>
+					{errorComponent}
+				</DialogHeader>
+				<div className="flex flex-col gap-4">
+					<Form action={formAction} className="flex flex-col gap-3">
+						<input type="hidden" name="communityId" value={id} />
+						<Select name="membershipTierId">
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder={copy.placeholders.tier} />
+							</SelectTrigger>
+							<SelectContent>
+								{membershipTiers.map(
+									({ id: tierId, name: tierName, priceCents, currency }) => (
+										<SelectItem key={tierId} value={tierId}>
+											{tierName} -{' '}
+											{priceCents
+												? new Intl.NumberFormat('en-US', {
+														style: 'currency',
+														currency: currency ?? 'USD',
+													}).format(priceCents / 100)
+												: 'Free'}
+										</SelectItem>
+									)
+								)}
+							</SelectContent>
+						</Select>
+						<Button
+							type="submit"
+							disabled={isPending}
+							className="flex items-center justify-center gap-1.5"
+						>
+							{isPending && <Loader2 className="size-3 animate-spin" />}
+							Subscribe
+						</Button>
+					</Form>
+				</div>
+			</DialogContent>
+		</Dialog>
+	)
+}

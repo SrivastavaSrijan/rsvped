@@ -90,6 +90,7 @@ export const RouteDefs = {
 
 		Routes.Main.Events.ViewBySlugRegister('[slug]'),
 		Routes.Main.Communities.Discover,
+		Routes.Main.Communities.SubscribeTo('[slug]'),
 	],
 }
 
