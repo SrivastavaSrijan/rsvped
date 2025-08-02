@@ -30,12 +30,14 @@ export const CommunityDiscoverCard = ({
 	return (
 		<Card className="lg:bg-card bg-transparent items-center w-full lg:flex-col flex-row lg:gap-6 gap-2 lg:py-6 py-2">
 			<CardHeader className="w-full lg:px-6 px-0">
-				<CardAction className="w-full justify-between lg:flex flex-row hidden">
-					<Link href={Routes.Main.Communities.SubscribeTo(slug)} passHref>
-						<Button size="sm" variant="secondary">
-							Subscribe
-						</Button>
-					</Link>
+				<CardAction className="w-full justify-between flex flex-row">
+					{!role && (
+						<Link href={Routes.Main.Communities.SubscribeTo(slug)} passHref>
+							<Button size="sm" variant="secondary">
+								Subscribe
+							</Button>
+						</Link>
+					)}
 				</CardAction>
 				<Link href={Routes.Main.Communities.ViewBySlug(slug)} passHref>
 					<CardTitle className="relative lg:w-[50px] lg:h-[50px]  h-full w-full aspect-square">

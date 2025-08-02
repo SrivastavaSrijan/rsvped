@@ -37,6 +37,12 @@ export enum RsvpErrorCodes {
 	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 }
 
+export enum MembershipErrorCodes {
+	ALREADY_MEMBER = 'ALREADY_MEMBER',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
+}
+
 export enum LocationUpdateActionErrorCode {
 	SERVER_ERROR = 'SERVER_ERROR',
 	FORBIDDEN = 'FORBIDDEN',

@@ -8,5 +8,5 @@ export default async function DiscoverLocation({
 }: DiscoverLocationProps) {
 	const { slug } = await params
 	const api = await getAPI()
-	const location = await api.location.get({ slug })
+	const _location = await api.location.get({ slug })
 }

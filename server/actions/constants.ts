@@ -2,6 +2,7 @@ import {
 	AuthErrorCodes,
 	EventErrorCodes,
 	LocationUpdateActionErrorCode,
+	MembershipErrorCodes,
 	RsvpErrorCodes,
 } from './types'
 
@@ -39,6 +40,18 @@ export const RsvpActionErrorCodeMap: Record<RsvpErrorCodes, string> = {
 	[RsvpErrorCodes.EVENT_FULL]: 'This event is full.',
 	[RsvpErrorCodes.VALIDATION_ERROR]: 'Please check the fields and try again.',
 	[RsvpErrorCodes.UNEXPECTED_ERROR]:
+		'An unexpected error occurred. Please try again.',
+}
+
+export const MembershipActionErrorCodeMap: Record<
+	MembershipErrorCodes,
+	string
+> = {
+	[MembershipErrorCodes.ALREADY_MEMBER]:
+		'You are already a member of this community.',
+	[MembershipErrorCodes.VALIDATION_ERROR]:
+		'Please check the fields and try again.',
+	[MembershipErrorCodes.UNEXPECTED_ERROR]:
 		'An unexpected error occurred. Please try again.',
 }
 
