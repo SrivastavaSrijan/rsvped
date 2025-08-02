@@ -68,11 +68,16 @@ export default async function ViewCommunity({
 			)}
 			<div className="flex flex-col px-3 py-6 lg:gap-8 lg:px-8 gap-4 lg:py-8">
 				<div className="flex flex-col gap-2 lg:gap-2">
-					<div className="flex flex-col gap-1">
-						<h2 className="text-sm text-muted-foreground">
-							Curated by {owner?.name}
-						</h2>
-						<h1 className="text-2xl font-semibold">{name}</h1>
+					<div className="flex items-start justify-between">
+						<div className="flex flex-col gap-1">
+							<h2 className="text-sm text-muted-foreground">
+								Curated by {owner?.name}
+							</h2>
+							<h1 className="text-2xl font-semibold">{name}</h1>
+						</div>
+						<Link href={Routes.Main.Communities.SubscribeTo(slug)} passHref>
+							<Button variant="secondary">Subscribe</Button>
+						</Link>
 					</div>
 					<p className="text-muted-foreground text-sm">{description}</p>
 				</div>

@@ -4,13 +4,13 @@ import { Check, Loader2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { Form } from '@/components/shared'
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
 } from '@/components/ui'
-import { Button } from '@/components/ui/button'
 import {
 	Dialog,
 	DialogContent,
@@ -84,26 +84,46 @@ export const CommunitySubscribeModal = ({
 				<div className="flex flex-col gap-4">
 					<Form action={formAction} className="flex flex-col gap-3">
 						<input type="hidden" name="communityId" value={id} />
-						<Select name="membershipTierId">
-							<SelectTrigger className="w-full">
-								<SelectValue placeholder={copy.placeholders.tier} />
-							</SelectTrigger>
-							<SelectContent>
-								{membershipTiers.map(
-									({ id: tierId, name: tierName, priceCents, currency }) => (
-										<SelectItem key={tierId} value={tierId}>
-											{tierName} -{' '}
-											{priceCents
-												? new Intl.NumberFormat('en-US', {
-														style: 'currency',
-														currency: currency ?? 'USD',
-													}).format(priceCents / 100)
-												: 'Free'}
-										</SelectItem>
-									)
-								)}
-							</SelectContent>
-						</Select>
+						<div className="flex flex-col gap-3">
+							{membershipTiers.map(
+								({
+									id: tierId,
+									name: tierName,
+									description: tierDescription,
+									priceCents,
+									currency,
+								}) => (
+									<label key={tierId} className="cursor-pointer">
+										<input
+											type="radio"
+											name="membershipTierId"
+											value={tierId}
+											className="peer sr-only"
+										/>
+										<Card className="peer-checked:border-primary">
+											<CardHeader>
+												<CardTitle className="text-base">{tierName}</CardTitle>
+												<CardDescription>
+													{priceCents
+														? new Intl.NumberFormat('en-US', {
+																style: 'currency',
+																currency: currency ?? 'USD',
+															}).format(priceCents / 100)
+														: 'Free'}
+												</CardDescription>
+											</CardHeader>
+											{tierDescription && (
+												<CardContent>
+													<p className="text-sm text-muted-foreground">
+														{tierDescription}
+													</p>
+												</CardContent>
+											)}
+										</Card>
+									</label>
+								)
+							)}
+						</div>
 						<Button
 							type="submit"
 							disabled={isPending}
