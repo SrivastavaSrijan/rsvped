@@ -24,14 +24,20 @@ const nextConfig: NextConfig = {
 				port: '',
 				pathname: '/**',
 			},
-			{
-				protocol: 'https',
-				hostname: 'source.unsplash.com',
-				port: '',
-				pathname: '/**',
-			},
-		],
-	},
+                        {
+                                protocol: 'https',
+                                hostname: 'source.unsplash.com',
+                                port: '',
+                                pathname: '/**',
+                        },
+                        {
+                                protocol: 'https',
+                                hostname: '*.blob.vercel-storage.com',
+                                port: '',
+                                pathname: '/**',
+                        },
+                ],
+        },
 }
 
 export default nextConfig

@@ -21,13 +21,13 @@ import {
 	Button,
 	DateTimePicker,
 	Input,
+	RichTextEditor,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 	Switch,
-	Textarea,
 } from '@/components/ui'
 import { TimezoneConfig } from '@/lib/config'
 import { LocationTypeLabels } from '@/lib/constants'
@@ -91,6 +91,33 @@ export function EventForm({
 
 	const searchParams = useSearchParams()
 
+	const [coverImageUrl, setCoverImageUrl] = useState(
+		event?.coverImage || coverImage.url
+	)
+	const [isUploadingImage, setIsUploadingImage] = useState(false)
+
+	async function handleCoverImageChange(
+		e: React.ChangeEvent<HTMLInputElement>
+	) {
+		const file = e.target.files?.[0]
+		if (!file) return
+		setIsUploadingImage(true)
+		const formData = new FormData()
+		formData.append('file', file)
+		try {
+			const res = await fetch('/api/upload', {
+				method: 'POST',
+				body: formData,
+			})
+			const data = await res.json()
+			if (data.url) {
+				setCoverImageUrl(data.url as string)
+			}
+		} finally {
+			setIsUploadingImage(false)
+		}
+	}
+
 	// Extract field errors from state
 	const fieldErrors = state?.fieldErrors || {}
 
@@ -105,20 +132,24 @@ export function EventForm({
 				>
 					<Image
 						fill
-						src={coverImage.url}
+						src={coverImageUrl}
 						alt={coverImage.alt}
 						className="h-auto w-full rounded-xl object-cover"
 						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 					/>
 				</div>
+				<div className="mt-2 w-full max-w-[350px]">
+					<Input
+						type="file"
+						accept="image/*"
+						onChange={handleCoverImageChange}
+						disabled={isUploadingImage}
+					/>
+				</div>
 			</div>
 			<div className="w-full px-2 lg:col-span-2 lg:px-0">
 				<Form action={formAction} className="flex flex-col gap-4">
-					<Input
-						type="hidden"
-						name="coverImage"
-						value={event?.coverImage || coverImage.url}
-					/>
+					<Input type="hidden" name="coverImage" value={coverImageUrl} />
 					<Input
 						type="hidden"
 						name="next"
@@ -197,10 +228,8 @@ export function EventForm({
 							<h3 className="font-semibold text-sm">Details</h3>
 						</div>
 						<div className="flex flex-col gap-3">
-							<Textarea
+							<RichTextEditor
 								name="description"
-								placeholder="Add Description"
-								variant="naked"
 								defaultValue={event?.description || ''}
 							/>
 							{fieldErrors.description && (
