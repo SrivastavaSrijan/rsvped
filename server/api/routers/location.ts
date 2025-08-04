@@ -133,6 +133,27 @@ export const locationRouter = createTRPCRouter({
 		)()
 	),
 
+	listSlugs: publicProcedure.query(async ({ ctx }) => {
+		const cacheKey = [Tags.List, 'slugs'] as const
+		return unstable_cache(
+			async () =>
+				ctx.prisma.location.findMany({
+					where: {
+						events: {
+							some: {
+								isPublished: true,
+								deletedAt: null,
+							},
+						},
+					},
+					select: { slug: true },
+					take: 50,
+				}),
+			cacheKey,
+			{ revalidate: 3600, tags: [Tags.List] }
+		)()
+	}),
+
 	// Get a single location by its unique ID
 	byId: publicProcedure
 		.input(z.object({ id: z.string() }))
