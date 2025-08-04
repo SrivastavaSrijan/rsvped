@@ -1,18 +1,18 @@
+import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
 	EventCard,
 	EventsPagination,
-	NoEvents,
 	PeriodTabs,
 } from '@/app/(main)/components'
 import { copy } from '@/app/(main)/copy'
+import { DateFilterMessage, EventCalendar } from '@/components/shared'
 import {
 	AvatarWithFallback,
 	Badge,
 	Button,
-	Calendar,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
@@ -26,24 +26,77 @@ const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
 	sm: 'size-18 -bottom-9',
 }
-const now = new Date().toISOString()
+
+function getDateFilters({
+	on,
+	after,
+	before,
+	period,
+}: {
+	on?: string
+	after?: string
+	before?: string
+	period: string
+}) {
+	const now = dayjs().toISOString()
+
+	if (on) {
+		return {
+			after: dayjs(on).startOf('day').toISOString(),
+			before: dayjs(on).endOf('day').toISOString(),
+		}
+	}
+
+	return {
+		after: after
+			? dayjs(after).startOf('day').toISOString()
+			: period === 'upcoming'
+				? now
+				: undefined,
+		before: before
+			? dayjs(before).endOf('day').toISOString()
+			: period === 'past'
+				? now
+				: undefined,
+	}
+}
 
 export default async function ViewCommunity({
 	params,
 	searchParams,
 }: {
 	params: Promise<{ slug: string }>
-	searchParams: Promise<{ period?: string; page?: string }>
+	searchParams: Promise<{
+		period?: string
+		page?: string
+		on?: string
+		after?: string
+		before?: string
+	}>
 }) {
 	const { slug } = await params
-	const { period = 'upcoming', page = '1' } = await searchParams
+	const {
+		period = 'upcoming',
+		page = '1',
+		on,
+		after,
+		before,
+	} = await searchParams
+
 	const api = await getAPI()
 	const community = await api.community.get({ slug })
+	const { after: finalAfter, before: finalBefore } = getDateFilters({
+		on,
+		after,
+		before,
+		period,
+	})
+
 	const { coverImage, name, description, id, owner, metadata } = community
 	const events = await api.event.list({
 		sort: 'asc',
-		after: period === 'upcoming' ? now : undefined,
-		before: period === 'past' ? now : undefined,
+		after: finalAfter,
+		before: finalBefore,
 		page: parseInt(page, 10) || 1,
 		where: {
 			communityId: id,
@@ -82,7 +135,7 @@ export default async function ViewCommunity({
 			)}
 			<div className="flex flex-col px-3 py-6 lg:gap-8 lg:px-8 gap-4 lg:py-8">
 				<div className="flex flex-col gap-2 lg:gap-2">
-					<div className="flex items-start justify-between">
+					<div className="flex lg:flex-row flex-col items-start justify-between lg:gap-2 gap-2">
 						<div className="flex flex-col gap-1">
 							<h2 className="text-sm text-muted-foreground">
 								Curated by {owner?.name}
@@ -121,21 +174,18 @@ export default async function ViewCommunity({
 								Submit Event
 							</Button>
 						</Link>
-						<Calendar
-							mode="single"
-							className="rounded-lg mx-auto border p-2 [--cell-size:--spacing(10)] lg:p-3 lg:[--cell-size:--spacing(8)]"
-						/>
+						<EventCalendar />
 					</div>
-					<div className="col-span-12 lg:col-span-8 lg:order-1 flex flex-col gap-4 lg:gap-8 ">
-						<div className="flex w-full flex-row justify-between gap-4">
-							<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
-								{copy.home.title}
-							</h1>
-							<PeriodTabs currentPeriod={period as 'upcoming' | 'past'} />
+					<div className="col-span-12 lg:col-span-8 lg:order-1 flex flex-col gap-4 lg:gap-8">
+						<div className="flex flex-col gap-3 lg:gap-2">
+							<div className="flex w-full flex-row justify-between gap-4">
+								<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
+									{copy.home.title}
+								</h1>
+								<PeriodTabs currentPeriod={period as 'upcoming' | 'past'} />
+							</div>
+							<DateFilterMessage />
 						</div>
-						{events.length === 0 && (
-							<NoEvents>Looks like this community has no events.</NoEvents>
-						)}
 						{events.map((event, index) => (
 							<EventCard
 								key={event.id}

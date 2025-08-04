@@ -1,4 +1,6 @@
 export * from './Background'
+export * from './DateFilterMessage'
+export * from './EventCalendar'
 export * from './Footer'
 export * from './Form'
 export * from './ProfileDropdown'
