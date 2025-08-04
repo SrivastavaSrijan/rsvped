@@ -10,12 +10,12 @@ This document summarizes performance considerations and improvements for the RSV
 
 ## Server Data Caching
 
-- Introduced `server/cache.ts` leveraging Next.js `unstable_cache` to cache server-side API calls.
+- Integrated Next.js `unstable_cache` directly within tRPC procedures using strongly-typed cache tags.
 - Cached data sets:
   - Nearby events (revalidate every 60 seconds, tagged per location).
   - Nearby categories and communities (revalidate every 5 minutes, tagged per location).
   - Location list and default location (revalidate every hour).
-- Updated the events discovery page to use these cached helpers for parallel data fetching.
+- The events discovery page consumes these cached procedures for parallel data fetching.
 
 ## Additional Notes
 

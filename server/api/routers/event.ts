@@ -1,13 +1,17 @@
 import { EventRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { unstable_cache } from 'next/cache'
 import slugify from 'slugify'
 import { z } from 'zod'
+import { CacheTags } from '@/lib/config'
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from '@/server/api/trpc'
 import { EventModel } from './zod'
+
+const Tags = CacheTags.Event
 
 // Create input schema from the EventModel, picking only the fields we want for creation
 const CreateEventInput = EventModel.pick({
@@ -392,28 +396,35 @@ export const eventRouter = createTRPCRouter({
 				})
 			}
 
-			const events = await ctx.prisma.event.findMany({
-				where: {
-					location: {
-						id: locationId,
-					},
+			const cacheKey = [Tags.Root, 'nearby', locationId, String(take)]
+			return unstable_cache(
+				async () => {
+					const events = await ctx.prisma.event.findMany({
+						where: {
+							location: {
+								id: locationId,
+							},
+						},
+						take,
+						select: {
+							id: true,
+							title: true,
+							slug: true,
+							startDate: true,
+							endDate: true,
+							coverImage: true,
+						},
+					})
+					if (events.length === 0) {
+						throw new TRPCError({
+							code: 'NOT_FOUND',
+							message: 'No nearby events found',
+						})
+					}
+					return events
 				},
-				take,
-				select: {
-					id: true,
-					title: true,
-					slug: true,
-					startDate: true,
-					endDate: true,
-					coverImage: true,
-				},
-			})
-			if (events.length === 0) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'No nearby events found',
-				})
-			}
-			return events
+				cacheKey,
+				{ revalidate: 60, tags: [Tags.Nearby(locationId)] }
+			)()
 		}),
 })

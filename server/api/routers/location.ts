@@ -1,6 +1,8 @@
 import type { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { unstable_cache } from 'next/cache'
 import z from 'zod'
+import { CacheTags } from '@/lib/config'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
 type Location = Prisma.LocationGetPayload<{
@@ -96,32 +98,40 @@ export const groupLocations = (locations: readonly Location[]) =>
 		{ continents: {}, countries: {} }
 	)
 
+const Tags = CacheTags.Location
+
 export const locationRouter = createTRPCRouter({
 	// Get all locations with both continent and country groupings
-	list: publicProcedure.query(async ({ ctx }) => {
-		const locationsData = await ctx.prisma.location.findMany({
-			where: {
-				events: {
-					some: {
-						isPublished: true,
-						deletedAt: null,
+	list: publicProcedure.query(async ({ ctx }) =>
+		unstable_cache(
+			async () => {
+				const locationsData = await ctx.prisma.location.findMany({
+					where: {
+						events: {
+							some: {
+								isPublished: true,
+								deletedAt: null,
+							},
+						},
 					},
-				},
+					orderBy: [{ continent: 'asc' }, { country: 'asc' }, { name: 'asc' }],
+					select: {
+						_count: true,
+						id: true,
+						name: true,
+						slug: true,
+						country: true,
+						iconPath: true,
+						continent: true,
+					},
+				})
+				const { continents, countries } = groupLocations(locationsData)
+				return { continents, countries }
 			},
-			orderBy: [{ continent: 'asc' }, { country: 'asc' }, { name: 'asc' }],
-			select: {
-				_count: true,
-				id: true,
-				name: true,
-				slug: true,
-				country: true,
-				iconPath: true,
-				continent: true,
-			},
-		})
-		const { continents, countries } = groupLocations(locationsData)
-		return { continents, countries }
-	}),
+			[Tags.List],
+			{ revalidate: 3600, tags: [Tags.List] }
+		)()
+	),
 
 	// Get a single location by its unique ID
 	byId: publicProcedure
@@ -142,29 +152,35 @@ export const locationRouter = createTRPCRouter({
 		}),
 
 	// Get the first available location as a system-wide default
-	getDefault: publicProcedure.query(async ({ ctx }) => {
-		const location = await ctx.prisma.location.findFirst({
-			where: {
-				events: {
-					some: {
-						isPublished: true,
-						deletedAt: null,
+	getDefault: publicProcedure.query(async ({ ctx }) =>
+		unstable_cache(
+			async () => {
+				const location = await ctx.prisma.location.findFirst({
+					where: {
+						events: {
+							some: {
+								isPublished: true,
+								deletedAt: null,
+							},
+						},
 					},
-				},
-			},
-			orderBy: {
-				name: 'asc',
-			},
-		})
+					orderBy: {
+						name: 'asc',
+					},
+				})
 
-		if (!location) {
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: 'No default location available',
-			})
-		}
-		return location
-	}),
+				if (!location) {
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'No default location available',
+					})
+				}
+				return location
+			},
+			[Tags.Default],
+			{ revalidate: 3600, tags: [Tags.Default] }
+		)()
+	),
 
 	get: publicProcedure
 		.input(z.object({ slug: z.string() }))

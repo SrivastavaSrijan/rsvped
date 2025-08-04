@@ -1,7 +1,11 @@
 import { MembershipRole } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { unstable_cache } from 'next/cache'
 import z from 'zod'
+import { CacheTags } from '@/lib/config'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
+
+const Tags = CacheTags.Community
 
 export const communityRouter = createTRPCRouter({
 	// Get all communities
@@ -16,35 +20,48 @@ export const communityRouter = createTRPCRouter({
 				.default({ take: 10 })
 		)
 		.query(async ({ ctx, input: { take, locationId } }) => {
+			if (!locationId) {
+				throw new Error('locationId is required')
+			}
+			const cacheKey = [Tags.Root, 'nearby', locationId, String(take)]
 			const user = ctx.session?.user
-			const communities = await ctx.prisma.community.findMany({
-				take,
-				orderBy: {
-					events: {
-						_count: 'desc',
-					},
-				},
-				select: {
-					_count: true,
-					description: true,
-					slug: true,
-					name: true,
-					coverImage: true,
-					id: true,
-				},
-				where: {
-					events: {
-						some: {
-							deletedAt: null,
-							isPublished: true,
-							OR: [
-								{ locationId: locationId },
-								{ locationType: { in: ['ONLINE', 'HYBRID'] } },
-							],
+			const communities = await unstable_cache(
+				async () =>
+					ctx.prisma.community.findMany({
+						take,
+						orderBy: {
+							events: {
+								_count: 'desc',
+							},
 						},
-					},
-				},
-			})
+						select: {
+							_count: true,
+							description: true,
+							slug: true,
+							name: true,
+							coverImage: true,
+							id: true,
+						},
+						where: {
+							events: {
+								some: {
+									deletedAt: null,
+									isPublished: true,
+									OR: [
+										{ locationId: locationId },
+										{
+											locationType: {
+												in: ['ONLINE', 'HYBRID'],
+											},
+										},
+									],
+								},
+							},
+						},
+					}),
+				cacheKey,
+				{ revalidate: 300, tags: [Tags.Nearby(locationId)] }
+			)()
 
 			const communityIds = communities.map((community) => community.id)
 
