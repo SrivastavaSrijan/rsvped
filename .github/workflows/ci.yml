@@ -38,6 +38,10 @@ jobs:
     env:
       SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      UNSPLASH_SECRET_KEY: ${{ secrets.UNSPLASH_SECRET_KEY }}
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      UNSPLASH_COLLECTION_IDS: ${{ secrets.UNSPLASH_COLLECTION_IDS }}
     services:
       postgres:
         image: postgres:15
