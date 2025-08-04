@@ -169,7 +169,7 @@ export const eventRouter = createTRPCRouter({
 				// First, check if the event exists and user is the owner
 				const existingEvent = await ctx.prisma.event.findUnique({
 					where: { slug, deletedAt: null },
-					select: { id: true, hostId: true },
+					select: { id: true, hostId: true, eventCollaborators: true },
 				})
 
 				if (!existingEvent) {
@@ -179,7 +179,13 @@ export const eventRouter = createTRPCRouter({
 					})
 				}
 
-				if (existingEvent.hostId !== ctx.session.user.id) {
+				if (
+					existingEvent.hostId !== ctx.session.user.id &&
+					!existingEvent.eventCollaborators.some(
+						(c) =>
+							c.userId === ctx.session.user.id && c.role === EventRole.CO_HOST
+					)
+				) {
 					throw new TRPCError({
 						code: 'UNAUTHORIZED',
 						message: 'You are not authorized to update this event',

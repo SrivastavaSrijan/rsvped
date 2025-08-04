@@ -23,7 +23,7 @@ interface ProfileDropdownProps {
 	session: Session
 }
 export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
-	const { image, name } = session.user
+	const { image, email, name } = session.user
 	const [src, _setSrc] = useState<string | null>(image ?? null)
 	return (
 		<DropdownMenu>
@@ -37,6 +37,10 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
 				)}
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
+				<div className="flex flex-col items-start gap-2 lg:p-2 p-2">
+					Hi, {name || 'there'}!
+					<p className="text-xs text-muted-foreground">{email}</p>
+				</div>
 				<Link href={Routes.Main.Events.Home} passHref>
 					<DropdownMenuItem>{copy.events}</DropdownMenuItem>
 				</Link>

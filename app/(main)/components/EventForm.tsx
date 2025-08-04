@@ -61,14 +61,14 @@ export function EventForm({
 	event,
 }: EventFormProps) {
 	const [startDate, setStartDate] = useState<Date | undefined>(() => {
-		if (event?.startDate) return event.startDate
+		if (event?.startDate) return new Date(event.startDate)
 		const aWeekFromNow = new Date()
 		aWeekFromNow.setDate(aWeekFromNow.getDate() + 7)
 		return aWeekFromNow
 	})
 
 	const [endDate, setEndDate] = useState<Date | undefined>(() => {
-		if (event?.endDate) return event.endDate
+		if (event?.endDate) return new Date(event.endDate)
 		const aWeekFromNowPlusAnHour = new Date()
 		aWeekFromNowPlusAnHour.setDate(aWeekFromNowPlusAnHour.getDate() + 7)
 		aWeekFromNowPlusAnHour.setHours(aWeekFromNowPlusAnHour.getHours() + 1)
