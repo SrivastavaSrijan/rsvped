@@ -81,6 +81,7 @@ export const communityRouter = createTRPCRouter({
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const { slug } = input
+			const user = ctx.session?.user
 			const community = await ctx.prisma.community.findUnique({
 				where: { slug },
 				select: {
@@ -118,7 +119,22 @@ export const communityRouter = createTRPCRouter({
 				})
 			}
 
-			return community
+			const membership = user
+				? await ctx.prisma.communityMembership.findFirst({
+						where: {
+							userId: user.id,
+							communityId: community.id,
+						},
+						select: {
+							role: true,
+						},
+					})
+				: null
+
+			return {
+				...community,
+				metadata: { role: membership?.role ?? null },
+			}
 		}),
 
 	subscribe: protectedProcedure

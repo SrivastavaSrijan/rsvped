@@ -19,14 +19,14 @@ export const Routes = {
 	Main: {
 		Communities: {
 			Root: '/communities',
-			SubscribeTo(slug: string) {
-				return `${this.Root}/${slug}/subscribe`
-			},
 			get Discover() {
 				return `${this.Root}/discover`
 			},
 			ViewBySlug(slug: string) {
 				return `${this.Root}/${slug}/view`
+			},
+			SubscribeTo(slug: string) {
+				return `${this.ViewBySlug(slug)}?action=subscribe`
 			},
 		},
 		Categories: {

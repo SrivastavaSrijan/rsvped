@@ -19,15 +19,15 @@
 
 ### Authentication & User Management
 
-- [ ] Complete NextAuth v6 configuration with providers (Google, GitHub)
+- [x] Complete NextAuth v6 configuration with providers (Google, GitHub)
 - [ ] User profile pages and account management
-- [ ] Protected routes and middleware setup
-- [ ] User dashboard for viewing RSVPs
+- [x] Protected routes and middleware setup
+- [x] User dashboard for viewing RSVPs
 
 ### Event Management
 
-- [ ] Event creation form for organizers
-- [ ] Event editing capabilities
+- [x] Event creation form for organizers
+- [x] Event editing capabilities
 - [ ] Event status management (draft, published, cancelled)
 - [ ] Image upload for event featured images
 - [ ] Rich text editor for event descriptions

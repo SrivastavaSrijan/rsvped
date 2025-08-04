@@ -100,9 +100,14 @@ export const CommunitySubscribeModal = ({
 											value={tierId}
 											className="peer sr-only"
 										/>
-										<Card className="peer-checked:border-primary">
-											<CardHeader>
-												<CardTitle className="text-base">{tierName}</CardTitle>
+										<Card className="peer-checked:border-primary peer-checked:border peer-checked:bg-primary/5 peer-checked:shadow-md transition-all duration-200">
+											<CardHeader className="relative">
+												<div className="absolute right-4 top-4 hidden peer-checked:block">
+													<Check className="size-4 text-primary" />
+												</div>
+												<CardTitle className="text-base pr-8">
+													{tierName}
+												</CardTitle>
 												<CardDescription>
 													{priceCents
 														? new Intl.NumberFormat('en-US', {
