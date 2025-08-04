@@ -11,8 +11,8 @@ jobs:
     name: "Lint & Type-Check"
     runs-on: ubuntu-latest
     env:
-      SECRET_COOKIE_PASSWORD: "9bd49650a8dd6757e5ecf629ca7774c3d538eb254f3aee1744093ef40026377d"
-      NEXTAUTH_SECRET: "3b7a71efe1e38a0805a7f4fa098a6675f8b4399521f764a590d7e197ca0cf9db"
+      SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,8 +36,8 @@ jobs:
     name: "Test Database Migrations"
     runs-on: ubuntu-latest
     env:
-      SECRET_COOKIE_PASSWORD: "9bd49650a8dd6757e5ecf629ca7774c3d538eb254f3aee1744093ef40026377d"
-      NEXTAUTH_SECRET: "3b7a71efe1e38a0805a7f4fa098a6675f8b4399521f764a590d7e197ca0cf9db"
+      SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
     services:
       postgres:
         image: postgres:15
@@ -78,9 +78,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test-migrations]
     env:
-      NEXTAUTH_SECRET: "3b7a71efe1e38a0805a7f4fa098a6675f8b4399521f764a590d7e197ca0cf9db"
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
-      SECRET_COOKIE_PASSWORD: "9bd49650a8dd6757e5ecf629ca7774c3d538eb254f3aee1744093ef40026377d"
+      SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
