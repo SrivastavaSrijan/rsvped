@@ -1,24 +1,33 @@
 import type { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/auth/password'
+import { CacheTags } from '@/lib/config'
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from '@/server/api/trpc'
 
+const Tags = CacheTags.User
+
 export const userRouter = createTRPCRouter({
 	getCurrentUser: publicProcedure.query(async ({ ctx }) => {
 		if (!ctx.session?.user) {
 			return null
 		}
-		const user = await ctx.prisma.user.findUnique({
-			where: { id: ctx.session.user.id },
-			include: {
-				location: true,
-			},
-		})
+		const userId = ctx.session.user.id
+		const cacheKey = [Tags.Get(userId)]
+		const user = await unstable_cache(
+			async () =>
+				ctx.prisma.user.findUnique({
+					where: { id: userId },
+					include: { location: true },
+				}),
+			cacheKey,
+			{ revalidate: 60, tags: [Tags.Get(userId)] }
+		)()
 		if (!user) {
 			throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' })
 		}
@@ -86,7 +95,7 @@ export const userRouter = createTRPCRouter({
 				image: input.image || null, // Allow image to be optional
 			}
 
-			return ctx.prisma.user.create({
+			const user = await ctx.prisma.user.create({
 				data: createData,
 				select: {
 					id: true,
@@ -95,6 +104,8 @@ export const userRouter = createTRPCRouter({
 					createdAt: true,
 				},
 			})
+			revalidateTag(Tags.Get(user.id))
+			return user
 		}),
 
 	updateLocation: protectedProcedure
@@ -104,12 +115,14 @@ export const userRouter = createTRPCRouter({
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
-			return ctx.prisma.user.update({
+			const user = await ctx.prisma.user.update({
 				where: { id: ctx.session.user.id },
 				data: { locationId: input.locationId },
 				include: {
 					location: true,
 				},
 			})
+			revalidateTag(Tags.Get(ctx.session.user.id))
+			return user
 		}),
 })

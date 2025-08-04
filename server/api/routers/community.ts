@@ -1,6 +1,6 @@
 import { MembershipRole } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import { unstable_cache } from 'next/cache'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import z from 'zod'
 import { CacheTags } from '@/lib/config'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
@@ -99,35 +99,41 @@ export const communityRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const { slug } = input
 			const user = ctx.session?.user
-			const community = await ctx.prisma.community.findUnique({
-				where: { slug },
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					description: true,
-					coverImage: true,
-					membershipTiers: {
-						where: { isActive: true },
+			const cacheKey = [Tags.Get(slug)]
+			const community = await unstable_cache(
+				async () =>
+					ctx.prisma.community.findUnique({
+						where: { slug },
 						select: {
 							id: true,
 							name: true,
+							slug: true,
 							description: true,
-							priceCents: true,
-							currency: true,
+							coverImage: true,
+							membershipTiers: {
+								where: { isActive: true },
+								select: {
+									id: true,
+									name: true,
+									description: true,
+									priceCents: true,
+									currency: true,
+								},
+								orderBy: { priceCents: 'asc' },
+							},
+							owner: {
+								select: {
+									image: true,
+									location: true,
+									name: true,
+									email: true,
+								},
+							},
 						},
-						orderBy: { priceCents: 'asc' },
-					},
-					owner: {
-						select: {
-							image: true,
-							location: true,
-							name: true,
-							email: true,
-						},
-					},
-				},
-			})
+					}),
+				cacheKey,
+				{ revalidate: 300, tags: [Tags.Get(slug)] }
+			)()
 
 			if (!community) {
 				throw new TRPCError({
@@ -178,7 +184,7 @@ export const communityRouter = createTRPCRouter({
 				})
 			}
 
-			await ctx.prisma.communityMembership.create({
+			const _membership = await ctx.prisma.communityMembership.create({
 				data: {
 					communityId,
 					userId,
@@ -186,6 +192,13 @@ export const communityRouter = createTRPCRouter({
 					role: MembershipRole.MEMBER,
 				},
 			})
+			const community = await ctx.prisma.community.findUnique({
+				where: { id: communityId },
+				select: { slug: true },
+			})
+			if (community) {
+				revalidateTag(Tags.Get(community.slug))
+			}
 
 			return { success: true }
 		}),

@@ -185,15 +185,21 @@ export const locationRouter = createTRPCRouter({
 	get: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const location = await ctx.prisma.location.findUnique({
-				where: {
-					slug: input.slug,
-					events: { some: { isPublished: true, deletedAt: null } },
-				},
-				include: {
-					events: true,
-				},
-			})
+			const cacheKey = [Tags.Get(input.slug)]
+			const location = await unstable_cache(
+				async () =>
+					ctx.prisma.location.findUnique({
+						where: {
+							slug: input.slug,
+							events: { some: { isPublished: true, deletedAt: null } },
+						},
+						include: {
+							events: true,
+						},
+					}),
+				cacheKey,
+				{ revalidate: 3600, tags: [Tags.Get(input.slug)] }
+			)()
 
 			if (!location) {
 				throw new TRPCError({
