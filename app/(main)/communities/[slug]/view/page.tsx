@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+
 import {
 	EventCard,
 	EventsPagination,
@@ -19,12 +20,23 @@ import {
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
+import { prisma } from '@/lib/prisma'
 import { cn } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 
 const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
 	sm: 'size-18 -bottom-9',
+}
+
+export const revalidate = 300
+
+export async function generateStaticParams() {
+	const communities = await prisma.community.findMany({
+		select: { slug: true },
+		take: 50,
+	})
+	return communities.map((c) => ({ slug: c.slug }))
 }
 
 function getDateFilters({

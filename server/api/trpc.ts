@@ -1,5 +1,6 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import type { CreateNextContextOptions } from '@trpc/server/adapters/next'
+import { headers } from 'next/headers'
 import type { Session } from 'next-auth'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
@@ -19,8 +20,14 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 }
 
 export const createTRPCContext = async (_opts?: CreateNextContextOptions) => {
-	// Get the session from the server using the auth wrapper function
-	const session = await auth()
+	let session: Session | null = null
+	try {
+		headers()
+		session = await auth()
+	} catch {
+		// headers() not available outside of request context
+		session = null
+	}
 
 	return createInnerTRPCContext({
 		session,

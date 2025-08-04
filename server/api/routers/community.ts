@@ -1,7 +1,11 @@
 import { MembershipRole } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import z from 'zod'
+import { CacheTags } from '@/lib/config'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
+
+const Tags = CacheTags.Community
 
 export const communityRouter = createTRPCRouter({
 	// Get all communities
@@ -16,35 +20,48 @@ export const communityRouter = createTRPCRouter({
 				.default({ take: 10 })
 		)
 		.query(async ({ ctx, input: { take, locationId } }) => {
+			if (!locationId) {
+				throw new Error('locationId is required')
+			}
+			const cacheKey = [Tags.Root, 'nearby', locationId, String(take)]
 			const user = ctx.session?.user
-			const communities = await ctx.prisma.community.findMany({
-				take,
-				orderBy: {
-					events: {
-						_count: 'desc',
-					},
-				},
-				select: {
-					_count: true,
-					description: true,
-					slug: true,
-					name: true,
-					coverImage: true,
-					id: true,
-				},
-				where: {
-					events: {
-						some: {
-							deletedAt: null,
-							isPublished: true,
-							OR: [
-								{ locationId: locationId },
-								{ locationType: { in: ['ONLINE', 'HYBRID'] } },
-							],
+			const communities = await unstable_cache(
+				async () =>
+					ctx.prisma.community.findMany({
+						take,
+						orderBy: {
+							events: {
+								_count: 'desc',
+							},
 						},
-					},
-				},
-			})
+						select: {
+							_count: true,
+							description: true,
+							slug: true,
+							name: true,
+							coverImage: true,
+							id: true,
+						},
+						where: {
+							events: {
+								some: {
+									deletedAt: null,
+									isPublished: true,
+									OR: [
+										{ locationId: locationId },
+										{
+											locationType: {
+												in: ['ONLINE', 'HYBRID'],
+											},
+										},
+									],
+								},
+							},
+						},
+					}),
+				cacheKey,
+				{ revalidate: 300, tags: [Tags.Nearby(locationId)] }
+			)()
 
 			const communityIds = communities.map((community) => community.id)
 
@@ -82,35 +99,41 @@ export const communityRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const { slug } = input
 			const user = ctx.session?.user
-			const community = await ctx.prisma.community.findUnique({
-				where: { slug },
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					description: true,
-					coverImage: true,
-					membershipTiers: {
-						where: { isActive: true },
+			const cacheKey = [Tags.Get(slug)]
+			const community = await unstable_cache(
+				async () =>
+					ctx.prisma.community.findUnique({
+						where: { slug },
 						select: {
 							id: true,
 							name: true,
+							slug: true,
 							description: true,
-							priceCents: true,
-							currency: true,
+							coverImage: true,
+							membershipTiers: {
+								where: { isActive: true },
+								select: {
+									id: true,
+									name: true,
+									description: true,
+									priceCents: true,
+									currency: true,
+								},
+								orderBy: { priceCents: 'asc' },
+							},
+							owner: {
+								select: {
+									image: true,
+									location: true,
+									name: true,
+									email: true,
+								},
+							},
 						},
-						orderBy: { priceCents: 'asc' },
-					},
-					owner: {
-						select: {
-							image: true,
-							location: true,
-							name: true,
-							email: true,
-						},
-					},
-				},
-			})
+					}),
+				cacheKey,
+				{ revalidate: 300, tags: [Tags.Get(slug)] }
+			)()
 
 			if (!community) {
 				throw new TRPCError({
@@ -161,7 +184,7 @@ export const communityRouter = createTRPCRouter({
 				})
 			}
 
-			await ctx.prisma.communityMembership.create({
+			const _membership = await ctx.prisma.communityMembership.create({
 				data: {
 					communityId,
 					userId,
@@ -169,6 +192,13 @@ export const communityRouter = createTRPCRouter({
 					role: MembershipRole.MEMBER,
 				},
 			})
+			const community = await ctx.prisma.community.findUnique({
+				where: { id: communityId },
+				select: { slug: true },
+			})
+			if (community) {
+				revalidateTag(Tags.Get(community.slug))
+			}
 
 			return { success: true }
 		}),

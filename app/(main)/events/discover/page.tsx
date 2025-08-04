@@ -101,7 +101,7 @@ export default async function DiscoverEvents() {
 	const api = await getAPI()
 	const { locationId, location } = await resolveUserLocation()
 
-	// Fetch all data in parallel
+	// Fetch all data in parallel with caching
 	const [nearbyEvents, categories, communities, { continents }] =
 		await Promise.all([
 			api.event.listNearby({

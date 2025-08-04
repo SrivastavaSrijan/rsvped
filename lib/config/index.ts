@@ -1,4 +1,5 @@
 export * from './assets'
+export * from './cache'
 export * from './colors'
 export * from './cookies'
 export * from './pageStyles'

@@ -1,3 +1,6 @@
+export const dynamic = 'force-static'
+export const revalidate = 86400
+
 export default function PrivacyPolicyPage() {
 	return (
 		<main className="mx-auto max-w-3xl px-6 py-12">
