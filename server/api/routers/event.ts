@@ -44,6 +44,7 @@ const GetEventsInput = z.object({
 	sort: z.enum(['asc', 'desc']).default('asc'),
 	before: z.string().optional(),
 	after: z.string().optional(),
+	on: z.string().optional(),
 	page: z.number().int().min(1).default(1),
 	size: z.number().int().min(1).max(100).default(5),
 	roles: z.array(z.enum(EventRole)).optional(),
@@ -282,7 +283,7 @@ export const eventRouter = createTRPCRouter({
 		const user = ctx.session?.user
 		if (!user) return []
 
-		const { roles, page, size, sort, before, after } = input
+		const { roles, page, size, sort, before, after, on } = input
 
 		const orConditions: Prisma.EventWhereInput[] = []
 		if (roles?.includes(EventRole.CHECKIN)) {
@@ -309,13 +310,25 @@ export const eventRouter = createTRPCRouter({
 			}
 		}
 
+		const startDate: Prisma.DateTimeFilter | undefined = on
+			? (() => {
+					const start = new Date(on)
+					start.setHours(0, 0, 0, 0)
+					const end = new Date(start)
+					end.setDate(end.getDate() + 1)
+					return { gte: start, lt: end }
+				})()
+			: before || after
+				? {
+						...(before && { lt: new Date(before) }),
+						...(after && { gt: new Date(after) }),
+					}
+				: undefined
+
 		const whereClause: Prisma.EventWhereInput = {
 			...(orConditions.length && { OR: orConditions }),
 			communityId: input?.where?.communityId ?? undefined,
-			startDate: {
-				...(before && { lt: new Date(before) }),
-				...(after && { gt: new Date(after) }),
-			},
+			...(startDate && { startDate }),
 		}
 
 		const events = await ctx.prisma.event.findMany({
