@@ -8,7 +8,8 @@ import {
 	PeriodTabs,
 } from '@/app/(main)/components'
 import { copy } from '@/app/(main)/copy'
-import { AvatarWithFallback, Button, Calendar } from '@/components/ui'
+import Calendar from '@/components/calendar-04'
+import { AvatarWithFallback, Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { cn } from '@/lib/utils'
 import { getAPI } from '@/server/api'
@@ -24,17 +25,36 @@ export default async function ViewCommunity({
 	searchParams,
 }: {
 	params: Promise<{ slug: string }>
-	searchParams: Promise<{ period?: string; page?: string }>
+	searchParams: Promise<{
+		period?: string
+		page?: string
+		on?: string
+		after?: string
+		before?: string
+	}>
 }) {
 	const { slug } = await params
-	const { period = 'upcoming', page = '1' } = await searchParams
+	const {
+		period = 'upcoming',
+		page = '1',
+		on,
+		after,
+		before,
+	} = await searchParams
 	const api = await getAPI()
 	const community = await api.community.get({ slug })
 	const { coverImage, name, description, id, owner } = community
+	const finalAfter = on
+		? undefined
+		: (after ?? (period === 'upcoming' ? now : undefined))
+	const finalBefore = on
+		? undefined
+		: (before ?? (period === 'past' ? now : undefined))
 	const events = await api.event.list({
 		sort: 'asc',
-		after: period === 'upcoming' ? now : undefined,
-		before: period === 'past' ? now : undefined,
+		on,
+		after: finalAfter,
+		before: finalBefore,
 		page: parseInt(page, 10) || 1,
 		where: {
 			communityId: id,
@@ -85,10 +105,7 @@ export default async function ViewCommunity({
 								Submit Event
 							</Button>
 						</Link>
-						<Calendar
-							mode="single"
-							className="rounded-lg mx-auto border p-2 [--cell-size:--spacing(10)] lg:p-3 lg:[--cell-size:--spacing(8)]"
-						/>
+						<Calendar />
 					</div>
 					<div className="col-span-12 lg:col-span-8 lg:order-1 flex flex-col gap-4 lg:gap-8 ">
 						<div className="flex w-full flex-row justify-between gap-4">
