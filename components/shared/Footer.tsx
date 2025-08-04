@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { copy } from '../../app/(static)/copy'
 

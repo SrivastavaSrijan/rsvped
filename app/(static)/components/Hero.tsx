@@ -1,6 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@/components/ui'
+import { Button, Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { AssetMap } from '@/lib/config/assets'
 import { copy } from '../copy'

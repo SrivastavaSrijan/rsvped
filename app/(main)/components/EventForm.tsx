@@ -13,13 +13,13 @@ import {
 	Timer,
 	Users,
 } from 'lucide-react'
-import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Form } from '@/components/shared'
 import {
 	Button,
 	DateTimePicker,
+	Image,
 	Input,
 	Select,
 	SelectContent,

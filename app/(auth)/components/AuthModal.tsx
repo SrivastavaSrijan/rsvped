@@ -1,12 +1,12 @@
 'use client'
 import { AlertCircle, Loader2, LogInIcon, Mail } from 'lucide-react'
-import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { Background, Form } from '@/components/shared'
 import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
+	Image,
 	InputWithError,
 } from '@/components/ui'
 import { Button } from '@/components/ui/button'

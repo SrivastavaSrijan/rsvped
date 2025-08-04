@@ -1,5 +1,4 @@
 import { ArrowUpRight } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	Avatar,
@@ -8,6 +7,7 @@ import {
 	Badge,
 	Button,
 	Card,
+	Image,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,

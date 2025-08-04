@@ -1,9 +1,9 @@
 import { Clock } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	AvatarWithFallback,
 	Button,
+	Image,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,

@@ -1,10 +1,10 @@
 import { chunk } from 'es-toolkit/array'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
+	Image,
 	Tabs,
 	TabsContent,
 	TabsList,

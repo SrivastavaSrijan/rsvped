@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { Image } from '@/components/ui'
 import { AssetMap } from '@/lib/config/assets'
 
 export const Background = () => {

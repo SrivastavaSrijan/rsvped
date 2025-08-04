@@ -1,7 +1,6 @@
 import { Camera, Edit } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Button, Card } from '@/components/ui'
+import { Button, Card, Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
 import { EventDateTime } from './EventDateTime'

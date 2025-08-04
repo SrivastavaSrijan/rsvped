@@ -1,7 +1,13 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Badge, Button, Card, CardContent, CardHeader } from '@/components/ui'
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	CardHeader,
+	Image,
+} from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import type { RouterOutput } from '@/server/api'

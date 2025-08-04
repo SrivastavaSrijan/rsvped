@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	EventCard,
@@ -13,6 +12,7 @@ import {
 	AvatarWithFallback,
 	Badge,
 	Button,
+	Image,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
