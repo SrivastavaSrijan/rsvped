@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
-import { hashPassword } from '@/lib/utils'
+import { hashPassword } from '@/lib/auth/password'
 import {
 	createTRPCRouter,
 	protectedProcedure,
