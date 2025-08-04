@@ -1,10 +1,10 @@
 import { chunk } from 'es-toolkit/array'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
+	Image,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -32,25 +32,22 @@ export const Location = ({
 }: Location) => {
 	const renderContent = (
 		<div className="flex flex-row  gap-2 lg:gap-2 items-center">
-			<div
-				className="rounded-full flex items-center aspect-square lg:w-10 lg:h-10 w-9 h-9 justify-center relative"
-				style={{
+			<Image
+				unoptimized
+				fill
+				sizes="48px"
+				src={`${AssetMap.Locations}/${iconPath}`}
+				alt={name}
+				className="rounded-full "
+				wrapperClassName="rounded-full flex items-center aspect-square lg:w-10 lg:h-10 w-9 h-9 justify-center relative"
+				wrapperStyle={{
 					backgroundColor: getRandomColor({
 						seed: id,
 						palette: 'extended',
 						intensity: 60,
 					}),
 				}}
-			>
-				<Image
-					unoptimized
-					fill
-					sizes="48px"
-					src={`${AssetMap.Locations}/${iconPath}`}
-					alt={name}
-					className="rounded-full "
-				/>
-			</div>
+			/>
 			<div className="flex flex-col">
 				<p className="lg:text-base text-sm line-clamp-1 font-semibold">
 					{name}

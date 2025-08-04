@@ -1,7 +1,13 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Badge, Button, Card, CardContent, CardHeader } from '@/components/ui'
+import {
+	Badge,
+	Button,
+	Card,
+	CardContent,
+	CardHeader,
+	Image,
+} from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import type { RouterOutput } from '@/server/api'
@@ -26,18 +32,21 @@ export const CommunityDiscoverCard = ({
 			<CardHeader>
 				<div className="flex items-start gap-4">
 					{/* Image */}
-					<div className="relative lg:size-20 size-15 shrink-0">
-						<Link href={Routes.Main.Communities.ViewBySlug(slug)}>
-							{coverImage && (
-								<Image
-									fill
-									src={coverImage}
-									alt={`Cover image for ${name}`}
-									className="rounded-lg object-cover"
-								/>
-							)}
-						</Link>
-					</div>
+					<Link
+						href={Routes.Main.Communities.ViewBySlug(slug)}
+						className="shrink-0"
+					>
+						{coverImage && (
+							<Image
+								fill
+								src={coverImage}
+								alt={`Cover image for ${name}`}
+								className="rounded-lg object-cover"
+								wrapperClassName="relative lg:size-20 size-15"
+								sizes={{ lg: '80px', sm: '60px' }}
+							/>
+						)}
+					</Link>
 
 					{/* Action */}
 					<div className="ml-auto">

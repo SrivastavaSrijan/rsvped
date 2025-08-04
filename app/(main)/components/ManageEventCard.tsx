@@ -1,7 +1,6 @@
 import { Camera, Edit } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Button, Card } from '@/components/ui'
+import { Button, Card, Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
 import { EventDateTime } from './EventDateTime'
@@ -42,6 +41,8 @@ export function ManageEventCard({
 								alt={title}
 								fill
 								className="h-full w-full rounded-lg object-cover"
+								wrapperClassName="h-full w-full"
+								sizes={{ lg: '336px', sm: '288px' }}
 							/>
 						) : (
 							<div className="aspect-square text-center font-medium text-sm tracking-wider">

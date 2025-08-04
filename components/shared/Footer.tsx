@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { copy } from '../../app/(static)/copy'
 
@@ -9,15 +9,14 @@ export const Footer = () => {
 			<div className="container mx-auto px-2 py-2 lg:px-4 lg:py-2 ">
 				<div className="border-border border-t px-2 py-2 lg:py-4 lg:px-4">
 					<div className="flex lg:flex-row flex-col lg:items-center items-start justify-between lg:gap-2 gap-0 h-[72px] lg:h-[48px]">
-						<div className="flex items-center space-x-2 h-full w-[72px] lg:w-[72px] relative">
-							<Image
-								src="/logo-full.png"
-								alt="Logo"
-								fill
-								sizes="72px"
-								className="opacity-75 object-contain"
-							/>
-						</div>
+						<Image
+							src="/logo-full.png"
+							alt="Logo"
+							fill
+							sizes="72px"
+							className="opacity-75 object-contain"
+							wrapperClassName="flex items-center space-x-2 h-full w-[72px] lg:w-[72px] relative"
+						/>
 
 						<div className="flex items-center space-x-4 lg:space-x-6">
 							<Link

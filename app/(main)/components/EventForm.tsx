@@ -13,13 +13,13 @@ import {
 	Timer,
 	Users,
 } from 'lucide-react'
-import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Form } from '@/components/shared'
 import {
 	Button,
 	DateTimePicker,
+	Image,
 	Input,
 	Select,
 	SelectContent,
@@ -99,18 +99,15 @@ export function EventForm({
 	return (
 		<div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
 			<div className="flex flex-col items-center justify-center lg:col-span-1">
-				<div
-					className="relative aspect-square h-auto w-full max-w-[350px] rounded-xl shadow-lg lg:max-w-[340px]"
-					style={{ backgroundColor: coverImage.color || 'transparent' }}
-				>
-					<Image
-						fill
-						src={coverImage.url}
-						alt={coverImage.alt}
-						className="h-auto w-full rounded-xl object-cover"
-						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-					/>
-				</div>
+				<Image
+					fill
+					src={coverImage.url}
+					alt={coverImage.alt}
+					className="h-auto w-full rounded-xl object-cover"
+					sizes={{ md: '50vw', sm: '100vw' }}
+					wrapperClassName="relative aspect-square h-auto w-full max-w-[350px] rounded-xl shadow-lg lg:max-w-[340px]"
+					wrapperStyle={{ backgroundColor: coverImage.color || 'transparent' }}
+				/>
 			</div>
 			<div className="w-full px-2 lg:col-span-2 lg:px-0">
 				<Form action={formAction} className="flex flex-col gap-4">

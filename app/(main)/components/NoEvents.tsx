@@ -1,7 +1,6 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import type { PropsWithChildren } from 'react'
-import { Button } from '@/components/ui'
+import { Button, Image } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
 
 interface NoEventsProps extends PropsWithChildren {}

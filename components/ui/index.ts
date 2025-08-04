@@ -87,6 +87,7 @@ export {
 	FormMessage,
 	useFormField,
 } from './form'
+export { Image } from './image'
 export { Input, inputVariants } from './input'
 export { InputWithError } from './input-with-error'
 export { Label } from './label'
