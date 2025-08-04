@@ -8,8 +8,17 @@ import {
 	PeriodTabs,
 } from '@/app/(main)/components'
 import { copy } from '@/app/(main)/copy'
-import { AvatarWithFallback, Button, Calendar } from '@/components/ui'
+import {
+	AvatarWithFallback,
+	Badge,
+	Button,
+	Calendar,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui'
 import { Routes } from '@/lib/config'
+import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 
@@ -38,7 +47,7 @@ export default async function ViewCommunity({
 	const { period = 'upcoming', page = '1' } = await searchParams
 	const api = await getAPI()
 	const community = await api.community.get({ slug })
-	const { coverImage, name, description, id, owner } = community
+	const { coverImage, name, description, id, owner, metadata } = community
 	const events = await api.event.list({
 		sort: 'asc',
 		after: period === 'upcoming' ? now : undefined,
@@ -48,6 +57,11 @@ export default async function ViewCommunity({
 			communityId: id,
 		},
 	})
+
+	const role = metadata?.role ? MembershipLabels[metadata.role] : null
+	const membershipBadgeVariant = metadata?.role
+		? MembershipBadgeVariants[metadata.role]
+		: 'default'
 
 	return (
 		<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
@@ -76,11 +90,33 @@ export default async function ViewCommunity({
 			)}
 			<div className="flex flex-col px-3 py-6 lg:gap-8 lg:px-8 gap-4 lg:py-8">
 				<div className="flex flex-col gap-2 lg:gap-2">
-					<div className="flex flex-col gap-1">
-						<h2 className="text-sm text-muted-foreground">
-							Curated by {owner?.name}
-						</h2>
-						<h1 className="text-2xl font-semibold">{name}</h1>
+					<div className="flex items-start justify-between">
+						<div className="flex flex-col gap-1">
+							<h2 className="text-sm text-muted-foreground">
+								Curated by {owner?.name}
+							</h2>
+							<div className="flex flex-row items-center gap-2">
+								<h1 className="text-2xl font-semibold">{name}</h1>
+								{role && <Badge variant={membershipBadgeVariant}>{role}</Badge>}
+							</div>
+						</div>
+						<Tooltip>
+							<TooltipTrigger>
+								<Link
+									href={role ? '' : Routes.Main.Communities.SubscribeTo(slug)}
+									passHref
+								>
+									<Button variant="secondary" disabled={!!role}>
+										Subscribe
+									</Button>
+								</Link>
+							</TooltipTrigger>
+							<TooltipContent>
+								{role
+									? `You are already subscribed as ${role}`
+									: 'Subscribe to this community'}
+							</TooltipContent>
+						</Tooltip>
 					</div>
 					<p className="text-muted-foreground text-sm">{description}</p>
 				</div>

@@ -20,7 +20,7 @@ export const EventDiscoverCard = ({
 	})
 	return (
 		<Link href={Routes.Main.Events.ViewBySlug(slug)}>
-			<div className="flex flex-row gap-2 lg:gap-3 items-center">
+			<div className="flex flex-row gap-3 lg:gap-3 items-center">
 				<div className="shrink-0">
 					{coverImage && (
 						<FallbackImage
