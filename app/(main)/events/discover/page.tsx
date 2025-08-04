@@ -8,6 +8,13 @@ import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
 import {
+	getCachedDefaultLocation,
+	getCachedLocations,
+	getCachedNearbyCategories,
+	getCachedNearbyCommunities,
+	getCachedNearbyEvents,
+} from '@/server/cache'
+import {
 	CategoryDiscoverCard,
 	CommunityDiscoverCard,
 	EventDiscoverCard,
@@ -88,7 +95,7 @@ async function resolveUserLocation() {
 	}
 
 	// 3. Fallback to the first available location in the system
-	const defaultLocation = await api.location.getDefault()
+	const defaultLocation = await getCachedDefaultLocation()
 	if (defaultLocation) {
 		return { locationId: defaultLocation.id, location: defaultLocation }
 	}
@@ -98,25 +105,15 @@ async function resolveUserLocation() {
 }
 
 export default async function DiscoverEvents() {
-	const api = await getAPI()
 	const { locationId, location } = await resolveUserLocation()
 
-	// Fetch all data in parallel
+	// Fetch all data in parallel with caching
 	const [nearbyEvents, categories, communities, { continents }] =
 		await Promise.all([
-			api.event.listNearby({
-				locationId,
-				take: PageConfig.nearbyEvents.pageSize,
-			}),
-			api.category.listNearby({
-				locationId,
-				take: PageConfig.categories.pageSize,
-			}),
-			api.community.listNearby({
-				locationId,
-				take: PageConfig.communities.pageSize,
-			}),
-			api.location.list(),
+			getCachedNearbyEvents(locationId, PageConfig.nearbyEvents.pageSize),
+			getCachedNearbyCategories(locationId, PageConfig.categories.pageSize),
+			getCachedNearbyCommunities(locationId, PageConfig.communities.pageSize),
+			getCachedLocations(),
 		])
 
 	return (
