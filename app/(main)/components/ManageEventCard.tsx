@@ -41,6 +41,8 @@ export function ManageEventCard({
 								alt={title}
 								fill
 								className="h-full w-full rounded-lg object-cover"
+								wrapperClassName="h-full w-full"
+								sizes={{ lg: '336px', sm: '288px' }}
 							/>
 						) : (
 							<div className="aspect-square text-center font-medium text-sm tracking-wider">

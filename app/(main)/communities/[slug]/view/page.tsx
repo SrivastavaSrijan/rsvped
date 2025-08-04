@@ -117,7 +117,8 @@ export default async function ViewCommunity({
 						alt={name}
 						className="aspect-video lg:rounded-xl object-cover"
 						fill
-						sizes="(min-width: 1024px) 60vw, 50vw"
+						wrapperClassName="h-full w-full"
+						sizes={{ lg: '60vw', sm: '50vw' }}
 					/>
 					{owner?.name && owner?.image && (
 						<AvatarWithFallback
