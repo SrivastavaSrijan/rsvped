@@ -1,10 +1,10 @@
-import Image from 'next/image'
+import { FallbackImage } from '@/components/ui'
 import { AssetMap } from '@/lib/config/assets'
 
 export const Background = () => {
 	return (
 		<div className="absolute inset-0">
-			<Image
+			<FallbackImage
 				src={AssetMap.Background}
 				alt="Background pattern"
 				fill

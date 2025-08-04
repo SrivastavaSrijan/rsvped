@@ -77,6 +77,7 @@ export {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from './dropdown-menu'
+export { FallbackImage } from './fallback-image'
 export {
 	Form,
 	FormControl,

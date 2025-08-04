@@ -1,6 +1,6 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
+import { FallbackImage } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { useEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
@@ -23,12 +23,12 @@ export const EventDiscoverCard = ({
 			<div className="flex flex-row gap-2 lg:gap-3 items-center">
 				<div className="shrink-0">
 					{coverImage && (
-						<Image
+						<FallbackImage
 							src={coverImage}
 							alt={title}
 							width={80}
 							height={80}
-							className="rounded-lg aspect-square object-cover"
+							className="rounded-lg aspect-square"
 						/>
 					)}
 				</div>

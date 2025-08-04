@@ -76,6 +76,13 @@ export const communityRouter = createTRPCRouter({
 			return communitiesWithMembership
 		}),
 
+	listSlugs: publicProcedure.query(async ({ ctx }) => {
+		const communities = await ctx.prisma.community.findMany({
+			select: { slug: true },
+		})
+		return communities.map((c) => c.slug)
+	}),
+
 	get: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {

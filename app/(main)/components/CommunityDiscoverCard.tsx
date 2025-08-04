@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	Badge,
@@ -9,6 +8,7 @@ import {
 	CardContent,
 	CardHeader,
 	CardTitle,
+	FallbackImage,
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
@@ -40,7 +40,7 @@ export const CommunityDiscoverCard = ({
 				<Link href={Routes.Main.Communities.ViewBySlug(slug)} passHref>
 					<CardTitle className="relative lg:w-[50px] lg:h-[50px]  h-full w-full aspect-square">
 						{coverImage && (
-							<Image
+							<FallbackImage
 								src={coverImage}
 								alt={`Cover image for ${name}`}
 								fill

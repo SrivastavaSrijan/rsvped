@@ -403,4 +403,11 @@ export const eventRouter = createTRPCRouter({
 			}
 			return events
 		}),
+	listSlugs: publicProcedure.query(async ({ ctx }) => {
+		const events = await ctx.prisma.event.findMany({
+			where: { deletedAt: null, isPublished: true },
+			select: { slug: true },
+		})
+		return events.map((e) => e.slug)
+	}),
 })

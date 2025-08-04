@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { FallbackImage } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { copy } from '../../app/(static)/copy'
 
@@ -10,7 +10,7 @@ export const Footer = () => {
 				<div className="border-border border-t px-2 py-2 lg:py-4 lg:px-4">
 					<div className="flex lg:flex-row flex-col lg:items-center items-start justify-between lg:gap-2 gap-0 h-[72px] lg:h-[48px]">
 						<div className="flex items-center space-x-2 h-full w-[72px] lg:w-[72px] relative">
-							<Image
+							<FallbackImage
 								src="/logo-full.png"
 								alt="Logo"
 								fill

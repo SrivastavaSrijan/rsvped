@@ -13,6 +13,14 @@ import { Routes } from '@/lib/config'
 import { cn } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 
+export const revalidate = 300
+
+export const generateStaticParams = async () => {
+	const api = await getAPI()
+	const slugs = await api.community.listSlugs()
+	return slugs.map((slug) => ({ slug }))
+}
+
 const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
 	sm: 'size-18 -bottom-9',

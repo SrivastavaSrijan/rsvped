@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { createApi } from 'unsplash-js'
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
@@ -16,6 +17,40 @@ if (!UNSPLASH_ACCESS_KEY) {
 const unsplash = createApi({
 	accessKey: UNSPLASH_ACCESS_KEY,
 })
+
+const getRandomImage = unstable_cache(
+	async () => {
+		const result = await unsplash.photos.getRandom({
+			collectionIds: collectionIds,
+			count: 1,
+		})
+
+		if (result.errors) {
+			console.error('Unsplash API error:', result.errors[0])
+			throw new Error('Failed to fetch image from Unsplash.')
+		}
+
+		const photo = Array.isArray(result.response)
+			? result.response[0]
+			: result.response
+
+		if (!photo) {
+			throw new Error('No photo returned from Unsplash.')
+		}
+
+		return {
+			url: photo.urls.regular,
+			alt: photo.alt_description ?? 'An abstract background image',
+			user: {
+				name: photo.user.name,
+				link: photo.user.links.html,
+			},
+			color: photo.color ?? null,
+		}
+	},
+	['unsplash-random'],
+	{ revalidate: 3600 }
+)
 
 const collectionIds = process.env.UNSPLASH_COLLECTION_IDS?.split(',') ?? []
 
@@ -36,34 +71,5 @@ export const imageRouter = createTRPCRouter({
 				color: z.string().nullable(),
 			})
 		)
-		.query(async () => {
-			const result = await unsplash.photos.getRandom({
-				collectionIds: collectionIds,
-				count: 1,
-			})
-
-			if (result.errors) {
-				console.error('Unsplash API error:', result.errors[0])
-				throw new Error('Failed to fetch image from Unsplash.')
-			}
-
-			// The API returns an array even for a count of 1
-			const photo = Array.isArray(result.response)
-				? result.response[0]
-				: result.response
-
-			if (!photo) {
-				throw new Error('No photo returned from Unsplash.')
-			}
-
-			return {
-				url: photo.urls.regular,
-				alt: photo.alt_description ?? 'An abstract background image',
-				user: {
-					name: photo.user.name,
-					link: photo.user.links.html,
-				},
-				color: photo.color ?? null,
-			}
-		}),
+		.query(async () => getRandomImage()),
 })

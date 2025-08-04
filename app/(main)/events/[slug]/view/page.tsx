@@ -2,6 +2,14 @@ import { notFound } from 'next/navigation'
 import { EventPage } from '@/app/(main)/components'
 import { getAPI } from '@/server/api'
 
+export const revalidate = 3600
+
+export const generateStaticParams = async () => {
+	const api = await getAPI()
+	const slugs = await api.event.listSlugs()
+	return slugs.map((slug) => ({ slug }))
+}
+
 export const generateMetadata = async ({
 	params,
 }: {
