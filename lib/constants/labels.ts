@@ -35,6 +35,6 @@ export const MembershipBadgeVariants: Record<
 	BadgeVariantProps['variant']
 > = {
 	[MembershipRole.ADMIN]: 'success',
-	[MembershipRole.MEMBER]: 'secondary',
+	[MembershipRole.MEMBER]: 'default',
 	[MembershipRole.MODERATOR]: 'outline',
 }

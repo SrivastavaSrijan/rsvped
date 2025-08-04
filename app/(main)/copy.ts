@@ -15,10 +15,14 @@ export const copy = {
 		password: 'Password',
 		name: 'Name',
 		ticket: 'Select Ticket',
+		tier: 'Select Tier',
 	},
 	welcome: 'Welcome! To register for this event, please click below.',
 	register: {
 		description: 'Please enter your details to register.',
+	},
+	subscribe: {
+		description: 'Choose a membership tier to join this community.',
 	},
 	home: {
 		title: 'Events',

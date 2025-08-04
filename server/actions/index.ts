@@ -1,5 +1,6 @@
 export * from './auth'
 export * from './constants'
 export * from './events'
+export * from './membership'
 export * from './rsvp'
 export * from './user'

@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
 import { Averia_Serif_Libre, Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
+import { baseMetadata, siteSchema } from '@/lib/config'
 import Providers from './providers'
 
 const inter = Inter({
@@ -15,11 +15,7 @@ const averia = Averia_Serif_Libre({
 	variable: '--font-averia',
 })
 
-export const metadata: Metadata = {
-	title: "Delightful Events Start Here · RSVP'd",
-	description:
-		"RSVP'd is an event management platform that makes organizing and attending events a breeze.",
-}
+export const metadata = baseMetadata
 
 export default function RootLayout({
 	children,
@@ -28,8 +24,6 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className="dark">
-			<meta name="apple-mobile-web-app-title" content="RSVP'd" />
-			<meta name="og:image" content="/preview.jpg" />
 			<body
 				className={`${inter.variable} ${averia.variable} font-sans antialiased`}
 			>
@@ -37,6 +31,14 @@ export default function RootLayout({
 					{children}
 					<Toaster />
 				</Providers>
+				<script
+					type="application/ld+json"
+					suppressHydrationWarning
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: adding structured data for SEO
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(siteSchema),
+					}}
+				/>
 			</body>
 		</html>
 	)
