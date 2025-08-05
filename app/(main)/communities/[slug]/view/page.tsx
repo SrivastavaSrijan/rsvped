@@ -20,7 +20,6 @@ import {
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
-import { prisma } from '@/lib/prisma'
 import { cn } from '@/lib/utils'
 import { getAPI } from '@/server/api'
 
@@ -32,11 +31,14 @@ const AVATAR_CLASSES = {
 export const revalidate = 300
 
 export async function generateStaticParams() {
-	const communities = await prisma.community.findMany({
-		select: { slug: true },
-		take: 50,
-	})
-	return communities.map((c) => ({ slug: c.slug }))
+	try {
+		const api = await getAPI()
+		const communities = await api.community.listSlugs()
+		return communities.map((c) => ({ slug: c.slug }))
+	} catch (error) {
+		console.error('Error generating static params for communities', error)
+		return []
+	}
 }
 
 function getDateFilters({

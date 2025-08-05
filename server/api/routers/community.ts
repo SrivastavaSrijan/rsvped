@@ -94,6 +94,19 @@ export const communityRouter = createTRPCRouter({
 			return communitiesWithMembership
 		}),
 
+	listSlugs: publicProcedure.query(async ({ ctx }) => {
+		const cacheKey = [Tags.List, 'slugs']
+		return unstable_cache(
+			async () =>
+				ctx.prisma.community.findMany({
+					select: { slug: true },
+					take: 50,
+				}),
+			cacheKey,
+			{ revalidate: 300, tags: [Tags.List] }
+		)()
+	}),
+
 	get: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {

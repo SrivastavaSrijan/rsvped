@@ -65,7 +65,7 @@ const STEP_CONFIG = {
 		title: 'Which metro are you in?',
 		description: '',
 	},
-} as const
+}
 
 export const LocationModal = ({ locations }: LocationModalProps) => {
 	const { replace } = useRouter()

@@ -23,7 +23,7 @@ interface ProfileDropdownProps {
 	session: Session
 }
 export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
-	const { image, email, name } = session.user
+	const { image, email, name } = session?.user ?? {}
 	const [src, _setSrc] = useState<string | null>(image ?? null)
 	return (
 		<DropdownMenu>

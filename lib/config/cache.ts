@@ -56,6 +56,6 @@ export const CacheTags = {
 			return `${this.Root}/${id}`
 		},
 	},
-} as const
+}
 
 export type CacheTag = (typeof CacheTags)[keyof typeof CacheTags]

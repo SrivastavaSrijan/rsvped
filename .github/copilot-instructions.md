@@ -223,7 +223,7 @@ export const Routes = {
   Home: '/',
   Explore: '/explore',
   Pricing: '/pricing',
-} as const;
+} ;
 export type Route = typeof Routes[keyof typeof Routes];
 ```
 
@@ -246,7 +246,7 @@ export type Route = typeof Routes[keyof typeof Routes];
       subtitle: 'Only pay when you host paid events.',
     },
     faqs: [...],
-  } as const;
+  } ;
   ```
 - Components import from that file – this keeps translations easy (`copy.es.ts`, `copy.fr.ts`, …).
 - **No inline hard‑coded strings** except aria‑labels.

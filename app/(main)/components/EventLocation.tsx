@@ -7,7 +7,7 @@ const LocationIcons = {
 	[LocationType.PHYSICAL]: MapPin,
 	[LocationType.ONLINE]: Video,
 	[LocationType.HYBRID]: Globe,
-} as const
+}
 
 interface EventLocation {
 	locationType: LocationType

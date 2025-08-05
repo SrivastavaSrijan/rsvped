@@ -405,6 +405,20 @@ export const eventRouter = createTRPCRouter({
 		)()
 	}),
 
+	listSlugs: publicProcedure.query(async ({ ctx }) => {
+		const cacheKey = [Tags.List, 'slugs']
+		return unstable_cache(
+			async () =>
+				ctx.prisma.event.findMany({
+					where: { isPublished: true, deletedAt: null },
+					select: { slug: true },
+					take: 50,
+				}),
+			cacheKey,
+			{ revalidate: 300, tags: [Tags.List] }
+		)()
+	}),
+
 	listNearby: publicProcedure
 		.input(
 			z.object({

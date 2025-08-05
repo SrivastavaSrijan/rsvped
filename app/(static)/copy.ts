@@ -18,6 +18,6 @@ export const copy = {
 		discover: 'Discover',
 		pricing: 'Pricing',
 	},
-} as const
+}
 
 export type CopyKey = keyof typeof copy

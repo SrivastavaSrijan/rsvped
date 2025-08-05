@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import { EventPage } from '@/app/(main)/components'
-import { prisma } from '@/lib/prisma'
 import { getAPI } from '@/server/api'
 
 export const generateMetadata = async ({
@@ -20,12 +19,14 @@ export const generateMetadata = async ({
 export const revalidate = 300
 
 export async function generateStaticParams() {
-	const events = await prisma.event.findMany({
-		where: { isPublished: true, deletedAt: null },
-		select: { slug: true },
-		take: 50,
-	})
-	return events.map((e) => ({ slug: e.slug }))
+	try {
+		const api = await getAPI()
+		const events = await api.event.listSlugs()
+		return events.map((e) => ({ slug: e.slug }))
+	} catch (error) {
+		console.error('Error generating static params for events', error)
+		return []
+	}
 }
 
 export default async function ViewEvent({
