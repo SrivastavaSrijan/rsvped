@@ -167,7 +167,7 @@ jobs:
 
       - name: Setup database
         run: |
-          yarn prisma db push
+          yarn prisma migrate deploy
           yarn prisma generate
 
       - name: Build Next.js App
