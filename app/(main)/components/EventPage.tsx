@@ -1,9 +1,9 @@
 import { Clock } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
 	AvatarWithFallback,
 	Button,
+	Image,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
@@ -43,16 +43,15 @@ export const EventPage = ({
 			<div className="col-span-full lg:col-span-5">
 				<div className="flex flex-col gap-3 lg:gap-4">
 					{coverImage && (
-						<div className="relative aspect-square h-auto w-full rounded-xl shadow-lg">
-							<Image
-								priority
-								className="object-cover aspect-square rounded-lg"
-								sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw"
-								src={coverImage}
-								alt={title}
-								fill
-							/>
-						</div>
+						<Image
+							priority
+							className="object-cover aspect-square rounded-lg"
+							sizes={{ sm: '100vw', lg: '50vw' }}
+							src={coverImage}
+							alt={title}
+							fill
+							wrapperClassName="relative aspect-square h-auto w-full rounded-xl shadow-lg"
+						/>
 					)}
 					{canManage && (
 						<div className="p-2 rounded-lg lg:p-3 flex flex-row lg:gap-4 gap-3 bg-white/[0.04]">

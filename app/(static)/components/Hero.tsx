@@ -1,6 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@/components/ui'
+import { Button, Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { AssetMap } from '@/lib/config/assets'
 import { copy } from '../copy'
@@ -12,14 +11,14 @@ export const Hero = () => {
 				{/* Text Column */}
 				<div className="flex flex-col items-center gap-3 text-center lg:col-span-1 lg:items-start lg:gap-4 lg:text-left">
 					<div className="flex flex-col items-center gap-3 lg:items-start lg:gap-2">
-						<div className="relative h-[50px] w-[100px] lg:h-[75px] lg:w-[150px]">
-							<Image
-								src="/logo-full.png"
-								alt="Logo"
-								fill
-								className="object-cover opacity-50"
-							/>
-						</div>
+						<Image
+							src="/logo-full.png"
+							alt="Logo"
+							fill
+							className="object-cover opacity-50"
+							wrapperClassName="relative h-[50px] w-[100px] lg:h-[75px] lg:w-[150px]"
+							sizes={{ lg: '150px', sm: '100px' }}
+						/>
 						<div className="flex flex-col gap-1">
 							<h1 className="font-bold font-serif text-4xl lg:text-6xl">
 								{copy.hero.headline1}
