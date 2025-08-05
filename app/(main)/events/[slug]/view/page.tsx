@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { EventPage } from '@/app/(main)/components'
+import { baseMetadata } from '@/lib/config'
 import { getAPI } from '@/server/api'
 
 export const generateMetadata = async ({
@@ -7,12 +8,17 @@ export const generateMetadata = async ({
 }: {
 	params: Promise<{ slug: string }>
 }) => {
-	const { slug } = await params
-	const api = await getAPI()
-	const event = await api.event.getMetadata({ slug })
-	return {
-		title: `${event.title} · RSVP'd`,
-		description: `View details for the event: ${event.title}`,
+	try {
+		const { slug } = await params
+		const api = await getAPI()
+		const event = await api.event.getMetadata({ slug })
+		return {
+			title: `${event.title} · RSVP'd`,
+			description: `View details for the event: ${event.title}`,
+		}
+	} catch (error) {
+		console.error('Error generating metadata for event:', error)
+		return baseMetadata
 	}
 }
 

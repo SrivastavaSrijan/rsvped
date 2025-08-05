@@ -10,6 +10,9 @@ export const CacheTags = {
 		Get(slug: string) {
 			return `${this.Root}/get/${slug}`
 		},
+		GetMetadata(slug: string) {
+			return `${this.Get(slug)}/metadata`
+		},
 		Nearby(locationId: string) {
 			return `${this.Root}/nearby/${locationId}`
 		},

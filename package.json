@@ -14,7 +14,7 @@
 		"db:migrate": "prisma migrate dev",
 		"db:push": "prisma db push",
 		"db:studio": "prisma studio",
-		"vercel:build": "prisma migrate deploy && prisma generate && DATABASE_URL=$DATABASE_URL_UNPOOLED next build",
+		"vercel:build": "prisma migrate deploy && prisma generate && next build",
 		"docker:up": "docker-compose up -d",
 		"docker:down": "docker-compose down",
 		"docker:logs": "docker-compose logs -f postgres"

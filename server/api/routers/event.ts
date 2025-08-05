@@ -107,15 +107,7 @@ export const eventRouter = createTRPCRouter({
 
 			try {
 				// Generate unique slug from title
-				const baseSlug = slugify(input.title)
-
-				// Check for existing slugs and make unique
-				let slug = baseSlug
-				let counter = 1
-				while (await ctx.prisma.event.findUnique({ where: { slug } })) {
-					slug = `${baseSlug}-${counter}`
-					counter++
-				}
+				const slug = slugify(input.title)
 
 				const event = await ctx.prisma.event.create({
 					data: {
@@ -232,18 +224,23 @@ export const eventRouter = createTRPCRouter({
 	getMetadata: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const event = await ctx.prisma.event.findUnique({
-				where: {
-					slug: input.slug,
-					deletedAt: null,
-				},
-				select: {
-					title: true,
-					startDate: true,
-					endDate: true,
-				},
-			})
-
+			const cacheKey = [Tags.GetMetadata(input.slug)]
+			const event = await unstable_cache(
+				async () =>
+					ctx.prisma.event.findUnique({
+						where: {
+							slug: input.slug,
+							deletedAt: null,
+						},
+						select: {
+							title: true,
+							startDate: true,
+							endDate: true,
+						},
+					}),
+				cacheKey,
+				{ revalidate: 60, tags: [Tags.Get(input.slug)] }
+			)()
 			if (!event) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',

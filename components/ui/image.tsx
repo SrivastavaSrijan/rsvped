@@ -75,7 +75,7 @@ export const Image = ({
 				fill={fill}
 				sizes={computedSizes}
 				className={cn(className, isLoading && 'opacity-0')}
-				onLoadingComplete={() => setIsLoading(false)}
+				onLoad={() => setIsLoading(false)}
 			/>
 		</div>
 	)
