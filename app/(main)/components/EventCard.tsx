@@ -142,9 +142,11 @@ export const EventCard = ({
 								{rsvps.length > 0 && (
 									<div className="-space-x-1 flex">
 										{(rsvps ?? []).map(
-											({ user: guestUser, name: guestName }) =>
+											({ user: guestUser, name: guestName }, index) =>
 												(guestUser?.name || guestName) && (
-													<Tooltip key={guestUser?.id ?? guestName}>
+													<Tooltip
+														key={guestUser?.id ?? `${guestName}-${index}`}
+													>
 														<TooltipTrigger>
 															<AvatarWithFallback
 																className="size-4"

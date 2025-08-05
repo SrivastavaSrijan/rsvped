@@ -22,19 +22,6 @@ export const generateMetadata = async ({
 	}
 }
 
-export const revalidate = 300
-
-export async function generateStaticParams() {
-	try {
-		const api = await getAPI()
-		const events = await api.event.listSlugs()
-		return events.map((e) => ({ slug: e.slug }))
-	} catch (error) {
-		console.error('Error generating static params for events', error)
-		return []
-	}
-}
-
 export default async function ViewEvent({
 	params,
 }: {
@@ -42,10 +29,15 @@ export default async function ViewEvent({
 }) {
 	const { slug } = await params
 	const api = await getAPI()
-	const event = await api.event.get({ slug })
-
-	if (!event) {
-		notFound()
+	let event: Awaited<ReturnType<typeof api.event.get>> | undefined
+	try {
+		event = await api.event.get({ slug })
+		if (!event) {
+			return notFound()
+		}
+	} catch (error) {
+		console.error('Error fetching event:', error)
+		return notFound()
 	}
 
 	return (

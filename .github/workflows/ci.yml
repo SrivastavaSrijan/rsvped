@@ -41,6 +41,7 @@ jobs:
       UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
       UNSPLASH_SECRET_KEY: ${{ secrets.UNSPLASH_SECRET_KEY }}
       DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
       UNSPLASH_COLLECTION_IDS: ${{ secrets.UNSPLASH_COLLECTION_IDS }}
     services:
       postgres:
@@ -73,6 +74,7 @@ jobs:
       - name: Test migrations
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+          DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
         run: |
           yarn prisma migrate deploy
           yarn prisma generate
@@ -87,6 +89,7 @@ jobs:
       UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
       UNSPLASH_SECRET_KEY: ${{ secrets.UNSPLASH_SECRET_KEY }}
       DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
       UNSPLASH_COLLECTION_IDS: ${{ secrets.UNSPLASH_COLLECTION_IDS }}
     services:
       postgres:

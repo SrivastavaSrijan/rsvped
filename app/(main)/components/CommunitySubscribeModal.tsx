@@ -85,7 +85,7 @@ export const CommunitySubscribeModal = ({
 					<Form action={formAction} className="flex flex-col gap-3">
 						<input type="hidden" name="communityId" value={id} />
 						<div className="flex flex-col gap-3">
-							{membershipTiers.map(
+							{(membershipTiers ?? []).map(
 								({
 									id: tierId,
 									name: tierName,

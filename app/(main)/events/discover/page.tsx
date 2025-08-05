@@ -100,10 +100,17 @@ async function resolveUserLocation() {
 export default async function DiscoverEvents() {
 	const api = await getAPI()
 	const { locationId, location } = await resolveUserLocation()
-
-	// Fetch all data in parallel with caching
-	const [nearbyEvents, categories, communities, { continents }] =
-		await Promise.all([
+	let data:
+		| [
+				nearbyEvents: Awaited<ReturnType<typeof api.event.listNearby>>,
+				categories: Awaited<ReturnType<typeof api.category.listNearby>>,
+				communities: Awaited<ReturnType<typeof api.community.listNearby>>,
+				continents: Awaited<ReturnType<typeof api.location.list>>,
+		  ]
+		| undefined
+	try {
+		// Fetch all data in parallel with caching
+		data = await Promise.all([
 			api.event.listNearby({
 				locationId,
 				take: PageConfig.nearbyEvents.pageSize,
@@ -118,6 +125,12 @@ export default async function DiscoverEvents() {
 			}),
 			api.location.list(),
 		])
+	} catch (error) {
+		console.error('Error fetching discover data:', error)
+		// Redirect to location selection if any fetch fails
+		redirect(Routes.Main.Events.DiscoverLocationSelect)
+	}
+	const [nearbyEvents, categories, communities, { continents }] = data
 
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">

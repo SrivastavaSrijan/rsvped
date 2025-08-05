@@ -15,12 +15,16 @@ export default async function EditEvent({
 }) {
 	const { slug } = await params
 	const api = await getAPI()
-
-	const event = await api.event.get({ slug })
-	if (!event) {
+	let event: Awaited<ReturnType<typeof api.event.get>> | undefined
+	try {
+		event = await api.event.get({ slug })
+		if (!event) {
+			return notFound()
+		}
+	} catch (error) {
+		console.error('Error fetching event:', error)
 		return notFound()
 	}
-
 	if (!event?.metadata?.user?.access?.manager) {
 		return unauthorized()
 	}

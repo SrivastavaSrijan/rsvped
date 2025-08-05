@@ -1,17 +1,14 @@
 import { EventRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import { revalidateTag, unstable_cache } from 'next/cache'
+
 import slugify from 'slugify'
 import { z } from 'zod'
-import { CacheTags } from '@/lib/config'
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from '@/server/api/trpc'
 import { EventModel } from './zod'
-
-const Tags = CacheTags.Event
 
 // Create input schema from the EventModel, picking only the fields we want for creation
 const CreateEventInput = EventModel.pick({
@@ -137,10 +134,6 @@ export const eventRouter = createTRPCRouter({
 						},
 					},
 				})
-
-				revalidateTag(Tags.ListByUser(ctx.session.user.id))
-				revalidateTag(Tags.Get(event.slug))
-
 				return event
 			} catch (error) {
 				console.error('Error creating event:', error)
@@ -204,10 +197,6 @@ export const eventRouter = createTRPCRouter({
 						},
 					},
 				})
-
-				revalidateTag(Tags.ListByUser(ctx.session.user.id))
-				revalidateTag(Tags.Get(slug))
-
 				return event
 			} catch (error) {
 				if (error instanceof TRPCError) {
@@ -224,23 +213,17 @@ export const eventRouter = createTRPCRouter({
 	getMetadata: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const cacheKey = [Tags.GetMetadata(input.slug)]
-			const event = await unstable_cache(
-				async () =>
-					ctx.prisma.event.findUnique({
-						where: {
-							slug: input.slug,
-							deletedAt: null,
-						},
-						select: {
-							title: true,
-							startDate: true,
-							endDate: true,
-						},
-					}),
-				cacheKey,
-				{ revalidate: 60, tags: [Tags.Get(input.slug)] }
-			)()
+			const event = await ctx.prisma.event.findUnique({
+				where: {
+					slug: input.slug,
+					deletedAt: null,
+				},
+				select: {
+					title: true,
+					startDate: true,
+					endDate: true,
+				},
+			})
 			if (!event) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
@@ -254,16 +237,10 @@ export const eventRouter = createTRPCRouter({
 	get: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const cacheKey = [Tags.Get(input.slug)]
-			const event = await unstable_cache(
-				async () =>
-					ctx.prisma.event.findUnique({
-						where: { slug: input.slug, deletedAt: null },
-						include: eventInclude,
-					}),
-				cacheKey,
-				{ revalidate: 60, tags: [Tags.Get(input.slug)] }
-			)()
+			const event = await ctx.prisma.event.findUnique({
+				where: { slug: input.slug, deletedAt: null },
+				include: eventInclude,
+			})
 
 			if (!event) {
 				throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
@@ -302,118 +279,97 @@ export const eventRouter = createTRPCRouter({
 		const user = ctx.session?.user
 		if (!user) return []
 
-		const cacheKey = [Tags.ListByUser(user.id), JSON.stringify(input)]
-		return unstable_cache(
-			async () => {
-				const { roles, page, size, sort, before, after, on } = input
+		const { roles, page, size, sort, before, after, on } = input
 
-				const orConditions: Prisma.EventWhereInput[] = []
-				if (roles?.includes(EventRole.CHECKIN)) {
-					orConditions.push({ rsvps: { some: { userId: user.id } } })
-				}
-				if (
-					roles?.includes(EventRole.MANAGER) ||
-					roles?.includes(EventRole.CO_HOST)
-				) {
-					const roles: EventRole[] = []
-					if (roles?.includes(EventRole.MANAGER)) roles.push(EventRole.MANAGER)
-					if (roles?.includes(EventRole.CO_HOST)) roles.push(EventRole.CO_HOST)
-					if (roles.length > 0) {
-						orConditions.push({
-							OR: [
-								{ hostId: user.id },
-								{
-									eventCollaborators: {
-										some: { userId: user.id, role: { in: roles } },
-									},
-								},
-							],
-						})
-					}
-				}
-
-				const startDate: Prisma.DateTimeFilter | undefined = on
-					? (() => {
-							const start = new Date(on)
-							start.setHours(0, 0, 0, 0)
-							const end = new Date(start)
-							end.setDate(end.getDate() + 1)
-							return { gte: start, lt: end }
-						})()
-					: before || after
-						? {
-								...(before && { lt: new Date(before) }),
-								...(after && { gt: new Date(after) }),
-							}
-						: undefined
-
-				const whereClause: Prisma.EventWhereInput = {
-					...(orConditions.length && { OR: orConditions }),
-					communityId: input?.where?.communityId ?? undefined,
-					...(startDate && { startDate }),
-				}
-
-				const events = await ctx.prisma.event.findMany({
-					where: whereClause,
-					orderBy: { startDate: sort },
-					skip: (page - 1) * size,
-					take: size,
-					include: eventInclude,
-				})
-
-				if (events.length === 0) return []
-
-				const eventIds = events.map((event) => event.id)
-
-				// Fetch all user's RSVPs for the retrieved events in one query
-				const userRsvps = await ctx.prisma.rsvp.findMany({
-					where: { userId: user.id, eventId: { in: eventIds } },
-					include: { ticketTier: true },
-				})
-				const rsvpMap = new Map(userRsvps.map((rsvp) => [rsvp.eventId, rsvp]))
-
-				// Map events to include the specific user context for each one
-				const eventsWithContext = events.map((event) => {
-					const isHost = event.host.id === user.id
-					const collaboratorRole = event.eventCollaborators.find(
-						(c) => c.user.id === user.id
-					)?.role
-
-					const metadata = {
-						user: {
-							id: user.id,
-							name: user.name,
-							image: user.image,
-							email: user.email,
-							rsvp: rsvpMap.get(event.id) ?? null,
-							access: {
-								manager: isHost || collaboratorRole === EventRole.MANAGER,
-								cohost: collaboratorRole === EventRole.CO_HOST,
+		const orConditions: Prisma.EventWhereInput[] = []
+		if (roles?.includes(EventRole.CHECKIN)) {
+			orConditions.push({ rsvps: { some: { userId: user.id } } })
+		}
+		if (
+			roles?.includes(EventRole.MANAGER) ||
+			roles?.includes(EventRole.CO_HOST)
+		) {
+			const roles: EventRole[] = []
+			if (roles?.includes(EventRole.MANAGER)) roles.push(EventRole.MANAGER)
+			if (roles?.includes(EventRole.CO_HOST)) roles.push(EventRole.CO_HOST)
+			if (roles.length > 0) {
+				orConditions.push({
+					OR: [
+						{ hostId: user.id },
+						{
+							eventCollaborators: {
+								some: { userId: user.id, role: { in: roles } },
 							},
 						},
-					}
-					return { ...event, metadata }
+					],
 				})
+			}
+		}
 
-				return eventsWithContext
-			},
-			cacheKey,
-			{ revalidate: 60, tags: [Tags.ListByUser(user.id)] }
-		)()
-	}),
+		const startDate: Prisma.DateTimeFilter | undefined = on
+			? (() => {
+					const start = new Date(on)
+					start.setHours(0, 0, 0, 0)
+					const end = new Date(start)
+					end.setDate(end.getDate() + 1)
+					return { gte: start, lt: end }
+				})()
+			: before || after
+				? {
+						...(before && { lt: new Date(before) }),
+						...(after && { gt: new Date(after) }),
+					}
+				: undefined
 
-	listSlugs: publicProcedure.query(async ({ ctx }) => {
-		const cacheKey = [Tags.List, 'slugs']
-		return unstable_cache(
-			async () =>
-				ctx.prisma.event.findMany({
-					where: { isPublished: true, deletedAt: null },
-					select: { slug: true },
-					take: 50,
-				}),
-			cacheKey,
-			{ revalidate: 300, tags: [Tags.List] }
-		)()
+		const whereClause: Prisma.EventWhereInput = {
+			...(orConditions.length && { OR: orConditions }),
+			communityId: input?.where?.communityId ?? undefined,
+			...(startDate && { startDate }),
+		}
+
+		const events = await ctx.prisma.event.findMany({
+			where: whereClause,
+			orderBy: { startDate: sort },
+			skip: (page - 1) * size,
+			take: size,
+			include: eventInclude,
+		})
+
+		if (events.length === 0) return []
+
+		const eventIds = events.map((event) => event.id)
+
+		// Fetch all user's RSVPs for the retrieved events in one query
+		const userRsvps = await ctx.prisma.rsvp.findMany({
+			where: { userId: user.id, eventId: { in: eventIds } },
+			include: { ticketTier: true },
+		})
+		const rsvpMap = new Map(userRsvps.map((rsvp) => [rsvp.eventId, rsvp]))
+
+		// Map events to include the specific user context for each one
+		const eventsWithContext = events.map((event) => {
+			const isHost = event.host.id === user.id
+			const collaboratorRole = event.eventCollaborators.find(
+				(c) => c.user.id === user.id
+			)?.role
+
+			const metadata = {
+				user: {
+					id: user.id,
+					name: user.name,
+					image: user.image,
+					email: user.email,
+					rsvp: rsvpMap.get(event.id) ?? null,
+					access: {
+						manager: isHost || collaboratorRole === EventRole.MANAGER,
+						cohost: collaboratorRole === EventRole.CO_HOST,
+					},
+				},
+			}
+			return { ...event, metadata }
+		})
+
+		return eventsWithContext
 	}),
 
 	listNearby: publicProcedure
@@ -432,35 +388,28 @@ export const eventRouter = createTRPCRouter({
 				})
 			}
 
-			const cacheKey = [Tags.Root, 'nearby', locationId, String(take)]
-			return unstable_cache(
-				async () => {
-					const events = await ctx.prisma.event.findMany({
-						where: {
-							location: {
-								id: locationId,
-							},
-						},
-						take,
-						select: {
-							id: true,
-							title: true,
-							slug: true,
-							startDate: true,
-							endDate: true,
-							coverImage: true,
-						},
-					})
-					if (events.length === 0) {
-						throw new TRPCError({
-							code: 'NOT_FOUND',
-							message: 'No nearby events found',
-						})
-					}
-					return events
+			const events = await ctx.prisma.event.findMany({
+				where: {
+					location: {
+						id: locationId,
+					},
 				},
-				cacheKey,
-				{ revalidate: 60, tags: [Tags.Nearby(locationId)] }
-			)()
+				take,
+				select: {
+					id: true,
+					title: true,
+					slug: true,
+					startDate: true,
+					endDate: true,
+					coverImage: true,
+				},
+			})
+			if (events.length === 0) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'No nearby events found',
+				})
+			}
+			return events
 		}),
 })

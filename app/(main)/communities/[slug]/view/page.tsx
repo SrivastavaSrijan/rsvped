@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-
+import { notFound } from 'next/navigation'
 import {
 	EventCard,
 	EventsPagination,
@@ -26,19 +26,6 @@ import { getAPI } from '@/server/api'
 const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
 	sm: 'size-18 -bottom-9',
-}
-
-export const revalidate = 300
-
-export async function generateStaticParams() {
-	try {
-		const api = await getAPI()
-		const communities = await api.community.listSlugs()
-		return communities.map((c) => ({ slug: c.slug }))
-	} catch (error) {
-		console.error('Error generating static params for communities', error)
-		return []
-	}
 }
 
 function getDateFilters({
@@ -96,9 +83,17 @@ export default async function ViewCommunity({
 		after,
 		before,
 	} = await searchParams
-
 	const api = await getAPI()
-	const community = await api.community.get({ slug })
+	let community: Awaited<ReturnType<typeof api.community.get>> | null = null
+	try {
+		community = await api.community.get({ slug })
+		if (!community) {
+			return notFound()
+		}
+	} catch (error) {
+		console.error('Error fetching community:', error)
+		return notFound()
+	}
 	const { after: finalAfter, before: finalBefore } = getDateFilters({
 		on,
 		after,

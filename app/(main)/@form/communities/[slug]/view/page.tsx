@@ -7,11 +7,16 @@ interface SubscribePageProps {
 }
 
 export default async function SubscribePage({ params }: SubscribePageProps) {
-	const api = await getAPI()
 	const { slug } = await params
-	const community = await api.community.get({ slug })
-
-	if (!community || !community.membershipTiers.length) {
+	const api = await getAPI()
+	let community: Awaited<ReturnType<typeof api.community.get>> | null = null
+	try {
+		community = await api.community.get({ slug })
+		if (!community) {
+			return notFound()
+		}
+	} catch (error) {
+		console.error('Error fetching community:', error)
 		return notFound()
 	}
 
