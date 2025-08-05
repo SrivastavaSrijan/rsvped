@@ -1,0 +1,106 @@
+import Link from 'next/link'
+import type { ReactNode } from 'react'
+import {
+	AvatarWithFallback,
+	Badge,
+	Button,
+	Image,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui'
+import { Routes } from '@/lib/config'
+import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
+import { cn } from '@/lib/utils'
+
+const AVATAR_CLASSES = {
+	lg: 'lg:size-24 -bottom-12',
+	sm: 'size-18 -bottom-9',
+}
+
+interface CommunityHeaderProps {
+	community: {
+		coverImage?: string | null
+		name: string
+		description: string | null
+		owner: { name?: string | null; image?: string | null } | null
+		slug: string
+		metadata?: { role?: keyof typeof MembershipLabels } | null
+	}
+	children?: ReactNode
+}
+
+export const CommunityHeader = ({
+	community,
+	children,
+}: CommunityHeaderProps) => {
+	const { coverImage, name, description, owner, metadata, slug } = community
+	const role = metadata?.role ? MembershipLabels[metadata.role] : null
+	const membershipBadgeVariant = metadata?.role
+		? MembershipBadgeVariants[metadata.role]
+		: 'default'
+
+	return (
+		<>
+			{coverImage && owner && (
+				<div className="lg:h-[240px] lg:w-full w-full h-[120px] relative">
+					<Image
+						src={coverImage}
+						alt={name}
+						className="aspect-video lg:rounded-xl object-cover"
+						fill
+						wrapperClassName="h-full w-full"
+						sizes={{ lg: '60vw', sm: '50vw' }}
+					/>
+					{owner?.name && owner?.image && (
+						<AvatarWithFallback
+							src={owner.image}
+							alt={owner.name}
+							name={owner.name}
+							className={cn(
+								'absolute left-4',
+								AVATAR_CLASSES.lg,
+								AVATAR_CLASSES.sm
+							)}
+						/>
+					)}
+				</div>
+			)}
+			<div className="flex flex-col px-3 py-6 lg:gap-8 lg:px-8 gap-4 lg:py-8">
+				<div className="flex flex-col gap-2 lg:gap-2">
+					<div className="flex lg:flex-row flex-col items-start justify-between lg:gap-2 gap-2">
+						<div className="flex flex-col gap-1">
+							<h2 className="text-sm text-muted-foreground">
+								Curated by {owner?.name}
+							</h2>
+							<div className="flex flex-row items-center gap-2">
+								<h1 className="text-2xl font-semibold">{name}</h1>
+								{role && <Badge variant={membershipBadgeVariant}>{role}</Badge>}
+							</div>
+						</div>
+						<Tooltip>
+							<TooltipTrigger>
+								<Link
+									href={role ? '' : Routes.Main.Communities.SubscribeTo(slug)}
+									passHref
+								>
+									<Button variant="secondary" disabled={!!role}>
+										Subscribe
+									</Button>
+								</Link>
+							</TooltipTrigger>
+							<TooltipContent>
+								{role
+									? `You are already subscribed as ${role}`
+									: 'Subscribe to this community'}
+							</TooltipContent>
+						</Tooltip>
+					</div>
+					<p className="text-muted-foreground text-sm">{description}</p>
+				</div>
+				<hr />
+				{children}
+			</div>
+		</>
+	)
+}
