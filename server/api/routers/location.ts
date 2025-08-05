@@ -1,6 +1,8 @@
-import type { Prisma } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import z from 'zod'
+import { withCache } from '@/lib/cache'
+import { CacheTags } from '@/lib/config'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
 type Location = Prisma.LocationGetPayload<{
@@ -96,10 +98,9 @@ export const groupLocations = (locations: readonly Location[]) =>
 		{ continents: {}, countries: {} }
 	)
 
-export const locationRouter = createTRPCRouter({
-	// Get all locations with both continent and country groupings
-	list: publicProcedure.query(async ({ ctx }) => {
-		const locationsData = await ctx.prisma.location.findMany({
+const listLocations = withCache(
+	async (prisma: PrismaClient) => {
+		const locationsData = await prisma.location.findMany({
 			where: {
 				events: {
 					some: {
@@ -121,7 +122,13 @@ export const locationRouter = createTRPCRouter({
 		})
 		const { continents, countries } = groupLocations(locationsData)
 		return { continents, countries }
-	}),
+	},
+	{ cacheTime: 3600, tags: () => [CacheTags.Location.List] }
+)
+
+export const locationRouter = createTRPCRouter({
+	// Get all locations with both continent and country groupings
+	list: publicProcedure.query(async ({ ctx }) => listLocations(ctx.prisma)),
 
 	// Get a single location by its unique ID
 	byId: publicProcedure

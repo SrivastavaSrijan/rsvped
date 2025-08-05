@@ -1,6 +1,49 @@
+import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import z from 'zod'
+import { withCache } from '@/lib/cache'
+import { CacheTags } from '@/lib/config'
 import { createTRPCRouter, publicProcedure } from '../trpc'
+
+const listNearbyCategories = withCache(
+	async (prisma: PrismaClient, locationId: string, take: number) =>
+		prisma.category.findMany({
+			orderBy: {
+				events: {
+					_count: 'desc',
+				},
+			},
+			take,
+			select: {
+				_count: true,
+				slug: true,
+				name: true,
+				id: true,
+			},
+			where: {
+				events: {
+					some: {
+						event: {
+							deletedAt: null,
+							isPublished: true,
+							OR: [
+								{ locationId: locationId },
+								{
+									locationType: {
+										in: ['ONLINE', 'HYBRID'],
+									},
+								},
+							],
+						},
+					},
+				},
+			},
+		}),
+	{
+		cacheTime: 3600,
+		tags: (_prisma, locationId) => [CacheTags.Category.Nearby(locationId)],
+	}
+)
 
 export const categoryRouter = createTRPCRouter({
 	// Get all categories
@@ -18,38 +61,7 @@ export const categoryRouter = createTRPCRouter({
 			if (!locationId) {
 				throw new Error('locationId is required')
 			}
-			return ctx.prisma.category.findMany({
-				orderBy: {
-					events: {
-						_count: 'desc',
-					},
-				},
-				take,
-				select: {
-					_count: true,
-					slug: true,
-					name: true,
-					id: true,
-				},
-				where: {
-					events: {
-						some: {
-							event: {
-								deletedAt: null,
-								isPublished: true,
-								OR: [
-									{ locationId: locationId },
-									{
-										locationType: {
-											in: ['ONLINE', 'HYBRID'],
-										},
-									},
-								],
-							},
-						},
-					},
-				},
-			})
+			return listNearbyCategories(ctx.prisma, locationId, take)
 		}),
 	get: publicProcedure
 		.input(z.object({ slug: z.string() }))

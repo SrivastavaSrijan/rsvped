@@ -1,5 +1,6 @@
 import { Clock } from 'lucide-react'
 import Link from 'next/link'
+import { Suspense, use } from 'react'
 import {
 	AvatarWithFallback,
 	Button,
@@ -16,7 +17,49 @@ import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 
 type EventPageData = RouterOutput['event']['get']
-interface EventPageProps extends EventPageData {}
+type RsvpsData = RouterOutput['event']['getRsvps']
+
+interface EventPageProps extends EventPageData {
+	rsvpsPromise: Promise<RsvpsData>
+}
+
+const RsvpsSection = ({ promise }: { promise: Promise<RsvpsData> }) => {
+	const { rsvps, rsvpCount } = use(promise)
+	return (
+		<div className="flex flex-col gap-2 lg:gap-2">
+			<p className="font-semibold text-sm">{rsvpCount} Going</p>
+			<hr className="border-muted-foreground/20" />
+			<div className="flex flex-col gap-2 items-start">
+				<div className="-space-x-1 flex">
+					{(rsvps ?? []).map(
+						({ name: guestName, email: guestEmail }) =>
+							guestEmail &&
+							guestName && (
+								<Tooltip key={guestEmail}>
+									<TooltipTrigger>
+										<AvatarWithFallback
+											className="size-4 mt-1"
+											name={guestName}
+										/>
+									</TooltipTrigger>
+									<TooltipContent>{guestName}</TooltipContent>
+								</Tooltip>
+							)
+					)}
+				</div>
+				<p className="text-sm text-muted-foreground">
+					{(rsvps ?? [])
+						.slice(0, 2)
+						.map((rsvp) => rsvp?.name)
+						.filter((value): value is string => !!value)
+						.join(', ')}
+					{(rsvps ?? []).length > 2 && ` and ${rsvpCount - 2} others`}
+				</p>
+			</div>
+		</div>
+	)
+}
+
 export const EventPage = ({
 	startDate,
 	endDate,
@@ -25,14 +68,13 @@ export const EventPage = ({
 	description,
 	coverImage,
 	host,
-	rsvps,
 	venueName,
 	location,
 	venueAddress,
 	locationType,
 	onlineUrl,
-	rsvpCount,
 	metadata,
+	rsvpsPromise,
 }: EventPageProps) => {
 	const { image, name, email } = host ?? {}
 	const canManage = metadata?.user?.access?.manager
@@ -74,37 +116,9 @@ export const EventPage = ({
 							</div>
 						</div>
 					</div>
-					<div className="flex flex-col gap-2 lg:gap-2">
-						<p className="font-semibold text-sm">{rsvpCount} Going</p>
-						<hr className="border-muted-foreground/20" />
-						<div className="flex flex-col gap-2 items-start">
-							<div className="-space-x-1 flex">
-								{(rsvps ?? []).map(
-									({ name: guestName, email: guestEmail }) =>
-										guestEmail &&
-										guestName && (
-											<Tooltip key={guestEmail}>
-												<TooltipTrigger>
-													<AvatarWithFallback
-														className="size-4 mt-1"
-														name={guestName}
-													/>
-												</TooltipTrigger>
-												<TooltipContent>{guestName}</TooltipContent>
-											</Tooltip>
-										)
-								)}
-							</div>
-							<p className="text-sm text-muted-foreground">
-								{(rsvps ?? [])
-									.slice(0, 2)
-									.map((rsvp) => rsvp?.name)
-									.filter((value): value is string => !!value)
-									.join(', ')}
-								{(rsvps ?? []).length > 2 && ` and ${rsvpCount - 2} others`}
-							</p>
-						</div>
-					</div>
+					<Suspense fallback={null}>
+						<RsvpsSection promise={rsvpsPromise} />
+					</Suspense>
 				</div>
 			</div>
 			<div className="col-span-full lg:col-span-7 flex flex-col gap-3 lg:gap-4">

@@ -1,8 +1,10 @@
-import { EventRole, type Prisma } from '@prisma/client'
+import { EventRole, type Prisma, type PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 
 import slugify from 'slugify'
 import { z } from 'zod'
+import { withCache } from '@/lib/cache'
+import { CacheTags } from '@/lib/config'
 import {
 	createTRPCRouter,
 	protectedProcedure,
@@ -89,6 +91,99 @@ export const eventInclude = {
 		},
 	},
 } satisfies Prisma.EventInclude
+
+export const eventBasicInclude = {
+	host: {
+		select: { id: true, name: true, image: true, email: true },
+	},
+	location: true,
+	categories: { include: { category: true } },
+} satisfies Prisma.EventInclude
+
+const listNearbyEvents = withCache(
+	async (prisma: PrismaClient, locationId: string, take: number) =>
+		prisma.event.findMany({
+			where: {
+				location: {
+					id: locationId,
+				},
+			},
+			take,
+			select: {
+				id: true,
+				title: true,
+				slug: true,
+				startDate: true,
+				endDate: true,
+				coverImage: true,
+			},
+		}),
+	{
+		cacheTime: 30,
+		tags: (_prisma, locationId) => [CacheTags.Event.Nearby(locationId)],
+	}
+)
+
+const getEventRsvps = withCache(
+	async (prisma: PrismaClient, slug: string) => {
+		const event = await prisma.event.findUnique({
+			where: { slug, deletedAt: null },
+			select: { id: true },
+		})
+		if (!event) {
+			throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+		}
+		const rsvps = await prisma.rsvp.findMany({
+			where: { eventId: event.id, status: 'CONFIRMED' },
+			take: 5,
+			orderBy: { createdAt: 'desc' },
+			select: {
+				name: true,
+				email: true,
+				user: { select: { id: true, name: true, image: true } },
+			},
+		})
+		const rsvpCount = await prisma.rsvp.count({
+			where: { eventId: event.id, status: 'CONFIRMED' },
+		})
+		return { rsvps, rsvpCount }
+	},
+	{ cacheTime: 30, tags: (_prisma, slug) => [CacheTags.Event.Get(slug)] }
+)
+
+const getEventTicketTiers = withCache(
+	async (prisma: PrismaClient, slug: string) => {
+		const event = await prisma.event.findUnique({
+			where: { slug, deletedAt: null },
+			select: { id: true },
+		})
+		if (!event) {
+			throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+		}
+		return prisma.ticketTier.findMany({ where: { eventId: event.id } })
+	},
+	{ cacheTime: 30, tags: (_prisma, slug) => [CacheTags.Event.Get(slug)] }
+)
+
+const getEventCollaborators = withCache(
+	async (prisma: PrismaClient, slug: string) => {
+		const event = await prisma.event.findUnique({
+			where: { slug, deletedAt: null },
+			select: { id: true },
+		})
+		if (!event) {
+			throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+		}
+		return prisma.eventCollaborator.findMany({
+			where: { eventId: event.id },
+			select: {
+				role: true,
+				user: { select: { id: true, name: true, image: true } },
+			},
+		})
+	},
+	{ cacheTime: 30, tags: (_prisma, slug) => [CacheTags.Event.Get(slug)] }
+)
 
 export const eventRouter = createTRPCRouter({
 	// Create a new event (requires authentication)
@@ -239,7 +334,7 @@ export const eventRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const event = await ctx.prisma.event.findUnique({
 				where: { slug: input.slug, deletedAt: null },
-				include: eventInclude,
+				include: eventBasicInclude,
 			})
 
 			if (!event) {
@@ -372,6 +467,18 @@ export const eventRouter = createTRPCRouter({
 		return eventsWithContext
 	}),
 
+	getRsvps: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(({ ctx, input }) => getEventRsvps(ctx.prisma, input.slug)),
+
+	getTicketTiers: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(({ ctx, input }) => getEventTicketTiers(ctx.prisma, input.slug)),
+
+	getCollaborators: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(({ ctx, input }) => getEventCollaborators(ctx.prisma, input.slug)),
+
 	listNearby: publicProcedure
 		.input(
 			z.object({
@@ -388,22 +495,7 @@ export const eventRouter = createTRPCRouter({
 				})
 			}
 
-			const events = await ctx.prisma.event.findMany({
-				where: {
-					location: {
-						id: locationId,
-					},
-				},
-				take,
-				select: {
-					id: true,
-					title: true,
-					slug: true,
-					startDate: true,
-					endDate: true,
-					coverImage: true,
-				},
-			})
+			const events = await listNearbyEvents(ctx.prisma, locationId, take)
 			if (events.length === 0) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',

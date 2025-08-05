@@ -1,7 +1,9 @@
 'use server'
 
 import { TRPCError } from '@trpc/server'
+import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
+import { CacheTags } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import { RsvpErrorCodes, type ServerActionResponse } from './types'
 
@@ -38,6 +40,7 @@ export async function createRsvpAction(
 	try {
 		const api = await getAPI()
 		await api.rsvp.create(validation.data)
+		revalidateTag(CacheTags.Event.Get(validation.data.eventId))
 		return { success: true }
 	} catch (error) {
 		if (error instanceof TRPCError) {

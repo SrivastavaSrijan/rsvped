@@ -24,20 +24,15 @@ export default async function ViewEvent({
 }) {
 	const { slug } = await params
 	const api = await getAPI()
-	let event: Awaited<ReturnType<typeof api.event.get>> | undefined
-	try {
-		event = await api.event.get({ slug })
-		if (!event) {
-			return notFound()
-		}
-	} catch (error) {
-		console.error('Error fetching event:', error)
+	const eventPromise = api.event.get({ slug })
+	const rsvpsPromise = api.event.getRsvps({ slug })
+	const event = await eventPromise
+	if (!event) {
 		return notFound()
 	}
-
 	return (
 		<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
-			<EventPage {...event} />
+			<EventPage {...event} rsvpsPromise={rsvpsPromise} />
 		</div>
 	)
 }

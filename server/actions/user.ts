@@ -1,9 +1,9 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { auth } from '@/lib/auth'
-import { CookieNames, Routes } from '@/lib/config'
+import { CacheTags, CookieNames } from '@/lib/config'
 import { setEncryptedCookie } from '@/lib/cookies'
 import { getAPI } from '@/server/api'
 import {
@@ -54,7 +54,11 @@ export async function updateLocationAction(
 		)
 	}
 
-	// Revalidate the path for both user types and return success
-	revalidatePath(Routes.Main.Events.Discover)
+	// Revalidate caches and return success
+	revalidateTag(CacheTags.Location.List)
+	revalidateTag(CacheTags.Event.Nearby(validation.data.locationId))
+	if (session?.user?.id) {
+		revalidateTag(CacheTags.User.Get(session.user.id))
+	}
 	return { success: true }
 }

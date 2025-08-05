@@ -1,9 +1,10 @@
 import { Edit3 } from 'lucide-react'
 import type { Metadata } from 'next'
+import { cache, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui'
-import { CookieNames, Routes } from '@/lib/config'
+import { CacheTags, CookieNames, Routes } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
@@ -59,43 +60,51 @@ const PageConfig = {
  * 3. A default location from the system.
  * Redirects to an error page if no location can be determined.
  */
-async function resolveUserLocation() {
-	const api = await getAPI()
-	const user = await api.user.getCurrentUser()
+const resolveUserLocation = cache(
+	async () => {
+		'use cache'
+		const api = await getAPI()
+		const user = await api.user.getCurrentUser()
 
-	// 1. Use authenticated user's location if available
-	if (user?.locationId && user.location) {
-		return { locationId: user.locationId, location: user.location }
-	}
-
-	// 2. Try to find location from cookie for guests
-	const { locationId: savedLocationId } =
-		(await getEncryptedCookie<Partial<LocationFormData>>(
-			CookieNames.PrefillLocation
-		)) ?? {}
-
-	if (savedLocationId) {
-		try {
-			const location = await api.location.byId({ id: savedLocationId })
-			if (location) {
-				return { locationId: savedLocationId, location }
-			}
-		} catch (error) {
-			console.error('Error fetching location by ID from cookie:', error)
-			// Could log this error. Cookie might contain an old/invalid ID.
-			// Proceed to fallback.
+		// 1. Use authenticated user's location if available
+		if (user?.locationId && user.location) {
+			cacheTag(CacheTags.User.Get(user.id))
+			cacheTag(CacheTags.Location.Get(user.locationId))
+			return { locationId: user.locationId, location: user.location }
 		}
-	}
 
-	// 3. Fallback to the first available location in the system
-	const defaultLocation = await api.location.getDefault()
-	if (defaultLocation) {
-		return { locationId: defaultLocation.id, location: defaultLocation }
-	}
+		// 2. Try to find location from cookie for guests
+		const { locationId: savedLocationId } =
+			(await getEncryptedCookie<Partial<LocationFormData>>(
+				CookieNames.PrefillLocation
+			)) ?? {}
 
-	// If no location can be found, redirect
-	redirect(Routes.Main.Events.DiscoverLocationSelect)
-}
+		if (savedLocationId) {
+			try {
+				const location = await api.location.byId({ id: savedLocationId })
+				if (location) {
+					cacheTag(CacheTags.Location.Get(savedLocationId))
+					return { locationId: savedLocationId, location }
+				}
+			} catch (error) {
+				console.error('Error fetching location by ID from cookie:', error)
+				// Could log this error. Cookie might contain an old/invalid ID.
+				// Proceed to fallback.
+			}
+		}
+
+		// 3. Fallback to the first available location in the system
+		const defaultLocation = await api.location.getDefault()
+		if (defaultLocation) {
+			cacheTag(CacheTags.Location.Default)
+			return { locationId: defaultLocation.id, location: defaultLocation }
+		}
+
+		// If no location can be found, redirect
+		redirect(Routes.Main.Events.DiscoverLocationSelect)
+	},
+	{ revalidate: 300 }
+)
 
 export default async function DiscoverEvents() {
 	const api = await getAPI()
