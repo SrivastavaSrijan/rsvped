@@ -1,8 +1,58 @@
 import { MembershipRole } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
+import { cacheLife, cacheTag } from 'next/cache'
 import z from 'zod'
-import { listNearbyCommunities } from '@/server/queries'
+import { auth } from '@/lib/auth'
+import { CacheTags } from '@/lib/config'
+import { prisma } from '@/lib/prisma'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
+
+async function listNearbyCommunities({
+	locationId,
+	take,
+}: {
+	locationId: string
+	take: number
+}) {
+	'use cache'
+	cacheTag(CacheTags.Community.Nearby(locationId))
+	cacheLife('minutes')
+	const session = await auth()
+	const communities = await prisma.community.findMany({
+		take,
+		orderBy: { events: { _count: 'desc' } },
+		select: {
+			_count: true,
+			description: true,
+			slug: true,
+			name: true,
+			coverImage: true,
+			id: true,
+		},
+		where: {
+			events: {
+				some: {
+					deletedAt: null,
+					isPublished: true,
+					OR: [{ locationId }, { locationType: { in: ['ONLINE', 'HYBRID'] } }],
+				},
+			},
+		},
+	})
+	const communityIds = communities.map((c) => c.id)
+	const userCommunities = session?.user
+		? await prisma.communityMembership.findMany({
+				where: { userId: session.user.id, communityId: { in: communityIds } },
+				select: { communityId: true, role: true },
+			})
+		: []
+	return communities.map((community) => {
+		const membership = userCommunities.find(
+			(m) => m.communityId === community.id
+		)
+		return { ...community, metadata: { role: membership?.role ?? null } }
+	})
+}
 
 export const communityRouter = createTRPCRouter({
 	// Get all communities

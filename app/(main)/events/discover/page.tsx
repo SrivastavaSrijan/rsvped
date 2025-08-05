@@ -3,14 +3,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui'
-import { Routes } from '@/lib/config'
-import {
-	listLocations,
-	listNearbyCategories,
-	listNearbyCommunities,
-	listNearbyEvents,
-	resolveUserLocation,
-} from '@/server/queries'
+import { CookieNames, Routes } from '@/lib/config'
+import { getEncryptedCookie } from '@/lib/cookies'
+import type { LocationFormData } from '@/server/actions'
+import { getAPI } from '@/server/api'
 import {
 	CategoryDiscoverCard,
 	CommunityDiscoverCard,
@@ -56,36 +52,62 @@ const PageConfig = {
 	},
 }
 
+async function resolveUserLocation() {
+	const api = await getAPI()
+	const user = await api.user.getCurrentUser()
+	if (user?.locationId && user.location) {
+		return { locationId: user.locationId, location: user.location }
+	}
+	const { locationId: savedLocationId } =
+		(await getEncryptedCookie<Partial<LocationFormData>>(
+			CookieNames.PrefillLocation
+		)) ?? {}
+	if (savedLocationId) {
+		try {
+			const location = await api.location.byId({ id: savedLocationId })
+			if (location) {
+				return { locationId: savedLocationId, location }
+			}
+		} catch (error) {
+			console.error('Error fetching location by ID from cookie:', error)
+		}
+	}
+	const defaultLocation = await api.location.getDefault()
+	if (defaultLocation) {
+		return { locationId: defaultLocation.id, location: defaultLocation }
+	}
+	redirect(Routes.Main.Events.DiscoverLocationSelect)
+}
+
 export default async function DiscoverEvents() {
+	const api = await getAPI()
 	const { locationId, location } = await resolveUserLocation()
 	let data:
 		| [
-				Awaited<ReturnType<typeof listNearbyEvents>>,
-				Awaited<ReturnType<typeof listNearbyCategories>>,
-				Awaited<ReturnType<typeof listNearbyCommunities>>,
-				Awaited<ReturnType<typeof listLocations>>,
+				Awaited<ReturnType<typeof api.event.listNearby>>,
+				Awaited<ReturnType<typeof api.category.listNearby>>,
+				Awaited<ReturnType<typeof api.community.listNearby>>,
+				Awaited<ReturnType<typeof api.location.list>>,
 		  ]
 		| undefined
 	try {
-		// Fetch all data in parallel with caching
 		data = await Promise.all([
-			listNearbyEvents({
+			api.event.listNearby({
 				locationId,
 				take: PageConfig.nearbyEvents.pageSize,
 			}),
-			listNearbyCategories({
+			api.category.listNearby({
 				locationId,
 				take: PageConfig.categories.pageSize,
 			}),
-			listNearbyCommunities({
+			api.community.listNearby({
 				locationId,
 				take: PageConfig.communities.pageSize,
 			}),
-			listLocations(),
+			api.location.list(),
 		])
 	} catch (error) {
 		console.error('Error fetching discover data:', error)
-		// Redirect to location selection if any fetch fails
 		redirect(Routes.Main.Events.DiscoverLocationSelect)
 	}
 	const [nearbyEvents, categories, communities, { continents }] = data

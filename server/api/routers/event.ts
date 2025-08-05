@@ -1,14 +1,15 @@
 import { EventRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-
+import { cacheLife, cacheTag } from 'next/cache'
 import slugify from 'slugify'
 import { z } from 'zod'
+import { CacheTags } from '@/lib/config'
+import { prisma } from '@/lib/prisma'
 import {
 	createTRPCRouter,
 	protectedProcedure,
 	publicProcedure,
 } from '@/server/api/trpc'
-import { listNearbyEvents } from '@/server/queries'
 import { EventModel } from './zod'
 
 // Create input schema from the EventModel, picking only the fields we want for creation
@@ -90,6 +91,34 @@ export const eventInclude = {
 		},
 	},
 } satisfies Prisma.EventInclude
+
+async function listNearbyEvents({
+	locationId,
+	take,
+}: {
+	locationId: string
+	take: number
+}) {
+	'use cache'
+	cacheTag(CacheTags.Event.Nearby(locationId))
+	cacheLife('minutes')
+	return prisma.event.findMany({
+		where: {
+			location: {
+				id: locationId,
+			},
+		},
+		take,
+		select: {
+			id: true,
+			title: true,
+			slug: true,
+			startDate: true,
+			endDate: true,
+			coverImage: true,
+		},
+	})
+}
 
 export const eventRouter = createTRPCRouter({
 	// Create a new event (requires authentication)

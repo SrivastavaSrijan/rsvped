@@ -3,10 +3,11 @@ import { LocationModal } from '@/app/(main)/components'
 import { CookieNames } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
-import { listLocations } from '@/server/queries'
+import { getAPI } from '@/server/api'
 
 export default async function LocationForm() {
-	const locations = await listLocations()
+	const api = await getAPI()
+	const locations = await api.location.list()
 	const prefill = await getEncryptedCookie<Partial<LocationFormData>>(
 		CookieNames.PrefillLocation
 	)
