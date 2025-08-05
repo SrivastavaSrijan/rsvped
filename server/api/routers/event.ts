@@ -406,7 +406,7 @@ export const eventRouter = createTRPCRouter({
 	}),
 
 	listSlugs: publicProcedure.query(async ({ ctx }) => {
-		const cacheKey = [Tags.List, 'slugs'] as const
+		const cacheKey = [Tags.List, 'slugs']
 		return unstable_cache(
 			async () =>
 				ctx.prisma.event.findMany({

@@ -75,7 +75,7 @@ export const Routes = {
 			},
 		},
 	},
-} as const
+}
 
 export const RouteDefs = {
 	Protected: [

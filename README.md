@@ -231,7 +231,7 @@ export const copy = {
     title: 'Plan memorable events faster',
     subtitle: 'Ticketing & RSVPs in minutes.'
   }
-} as const;
+} ;
 ```
 
 This pattern enables easy i18n expansion (`copy.es.ts`, `copy.fr.ts`) while keeping text close to components.
