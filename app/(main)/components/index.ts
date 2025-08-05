@@ -1,5 +1,7 @@
 export { CategoryDiscoverCard } from './CategoryDiscoverCard'
 export { CommunityDiscoverCard } from './CommunityDiscoverCard'
+export { CommunityEvents } from './CommunityEvents'
+export { CommunityHeader } from './CommunityHeader'
 export { CommunitySubscribeModal } from './CommunitySubscribeModal'
 export { EventCard } from './EventCard'
 export { EventDiscoverCard } from './EventDiscoverCard'
