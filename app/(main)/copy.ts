@@ -38,4 +38,12 @@ export const copy = {
 		communities: 'Featured Communities',
 		location: 'Explore Local Events',
 	},
+	community: {
+		home: {
+			title: 'Communities',
+			user: 'Subscribed Communities',
+			managed: 'My Communities',
+			empty: "You haven't subscribed to any communities yet.",
+		},
+	},
 }

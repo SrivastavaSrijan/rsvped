@@ -25,6 +25,7 @@ export const Routes = {
 			ViewBySlug(slug: string) {
 				return `${this.Root}/${slug}/view`
 			},
+
 			SubscribeTo(slug: string) {
 				return `${this.ViewBySlug(slug)}?action=subscribe`
 			},

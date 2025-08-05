@@ -19,7 +19,7 @@ const BREAKPOINTS = {
 type ResponsiveSizes = Partial<Record<keyof typeof BREAKPOINTS, string>>
 
 interface ImageProps extends Omit<NextImageProps, 'src' | 'alt' | 'sizes'> {
-	src?: NextImageProps['src']
+	src?: NextImageProps['src'] | null
 	alt?: string
 	fallbackSrc?: NextImageProps['src']
 	wrapperClassName?: string

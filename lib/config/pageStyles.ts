@@ -14,9 +14,9 @@ const getRandomGradient = (seed?: string) => ({
 const getRandomBackground = (seed?: string) => ({
 	backgroundColor: getRandomColor({ seed, intensity: 80 }),
 })
-const getRandomFaintBackground = () => ({
-	backgroundColor: getRandomColor({ palette: 'faint', intensity: 80 }),
-})
+// const getRandomFaintBackground = () => ({
+// 	backgroundColor: getRandomColor({ palette: 'faint', intensity: 80 }),
+// })
 /**
  * A map of path patterns to their corresponding style functions.
  * The key is a path pattern that can include dynamic segments like `:slug`.
@@ -37,7 +37,6 @@ const styleMap: Record<string, PageStyle> = {
 		pseudoElement: getRandomGradient,
 	},
 	[Routes.Main.Communities.Root]: {
-		background: getRandomFaintBackground,
 		pseudoElement: getRandomGradient,
 	},
 	[Routes.Main.Events.ManageBySlug(':slug')]: {
