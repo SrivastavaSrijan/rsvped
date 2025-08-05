@@ -1,14 +1,14 @@
 import { MembershipRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import z from 'zod'
+import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
 
 const GetCommunitiesInput = z.object({
 	sort: z.enum(['asc', 'desc']).optional().default('asc'),
-
 	page: z.number().int().min(1).default(1),
 	size: z.number().int().min(1).max(100).default(5),
-	roles: z.array(z.enum(MembershipRole)).optional(),
+	roles: z.array(z.nativeEnum(MembershipRole)).optional(),
+	invert: z.boolean().optional().default(false),
 	where: z
 		.object({
 			isPublic: z.boolean().optional().default(true),
@@ -17,27 +17,31 @@ const GetCommunitiesInput = z.object({
 		.optional()
 		.default({ isPublic: true }),
 })
+
 export const communityRouter = createTRPCRouter({
 	list: protectedProcedure
 		.input(GetCommunitiesInput)
 		.query(async ({ ctx, input }) => {
-			const { sort, page, size, roles, where } = input
+			const { sort, page, size, roles, where, invert } = input
 			const user = ctx.session?.user
 			if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
-			const orConditions: Prisma.CommunityWhereInput[] = []
+
+			// Build role filter for communities
+			let roleFilter: Prisma.CommunityWhereInput | undefined
 			if (roles && roles.length > 0) {
-				orConditions.push({
+				roleFilter = {
 					members: {
 						some: {
 							userId: user.id,
 							role: {
-								in: roles,
+								[invert ? 'notIn' : 'in']: roles,
 							},
 						},
 					},
-				})
+				}
 			}
 
+			// Get communities with basic data
 			const communities = await ctx.prisma.community.findMany({
 				skip: (page - 1) * size,
 				take: size,
@@ -56,16 +60,18 @@ export const communityRouter = createTRPCRouter({
 							members: true,
 						},
 					},
-					members: {
-						select: {
-							role: true,
-						},
-					},
 					events: {
-						take: 1,
+						take: 2,
 						where: {
 							deletedAt: null,
 							isPublished: true,
+						},
+						select: {
+							title: true,
+							slug: true,
+							id: true,
+							startDate: true,
+							endDate: true,
 						},
 						orderBy: {
 							startDate: 'asc',
@@ -74,30 +80,37 @@ export const communityRouter = createTRPCRouter({
 				},
 				where: {
 					...where,
-					OR: [
-						{
-							events: {
-								some: {
-									deletedAt: null,
-									isPublished: true,
-								},
-							},
-						},
-						...orConditions,
-					],
+					...(roleFilter && roleFilter),
 				},
 			})
-			const communitiesWithMembership = communities.map((community) => {
-				const membership = community.members[0]?.role ?? null
-				return {
-					...community,
-					metadata: {
-						role: membership,
-					},
-				}
+
+			// Get user memberships for these communities
+			const communityIds = communities.map(({ id }) => id)
+			const userMemberships = await ctx.prisma.communityMembership.findMany({
+				where: {
+					userId: user.id,
+					communityId: { in: communityIds },
+				},
+				select: {
+					communityId: true,
+					role: true,
+				},
 			})
-			return communitiesWithMembership
+
+			// Create membership lookup map
+			const membershipMap = new Map(
+				userMemberships.map(({ communityId, role }) => [communityId, role])
+			)
+
+			// Combine data
+			return communities.map((community) => ({
+				...community,
+				metadata: {
+					role: membershipMap.get(community.id) ?? null,
+				},
+			}))
 		}),
+
 	listNearby: publicProcedure
 		.input(
 			z
@@ -110,9 +123,14 @@ export const communityRouter = createTRPCRouter({
 		)
 		.query(async ({ ctx, input: { take, locationId } }) => {
 			if (!locationId) {
-				throw new Error('locationId is required')
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'locationId is required',
+				})
 			}
+
 			const user = ctx.session?.user
+
 			const communities = await ctx.prisma.community.findMany({
 				take,
 				orderBy: {
@@ -121,12 +139,12 @@ export const communityRouter = createTRPCRouter({
 					},
 				},
 				select: {
-					_count: true,
-					description: true,
-					slug: true,
-					name: true,
-					coverImage: true,
 					id: true,
+					name: true,
+					slug: true,
+					description: true,
+					coverImage: true,
+					_count: true,
 				},
 				where: {
 					events: {
@@ -134,7 +152,7 @@ export const communityRouter = createTRPCRouter({
 							deletedAt: null,
 							isPublished: true,
 							OR: [
-								{ locationId: locationId },
+								{ locationId },
 								{
 									locationType: {
 										in: ['ONLINE', 'HYBRID'],
@@ -146,35 +164,35 @@ export const communityRouter = createTRPCRouter({
 				},
 			})
 
-			const communityIds = communities.map((community) => community.id)
-
-			const userCommunities = user
-				? await ctx.prisma.communityMembership.findMany({
-						where: {
-							userId: user.id,
-							communityId: {
-								in: communityIds,
-							},
-						},
-						select: {
-							communityId: true,
-							role: true,
-						},
-					})
-				: []
-
-			const communitiesWithMembership = communities.map((community) => {
-				const membership = userCommunities.find(
-					(m) => m.communityId === community.id
-				)
-				return {
+			if (!user) {
+				return communities.map((community) => ({
 					...community,
-					metadata: {
-						role: membership?.role ?? null,
-					},
-				}
+					metadata: { role: null },
+				}))
+			}
+
+			const communityIds = communities.map(({ id }) => id)
+			const userMemberships = await ctx.prisma.communityMembership.findMany({
+				where: {
+					userId: user.id,
+					communityId: { in: communityIds },
+				},
+				select: {
+					communityId: true,
+					role: true,
+				},
 			})
-			return communitiesWithMembership
+
+			const membershipMap = new Map(
+				userMemberships.map(({ communityId, role }) => [communityId, role])
+			)
+
+			return communities.map((community) => ({
+				...community,
+				metadata: {
+					role: membershipMap.get(community.id) ?? null,
+				},
+			}))
 		}),
 
 	get: publicProcedure
@@ -182,6 +200,7 @@ export const communityRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const { slug } = input
 			const user = ctx.session?.user
+
 			const community = await ctx.prisma.community.findUnique({
 				where: { slug },
 				select: {
@@ -219,21 +238,21 @@ export const communityRouter = createTRPCRouter({
 				})
 			}
 
-			const membership = user
-				? await ctx.prisma.communityMembership.findFirst({
-						where: {
-							userId: user.id,
-							communityId: community.id,
-						},
-						select: {
-							role: true,
-						},
-					})
-				: null
+			let userRole = null
+			if (user) {
+				const membership = await ctx.prisma.communityMembership.findFirst({
+					where: {
+						userId: user.id,
+						communityId: community.id,
+					},
+					select: { role: true },
+				})
+				userRole = membership?.role ?? null
+			}
 
 			return {
 				...community,
-				metadata: { role: membership?.role ?? null },
+				metadata: { role: userRole },
 			}
 		}),
 
@@ -248,16 +267,17 @@ export const communityRouter = createTRPCRouter({
 			const userId = ctx.session.user.id
 			const { communityId, membershipTierId } = input
 
-			const existing = await ctx.prisma.communityMembership.findUnique({
-				where: {
-					userId_communityId: { userId, communityId },
-				},
-			})
+			const existingMembership =
+				await ctx.prisma.communityMembership.findUnique({
+					where: {
+						userId_communityId: { userId, communityId },
+					},
+				})
 
-			if (existing) {
+			if (existingMembership) {
 				throw new TRPCError({
 					code: 'CONFLICT',
-					message: 'ALREADY_MEMBER',
+					message: 'Already a member of this community',
 				})
 			}
 

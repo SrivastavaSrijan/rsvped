@@ -44,6 +44,8 @@ export const copy = {
 			user: 'Subscribed Communities',
 			managed: 'My Communities',
 			empty: "You haven't subscribed to any communities yet.",
+			emptyManaged:
+				"You haven't created any communities yet. Create one to get started!",
 		},
 	},
 }

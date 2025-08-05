@@ -135,6 +135,7 @@
 	--font-size-5xl: 3rem; /* 48px */
 
 	--text-base--line-height: calc(1.125 / 1);
+	--text-lg--line-height: calc(1.25 / 1);
 
 	/* Font weights */
 	--font-weight-light: 300;

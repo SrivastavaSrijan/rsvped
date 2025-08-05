@@ -316,6 +316,14 @@ export type Route = typeof Routes[keyof typeof Routes];
 - Use **Tailwind CSS** for styling, leveraging the `@theme` tokens defined in `app/theme.css`.
 - Use **Prisma** for database access, with all queries going through tRPC routers.
 - Use **TypeScript** for type safety across the codebase.
+- When creating new components, ALWAYS use `RouterOutput` types from `@/server/api` to ensure type safety and consistency with the server API. DO NOT create new types or interfaces unless absolutely necessary. Use the existing types from the tRPC routers to ensure that your components are always in sync with the server API. E.g. - 
+```ts
+import type { RouterOutput } from '@/server/api'
+interface MyComponentProps {
+  data: RouterOutput['event']['list']
+}
+```
+- Use arrow functions for components and hooks, e.g., `const MyComponent = () => { ... }`. Use function declarations only for server actions or when necessary.
 
 #### React 19 
 - Does not need to use hooks like `useCallback`, `useMemo`, etc. Use them only when necessary. React Compiler optimizes the code for you.
