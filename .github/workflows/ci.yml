@@ -71,11 +71,12 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Test migrations
+      - name: Reset and apply migrations
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
           DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
         run: |
+          yarn prisma migrate reset --force --skip-seed
           yarn prisma migrate deploy
           yarn prisma generate
 
