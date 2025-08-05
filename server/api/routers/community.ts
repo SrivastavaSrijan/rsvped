@@ -1,10 +1,103 @@
-import { MembershipRole } from '@prisma/client'
+import { MembershipRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import z from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
 
+const GetCommunitiesInput = z.object({
+	sort: z.enum(['asc', 'desc']).optional().default('asc'),
+
+	page: z.number().int().min(1).default(1),
+	size: z.number().int().min(1).max(100).default(5),
+	roles: z.array(z.enum(MembershipRole)).optional(),
+	where: z
+		.object({
+			isPublic: z.boolean().optional().default(true),
+		})
+		.partial()
+		.optional()
+		.default({ isPublic: true }),
+})
 export const communityRouter = createTRPCRouter({
-	// Get all communities
+	list: protectedProcedure
+		.input(GetCommunitiesInput)
+		.query(async ({ ctx, input }) => {
+			const { sort, page, size, roles, where } = input
+			const user = ctx.session?.user
+			if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
+			const orConditions: Prisma.CommunityWhereInput[] = []
+			if (roles && roles.length > 0) {
+				orConditions.push({
+					members: {
+						some: {
+							userId: user.id,
+							role: {
+								in: roles,
+							},
+						},
+					},
+				})
+			}
+
+			const communities = await ctx.prisma.community.findMany({
+				skip: (page - 1) * size,
+				take: size,
+				orderBy: {
+					name: sort,
+				},
+				select: {
+					id: true,
+					name: true,
+					slug: true,
+					description: true,
+					coverImage: true,
+					_count: {
+						select: {
+							events: true,
+							members: true,
+						},
+					},
+					members: {
+						select: {
+							role: true,
+						},
+					},
+					events: {
+						take: 1,
+						where: {
+							deletedAt: null,
+							isPublished: true,
+						},
+						orderBy: {
+							startDate: 'asc',
+						},
+					},
+				},
+				where: {
+					...where,
+					OR: [
+						{
+							events: {
+								some: {
+									deletedAt: null,
+									isPublished: true,
+								},
+							},
+						},
+						...orConditions,
+					],
+				},
+			})
+			const communitiesWithMembership = communities.map((community) => {
+				const membership = community.members[0]?.role ?? null
+				return {
+					...community,
+					metadata: {
+						role: membership,
+					},
+				}
+			})
+			return communitiesWithMembership
+		}),
 	listNearby: publicProcedure
 		.input(
 			z

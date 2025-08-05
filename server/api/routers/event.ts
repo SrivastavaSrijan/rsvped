@@ -275,102 +275,104 @@ export const eventRouter = createTRPCRouter({
 			return { ...event, metadata }
 		}),
 
-	list: publicProcedure.input(GetEventsInput).query(async ({ ctx, input }) => {
-		const user = ctx.session?.user
-		if (!user) return []
+	list: protectedProcedure
+		.input(GetEventsInput)
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
 
-		const { roles, page, size, sort, before, after, on } = input
+			const { roles, page, size, sort, before, after, on } = input
 
-		const orConditions: Prisma.EventWhereInput[] = []
-		if (roles?.includes(EventRole.CHECKIN)) {
-			orConditions.push({ rsvps: { some: { userId: user.id } } })
-		}
-		if (
-			roles?.includes(EventRole.MANAGER) ||
-			roles?.includes(EventRole.CO_HOST)
-		) {
-			const roles: EventRole[] = []
-			if (roles?.includes(EventRole.MANAGER)) roles.push(EventRole.MANAGER)
-			if (roles?.includes(EventRole.CO_HOST)) roles.push(EventRole.CO_HOST)
-			if (roles.length > 0) {
-				orConditions.push({
-					OR: [
-						{ hostId: user.id },
-						{
-							eventCollaborators: {
-								some: { userId: user.id, role: { in: roles } },
+			const orConditions: Prisma.EventWhereInput[] = []
+			if (roles?.includes(EventRole.CHECKIN)) {
+				orConditions.push({ rsvps: { some: { userId: user.id } } })
+			}
+			if (
+				roles?.includes(EventRole.MANAGER) ||
+				roles?.includes(EventRole.CO_HOST)
+			) {
+				const inRoles: EventRole[] = []
+				if (roles?.includes(EventRole.MANAGER)) inRoles.push(EventRole.MANAGER)
+				if (roles?.includes(EventRole.CO_HOST)) inRoles.push(EventRole.CO_HOST)
+				if (inRoles.length > 0) {
+					orConditions.push({
+						OR: [
+							{ hostId: user.id },
+							{
+								eventCollaborators: {
+									some: { userId: user.id, role: { in: inRoles } },
+								},
 							},
+						],
+					})
+				}
+			}
+
+			const startDate: Prisma.DateTimeFilter | undefined = on
+				? (() => {
+						const start = new Date(on)
+						start.setHours(0, 0, 0, 0)
+						const end = new Date(start)
+						end.setDate(end.getDate() + 1)
+						return { gte: start, lt: end }
+					})()
+				: before || after
+					? {
+							...(before && { lt: new Date(before) }),
+							...(after && { gt: new Date(after) }),
+						}
+					: undefined
+
+			const whereClause: Prisma.EventWhereInput = {
+				...(orConditions.length && { OR: orConditions }),
+				communityId: input?.where?.communityId ?? undefined,
+				...(startDate && { startDate }),
+			}
+
+			const events = await ctx.prisma.event.findMany({
+				where: whereClause,
+				orderBy: { startDate: sort },
+				skip: (page - 1) * size,
+				take: size,
+				include: eventInclude,
+			})
+
+			if (events.length === 0) return []
+
+			const eventIds = events.map((event) => event.id)
+
+			// Fetch all user's RSVPs for the retrieved events in one query
+			const userRsvps = await ctx.prisma.rsvp.findMany({
+				where: { userId: user.id, eventId: { in: eventIds } },
+				include: { ticketTier: true },
+			})
+			const rsvpMap = new Map(userRsvps.map((rsvp) => [rsvp.eventId, rsvp]))
+
+			// Map events to include the specific user context for each one
+			const eventsWithContext = events.map((event) => {
+				const isHost = event.host.id === user.id
+				const collaboratorRole = event.eventCollaborators.find(
+					(c) => c.user.id === user.id
+				)?.role
+
+				const metadata = {
+					user: {
+						id: user.id,
+						name: user.name,
+						image: user.image,
+						email: user.email,
+						rsvp: rsvpMap.get(event.id) ?? null,
+						access: {
+							manager: isHost || collaboratorRole === EventRole.MANAGER,
+							cohost: collaboratorRole === EventRole.CO_HOST,
 						},
-					],
-				})
-			}
-		}
-
-		const startDate: Prisma.DateTimeFilter | undefined = on
-			? (() => {
-					const start = new Date(on)
-					start.setHours(0, 0, 0, 0)
-					const end = new Date(start)
-					end.setDate(end.getDate() + 1)
-					return { gte: start, lt: end }
-				})()
-			: before || after
-				? {
-						...(before && { lt: new Date(before) }),
-						...(after && { gt: new Date(after) }),
-					}
-				: undefined
-
-		const whereClause: Prisma.EventWhereInput = {
-			...(orConditions.length && { OR: orConditions }),
-			communityId: input?.where?.communityId ?? undefined,
-			...(startDate && { startDate }),
-		}
-
-		const events = await ctx.prisma.event.findMany({
-			where: whereClause,
-			orderBy: { startDate: sort },
-			skip: (page - 1) * size,
-			take: size,
-			include: eventInclude,
-		})
-
-		if (events.length === 0) return []
-
-		const eventIds = events.map((event) => event.id)
-
-		// Fetch all user's RSVPs for the retrieved events in one query
-		const userRsvps = await ctx.prisma.rsvp.findMany({
-			where: { userId: user.id, eventId: { in: eventIds } },
-			include: { ticketTier: true },
-		})
-		const rsvpMap = new Map(userRsvps.map((rsvp) => [rsvp.eventId, rsvp]))
-
-		// Map events to include the specific user context for each one
-		const eventsWithContext = events.map((event) => {
-			const isHost = event.host.id === user.id
-			const collaboratorRole = event.eventCollaborators.find(
-				(c) => c.user.id === user.id
-			)?.role
-
-			const metadata = {
-				user: {
-					id: user.id,
-					name: user.name,
-					image: user.image,
-					email: user.email,
-					rsvp: rsvpMap.get(event.id) ?? null,
-					access: {
-						manager: isHost || collaboratorRole === EventRole.MANAGER,
-						cohost: collaboratorRole === EventRole.CO_HOST,
 					},
-				},
-			}
-			return { ...event, metadata }
-		})
+				}
+				return { ...event, metadata }
+			})
 
-		return eventsWithContext
-	}),
+			return eventsWithContext
+		}),
 
 	listNearby: publicProcedure
 		.input(
