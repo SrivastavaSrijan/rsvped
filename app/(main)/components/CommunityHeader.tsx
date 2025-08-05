@@ -12,6 +12,7 @@ import {
 import { Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import type { RouterOutput } from '@/server/api'
 
 const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
@@ -19,20 +20,13 @@ const AVATAR_CLASSES = {
 }
 
 interface CommunityHeaderProps {
-	community: {
-		coverImage?: string | null
-		name: string
-		description: string | null
-		owner: { name?: string | null; image?: string | null } | null
-		slug: string
-		metadata?: { role?: keyof typeof MembershipLabels } | null
-	}
+	community: RouterOutput['community']['get']
 	children?: ReactNode
 }
 
 export const CommunityHeader = ({
-	community,
 	children,
+	community,
 }: CommunityHeaderProps) => {
 	const { coverImage, name, description, owner, metadata, slug } = community
 	const role = metadata?.role ? MembershipLabels[metadata.role] : null
@@ -79,7 +73,7 @@ export const CommunityHeader = ({
 							</div>
 						</div>
 						<Tooltip>
-							<TooltipTrigger>
+							<TooltipTrigger asChild>
 								<Link
 									href={role ? '' : Routes.Main.Communities.SubscribeTo(slug)}
 									passHref
