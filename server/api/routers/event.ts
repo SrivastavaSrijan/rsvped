@@ -8,6 +8,7 @@ import {
 	protectedProcedure,
 	publicProcedure,
 } from '@/server/api/trpc'
+import { listNearbyEvents } from '@/server/queries'
 import { EventModel } from './zod'
 
 // Create input schema from the EventModel, picking only the fields we want for creation
@@ -379,7 +380,7 @@ export const eventRouter = createTRPCRouter({
 				take: z.number().min(1).max(100).default(10),
 			})
 		)
-		.query(async ({ ctx, input }) => {
+		.query(async ({ input }) => {
 			const { locationId, take } = input
 			if (!locationId) {
 				throw new TRPCError({
@@ -388,22 +389,7 @@ export const eventRouter = createTRPCRouter({
 				})
 			}
 
-			const events = await ctx.prisma.event.findMany({
-				where: {
-					location: {
-						id: locationId,
-					},
-				},
-				take,
-				select: {
-					id: true,
-					title: true,
-					slug: true,
-					startDate: true,
-					endDate: true,
-					coverImage: true,
-				},
-			})
+			const events = await listNearbyEvents({ locationId, take })
 			if (events.length === 0) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',

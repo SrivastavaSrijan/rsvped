@@ -1,6 +1,7 @@
 import { MembershipRole } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import z from 'zod'
+import { listNearbyCommunities } from '@/server/queries'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
 
 export const communityRouter = createTRPCRouter({
@@ -15,73 +16,11 @@ export const communityRouter = createTRPCRouter({
 				.optional()
 				.default({ take: 10 })
 		)
-		.query(async ({ ctx, input: { take, locationId } }) => {
+		.query(async ({ input: { take, locationId } }) => {
 			if (!locationId) {
 				throw new Error('locationId is required')
 			}
-			const user = ctx.session?.user
-			const communities = await ctx.prisma.community.findMany({
-				take,
-				orderBy: {
-					events: {
-						_count: 'desc',
-					},
-				},
-				select: {
-					_count: true,
-					description: true,
-					slug: true,
-					name: true,
-					coverImage: true,
-					id: true,
-				},
-				where: {
-					events: {
-						some: {
-							deletedAt: null,
-							isPublished: true,
-							OR: [
-								{ locationId: locationId },
-								{
-									locationType: {
-										in: ['ONLINE', 'HYBRID'],
-									},
-								},
-							],
-						},
-					},
-				},
-			})
-
-			const communityIds = communities.map((community) => community.id)
-
-			const userCommunities = user
-				? await ctx.prisma.communityMembership.findMany({
-						where: {
-							userId: user.id,
-							communityId: {
-								in: communityIds,
-							},
-						},
-						select: {
-							communityId: true,
-							role: true,
-						},
-					})
-				: []
-
-			const communitiesWithMembership = communities.map((community) => {
-				const membership = userCommunities.find(
-					(m) => m.communityId === community.id
-				)
-				return {
-					...community,
-					metadata: {
-						role: membership?.role ?? null,
-					},
-				}
-			})
-			return communitiesWithMembership
+			return listNearbyCommunities({ locationId, take })
 		}),
 
 	get: publicProcedure
