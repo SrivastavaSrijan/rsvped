@@ -1,7 +1,9 @@
 'use server'
 
 import { TRPCError } from '@trpc/server'
+import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
+import { CacheTags } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import { MembershipErrorCodes, type ServerActionResponse } from './types'
 
@@ -36,6 +38,8 @@ export async function subscribeToCommunityAction(
 	try {
 		const api = await getAPI()
 		await api.community.subscribe(validation.data)
+		revalidateTag(CacheTags.Community.Get(validation.data.communityId))
+		revalidateTag(CacheTags.Community.List)
 		return { success: true }
 	} catch (error) {
 		if (error instanceof TRPCError && error.message === 'ALREADY_MEMBER') {

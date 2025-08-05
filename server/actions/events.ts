@@ -1,9 +1,10 @@
 'use server'
 
 import { LocationType } from '@prisma/client'
+import { revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { Routes } from '@/lib/config'
+import { CacheTags, Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import type { RouterOutput } from '../api/root'
 import { EventErrorCodes, type ServerActionResponse } from './types'
@@ -136,6 +137,11 @@ export async function saveEvent(
 				? EventErrorCodes.UPDATE_FAILED
 				: EventErrorCodes.CREATION_FAILED,
 		}
+	}
+	if (event) {
+		revalidateTag(CacheTags.Event.List)
+		revalidateTag(CacheTags.Event.ListByUser(event.hostId))
+		revalidateTag(CacheTags.Event.Get(event.slug))
 	}
 	const next = formData.get('next') as string | null
 	const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
