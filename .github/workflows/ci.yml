@@ -7,9 +7,36 @@ on:
     branches: [main]
 
 jobs:
+  setup:
+    name: "Setup Dependencies"
+    runs-on: ubuntu-latest
+    outputs:
+      yarn-cache-hit: ${{ steps.yarn-cache.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+
+      - name: Cache node_modules
+        id: yarn-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn --frozen-lockfile --prefer-offline
+
   lint:
     name: "Lint & Type-Check"
     runs-on: ubuntu-latest
+    needs: setup
     env:
       SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -20,44 +47,45 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "yarn"
 
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        if: needs.setup.outputs.yarn-cache-hit != 'true'
+        run: yarn --frozen-lockfile --prefer-offline
 
-      - name: Run Biome Linter
-        run: yarn lint:check
-
-      - name: Type check
-        run: yarn tsc --noEmit
+      - name: Run Biome Linter & Type Check
+        run: |
+          yarn lint:check
+          yarn tsc --noEmit
 
   test-migrations:
     name: "Test Database Migrations"
     runs-on: ubuntu-latest
-    env:
-      SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
-      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
-      UNSPLASH_SECRET_KEY: ${{ secrets.UNSPLASH_SECRET_KEY }}
-      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
-      DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
-      UNSPLASH_COLLECTION_IDS: ${{ secrets.UNSPLASH_COLLECTION_IDS }}
+    needs: setup
     services:
       postgres:
-        image: postgres:15
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: test_db
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 3
         ports:
           - 5432:5432
-
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,16 +93,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Test migrations
-        env:
-          DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
-          DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
+      - name: Install dependencies
+        if: needs.setup.outputs.yarn-cache-hit != 'true'
+        run: yarn --frozen-lockfile --prefer-offline
+
+      - name: Setup database
         run: |
           yarn prisma migrate deploy
           yarn prisma generate
@@ -83,6 +115,20 @@ jobs:
     name: "Build Application"
     runs-on: ubuntu-latest
     needs: [lint, test-migrations]
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 3
+        ports:
+          - 5432:5432
     env:
       SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -91,20 +137,6 @@ jobs:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
       DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
       UNSPLASH_COLLECTION_IDS: ${{ secrets.UNSPLASH_COLLECTION_IDS }}
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,8 +144,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "yarn"
+
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache Next.js build
         uses: actions/cache@v4
@@ -124,10 +162,13 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        if: needs.setup.outputs.yarn-cache-hit != 'true'
+        run: yarn --frozen-lockfile --prefer-offline
 
-      - name: Generate Prisma Client
-        run: yarn prisma generate
+      - name: Setup database
+        run: |
+          yarn prisma migrate deploy
+          yarn prisma generate
 
       - name: Build Next.js App
         run: yarn build
