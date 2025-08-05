@@ -36,6 +36,7 @@ export async function generateStaticParams() {
 		select: { slug: true },
 		take: 50,
 	})
+	await prisma.$disconnect()
 	return communities.map((c) => ({ slug: c.slug }))
 }
 

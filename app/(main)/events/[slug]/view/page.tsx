@@ -25,6 +25,7 @@ export async function generateStaticParams() {
 		select: { slug: true },
 		take: 50,
 	})
+	await prisma.$disconnect()
 	return events.map((e) => ({ slug: e.slug }))
 }
 

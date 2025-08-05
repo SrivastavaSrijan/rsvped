@@ -15,6 +15,7 @@ export async function generateStaticParams() {
 		select: { slug: true },
 		take: 50,
 	})
+	await prisma.$disconnect()
 	return locations.map((l) => ({ slug: l.slug }))
 }
 export default async function DiscoverLocation({
