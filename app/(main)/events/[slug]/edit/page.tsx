@@ -15,32 +15,31 @@ export default async function EditEvent({
 }) {
 	const { slug } = await params
 	const api = await getAPI()
-	let event: Awaited<ReturnType<typeof api.event.get>> | undefined
 	try {
-		event = await api.event.get({ slug })
+		const event = await api.event.get({ slug })
 		if (!event) {
 			return notFound()
 		}
+		if (!event?.metadata?.user?.access?.manager) {
+			return unauthorized()
+		}
+		// If the event is found, render the edit form
+		return (
+			<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
+				<EventForm
+					coverImage={{
+						alt: 'Event cover',
+						url: event.coverImage || '',
+						color: null,
+					}}
+					mode="edit"
+					eventSlug={slug}
+					event={event}
+				/>
+			</div>
+		)
 	} catch (error) {
 		console.error('Error fetching event:', error)
 		return notFound()
 	}
-	if (!event?.metadata?.user?.access?.manager) {
-		return unauthorized()
-	}
-
-	return (
-		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
-			<EventForm
-				coverImage={{
-					alt: 'Event cover',
-					url: event.coverImage || '',
-					color: null,
-				}}
-				mode="edit"
-				eventSlug={slug}
-				event={event}
-			/>
-		</div>
-	)
 }

@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function ModalLoading() {
+export const ModalLoading = () => {
 	return (
 		<Dialog open>
 			<DialogContent>

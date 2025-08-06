@@ -27,7 +27,7 @@ export const Routes = {
 			},
 
 			SubscribeTo(slug: string) {
-				return `${this.ViewBySlug(slug)}?action=subscribe`
+				return `${this.ViewBySlug(slug)}/subscribe`
 			},
 		},
 		Categories: {
@@ -57,7 +57,7 @@ export const Routes = {
 				return `${this.Root}/discover`
 			},
 			get DiscoverLocationSelect() {
-				return `${this.Discover}?action=select-location`
+				return `${this.Discover}/select-location`
 			},
 			get Home() {
 				return `${this.Root}/home`
@@ -66,7 +66,7 @@ export const Routes = {
 				return `${this.Root}/${slug}/view`
 			},
 			ViewBySlugRegister(slug: string) {
-				return `${this.ViewBySlug(slug)}?action=register`
+				return `${this.ViewBySlug(slug)}/register`
 			},
 			ManageBySlug(slug: string) {
 				return `${this.Root}/${slug}/manage`

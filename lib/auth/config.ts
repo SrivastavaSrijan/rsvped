@@ -7,6 +7,7 @@ export const config = {
 	pages: {
 		signIn: Routes.Auth.SignIn,
 	},
+	trustHost: true,
 	callbacks: {
 		authorized({ auth, request: { nextUrl } }) {
 			const isLoggedIn = !!auth?.user

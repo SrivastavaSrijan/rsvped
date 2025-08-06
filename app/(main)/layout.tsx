@@ -1,7 +1,7 @@
-import { Footer } from '@/components/shared'
+import { Suspense } from 'react'
+import { Footer, ModalLoading } from '@/components/shared'
 import { Navbar, PageWrapper } from './components'
 
-export const experimental_ppr = true
 export default async function MainLayout({
 	children,
 	form,
@@ -10,13 +10,15 @@ export default async function MainLayout({
 	form: React.ReactNode
 }) {
 	return (
-		<PageWrapper>
+		<>
+			<Suspense fallback={<ModalLoading />}>{form}</Suspense>
 			<Navbar />
-			{form}
-			<main className="flex flex-1 items-center justify-center">
-				{children}
-			</main>
-			<Footer />
-		</PageWrapper>
+			<PageWrapper>
+				<main className="flex flex-1 items-center justify-center">
+					{children}
+				</main>
+				<Footer />
+			</PageWrapper>
+		</>
 	)
 }

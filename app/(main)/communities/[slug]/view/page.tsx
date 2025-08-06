@@ -26,29 +26,27 @@ export default async function ViewCommunity({
 		before,
 	} = await searchParams
 	const api = await getAPI()
-	let community: Awaited<ReturnType<typeof api.community.get>> | null = null
 	try {
-		community = await api.community.get({ slug })
+		const community = await api.community.get({ slug })
 		if (!community) {
 			return notFound()
 		}
+		return (
+			<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
+				<CommunityHeader community={community}>
+					<CommunityEvents
+						communityId={community.id}
+						period={period as 'upcoming' | 'past'}
+						page={parseInt(page, 10)}
+						on={on}
+						after={after}
+						before={before}
+					/>
+				</CommunityHeader>
+			</div>
+		)
 	} catch (error) {
 		console.error('Error fetching community:', error)
 		return notFound()
 	}
-
-	return (
-		<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
-			<CommunityHeader community={community}>
-				<CommunityEvents
-					communityId={community.id}
-					period={period as 'upcoming' | 'past'}
-					page={parseInt(page, 10)}
-					on={on}
-					after={after}
-					before={before}
-				/>
-			</CommunityHeader>
-		</div>
-	)
 }

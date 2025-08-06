@@ -7,7 +7,6 @@ export const metadata: Metadata = {
 	description: copy.description,
 }
 
-export const experimental_ppr = true
 export default function LoginLayout({
 	children,
 	modal,
