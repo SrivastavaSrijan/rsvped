@@ -5,7 +5,7 @@ import { getAPI } from '@/server/api'
 interface ManageFormProps {
 	params: Promise<{ slug: string }>
 }
-
+export const experimental_ppr = false
 export default async function ManageForm({ params }: ManageFormProps) {
 	const api = await getAPI()
 	const { slug } = await params

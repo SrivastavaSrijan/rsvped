@@ -5,6 +5,7 @@ import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
 
+export const experimental_ppr = false
 export default async function LocationForm() {
 	const api = await getAPI()
 	const locations = await api.location.list()

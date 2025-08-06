@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 
+export const experimental_ppr = false
 export default function FormLayout({
 	children,
 }: {

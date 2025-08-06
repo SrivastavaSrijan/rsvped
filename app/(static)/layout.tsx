@@ -1,6 +1,7 @@
 import { Background, Footer } from '@/components/shared'
 import { Navbar } from './components'
 
+export const experimental_ppr = true
 export default function StaticLayout({
 	children,
 }: {

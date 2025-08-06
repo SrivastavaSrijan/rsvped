@@ -6,6 +6,7 @@ interface SubscribePageProps {
 	params: Promise<{ slug: string }>
 }
 
+export const experimental_ppr = false
 export default async function SubscribePage({ params }: SubscribePageProps) {
 	const { slug } = await params
 	const api = await getAPI()
