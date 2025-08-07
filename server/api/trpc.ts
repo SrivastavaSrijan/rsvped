@@ -1,4 +1,4 @@
-import { initTRPC, TRPCError } from '@trpc/server'
+import { initTRPC } from '@trpc/server'
 import type { CreateNextContextOptions } from '@trpc/server/adapters/next'
 import { headers } from 'next/headers'
 import type { Session } from 'next-auth'
@@ -7,6 +7,7 @@ import { ZodError } from 'zod'
 
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { TRPCErrors } from '@/server/api/shared/errors'
 
 type CreateContextOptions = {
 	session: Session | null
@@ -55,7 +56,7 @@ export const publicProcedure = t.procedure
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 	if (!ctx.session || !ctx.session.user) {
-		throw new TRPCError({ code: 'UNAUTHORIZED' })
+		throw TRPCErrors.unauthorized()
 	}
 	return next({
 		ctx: {

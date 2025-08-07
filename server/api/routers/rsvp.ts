@@ -1,5 +1,5 @@
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
 // Create input schema for RSVP creation
@@ -23,10 +23,7 @@ export const rsvpRouter = createTRPCRouter({
 			})
 
 			if (existingRsvp) {
-				throw new TRPCError({
-					code: 'CONFLICT',
-					message: 'ALREADY_REGISTERED',
-				})
+				throw TRPCErrors.alreadyRegistered()
 			}
 
 			// Check event capacity
@@ -40,17 +37,11 @@ export const rsvpRouter = createTRPCRouter({
 			})
 
 			if (!event) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'EVENT_NOT_FOUND',
-				})
+				throw TRPCErrors.eventNotFound()
 			}
 
 			if (event.capacity && event._count.rsvps >= event.capacity) {
-				throw new TRPCError({
-					code: 'PRECONDITION_FAILED',
-					message: 'EVENT_FULL',
-				})
+				throw TRPCErrors.eventFull()
 			}
 
 			// transaction to update RSVP count and create RSVP

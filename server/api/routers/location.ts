@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client'
-import { TRPCError } from '@trpc/server'
 import z from 'zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
 type Location = Prisma.LocationGetPayload<{
@@ -132,10 +132,7 @@ export const locationRouter = createTRPCRouter({
 			})
 
 			if (!location) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Location not found',
-				})
+				throw TRPCErrors.locationNotFound()
 			}
 
 			return location
@@ -158,10 +155,7 @@ export const locationRouter = createTRPCRouter({
 		})
 
 		if (!location) {
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: 'No default location available',
-			})
+			throw TRPCErrors.locationNotFound()
 		}
 		return location
 	}),
@@ -180,10 +174,7 @@ export const locationRouter = createTRPCRouter({
 			})
 
 			if (!location) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Location not found',
-				})
+				throw TRPCErrors.locationNotFound()
 			}
 
 			return location
