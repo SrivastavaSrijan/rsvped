@@ -10,18 +10,18 @@ export const DateFilterMessage = () => {
 	if (!hasDateFilter || !dateRangeText) return null
 
 	return (
-		<div className="flex flex-row items-center">
+		<div className="flex flex-col items-start gap-2">
 			<div className="text-sm text-muted-foreground">
 				Showing events {dateRangeText}
 			</div>
 			<Button
-				variant="ghost"
+				variant="outline"
 				size="sm"
 				onClick={clearDateFilter}
 				className="text-sm text-muted-foreground"
 			>
 				<X className="size-3" />
-				Clear
+				Clear Filter
 			</Button>
 		</div>
 	)

@@ -81,7 +81,7 @@ export const CommunityEvents = async ({
 	return (
 		<>
 			<div className="grid grid-cols-12 lg:gap-4 gap-4">
-				<div className="col-span-12 lg:col-span-4 lg:order-2 flex flex-col gap-4">
+				<div className="col-span-12 lg:col-span-4 lg:order-2 flex lg:flex-col flex-row gap-4">
 					<Link href={Routes.Main.Events.Create} passHref>
 						<Button variant="secondary">
 							<Plus />

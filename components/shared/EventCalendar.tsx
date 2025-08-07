@@ -1,10 +1,12 @@
 'use client'
 
 import dayjs from 'dayjs'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { DateRange } from 'react-day-picker'
 import { Calendar } from '@/components/ui/calendar'
+import { Button, Popover, PopoverContent, PopoverTrigger } from '../ui'
 
 const toStartOfDay = (date: Date) => dayjs(date).startOf('day').toISOString()
 const toEndOfDay = (date: Date) => dayjs(date).endOf('day').toISOString()
@@ -36,7 +38,7 @@ export const EventCalendar = () => {
 	const paramAfter = searchParams.get('after')
 	const paramBefore = searchParams.get('before')
 
-	const defaultRange = useMemo(
+	const dateRange = useMemo(
 		() =>
 			getDateRangeFromParams(
 				paramOn ?? undefined,
@@ -46,13 +48,7 @@ export const EventCalendar = () => {
 		[paramOn, paramAfter, paramBefore]
 	)
 
-	const [dateRange, setDateRange] = useState<DateRange | undefined>(
-		defaultRange
-	)
-	const hasDateFilter = paramOn || paramAfter || paramBefore
-
 	const handleSelect = (range: DateRange | undefined) => {
-		setDateRange(range)
 		const params = new URLSearchParams(searchParams.toString())
 
 		if (!range || (!range.from && !range.to)) {
@@ -62,12 +58,13 @@ export const EventCalendar = () => {
 		} else if (
 			range.from &&
 			range.to &&
-			range.from.toDateString() === range.to.toDateString()
+			dayjs(range.from).isSame(range.to, 'day')
 		) {
 			params.set('on', range.from.toISOString())
 			params.delete('after')
 			params.delete('before')
 		} else {
+			params.delete('on')
 			if (range.from) {
 				params.set('after', toStartOfDay(range.from))
 			} else {
@@ -78,25 +75,42 @@ export const EventCalendar = () => {
 			} else {
 				params.delete('before')
 			}
-			params.delete('on')
 		}
 
 		params.set('page', '1')
 		router.push(`${pathname}?${params.toString()}`)
 	}
 
+	const renderCalendar = (
+		<div className="flex flex-col items-start gap-3 rounded-lg bg-card p-3 lg:p-4">
+			<p className="text-sm text-muted-foreground">Find events by date</p>
+			<hr className="w-full border-border" />
+			<Calendar
+				mode="range"
+				defaultMonth={dateRange?.from}
+				selected={dateRange}
+				onSelect={handleSelect}
+				className="w-full bg-card p-0 lg:w-fit lg:[--cell-size:--spacing(8)] [--cell-size:--spacing(7)]"
+			/>
+		</div>
+	)
+
 	return (
-		<Calendar
-			mode="range"
-			defaultMonth={dateRange?.from}
-			selected={dateRange}
-			onSelect={handleSelect}
-			className="rounded-lg border shadow-sm"
-			classNames={{
-				today: hasDateFilter
-					? 'bg-transparent text-foreground data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground'
-					: undefined,
-			}}
-		/>
+		<>
+			<div className="flex w-full justify-end lg:hidden">
+				<Popover>
+					<PopoverTrigger asChild>
+						<Button variant="secondary" size="sm">
+							<CalendarIcon className="size-3 text-muted-foreground" />
+							Find Events
+						</Button>
+					</PopoverTrigger>
+					<PopoverContent className="w-auto p-0" align="end">
+						{renderCalendar}
+					</PopoverContent>
+				</Popover>
+			</div>
+			<div className="hidden lg:flex">{renderCalendar}</div>
+		</>
 	)
 }
