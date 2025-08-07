@@ -17,15 +17,15 @@ const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
 	sm: 'size-18 -bottom-9',
 }
-type CommunityData = RouterOutput['community']['get']
+type CommunityData = RouterOutput['community']['get']['core']
 type CommunityHeaderProps = CommunityData
 
 export const CommunityHeader = ({
 	coverImage,
 	name,
 	description,
-	owner,
 	metadata,
+	owner,
 	slug,
 }: CommunityHeaderProps) => {
 	const role = metadata?.role ? MembershipLabels[metadata.role] : null

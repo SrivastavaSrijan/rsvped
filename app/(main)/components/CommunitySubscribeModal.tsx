@@ -33,7 +33,7 @@ const initialState: MembershipActionResponse = {
 	fieldErrors: {},
 }
 
-type CommunitySubscribeData = RouterOutput['community']['get']
+type CommunitySubscribeData = RouterOutput['community']['get']['enhanced']
 
 export const CommunitySubscribeModal = ({
 	id,
