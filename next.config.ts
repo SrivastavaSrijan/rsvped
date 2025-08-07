@@ -3,7 +3,6 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
 	experimental: {
 		authInterrupts: true,
-		ppr: true,
 		useCache: true,
 	},
 	images: {

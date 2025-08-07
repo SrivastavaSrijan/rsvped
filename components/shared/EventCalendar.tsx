@@ -3,7 +3,7 @@
 import dayjs from 'dayjs'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useMemo } from 'react'
+import { useMemo, useTransition } from 'react'
 import type { DateRange } from 'react-day-picker'
 import { Calendar } from '@/components/ui/calendar'
 import { Button, Popover, PopoverContent, PopoverTrigger } from '../ui'
@@ -33,6 +33,7 @@ export const EventCalendar = () => {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const pathname = usePathname()
+	const [isPending, startTransition] = useTransition()
 
 	const paramOn = searchParams.get('on')
 	const paramAfter = searchParams.get('after')
@@ -49,36 +50,40 @@ export const EventCalendar = () => {
 	)
 
 	const handleSelect = (range: DateRange | undefined) => {
-		const params = new URLSearchParams(searchParams.toString())
+		startTransition(() => {
+			const params = new URLSearchParams(searchParams.toString())
 
-		if (!range || (!range.from && !range.to)) {
-			params.delete('on')
-			params.delete('after')
-			params.delete('before')
-		} else if (
-			range.from &&
-			range.to &&
-			dayjs(range.from).isSame(range.to, 'day')
-		) {
-			params.set('on', range.from.toISOString())
-			params.delete('after')
-			params.delete('before')
-		} else {
-			params.delete('on')
-			if (range.from) {
-				params.set('after', toStartOfDay(range.from))
-			} else {
+			if (!range || (!range.from && !range.to)) {
+				params.delete('on')
 				params.delete('after')
-			}
-			if (range.to) {
-				params.set('before', toEndOfDay(range.to))
-			} else {
 				params.delete('before')
+			} else if (
+				range.from &&
+				range.to &&
+				dayjs(range.from).isSame(range.to, 'day')
+			) {
+				params.set('on', range.from.toISOString())
+				params.delete('after')
+				params.delete('before')
+			} else {
+				params.delete('on')
+				if (range.from) {
+					params.set('after', toStartOfDay(range.from))
+				} else {
+					params.delete('after')
+				}
+				if (range.to) {
+					params.set('before', toEndOfDay(range.to))
+				} else {
+					params.delete('before')
+				}
 			}
-		}
 
-		params.set('page', '1')
-		router.push(`${pathname}?${params.toString()}`)
+			params.set('page', '1')
+
+			// Use push instead of replace to maintain history
+			router.push(`${pathname}?${params.toString()}`)
+		})
 	}
 
 	const renderCalendar = (
@@ -90,6 +95,7 @@ export const EventCalendar = () => {
 				defaultMonth={dateRange?.from}
 				selected={dateRange}
 				onSelect={handleSelect}
+				disabled={isPending}
 				className="w-full bg-card p-0 lg:w-fit lg:[--cell-size:--spacing(8)] [--cell-size:--spacing(7)]"
 			/>
 		</div>
@@ -100,7 +106,7 @@ export const EventCalendar = () => {
 			<div className="flex w-full justify-end lg:hidden">
 				<Popover>
 					<PopoverTrigger asChild>
-						<Button variant="secondary" size="sm">
+						<Button variant="secondary" size="sm" disabled={isPending}>
 							<CalendarIcon className="size-3 text-muted-foreground" />
 							Find Events
 						</Button>

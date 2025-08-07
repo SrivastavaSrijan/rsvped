@@ -1,5 +1,6 @@
 'use client'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useTransition } from 'react'
 import {
 	Pagination,
 	PaginationContent,
@@ -14,30 +15,24 @@ interface EventsPaginationProps {
 	currentPage: number
 	totalPages?: number
 	hasMore?: boolean
-	basePath?: string
 }
 
 export function EventsPagination({
 	currentPage,
 	totalPages,
 	hasMore = true,
-	basePath = '',
 }: EventsPaginationProps) {
 	const searchParams = useSearchParams()
-	const buildUrl = (page: number) => {
-		const params = new URLSearchParams(searchParams)
+	const router = useRouter()
+	const pathname = usePathname()
+	const [isPending, startTransition] = useTransition()
 
-		// Add all search params except page
-		Object.entries(params).forEach(([key, value]) => {
-			if (key !== 'page' && value) {
-				params.set(key, value)
-			}
+	const handlePageChange = (page: number) => {
+		startTransition(() => {
+			const params = new URLSearchParams(searchParams)
+			params.set('page', page.toString())
+			router.push(`${pathname}?${params.toString()}`)
 		})
-
-		// Add the new page
-		params.set('page', page.toString())
-
-		return `${basePath}?${params.toString()}`
 	}
 
 	const showPrevious = currentPage > 1
@@ -49,12 +44,25 @@ export function EventsPagination({
 				<PaginationItem>
 					<PaginationPrevious
 						size="sm"
-						href={showPrevious ? buildUrl(currentPage - 1) : undefined}
+						onClick={
+							showPrevious ? () => handlePageChange(currentPage - 1) : undefined
+						}
+						className={
+							!showPrevious || isPending
+								? 'pointer-events-none opacity-50'
+								: 'cursor-pointer'
+						}
 					/>
 				</PaginationItem>
 
 				<PaginationItem>
-					<PaginationLink href={buildUrl(1)} isActive={currentPage === 1}>
+					<PaginationLink
+						onClick={() => handlePageChange(1)}
+						isActive={currentPage === 1}
+						className={
+							isPending ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+						}
+					>
 						1
 					</PaginationLink>
 				</PaginationItem>
@@ -67,7 +75,12 @@ export function EventsPagination({
 
 				{currentPage > 2 && (
 					<PaginationItem>
-						<PaginationLink href={buildUrl(currentPage - 1)}>
+						<PaginationLink
+							onClick={() => handlePageChange(currentPage - 1)}
+							className={
+								isPending ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+							}
+						>
 							{currentPage - 1}
 						</PaginationLink>
 					</PaginationItem>
@@ -75,16 +88,21 @@ export function EventsPagination({
 
 				{currentPage > 1 && (
 					<PaginationItem>
-						<PaginationLink href={buildUrl(currentPage)} isActive>
-							{currentPage}
-						</PaginationLink>
+						<PaginationLink isActive>{currentPage}</PaginationLink>
 					</PaginationItem>
 				)}
 
 				<PaginationItem>
 					<PaginationNext
 						size="sm"
-						href={showNext ? buildUrl(currentPage + 1) : undefined}
+						onClick={
+							showNext ? () => handlePageChange(currentPage + 1) : undefined
+						}
+						className={
+							!showNext || isPending
+								? 'pointer-events-none opacity-50'
+								: 'cursor-pointer'
+						}
 					/>
 				</PaginationItem>
 			</PaginationContent>
