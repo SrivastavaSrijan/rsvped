@@ -1,8 +1,10 @@
 import { Edit3 } from 'lucide-react'
+import { nanoid } from 'nanoid'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui'
+import { Suspense } from 'react'
+import { Button, Skeleton } from '@/components/ui'
 import { CookieNames, Routes } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
@@ -97,141 +99,231 @@ async function resolveUserLocation() {
 	redirect(Routes.Main.Events.DiscoverLocationSelect)
 }
 
-export default async function DiscoverEvents() {
+// Skeleton Components
+const EventsSkeleton = () => (
+	<div className="grid lg:grid-cols-6 grid-cols-4 gap-4">
+		{Array.from({ length: 6 }, () => (
+			<div key={nanoid()} className="flex flex-col gap-2">
+				<Skeleton className="aspect-video w-full rounded-lg" />
+				<Skeleton className="h-4 w-3/4" />
+				<Skeleton className="h-3 w-1/2" />
+			</div>
+		))}
+	</div>
+)
+
+const CommunitiesSkeleton = () => (
+	<div className="grid lg:grid-cols-3 grid-cols-2 gap-4">
+		{Array.from({ length: 6 }, () => (
+			<div key={nanoid()} className="flex flex-col gap-2">
+				<Skeleton className="aspect-square w-full rounded-lg" />
+				<Skeleton className="h-4 w-3/4" />
+				<Skeleton className="h-3 w-1/2" />
+			</div>
+		))}
+	</div>
+)
+
+const CategoriesSkeleton = () => (
+	<div className="grid lg:grid-cols-3 grid-cols-2 gap-4">
+		{Array.from({ length: 6 }, () => (
+			<div key={nanoid()} className="flex flex-col gap-2">
+				<Skeleton className="aspect-square w-full rounded-lg" />
+				<Skeleton className="h-4 w-3/4" />
+				<Skeleton className="h-3 w-1/2" />
+			</div>
+		))}
+	</div>
+)
+
+const LocationsSkeleton = () => (
+	<div className="flex flex-col gap-4">
+		<Skeleton className="h-10 w-full" />
+		<div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+			{Array.from({ length: 8 }, () => (
+				<Skeleton key={nanoid()} className="h-8 w-full" />
+			))}
+		</div>
+	</div>
+)
+
+// Individual async components for streaming
+interface NearbyEventsProps {
+	locationId: string
+}
+
+const NearbyEvents = async ({ locationId }: NearbyEventsProps) => {
 	const api = await getAPI()
+	const nearbyEvents = await api.event.listNearby({
+		locationId,
+		take: PageConfig.nearbyEvents.pageSize,
+	})
+
+	return (
+		<ResponsiveGridCarousel
+			config={{
+				pageSize: {
+					lg: PageConfig.nearbyEvents.lg,
+					sm: PageConfig.nearbyEvents.sm,
+				},
+			}}
+			data={nearbyEvents}
+			item={EventDiscoverCard}
+		/>
+	)
+}
+
+interface NearbyCommunitiesProps {
+	locationId: string
+}
+
+const NearbyCommunities = async ({ locationId }: NearbyCommunitiesProps) => {
+	const api = await getAPI()
+	const communities = await api.community.listNearby({
+		locationId,
+		take: PageConfig.communities.pageSize,
+	})
+
+	return (
+		<ResponsiveGridCarousel
+			config={{
+				pageSize: {
+					lg: PageConfig.communities.lg,
+					sm: PageConfig.communities.sm,
+				},
+				gap: {
+					sm: 2,
+					lg: 2,
+				},
+				cols: {
+					lg: 3,
+					sm: 2,
+				},
+			}}
+			data={communities}
+			item={CommunityDiscoverCard}
+		/>
+	)
+}
+
+interface NearbyCategoriesProps {
+	locationId: string
+}
+
+const NearbyCategories = async ({ locationId }: NearbyCategoriesProps) => {
+	const api = await getAPI()
+	const categories = await api.category.listNearby({
+		locationId,
+		take: PageConfig.categories.pageSize,
+	})
+
+	return (
+		<ResponsiveGridCarousel
+			config={{
+				pageSize: {
+					lg: PageConfig.categories.lg,
+					sm: PageConfig.categories.sm,
+				},
+				gap: {
+					sm: 2,
+					lg: 2,
+				},
+				cols: {
+					lg: 3,
+					sm: 2,
+				},
+			}}
+			data={categories}
+			item={CategoryDiscoverCard}
+		/>
+	)
+}
+
+interface LocationsListProps {
+	defaultContinent: string
+}
+
+const LocationsList = async ({ defaultContinent }: LocationsListProps) => {
+	const api = await getAPI()
+	const { continents } = await api.location.list()
+
+	return <Locations continents={continents} defaultValue={defaultContinent} />
+}
+
+export default async function DiscoverEvents() {
 	const { locationId, location } = await resolveUserLocation()
 
-	try {
-		// Fetch all data in parallel with caching
-		const data = await Promise.all([
-			api.event.listNearby({
-				locationId,
-				take: PageConfig.nearbyEvents.pageSize,
-			}),
-			api.category.listNearby({
-				locationId,
-				take: PageConfig.categories.pageSize,
-			}),
-			api.community.listNearby({
-				locationId,
-				take: PageConfig.communities.pageSize,
-			}),
-			api.location.list(),
-		])
-		const [nearbyEvents, categories, communities, { continents }] = data
-		return (
-			<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
-				<div className="flex flex-col gap-2 lg:gap-3">
-					<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
-						{copy.discover.title}
-					</h1>
-					<p className="text-muted-foreground text-sm lg:text-base">
-						{copy.discover.description}
-					</p>
-				</div>
-				<div className="flex flex-col gap-4 lg:gap-6">
-					<div className="flex w-full flex-row justify-between gap-4">
-						<div className="flex flex-col gap-2 lg:gap-2">
-							<h2 className="text-xl font-semibold">
-								{copy.discover.upcoming}
-							</h2>
-							<div className="flex items-center flex-row gap-2">
-								<p className="text-lg text-muted-foreground">{location.name}</p>
-								<Link href={Routes.Main.Events.DiscoverLocationSelect} passHref>
-									<Button variant="link" size="sm">
-										<Edit3 className="size-3" />
-										{copy.discover.changeLocation}
-									</Button>
-								</Link>
-							</div>
-						</div>
-					</div>
-					<ResponsiveGridCarousel
-						config={{
-							pageSize: {
-								lg: PageConfig.nearbyEvents.lg,
-								sm: PageConfig.nearbyEvents.sm,
-							},
-						}}
-						data={nearbyEvents}
-						item={EventDiscoverCard}
-					/>
-				</div>
-				<hr />
-				<div className="flex flex-col gap-4 lg:gap-6">
-					<div className="flex w-full flex-row justify-between gap-4">
-						<div className="flex flex-col">
-							<h2 className="text-xl font-semibold">
-								{copy.discover.communities}
-							</h2>
-						</div>
-					</div>
-					<ResponsiveGridCarousel
-						config={{
-							pageSize: {
-								lg: PageConfig.communities.lg,
-								sm: PageConfig.communities.sm,
-							},
-							gap: {
-								sm: 2,
-								lg: 2,
-							},
-							cols: {
-								lg: 3,
-								sm: 2,
-							},
-						}}
-						data={communities}
-						item={CommunityDiscoverCard}
-					/>
-				</div>
-				<hr />
-				<div className="flex flex-col gap-4 lg:gap-6">
-					<div className="flex w-full flex-row justify-between gap-4">
-						<div className="flex flex-col">
-							<h2 className="text-xl font-semibold">
-								{copy.discover.category}
-							</h2>
-						</div>
-					</div>
-					<ResponsiveGridCarousel
-						config={{
-							pageSize: {
-								lg: PageConfig.categories.lg,
-								sm: PageConfig.categories.sm,
-							},
-							gap: {
-								sm: 2,
-								lg: 2,
-							},
-							cols: {
-								lg: 3,
-								sm: 2,
-							},
-						}}
-						data={categories}
-						item={CategoryDiscoverCard}
-					/>
-				</div>
-				<hr />
-				<div className="flex flex-col gap-2 lg:gap-3">
-					<div className="flex w-full flex-row justify-between gap-4">
-						<div className="flex flex-col">
-							<h2 className="text-xl font-semibold">
-								{copy.discover.location}
-							</h2>
-						</div>
-					</div>
-					<Locations
-						continents={continents}
-						defaultValue={location.continent}
-					/>
-				</div>
+	return (
+		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
+			<div className="flex flex-col gap-2 lg:gap-3">
+				<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
+					{copy.discover.title}
+				</h1>
+				<p className="text-muted-foreground text-sm lg:text-base">
+					{copy.discover.description}
+				</p>
 			</div>
-		)
-	} catch (error) {
-		console.error('Error fetching discover data:', error)
-		// Redirect to location selection if any fetch fails
-		redirect(Routes.Main.Events.DiscoverLocationSelect)
-	}
+
+			<div className="flex flex-col gap-4 lg:gap-6">
+				<div className="flex w-full flex-row justify-between gap-4">
+					<div className="flex flex-col gap-2 lg:gap-2">
+						<h2 className="text-xl font-semibold">{copy.discover.upcoming}</h2>
+						<div className="flex items-center flex-row gap-2">
+							<p className="text-lg text-muted-foreground">{location.name}</p>
+							<Link href={Routes.Main.Events.DiscoverLocationSelect} passHref>
+								<Button variant="link" size="sm">
+									<Edit3 className="size-3" />
+									{copy.discover.changeLocation}
+								</Button>
+							</Link>
+						</div>
+					</div>
+				</div>
+				<Suspense fallback={<EventsSkeleton />}>
+					<NearbyEvents locationId={locationId} />
+				</Suspense>
+			</div>
+
+			<hr />
+
+			<div className="flex flex-col gap-4 lg:gap-6">
+				<div className="flex w-full flex-row justify-between gap-4">
+					<div className="flex flex-col">
+						<h2 className="text-xl font-semibold">
+							{copy.discover.communities}
+						</h2>
+					</div>
+				</div>
+				<Suspense fallback={<CommunitiesSkeleton />}>
+					<NearbyCommunities locationId={locationId} />
+				</Suspense>
+			</div>
+
+			<hr />
+
+			<div className="flex flex-col gap-4 lg:gap-6">
+				<div className="flex w-full flex-row justify-between gap-4">
+					<div className="flex flex-col">
+						<h2 className="text-xl font-semibold">{copy.discover.category}</h2>
+					</div>
+				</div>
+				<Suspense fallback={<CategoriesSkeleton />}>
+					<NearbyCategories locationId={locationId} />
+				</Suspense>
+			</div>
+
+			<hr />
+
+			<div className="flex flex-col gap-2 lg:gap-3">
+				<div className="flex w-full flex-row justify-between gap-4">
+					<div className="flex flex-col">
+						<h2 className="text-xl font-semibold">{copy.discover.location}</h2>
+					</div>
+				</div>
+				<Suspense fallback={<LocationsSkeleton />}>
+					<LocationsList defaultContinent={location.continent} />
+				</Suspense>
+			</div>
+		</div>
+	)
 }

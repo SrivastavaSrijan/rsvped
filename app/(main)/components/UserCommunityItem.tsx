@@ -5,13 +5,24 @@ import { AssetMap, Routes } from '@/lib/config'
 import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
 
-type CommunityData = RouterOutput['community']['list'][number]
+type CommunityData =
+	| RouterOutput['community']['list']['core'][number]
+	| RouterOutput['community']['list']['enhanced'][number]
 type UserCommunityItemProps = CommunityData
+
+// Type guard to check if community data has events (enhanced data)
+function hasEvents(
+	community: CommunityData
+): community is RouterOutput['community']['list']['enhanced'][number] {
+	return 'events' in community && Array.isArray(community.events)
+}
 
 export const UserCommunityEventItem = ({
 	event,
 }: {
-	event: CommunityData['events'][number]
+	event: NonNullable<
+		RouterOutput['community']['list']['enhanced'][number]['events']
+	>[number]
 }) => {
 	const { range } = getEventDateTime({
 		start: event?.startDate,
@@ -33,13 +44,11 @@ export const UserCommunityEventItem = ({
 	)
 }
 
-export const UserCommunityItem = ({
-	id,
-	name,
-	coverImage,
-	_count,
-	events,
-}: UserCommunityItemProps) => {
+export const UserCommunityItem = (props: UserCommunityItemProps) => {
+	const { id, name, coverImage, _count } = props
+	// Check if this community has events data (enhanced)
+	const communityEvents = hasEvents(props) ? props.events : []
+
 	return (
 		<div
 			key={id}
@@ -70,8 +79,8 @@ export const UserCommunityItem = ({
 			<div className="flex flex-col lg:col-span-8 gap-2">
 				<div className="flex gap-2 flex-col lg:gap-3">
 					<p className="text-xs text-muted-foreground">Upcoming Events</p>
-					{events.length > 0 ? (
-						events.map((event) => (
+					{communityEvents.length > 0 ? (
+						communityEvents.map((event) => (
 							<UserCommunityEventItem key={event.id} event={event} />
 						))
 					) : (

@@ -18,70 +18,96 @@ const GetCommunitiesInput = z.object({
 		.default({ isPublic: true }),
 })
 
-export const communityRouter = createTRPCRouter({
-	list: protectedProcedure
-		.input(GetCommunitiesInput)
-		.query(async ({ ctx, input }) => {
-			const { sort, page, size, roles, where, invert } = input
-			const user = ctx.session?.user
-			if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
+// Base procedure for community list operations
+const communityListBaseProcedure = protectedProcedure
+	.input(GetCommunitiesInput)
+	.use(async ({ ctx, input, next }) => {
+		const { sort, page, size, roles, where, invert } = input
+		const user = ctx.session?.user
+		if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
 
-			// Build role filter for communities
-			let roleFilter: Prisma.CommunityWhereInput | undefined
-			if (roles && roles.length > 0) {
-				roleFilter = {
-					members: {
-						some: {
-							userId: user.id,
-							role: {
-								[invert ? 'notIn' : 'in']: roles,
-							},
+		// Build role filter for communities
+		let roleFilter: Prisma.CommunityWhereInput | undefined
+		if (roles && roles.length > 0) {
+			roleFilter = {
+				members: {
+					some: {
+						userId: user.id,
+						role: {
+							[invert ? 'notIn' : 'in']: roles,
 						},
 					},
-				}
+				},
 			}
+		}
 
-			// Get communities with basic data
+		// Build the base query arguments
+		const args = {
+			skip: (page - 1) * size,
+			take: size,
+			orderBy: {
+				name: sort,
+			},
+			where: {
+				...where,
+				...(roleFilter && roleFilter),
+			},
+		}
+
+		return next({
+			ctx: {
+				...ctx,
+				user,
+				args,
+			},
+		})
+	})
+
+// Core community select for fast loading
+const communityCoreSelect = {
+	id: true,
+	name: true,
+	slug: true,
+	description: true,
+	coverImage: true,
+	_count: {
+		select: {
+			events: true,
+			members: true,
+		},
+	},
+} satisfies Prisma.CommunitySelect
+
+// Enhanced community select for full data
+const communityEnhancedSelect = {
+	...communityCoreSelect,
+	events: {
+		take: 2,
+		where: {
+			deletedAt: null,
+			isPublished: true,
+		},
+		select: {
+			title: true,
+			slug: true,
+			id: true,
+			startDate: true,
+			endDate: true,
+		},
+		orderBy: {
+			startDate: 'asc',
+		},
+	},
+} satisfies Prisma.CommunitySelect
+
+export const communityRouter = createTRPCRouter({
+	list: createTRPCRouter({
+		core: communityListBaseProcedure.query(async ({ ctx }) => {
+			const { user, args } = ctx
+
 			const communities = await ctx.prisma.community.findMany({
-				skip: (page - 1) * size,
-				take: size,
-				orderBy: {
-					name: sort,
-				},
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					description: true,
-					coverImage: true,
-					_count: {
-						select: {
-							events: true,
-							members: true,
-						},
-					},
-					events: {
-						take: 2,
-						where: {
-							deletedAt: null,
-							isPublished: true,
-						},
-						select: {
-							title: true,
-							slug: true,
-							id: true,
-							startDate: true,
-							endDate: true,
-						},
-						orderBy: {
-							startDate: 'asc',
-						},
-					},
-				},
-				where: {
-					...where,
-					...(roleFilter && roleFilter),
-				},
+				...args,
+				select: communityCoreSelect,
 			})
 
 			// Get user memberships for these communities
@@ -102,7 +128,7 @@ export const communityRouter = createTRPCRouter({
 				userMemberships.map(({ communityId, role }) => [communityId, role])
 			)
 
-			// Combine data
+			// Return core data with metadata
 			return communities.map((community) => ({
 				...community,
 				metadata: {
@@ -110,6 +136,42 @@ export const communityRouter = createTRPCRouter({
 				},
 			}))
 		}),
+
+		enhanced: communityListBaseProcedure.query(async ({ ctx }) => {
+			const { user, args } = ctx
+
+			const communities = await ctx.prisma.community.findMany({
+				...args,
+				select: communityEnhancedSelect,
+			})
+
+			// Get user memberships for these communities
+			const communityIds = communities.map(({ id }) => id)
+			const userMemberships = await ctx.prisma.communityMembership.findMany({
+				where: {
+					userId: user.id,
+					communityId: { in: communityIds },
+				},
+				select: {
+					communityId: true,
+					role: true,
+				},
+			})
+
+			// Create membership lookup map
+			const membershipMap = new Map(
+				userMemberships.map(({ communityId, role }) => [communityId, role])
+			)
+
+			// Return enhanced data with metadata
+			return communities.map((community) => ({
+				...community,
+				metadata: {
+					role: membershipMap.get(community.id) ?? null,
+				},
+			}))
+		}),
+	}),
 
 	listNearby: publicProcedure
 		.input(

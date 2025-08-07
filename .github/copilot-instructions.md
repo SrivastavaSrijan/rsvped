@@ -323,6 +323,7 @@ interface MyComponentProps {
   data: RouterOutput['event']['list']
 }
 ```
+- Do not add `as` to everything hoping it would work. If you are not sure about the type, ask for confirmation before using it. Use `as` only when absolutely necessary and when you are sure about the type.
 - Use arrow functions for components and hooks, e.g., `const MyComponent = () => { ... }`. Use function declarations only for server actions or when necessary.
 
 #### React 19 

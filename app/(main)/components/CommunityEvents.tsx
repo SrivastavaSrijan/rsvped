@@ -1,14 +1,12 @@
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { DateFilterMessage, EventCalendar } from '@/components/shared'
+import { EventCalendar } from '@/components/shared'
 import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
-import { copy } from '../copy'
 import {
 	type CreateEventListParams,
 	createEventListParams,
-	PeriodTabs,
 	ProgressiveEventsList,
 } from './index'
 

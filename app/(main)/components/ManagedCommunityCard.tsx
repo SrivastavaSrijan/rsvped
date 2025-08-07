@@ -4,7 +4,9 @@ import { AssetMap, Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
 import type { RouterOutput } from '@/server/api'
 
-type CommunityData = RouterOutput['community']['list'][number]
+type CommunityData =
+	| RouterOutput['community']['list']['core'][number]
+	| RouterOutput['community']['list']['enhanced'][number]
 type ManagedCommunityCardProps = CommunityData
 
 export const ManagedCommunityCard = ({

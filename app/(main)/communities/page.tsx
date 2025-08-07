@@ -1,7 +1,9 @@
 import { MembershipRole } from '@prisma/client'
-import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
-import { ManagedCommunitiesGrid, UserCommunitiesList } from '../components'
+import {
+	createCommunityListParams,
+	ProgressiveCommunitiesList,
+} from '../components'
 import { copy } from '../copy'
 
 const getCommunities = async (
@@ -10,19 +12,25 @@ const getCommunities = async (
 	invert?: boolean
 ) => {
 	const api = await getAPI()
-	return api.community.list({
+	const params = createCommunityListParams({
 		roles,
 		page: parseInt(page ?? '1', 10) || 1,
 		invert,
 	})
+	return {
+		communities: await api.community.list.core(params),
+		params,
+	}
 }
+
 export default async function ViewCommunities({
 	searchParams,
 }: {
 	searchParams: Promise<{ page?: string }>
 }) {
 	const { page = '1' } = await searchParams
-	const [managedCommunities, userCommunities] = await Promise.all([
+
+	const [managedResult, userResult] = await Promise.all([
 		getCommunities([MembershipRole.ADMIN], page),
 		getCommunities(
 			[MembershipRole.ADMIN, MembershipRole.MODERATOR],
@@ -39,20 +47,18 @@ export default async function ViewCommunities({
 				</h1>
 			</div>
 
-			<ManagedCommunitiesGrid
-				communities={managedCommunities}
-				title={copy.community.home.managed}
-				emptyMessage={copy.community.home.emptyManaged}
-				createButtonLabel="Create Community"
-				createButtonHref={Routes.Main.Events.Create}
+			<ProgressiveCommunitiesList
+				coreCommunities={managedResult.communities}
+				params={managedResult.params}
+				variant="managed"
 			/>
 
 			<hr />
 
-			<UserCommunitiesList
-				communities={userCommunities}
-				title={copy.community.home.user}
-				emptyMessage={copy.community.home.empty}
+			<ProgressiveCommunitiesList
+				coreCommunities={userResult.communities}
+				params={userResult.params}
+				variant="user"
 			/>
 		</div>
 	)

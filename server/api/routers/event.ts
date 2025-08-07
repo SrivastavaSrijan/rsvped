@@ -76,9 +76,7 @@ export const eventCoreInclude = {
 
 // Full include for enhanced data
 export const eventInclude = {
-	host: {
-		select: { id: true, name: true, image: true, email: true },
-	},
+	...eventCoreInclude,
 	ticketTiers: true,
 	eventCollaborators: {
 		select: {
@@ -86,7 +84,6 @@ export const eventInclude = {
 			user: { select: { id: true, name: true, image: true } },
 		},
 	},
-	location: true,
 	categories: { include: { category: true } },
 	rsvps: {
 		take: 5,
@@ -154,14 +151,17 @@ const eventListBaseProcedure = protectedProcedure
 			communityId: input?.where?.communityId ?? undefined,
 			...(startDate && { startDate }),
 		}
-
+		const args = {
+			where: whereClause,
+			orderBy: { startDate: sort },
+			skip: (page - 1) * size,
+			take: size,
+		} satisfies Prisma.EventFindManyArgs
 		return next({
 			ctx: {
 				...ctx,
 				user,
-				whereClause,
-				pagination: { page, size },
-				sort,
+				args,
 			},
 		})
 	})
@@ -353,30 +353,20 @@ export const eventRouter = createTRPCRouter({
 
 	list: createTRPCRouter({
 		core: eventListBaseProcedure.query(async ({ ctx }) => {
-			const { whereClause, pagination, sort } = ctx
+			const { args } = ctx
 
 			const events = await ctx.prisma.event.findMany({
-				where: whereClause,
-				orderBy: { startDate: sort },
-				skip: (pagination.page - 1) * pagination.size,
-				take: pagination.size,
+				...args,
 				include: eventCoreInclude,
 			})
-
-			return events.map((event) => ({
-				...event,
-				rsvpCount: event._count?.rsvps ?? 0,
-			}))
+			return events
 		}),
 
 		enhanced: eventListBaseProcedure.query(async ({ ctx }) => {
-			const { user, whereClause, pagination, sort } = ctx
+			const { user, args } = ctx
 
 			const events = await ctx.prisma.event.findMany({
-				where: whereClause,
-				orderBy: { startDate: sort },
-				skip: (pagination.page - 1) * pagination.size,
-				take: pagination.size,
+				...args,
 				include: eventInclude,
 			})
 
