@@ -1,5 +1,8 @@
 import type { Prisma } from '@prisma/client'
-import { TRPCError } from '@trpc/server'
+import {
+	type inferProcedureBuilderResolverOptions,
+	TRPCError,
+} from '@trpc/server'
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
@@ -37,7 +40,7 @@ const communityEnhancedSelect = {
 } satisfies Prisma.CommunitySelect
 
 async function getUserRole(
-	ctx: Parameters<typeof publicProcedure.query>[0]['ctx'],
+	ctx: inferProcedureBuilderResolverOptions<typeof publicProcedure>['ctx'],
 	communityId: string
 ) {
 	const user = ctx.session?.user
