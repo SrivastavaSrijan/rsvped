@@ -10,7 +10,7 @@ export const DateFilterMessage = () => {
 	if (!hasDateFilter || !dateRangeText) return null
 
 	return (
-		<div className="flex flex-col items-start gap-2">
+		<div className="flex lg:flex-row lg:items-center lg:gap-3 flex-col items-start gap-2">
 			<div className="text-sm text-muted-foreground">
 				Showing events {dateRangeText}
 			</div>

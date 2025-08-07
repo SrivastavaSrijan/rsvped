@@ -19,68 +19,157 @@ import { cn } from '@/lib/utils'
 import type { RouterOutput } from '@/server/api'
 import { EventLocation } from './EventLocation'
 
-type EventCardData = RouterOutput['event']['list'][number]
-export interface EventCardProps extends EventCardData {
+type CoreEventData = RouterOutput['event']['list']['core'][number]
+type EnhancedEventData = RouterOutput['event']['list']['enhanced'][number]
+type EventCardData = CoreEventData | EnhancedEventData
+
+type EventCardProps = EventCardData & {
 	isLast: boolean
 }
 
-export const EventCard = ({
-	title,
-	startDate,
-	endDate,
-	slug,
-	venueAddress,
-	locationType,
-	onlineUrl,
-	venueName,
-	coverImage,
-	host,
-	rsvps,
-	rsvpCount,
-	eventCollaborators,
-	metadata,
-	isLast,
-}: EventCardProps) => {
+// Type guard functions
+const isEnhancedEventData = (
+	data: EventCardData
+): data is EnhancedEventData => {
+	return 'metadata' in data && data.metadata !== undefined
+}
+
+const CollaboratorsSkeleton = () => (
+	<div className="flex gap-2">
+		<div className="size-4 animate-pulse rounded-full bg-white/20" />
+		<div className="h-4 w-24 animate-pulse rounded bg-white/20" />
+	</div>
+)
+
+const RSVPSkeleton = () => (
+	<div className="flex gap-2">
+		<div className="h-5 w-16 animate-pulse rounded-full bg-white/20" />
+		<div className="flex gap-1">
+			<div className="size-4 animate-pulse rounded-full bg-white/20" />
+			<div className="size-4 animate-pulse rounded-full bg-white/20" />
+			<div className="size-4 animate-pulse rounded-full bg-white/20" />
+		</div>
+	</div>
+)
+
+const ManageButtonSkeleton = () => (
+	<div className="h-9 w-28 animate-pulse rounded-md bg-white/20" />
+)
+
+export const EventCard = (props: EventCardProps) => {
+	const {
+		title,
+		startDate,
+		endDate,
+		slug,
+		venueAddress,
+		locationType,
+		onlineUrl,
+		venueName,
+		coverImage,
+		host,
+		rsvpCount,
+		isLast,
+	} = props
+
 	const { start, relative, range } = getEventDateTime({
 		start: startDate,
 		end: endDate,
 	})
 
-	const canManage = metadata?.user?.access?.manager
-	const rsvp = metadata?.user?.rsvp
+	// Type guard determines if we have enhanced data
+	const hasEnhancedData = isEnhancedEventData(props)
+
+	// Now TypeScript knows the exact type in each branch
+	const canManage = hasEnhancedData
+		? props.metadata.user.access.manager
+		: undefined
+	const rsvp = hasEnhancedData ? props.metadata.user.rsvp : null
+	const rsvps = hasEnhancedData ? props.rsvps : undefined
+	const eventCollaborators = hasEnhancedData
+		? props.eventCollaborators
+		: undefined
 
 	const status = rsvp?.status ? RSVPLabels[rsvp.status] : null
 	const rsvpBadgeVariant = rsvp?.status
 		? RSVPBadgeVariants[rsvp.status]
 		: 'default'
 
-	const renderEventCollaborators = () => (
-		<div className="-space-x-1 flex">
-			{(eventCollaborators ?? []).map(
-				({ user: collaborator }) =>
-					collaborator?.image &&
-					collaborator?.name && (
-						<Tooltip key={collaborator.id}>
-							<TooltipTrigger>
-								<AvatarWithFallback
-									className="size-4"
-									src={collaborator.image}
-									name={collaborator.name}
-								/>
-							</TooltipTrigger>
-							<TooltipContent>{collaborator.name}</TooltipContent>
-						</Tooltip>
-					)
-			)}
-			{host?.name && (
-				<AvatarWithFallback
-					src={host?.image}
-					name={host?.name}
-					className="size-4"
-				/>
-			)}
-		</div>
-	)
+	const renderEventCollaborators = () => {
+		if (!eventCollaborators) {
+			return <CollaboratorsSkeleton />
+		}
+
+		return (
+			<div className="-space-x-1 flex">
+				{eventCollaborators.map(
+					({ user: collaborator }) =>
+						collaborator?.image &&
+						collaborator?.name && (
+							<Tooltip key={collaborator.id}>
+								<TooltipTrigger>
+									<AvatarWithFallback
+										className="size-4"
+										src={collaborator.image}
+										name={collaborator.name}
+									/>
+								</TooltipTrigger>
+								<TooltipContent>{collaborator.name}</TooltipContent>
+							</Tooltip>
+						)
+				)}
+				{host?.name && (
+					<AvatarWithFallback
+						src={host?.image}
+						name={host?.name}
+						className="size-4"
+					/>
+				)}
+			</div>
+		)
+	}
+
+	const renderRSVPSection = () => {
+		if (!rsvps) {
+			return <RSVPSkeleton />
+		}
+
+		return (
+			<div className="flex flex-row items-center gap-2">
+				{status && <Badge variant={rsvpBadgeVariant}>{status}</Badge>}
+				{rsvps.length > 0 && (
+					<div className="-space-x-1 flex">
+						{rsvps.map(
+							({ user: guestUser, name: guestName }, index) =>
+								(guestUser?.name || guestName) && (
+									<Tooltip key={guestUser?.id ?? `${guestName}-${index}`}>
+										<TooltipTrigger>
+											<AvatarWithFallback
+												className="size-4"
+												src={guestUser?.image ?? undefined}
+												name={guestUser?.name ?? guestName ?? undefined}
+											/>
+										</TooltipTrigger>
+										<TooltipContent>
+											{guestUser?.name ?? guestName}
+										</TooltipContent>
+									</Tooltip>
+								)
+						)}
+						{rsvpCount > 5 && (
+							<Avatar>
+								<AvatarFallback>
+									<p className="text-[10px] text-muted-foreground">
+										+{rsvpCount - 5}
+									</p>
+								</AvatarFallback>
+							</Avatar>
+						)}
+					</div>
+				)}
+			</div>
+		)
+	}
 
 	return (
 		<div className="grid w-full grid-cols-[repeat(24,_1fr)] gap-x-1 lg:gap-x-2">
@@ -113,15 +202,16 @@ export const EventCard = ({
 							>
 								<p className="text-muted-foreground text-sm">{range.time}</p>
 								<h2 className="font-semibold text-xl">{title}</h2>
-								{!canManage && (
+								{!canManage && eventCollaborators && (
 									<div className="flex flex-row items-center gap-2">
 										<div className="flex items-center gap-2">
 											{renderEventCollaborators()}
 
 											<p className="truncate font-medium text-muted-foreground text-sm">
 												By {host.name}{' '}
-												{eventCollaborators?.length > 0 &&
-													`& ${eventCollaborators?.length} others`}
+												{hasEnhancedData &&
+													eventCollaborators?.length > 0 &&
+													`& ${eventCollaborators.length} others`}
 											</p>
 										</div>
 									</div>
@@ -137,43 +227,11 @@ export const EventCard = ({
 									onlineUrl={onlineUrl}
 								/>
 							</div>
-							<div className="flex flex-row items-center gap-2">
-								{status && <Badge variant={rsvpBadgeVariant}>{status}</Badge>}
-								{rsvps.length > 0 && (
-									<div className="-space-x-1 flex">
-										{(rsvps ?? []).map(
-											({ user: guestUser, name: guestName }, index) =>
-												(guestUser?.name || guestName) && (
-													<Tooltip
-														key={guestUser?.id ?? `${guestName}-${index}`}
-													>
-														<TooltipTrigger>
-															<AvatarWithFallback
-																className="size-4"
-																src={guestUser?.image ?? undefined}
-																name={guestUser?.name ?? guestName ?? undefined}
-															/>
-														</TooltipTrigger>
-														<TooltipContent>
-															{guestUser?.name ?? guestName}
-														</TooltipContent>
-													</Tooltip>
-												)
-										)}
-										{rsvpCount > 5 && (
-											<Avatar>
-												<AvatarFallback>
-													<p className="text-[10px] text-muted-foreground">
-														+{rsvpCount - 5}
-													</p>
-												</AvatarFallback>
-											</Avatar>
-										)}
-									</div>
-								)}
-							</div>
-							{canManage && (
-								<div className="mt-2 flex flex-row gap-3">
+
+							{renderRSVPSection()}
+
+							{canManage && hasEnhancedData && eventCollaborators ? (
+								<div className="flex flex-row gap-3">
 									<Link
 										passHref
 										href={`${Routes.Main.Events.ManageBySlug(slug)}?next=${encodeURIComponent(Routes.Main.Events.Home)}`}
@@ -188,11 +246,13 @@ export const EventCard = ({
 										<p className="truncate font-medium text-muted-foreground text-sm">
 											By you
 											{eventCollaborators?.length > 0 &&
-												` & ${eventCollaborators?.length} others`}
+												` & ${eventCollaborators.length} others`}
 										</p>
 									</div>
 								</div>
-							)}
+							) : canManage === undefined ? (
+								<ManageButtonSkeleton />
+							) : null}
 						</div>
 						<Link
 							href={Routes.Main.Events.ViewBySlug(slug)}

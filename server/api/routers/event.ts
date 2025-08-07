@@ -1,6 +1,5 @@
 import { EventRole, type Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-
 import slugify from 'slugify'
 import { z } from 'zod'
 import {
@@ -65,6 +64,17 @@ const GetEventsInput = z.object({
  * Reusable Prisma include object to ensure a consistent event data structure across the API.
  * This is the single source of truth for what an 'event' object contains.
  */
+export const eventCoreInclude = {
+	host: {
+		select: { id: true, name: true, image: true, email: true },
+	},
+	location: true,
+	_count: {
+		select: { rsvps: { where: { status: 'CONFIRMED' } } },
+	},
+} satisfies Prisma.EventInclude
+
+// Full include for enhanced data
 export const eventInclude = {
 	host: {
 		select: { id: true, name: true, image: true, email: true },
@@ -89,6 +99,72 @@ export const eventInclude = {
 		},
 	},
 } satisfies Prisma.EventInclude
+
+// Base procedure for event list operations
+const eventListBaseProcedure = protectedProcedure
+	.input(GetEventsInput)
+	.use(async ({ ctx, input, next }) => {
+		const user = ctx.session?.user
+		if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
+
+		const { roles, page, size, sort, before, after, on } = input
+
+		const orConditions: Prisma.EventWhereInput[] = []
+		if (roles?.includes(EventRole.CHECKIN)) {
+			orConditions.push({ rsvps: { some: { userId: user.id } } })
+		}
+		if (
+			roles?.includes(EventRole.MANAGER) ||
+			roles?.includes(EventRole.CO_HOST)
+		) {
+			const inRoles: EventRole[] = []
+			if (roles?.includes(EventRole.MANAGER)) inRoles.push(EventRole.MANAGER)
+			if (roles?.includes(EventRole.CO_HOST)) inRoles.push(EventRole.CO_HOST)
+			if (inRoles.length > 0) {
+				orConditions.push({
+					OR: [
+						{ hostId: user.id },
+						{
+							eventCollaborators: {
+								some: { userId: user.id, role: { in: inRoles } },
+							},
+						},
+					],
+				})
+			}
+		}
+
+		const startDate: Prisma.DateTimeFilter | undefined = on
+			? (() => {
+					const start = new Date(on)
+					start.setHours(0, 0, 0, 0)
+					const end = new Date(start)
+					end.setDate(end.getDate() + 1)
+					return { gte: start, lt: end }
+				})()
+			: before || after
+				? {
+						...(before && { lt: new Date(before) }),
+						...(after && { gt: new Date(after) }),
+					}
+				: undefined
+
+		const whereClause: Prisma.EventWhereInput = {
+			...(orConditions.length && { OR: orConditions }),
+			communityId: input?.where?.communityId ?? undefined,
+			...(startDate && { startDate }),
+		}
+
+		return next({
+			ctx: {
+				...ctx,
+				user,
+				whereClause,
+				pagination: { page, size },
+				sort,
+			},
+		})
+	})
 
 export const eventRouter = createTRPCRouter({
 	// Create a new event (requires authentication)
@@ -275,65 +351,32 @@ export const eventRouter = createTRPCRouter({
 			return { ...event, metadata }
 		}),
 
-	list: protectedProcedure
-		.input(GetEventsInput)
-		.query(async ({ ctx, input }) => {
-			const user = ctx.session?.user
-			if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
-
-			const { roles, page, size, sort, before, after, on } = input
-
-			const orConditions: Prisma.EventWhereInput[] = []
-			if (roles?.includes(EventRole.CHECKIN)) {
-				orConditions.push({ rsvps: { some: { userId: user.id } } })
-			}
-			if (
-				roles?.includes(EventRole.MANAGER) ||
-				roles?.includes(EventRole.CO_HOST)
-			) {
-				const inRoles: EventRole[] = []
-				if (roles?.includes(EventRole.MANAGER)) inRoles.push(EventRole.MANAGER)
-				if (roles?.includes(EventRole.CO_HOST)) inRoles.push(EventRole.CO_HOST)
-				if (inRoles.length > 0) {
-					orConditions.push({
-						OR: [
-							{ hostId: user.id },
-							{
-								eventCollaborators: {
-									some: { userId: user.id, role: { in: inRoles } },
-								},
-							},
-						],
-					})
-				}
-			}
-
-			const startDate: Prisma.DateTimeFilter | undefined = on
-				? (() => {
-						const start = new Date(on)
-						start.setHours(0, 0, 0, 0)
-						const end = new Date(start)
-						end.setDate(end.getDate() + 1)
-						return { gte: start, lt: end }
-					})()
-				: before || after
-					? {
-							...(before && { lt: new Date(before) }),
-							...(after && { gt: new Date(after) }),
-						}
-					: undefined
-
-			const whereClause: Prisma.EventWhereInput = {
-				...(orConditions.length && { OR: orConditions }),
-				communityId: input?.where?.communityId ?? undefined,
-				...(startDate && { startDate }),
-			}
+	list: createTRPCRouter({
+		core: eventListBaseProcedure.query(async ({ ctx }) => {
+			const { whereClause, pagination, sort } = ctx
 
 			const events = await ctx.prisma.event.findMany({
 				where: whereClause,
 				orderBy: { startDate: sort },
-				skip: (page - 1) * size,
-				take: size,
+				skip: (pagination.page - 1) * pagination.size,
+				take: pagination.size,
+				include: eventCoreInclude,
+			})
+
+			return events.map((event) => ({
+				...event,
+				rsvpCount: event._count?.rsvps ?? 0,
+			}))
+		}),
+
+		enhanced: eventListBaseProcedure.query(async ({ ctx }) => {
+			const { user, whereClause, pagination, sort } = ctx
+
+			const events = await ctx.prisma.event.findMany({
+				where: whereClause,
+				orderBy: { startDate: sort },
+				skip: (pagination.page - 1) * pagination.size,
+				take: pagination.size,
 				include: eventInclude,
 			})
 
@@ -351,7 +394,7 @@ export const eventRouter = createTRPCRouter({
 			// Map events to include the specific user context for each one
 			const eventsWithContext = events.map((event) => {
 				const isHost = event.host.id === user.id
-				const collaboratorRole = event.eventCollaborators.find(
+				const collaboratorRole = event.eventCollaborators?.find(
 					(c) => c.user.id === user.id
 				)?.role
 
@@ -373,6 +416,7 @@ export const eventRouter = createTRPCRouter({
 
 			return eventsWithContext
 		}),
+	}),
 
 	listNearby: publicProcedure
 		.input(

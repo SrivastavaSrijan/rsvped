@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui'
 
 interface PeriodTabsProps {
-	currentPeriod: 'upcoming' | 'past'
+	currentPeriod?: 'upcoming' | 'past'
 }
 
 export const PeriodTabs = ({ currentPeriod }: PeriodTabsProps) => {

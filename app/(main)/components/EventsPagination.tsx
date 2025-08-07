@@ -1,3 +1,5 @@
+'use client'
+import { useSearchParams } from 'next/navigation'
 import {
 	Pagination,
 	PaginationContent,
@@ -12,7 +14,6 @@ interface EventsPaginationProps {
 	currentPage: number
 	totalPages?: number
 	hasMore?: boolean
-	searchParams?: Record<string, string | undefined>
 	basePath?: string
 }
 
@@ -20,14 +21,14 @@ export function EventsPagination({
 	currentPage,
 	totalPages,
 	hasMore = true,
-	searchParams = {},
 	basePath = '',
 }: EventsPaginationProps) {
+	const searchParams = useSearchParams()
 	const buildUrl = (page: number) => {
-		const params = new URLSearchParams()
+		const params = new URLSearchParams(searchParams)
 
 		// Add all search params except page
-		Object.entries(searchParams).forEach(([key, value]) => {
+		Object.entries(params).forEach(([key, value]) => {
 			if (key !== 'page' && value) {
 				params.set(key, value)
 			}
