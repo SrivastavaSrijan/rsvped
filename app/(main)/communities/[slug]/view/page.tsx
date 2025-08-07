@@ -33,7 +33,8 @@ export default async function ViewCommunity({
 		}
 		return (
 			<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
-				<CommunityHeader community={community}>
+				<CommunityHeader {...community} />
+				<div className="flex flex-col px-3 pb-6 lg:gap-8 lg:px-8 gap-4 lg:pb-8">
 					<CommunityEvents
 						communityId={community.id}
 						period={period as 'upcoming' | 'past'}
@@ -42,7 +43,7 @@ export default async function ViewCommunity({
 						after={after}
 						before={before}
 					/>
-				</CommunityHeader>
+				</div>
 			</div>
 		)
 	} catch (error) {

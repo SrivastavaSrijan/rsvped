@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import type { ReactNode } from 'react'
 import {
 	AvatarWithFallback,
 	Badge,
@@ -18,17 +17,17 @@ const AVATAR_CLASSES = {
 	lg: 'lg:size-24 -bottom-12',
 	sm: 'size-18 -bottom-9',
 }
-
-interface CommunityHeaderProps {
-	community: RouterOutput['community']['get']
-	children?: ReactNode
-}
+type CommunityData = RouterOutput['community']['get']
+type CommunityHeaderProps = CommunityData
 
 export const CommunityHeader = ({
-	children,
-	community,
+	coverImage,
+	name,
+	description,
+	owner,
+	metadata,
+	slug,
 }: CommunityHeaderProps) => {
-	const { coverImage, name, description, owner, metadata, slug } = community
 	const role = metadata?.role ? MembershipLabels[metadata.role] : null
 	const membershipBadgeVariant = metadata?.role
 		? MembershipBadgeVariants[metadata.role]
@@ -60,7 +59,7 @@ export const CommunityHeader = ({
 					)}
 				</div>
 			)}
-			<div className="flex flex-col px-3 py-6 lg:gap-8 lg:px-8 gap-4 lg:py-8">
+			<div className="flex flex-col px-3 pt-6 lg:gap-8 lg:px-8 gap-4 lg:pt-8">
 				<div className="flex flex-col gap-2 lg:gap-2">
 					<div className="flex lg:flex-row flex-col items-start justify-between lg:gap-2 gap-2">
 						<div className="flex flex-col gap-1">
@@ -92,8 +91,6 @@ export const CommunityHeader = ({
 					</div>
 					<p className="text-muted-foreground text-sm">{description}</p>
 				</div>
-				<hr />
-				{children}
 			</div>
 		</>
 	)
