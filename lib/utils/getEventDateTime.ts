@@ -38,7 +38,7 @@ const getRelativeTime = (start: dayjs.Dayjs, end: dayjs.Dayjs | null) => {
 	return start.format(format)
 }
 
-export function useEventDateTime({ start, end }: EventDateTimeInput) {
+export function getEventDateTime({ start, end }: EventDateTimeInput) {
 	return useMemo(() => {
 		const startDate = dayjs(start)
 		const endDate = end ? dayjs(end) : null

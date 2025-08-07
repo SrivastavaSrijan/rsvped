@@ -9,7 +9,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
-import { useEventDateTime } from '@/lib/hooks'
+import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
 import { copy } from '../copy'
 import { EventDateTime } from './EventDateTime'
@@ -37,7 +37,7 @@ export const EventPage = ({
 	const { image, name, email } = host ?? {}
 	const canManage = metadata?.user?.access?.manager
 	const userRsvp = metadata?.user?.rsvp
-	const { relative } = useEventDateTime({ start: startDate, end: endDate })
+	const { relative } = getEventDateTime({ start: startDate, end: endDate })
 	return (
 		<div className="grid grid-cols-12 gap-4 lg:gap-5">
 			<div className="col-span-full lg:col-span-5">

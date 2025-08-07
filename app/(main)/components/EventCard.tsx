@@ -14,7 +14,7 @@ import {
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
-import { useEventDateTime } from '@/lib/hooks'
+import { getEventDateTime } from '@/lib/hooks'
 import { cn } from '@/lib/utils'
 import type { RouterOutput } from '@/server/api'
 import { EventLocation } from './EventLocation'
@@ -41,7 +41,7 @@ export const EventCard = ({
 	metadata,
 	isLast,
 }: EventCardProps) => {
-	const { start, relative, range } = useEventDateTime({
+	const { start, relative, range } = getEventDateTime({
 		start: startDate,
 		end: endDate,
 	})

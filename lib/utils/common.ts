@@ -8,7 +8,7 @@ import {
 	type ThemeColorIntensity,
 	type ThemeFaintColorName,
 	themeFaintColorNames,
-} from './config'
+} from '../config'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))

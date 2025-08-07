@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
-import { useEventDateTime } from '@/lib/hooks'
+import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
 
 type EventDiscoverCardData = RouterOutput['event']['listNearby'][number]
@@ -14,7 +14,7 @@ export const EventDiscoverCard = ({
 	title,
 	coverImage,
 }: EventDiscoverCardProps) => {
-	const { range } = useEventDateTime({
+	const { range } = getEventDateTime({
 		start: startDate,
 		end: endDate,
 	})

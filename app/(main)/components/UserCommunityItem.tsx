@@ -2,7 +2,7 @@ import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button, Image } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
-import { useEventDateTime } from '@/lib/hooks'
+import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
 
 type CommunityData = RouterOutput['community']['list'][number]
@@ -13,7 +13,7 @@ export const UserCommunityEventItem = ({
 }: {
 	event: CommunityData['events'][number]
 }) => {
-	const { range } = useEventDateTime({
+	const { range } = getEventDateTime({
 		start: event?.startDate,
 		end: event?.endDate,
 	})

@@ -1,4 +1,4 @@
-import { useEventDateTime } from '@/lib/hooks'
+import { getEventDateTime } from '@/lib/hooks'
 
 interface EventDateTimeProps {
 	startDate: string | Date
@@ -6,7 +6,7 @@ interface EventDateTimeProps {
 }
 export const EventDateTime = (params: EventDateTimeProps) => {
 	const { startDate, endDate } = params
-	const { start, range } = useEventDateTime({ start: startDate, end: endDate })
+	const { start, range } = getEventDateTime({ start: startDate, end: endDate })
 
 	return (
 		<div className="flex items-center gap-3 text-base">
