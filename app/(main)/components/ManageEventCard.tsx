@@ -7,29 +7,37 @@ import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 import { ShareActions } from './ShareActions'
 import { ShareLink } from './ShareLink'
-import { Stats } from './Stats'
 
-type RouterOutputEvent = RouterOutput['event']['get']
-interface ManageEventCardProps extends RouterOutputEvent {
-	url: string
+// import { Stats } from './Stats'
+
+type RouterOutputEvent =
+	| RouterOutput['event']['get']['enhanced']
+	| RouterOutput['event']['get']['core']
+type ManageEventCardProps = RouterOutputEvent
+
+/**
+ * Type guard to check if event data is enhanced with additional relations
+ */
+function isEnhancedEventData(
+	event: RouterOutputEvent
+): event is RouterOutput['event']['get']['enhanced'] {
+	return 'metadata' in event && 'rsvps' in event
 }
 
-export function ManageEventCard({
-	title,
-	id,
-	startDate,
-	endDate,
-	coverImage,
-	venueName,
-	venueAddress,
-	locationType,
-	onlineUrl,
-	slug,
-	url,
-	checkInCount,
-	rsvpCount,
-	viewCount,
-}: ManageEventCardProps) {
+export function ManageEventCard(props: ManageEventCardProps) {
+	const {
+		title,
+		id,
+		startDate,
+		endDate,
+		coverImage,
+		venueName,
+		venueAddress,
+		locationType,
+		onlineUrl,
+		slug,
+	} = props
+	const _metadata = isEnhancedEventData(props) ? props.metadata : null
 	return (
 		<Card className="w-full p-3 text-white lg:p-6">
 			<div className="grid grid-cols-12 items-start justify-stretch gap-6 lg:flex-row lg:gap-6">
@@ -59,7 +67,7 @@ export function ManageEventCard({
 							/>
 						</div>
 					</div>
-					<ShareActions title={title} url={url} />
+					<ShareActions title={title} slug={slug} />
 				</div>
 
 				{/* Event Info */}
@@ -80,11 +88,11 @@ export function ManageEventCard({
 							className="text-muted-foreground"
 							size="lg"
 						/>
-						<Stats
+						{/* <Stats
 							checkInCount={checkInCount}
-							rsvpCount={rsvpCount}
+							rsvpCount={rsvpCount || props._count?.rsvps || 0}
 							viewCount={viewCount}
-						/>
+						/> */}
 					</div>
 					<div className="flex w-full flex-col gap-2 lg:gap-2">
 						{/* Action Buttons */}

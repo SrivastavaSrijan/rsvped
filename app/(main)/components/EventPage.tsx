@@ -1,4 +1,5 @@
 import { Clock } from 'lucide-react'
+import { nanoid } from 'nanoid'
 import Link from 'next/link'
 import {
 	AvatarWithFallback,
@@ -15,25 +16,40 @@ import { copy } from '../copy'
 import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 
-type EventPageData = RouterOutput['event']['get']
-interface EventPageProps extends EventPageData {}
-export const EventPage = ({
-	startDate,
-	endDate,
-	slug,
-	title,
-	description,
-	coverImage,
-	host,
-	rsvps,
-	venueName,
-	location,
-	venueAddress,
-	locationType,
-	onlineUrl,
-	rsvpCount,
-	metadata,
-}: EventPageProps) => {
+type EventPageData =
+	| RouterOutput['event']['get']['enhanced']
+	| RouterOutput['event']['get']['core']
+type EventPageProps = EventPageData
+
+/**
+ * Type guard to check if event data is enhanced with additional relations
+ */
+function isEnhancedEventData(
+	event: EventPageData
+): event is RouterOutput['event']['get']['enhanced'] {
+	return 'metadata' in event && 'rsvps' in event
+}
+
+export const EventPage = (props: EventPageProps) => {
+	const {
+		startDate,
+		endDate,
+		slug,
+		title,
+		description,
+		coverImage,
+		host,
+		venueName,
+		location,
+		venueAddress,
+		locationType,
+		onlineUrl,
+	} = props
+
+	// Enhanced properties with type guard
+	const rsvps = isEnhancedEventData(props) ? props.rsvps : []
+	const rsvpCount = props._count.rsvps
+	const metadata = isEnhancedEventData(props) ? props.metadata : null
 	const { image, name, email } = host ?? {}
 	const canManage = metadata?.user?.access?.manager
 	const userRsvp = metadata?.user?.rsvp
@@ -77,33 +93,37 @@ export const EventPage = ({
 					<div className="flex flex-col gap-2 lg:gap-2">
 						<p className="font-semibold text-sm">{rsvpCount} Going</p>
 						<hr className="border-muted-foreground/20" />
-						<div className="flex flex-col gap-2 items-start">
-							<div className="-space-x-1 flex">
-								{(rsvps ?? []).map(
-									({ name: guestName, email: guestEmail }) =>
-										guestEmail &&
-										guestName && (
-											<Tooltip key={guestEmail}>
-												<TooltipTrigger>
-													<AvatarWithFallback
-														className="size-4 mt-1"
-														name={guestName}
-													/>
-												</TooltipTrigger>
-												<TooltipContent>{guestName}</TooltipContent>
-											</Tooltip>
-										)
-								)}
+						{isEnhancedEventData(props) ? (
+							<div className="flex flex-col gap-2 items-start">
+								<div className="-space-x-1 flex">
+									{(rsvps ?? []).map(
+										({ name: guestName, email: guestEmail }) =>
+											guestEmail &&
+											guestName && (
+												<Tooltip key={guestEmail}>
+													<TooltipTrigger>
+														<AvatarWithFallback
+															className="size-4 mt-1"
+															name={guestName}
+														/>
+													</TooltipTrigger>
+													<TooltipContent>{guestName}</TooltipContent>
+												</Tooltip>
+											)
+									)}
+								</div>
+								<p className="text-sm text-muted-foreground">
+									{(rsvps ?? [])
+										.slice(0, 2)
+										.map((rsvp) => rsvp?.name)
+										.filter((value): value is string => !!value)
+										.join(', ')}
+									{(rsvps ?? []).length > 2 && ` and ${rsvpCount - 2} others`}
+								</p>
 							</div>
-							<p className="text-sm text-muted-foreground">
-								{(rsvps ?? [])
-									.slice(0, 2)
-									.map((rsvp) => rsvp?.name)
-									.filter((value): value is string => !!value)
-									.join(', ')}
-								{(rsvps ?? []).length > 2 && ` and ${rsvpCount - 2} others`}
-							</p>
-						</div>
+						) : (
+							<RsvpListSkeleton />
+						)}
 					</div>
 				</div>
 			</div>
@@ -128,48 +148,54 @@ export const EventPage = ({
 						Registration
 					</p>
 					<div className="flex flex-col gap-3 lg:gap-4 p-3 lg:p-4 rounded-br-xl rounded-bl-xl bg-faint-white">
-						{userRsvp ? (
-							<div className="flex flex-col gap-3 lg:gap-3">
-								<AvatarWithFallback
-									src={userRsvp?.user?.image}
-									alt={userRsvp?.user?.name ?? 'You'}
-									name={userRsvp?.user?.name ?? 'You'}
-									className="size-10 lg:size-12"
-								/>
-								<div className="flex flex-col w-full gap-0.5">
-									<p className="text-xl font-serif">You're in!</p>
-									<p className="text-base text-muted-foreground">
-										Ticket: {userRsvp?.ticketTier?.name}
-									</p>
-								</div>
-								<div className="p-3 lg:p-3 rounded-xl flex flex-col gap-2 lg:gap-2 bg-pale-white">
-									<div className="flex flex-row  gap-2 lg:gap-3 items-center justify-between">
-										<div className="flex flex-row gap-2 items-center">
-											<Clock className="size-3 text-muted-foreground" />
+						{isEnhancedEventData(props) ? (
+							userRsvp ? (
+								<div className="flex flex-col gap-3 lg:gap-3">
+									<AvatarWithFallback
+										src={userRsvp?.user?.image}
+										alt={userRsvp?.user?.name ?? 'You'}
+										name={userRsvp?.user?.name ?? 'You'}
+										className="size-10 lg:size-12"
+									/>
+									<div className="flex flex-col w-full gap-0.5">
+										<p className="text-xl font-serif">You're in!</p>
+										<p className="text-base text-muted-foreground">
+											Ticket: {userRsvp?.ticketTier?.name}
+										</p>
+									</div>
+									<div className="p-3 lg:p-3 rounded-xl flex flex-col gap-2 lg:gap-2 bg-pale-white">
+										<div className="flex flex-row  gap-2 lg:gap-3 items-center justify-between">
+											<div className="flex flex-row gap-2 items-center">
+												<Clock className="size-3 text-muted-foreground" />
 
-											<p className="font-semibold text-muted-foreground text-sm">
-												Starting In
+												<p className="font-semibold text-muted-foreground text-sm">
+													Starting In
+												</p>
+											</div>
+											<p className="text-sm text-muted-foreground">
+												{relative}
 											</p>
 										</div>
-										<p className="text-sm text-muted-foreground">{relative}</p>
+										<hr className="border-muted-foreground/20" />
+										<Button variant="secondary" className="w-full">
+											Add To Calendar
+										</Button>
 									</div>
-									<hr className="border-muted-foreground/20" />
-									<Button variant="secondary" className="w-full">
-										Add To Calendar
-									</Button>
 								</div>
-							</div>
+							) : (
+								<>
+									<p className="text-sm">{copy.welcome}</p>
+									<Link
+										href={Routes.Main.Events.ViewBySlugRegister(slug)}
+										passHref
+										replace
+									>
+										<Button className="w-full">Register Now</Button>
+									</Link>
+								</>
+							)
 						) : (
-							<>
-								<p className="text-sm">{copy.welcome}</p>
-								<Link
-									href={Routes.Main.Events.ViewBySlugRegister(slug)}
-									passHref
-									replace
-								>
-									<Button className="w-full">Register Now</Button>
-								</Link>
-							</>
+							<RegistrationSkeleton />
 						)}
 					</div>
 				</div>
@@ -186,3 +212,25 @@ export const EventPage = ({
 		</div>
 	)
 }
+
+// Skeleton components for progressive loading
+const RsvpListSkeleton = () => (
+	<div className="flex flex-col gap-2 items-start">
+		<div className="-space-x-1 flex">
+			{Array.from({ length: 3 }).map(() => (
+				<div
+					key={nanoid()}
+					className="size-4 mt-1 rounded-full bg-muted-foreground/20 animate-pulse"
+				/>
+			))}
+		</div>
+		<div className="h-4 w-32 bg-muted-foreground/20 rounded animate-pulse" />
+	</div>
+)
+
+const RegistrationSkeleton = () => (
+	<div className="flex flex-col gap-3 lg:gap-4">
+		<div className="h-4 w-48 bg-muted-foreground/20 rounded animate-pulse" />
+		<div className="h-10 w-full bg-muted-foreground/20 rounded animate-pulse" />
+	</div>
+)

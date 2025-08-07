@@ -2,14 +2,17 @@
 
 import { Mail, MessageCircle, Share, Twitter } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { Routes } from '@/lib/config'
 
 interface ShareActionsProps {
 	title: string
-	url: string
+	slug: string
 }
 
-export function ShareActions({ title, url }: ShareActionsProps) {
+export function ShareActions({ title, slug }: ShareActionsProps) {
 	const shareText = `Check out this event: ${title}`
+	const url =
+		process.env.NEXT_PUBLIC_BASE_URL + Routes.Main.Events.ViewBySlug(slug)
 
 	const handleTwitterShare = () => {
 		const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`

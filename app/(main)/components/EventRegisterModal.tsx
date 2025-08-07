@@ -35,7 +35,7 @@ const initalState: RsvpActionResponse = {
 	fieldErrors: {},
 }
 
-type EventRegisterData = RouterOutput['event']['get']
+type EventRegisterData = RouterOutput['event']['get']['register']
 
 interface EventRegisterModalProps extends EventRegisterData {
 	prefill?: Partial<RsvpFormData>

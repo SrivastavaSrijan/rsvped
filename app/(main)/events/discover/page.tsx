@@ -154,7 +154,7 @@ interface NearbyEventsProps {
 
 const NearbyEvents = async ({ locationId }: NearbyEventsProps) => {
 	const api = await getAPI()
-	const nearbyEvents = await api.event.listNearby({
+	const nearbyEvents = await api.event.list.nearby({
 		locationId,
 		take: PageConfig.nearbyEvents.pageSize,
 	})

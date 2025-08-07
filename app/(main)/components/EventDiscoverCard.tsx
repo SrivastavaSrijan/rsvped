@@ -5,7 +5,7 @@ import { Routes } from '@/lib/config'
 import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
 
-type EventDiscoverCardData = RouterOutput['event']['listNearby'][number]
+type EventDiscoverCardData = RouterOutput['event']['list']['nearby'][number]
 interface EventDiscoverCardProps extends EventDiscoverCardData {}
 export const EventDiscoverCard = ({
 	startDate,

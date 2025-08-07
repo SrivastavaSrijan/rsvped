@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server'
 import type { Metadata } from 'next'
 import { notFound, unauthorized } from 'next/navigation'
 import { getAPI } from '@/server/api'
@@ -16,13 +17,11 @@ export default async function EditEvent({
 	const { slug } = await params
 	const api = await getAPI()
 	try {
-		const event = await api.event.get({ slug })
+		const event = await api.event.get.edit({ slug })
 		if (!event) {
 			return notFound()
 		}
-		if (!event?.metadata?.user?.access?.manager) {
-			return unauthorized()
-		}
+
 		// If the event is found, render the edit form
 		return (
 			<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
@@ -40,6 +39,9 @@ export default async function EditEvent({
 		)
 	} catch (error) {
 		console.error('Error fetching event:', error)
+		if (error instanceof TRPCError && error.code.includes('FORBIDDEN')) {
+			return unauthorized()
+		}
 		return notFound()
 	}
 }

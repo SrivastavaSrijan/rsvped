@@ -1,8 +1,7 @@
 import { ArrowUpLeft } from 'lucide-react'
-import { headers } from 'next/headers'
 import Link from 'next/link'
-import { notFound, unauthorized } from 'next/navigation'
-import { ManageEventCard } from '@/app/(main)/components'
+import { notFound } from 'next/navigation'
+import { ProgressiveManageEventCard } from '@/app/(main)/components'
 import {
 	Button,
 	Tabs,
@@ -20,7 +19,7 @@ export const generateMetadata = async ({
 }) => {
 	const { slug } = await params
 	const api = await getAPI()
-	const event = await api.event.getMetadata({ slug })
+	const event = await api.event.get.core({ slug })
 	return {
 		title: `${event.title} · RSVP'd`,
 		description: `View details for the event: ${event.title}`,
@@ -35,15 +34,10 @@ export default async function ViewEvent({
 	const { slug } = await params
 	const api = await getAPI()
 	try {
-		const event = await api.event.get({ slug })
-		if (!event) {
+		const coreEvent = await api.event.get.core({ slug })
+		if (!coreEvent) {
 			return notFound()
 		}
-		if (!event?.metadata?.user?.access?.manager) {
-			return unauthorized()
-		}
-		const pathname = (await headers()).get('x-pathname') || ''
-		const url = process.env.NEXT_PUBLIC_BASE_URL + pathname
 		return (
 			<Tabs
 				className="mx-auto flex w-full max-w-page flex-col gap-8 px-3 pb-6 lg:gap-12 lg:px-8 lg:pb-8"
@@ -60,7 +54,9 @@ export default async function ViewEvent({
 								<ArrowUpLeft className=" text-muted-foreground" /> Back home
 							</Button>
 						</Link>
-						<h1 className="font-bold text-2xl lg:text-3xl">{event.title}</h1>
+						<h1 className="font-bold text-2xl lg:text-3xl">
+							{coreEvent.title}
+						</h1>
 					</div>
 					<TabsList className="w-full">
 						<TabsTrigger value="details">Details</TabsTrigger>
@@ -69,7 +65,7 @@ export default async function ViewEvent({
 					</TabsList>
 				</div>
 				<TabsContent value="details">
-					<ManageEventCard {...event} url={url} />
+					<ProgressiveManageEventCard coreEvent={coreEvent} />
 				</TabsContent>
 				<TabsContent value="stats"></TabsContent>
 			</Tabs>
