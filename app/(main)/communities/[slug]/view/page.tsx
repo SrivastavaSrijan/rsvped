@@ -27,7 +27,7 @@ export default async function ViewCommunity({
 	} = await searchParams
 	const api = await getAPI()
 	try {
-		const community = await api.community.get({ slug })
+		const community = await api.community.get.enhanced({ slug })
 		if (!community) {
 			return notFound()
 		}

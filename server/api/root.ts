@@ -1,5 +1,4 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
-import { createTRPCRouter } from '@/server/api/trpc'
 import {
 	categoryRouter,
 	communityRouter,
@@ -8,8 +7,9 @@ import {
 	locationRouter,
 	rsvpRouter,
 	userRouter,
-} from './routers'
-import type { createTRPCContext } from './trpc'
+} from '@/server/api/routers'
+import type { createTRPCContext } from '@/server/api/trpc'
+import { createTRPCRouter } from '@/server/api/trpc'
 
 /**
  * This is the primary router for your server.

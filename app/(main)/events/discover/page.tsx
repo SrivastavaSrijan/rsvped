@@ -154,7 +154,7 @@ interface NearbyEventsProps {
 
 const NearbyEvents = async ({ locationId }: NearbyEventsProps) => {
 	const api = await getAPI()
-	const nearbyEvents = await api.event.list.nearby({
+	const nearbyEvents = await api.event.nearby({
 		locationId,
 		take: PageConfig.nearbyEvents.pageSize,
 	})
@@ -179,7 +179,7 @@ interface NearbyCommunitiesProps {
 
 const NearbyCommunities = async ({ locationId }: NearbyCommunitiesProps) => {
 	const api = await getAPI()
-	const communities = await api.community.listNearby({
+	const communities = await api.community.nearby({
 		locationId,
 		take: PageConfig.communities.pageSize,
 	})
