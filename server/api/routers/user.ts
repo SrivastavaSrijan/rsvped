@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { hashPassword } from '@/lib/auth/password'
+import { tRPCErrors } from '@/server/api/errors'
 import {
 	createTRPCRouter,
 	protectedProcedure,
@@ -20,7 +20,7 @@ export const userRouter = createTRPCRouter({
 		})
 
 		if (!user) {
-			throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' })
+			tRPCErrors.notFound('User')
 		}
 		return user
 	}),
@@ -44,10 +44,7 @@ export const userRouter = createTRPCRouter({
 			})
 
 			if (!user) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'User not found',
-				})
+				tRPCErrors.notFound('User')
 			}
 
 			return user
@@ -69,10 +66,7 @@ export const userRouter = createTRPCRouter({
 			})
 
 			if (existingUser) {
-				throw new TRPCError({
-					code: 'CONFLICT',
-					message: 'User already exists',
-				})
+				tRPCErrors.alreadyExists('User')
 			}
 
 			// Hash password

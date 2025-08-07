@@ -1,6 +1,6 @@
 import { MembershipRole } from '@prisma/client'
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { tRPCErrors } from '@/server/api/errors'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 
 export const communityCrudRouter = createTRPCRouter({
@@ -23,10 +23,7 @@ export const communityCrudRouter = createTRPCRouter({
 				})
 
 			if (existingMembership) {
-				throw new TRPCError({
-					code: 'CONFLICT',
-					message: 'Already a member of this community',
-				})
+				tRPCErrors.alreadyMember()
 			}
 
 			const membership = await ctx.prisma.communityMembership.create({

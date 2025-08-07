@@ -1,5 +1,5 @@
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { tRPCErrors } from '@/server/api/errors'
 import {
 	createTRPCRouter,
 	protectedProcedure,
@@ -26,7 +26,7 @@ export const eventGetRouter = createTRPCRouter({
 				},
 			})
 			if (!event) {
-				throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+				tRPCErrors.notFound('Event')
 			}
 			return event
 		}),
@@ -37,7 +37,7 @@ export const eventGetRouter = createTRPCRouter({
 			include: eventCoreInclude,
 		})
 		if (!event) {
-			throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+			tRPCErrors.notFound('Event')
 		}
 		return event
 	}),
@@ -50,7 +50,7 @@ export const eventGetRouter = createTRPCRouter({
 				include: eventEnhancedInclude,
 			})
 			if (!event) {
-				throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+				tRPCErrors.notFound('Event')
 			}
 
 			const user = ctx.session?.user
@@ -87,7 +87,7 @@ export const eventGetRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const user = ctx.session?.user
 			if (!user) {
-				throw new TRPCError({ code: 'UNAUTHORIZED' })
+				tRPCErrors.unauthorized()
 			}
 			const event = await ctx.prisma.event.findUnique({
 				where: { slug: input.slug, deletedAt: null },
@@ -99,12 +99,12 @@ export const eventGetRouter = createTRPCRouter({
 				},
 			})
 			if (!event) {
-				throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+				tRPCErrors.notFound('Event')
 			}
 			const isHost = event.host.id === user.id
 			const isCollaborator = event.eventCollaborators.length > 0
 			if (!isHost && !isCollaborator) {
-				throw new TRPCError({ code: 'FORBIDDEN' })
+				tRPCErrors.forbidden()
 			}
 			return event
 		}),
@@ -124,7 +124,7 @@ export const eventGetRouter = createTRPCRouter({
 				},
 			})
 			if (!event) {
-				throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+				tRPCErrors.notFound('Event')
 			}
 			return event
 		}),
@@ -133,10 +133,9 @@ export const eventGetRouter = createTRPCRouter({
 		.input(GetEventInput)
 		.query(async ({ ctx, input }) => {
 			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: 'UNAUTHORIZED',
-					message: 'You must be logged in to register for an event',
-				})
+				tRPCErrors.unauthorized(
+					'You must be logged in to register for an event'
+				)
 			}
 			const event = await ctx.prisma.event.findUnique({
 				where: { slug: input.slug, deletedAt: null },
@@ -148,7 +147,7 @@ export const eventGetRouter = createTRPCRouter({
 				where: { eventId: event?.id, userId: ctx.session.user.id },
 			})
 			if (!event) {
-				throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' })
+				tRPCErrors.notFound('Event')
 			}
 			return {
 				...event,

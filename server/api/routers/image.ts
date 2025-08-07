@@ -1,5 +1,6 @@
 import { createApi } from 'unsplash-js'
 import { z } from 'zod'
+import { tRPCErrors } from '@/server/api/errors'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
 // The unsplash-js library relies on the global fetch API.
@@ -44,7 +45,7 @@ export const imageRouter = createTRPCRouter({
 
 			if (result.errors) {
 				console.error('Unsplash API error:', result.errors[0])
-				throw new Error('Failed to fetch image from Unsplash.')
+				tRPCErrors.external('Failed to fetch image from Unsplash')
 			}
 
 			// The API returns an array even for a count of 1
@@ -53,7 +54,7 @@ export const imageRouter = createTRPCRouter({
 				: result.response
 
 			if (!photo) {
-				throw new Error('No photo returned from Unsplash.')
+				tRPCErrors.external('No photo returned from Unsplash')
 			}
 
 			return {

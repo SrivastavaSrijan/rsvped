@@ -1,9 +1,7 @@
 import type { Prisma } from '@prisma/client'
-import {
-	type inferProcedureBuilderResolverOptions,
-	TRPCError,
-} from '@trpc/server'
+import type { inferProcedureBuilderResolverOptions } from '@trpc/server'
 import { z } from 'zod'
+import { tRPCErrors } from '@/server/api/errors'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
 const GetCommunityInput = z.object({ slug: z.string() })
@@ -64,10 +62,7 @@ export const communityGetRouter = createTRPCRouter({
 				select: communityCoreSelect,
 			})
 			if (!community) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Community not found',
-				})
+				tRPCErrors.notFound('Community')
 			}
 			const role = await getUserRole(ctx, community.id)
 			return { ...community, metadata: { role } }
@@ -81,10 +76,7 @@ export const communityGetRouter = createTRPCRouter({
 				select: communityEnhancedSelect,
 			})
 			if (!community) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Community not found',
-				})
+				tRPCErrors.notFound('Community')
 			}
 			const role = await getUserRole(ctx, community.id)
 			return { ...community, metadata: { role } }
