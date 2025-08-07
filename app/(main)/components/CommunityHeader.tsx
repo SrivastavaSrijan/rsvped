@@ -20,7 +20,7 @@ const AVATAR_CLASSES = {
 }
 
 interface CommunityHeaderProps {
-	community: RouterOutput['community']['get']
+	community: RouterOutput['community']['get']['enhanced']
 	children?: ReactNode
 }
 
