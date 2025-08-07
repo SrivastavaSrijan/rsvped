@@ -1,5 +1,5 @@
-import { TRPCError } from '@trpc/server'
 import z from 'zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { createTRPCRouter, publicProcedure } from '../trpc'
 
 export const categoryRouter = createTRPCRouter({
@@ -16,7 +16,7 @@ export const categoryRouter = createTRPCRouter({
 		)
 		.query(async ({ ctx, input: { take, locationId } }) => {
 			if (!locationId) {
-				throw new Error('locationId is required')
+				throw TRPCErrors.locationRequired()
 			}
 			return ctx.prisma.category.findMany({
 				orderBy: {
@@ -60,10 +60,7 @@ export const categoryRouter = createTRPCRouter({
 			})
 
 			if (!category) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Category not found',
-				})
+				throw TRPCErrors.categoryNotFound()
 			}
 
 			return category

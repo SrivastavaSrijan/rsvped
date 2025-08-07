@@ -1,5 +1,5 @@
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { publicProcedure } from '@/server/api/trpc'
 
 export const communityNearbyRouter = publicProcedure
@@ -14,10 +14,7 @@ export const communityNearbyRouter = publicProcedure
 	)
 	.query(async ({ ctx, input: { take, locationId } }) => {
 		if (!locationId) {
-			throw new TRPCError({
-				code: 'BAD_REQUEST',
-				message: 'locationId is required',
-			})
+			throw TRPCErrors.locationRequired()
 		}
 
 		const user = ctx.session?.user
