@@ -1,5 +1,5 @@
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { publicProcedure } from '@/server/api/trpc'
 
 export const eventNearbyRouter = publicProcedure
@@ -12,10 +12,7 @@ export const eventNearbyRouter = publicProcedure
 	.query(async ({ ctx, input }) => {
 		const { locationId, take } = input
 		if (!locationId) {
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: 'User location not found',
-			})
+			throw TRPCErrors.locationRequired()
 		}
 		const events = await ctx.prisma.event.findMany({
 			where: {
@@ -34,10 +31,7 @@ export const eventNearbyRouter = publicProcedure
 			},
 		})
 		if (events.length === 0) {
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: 'No nearby events found',
-			})
+			throw TRPCErrors.noNearbyEvents()
 		}
 		return events
 	})

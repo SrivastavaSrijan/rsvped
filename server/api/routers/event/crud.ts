@@ -3,6 +3,7 @@ import { TRPCError } from '@trpc/server'
 import slugify from 'slugify'
 import { z } from 'zod'
 import { EventModel } from '@/server/api/routers/zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 
 const CreateEventInput = EventModel.pick({
@@ -39,10 +40,7 @@ export const eventCrudRouter = createTRPCRouter({
 		.input(CreateEventInput)
 		.mutation(async ({ ctx, input }) => {
 			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: 'UNAUTHORIZED',
-					message: 'You must be logged in to create an event',
-				})
+				throw TRPCErrors.unauthorized()
 			}
 
 			try {
@@ -77,11 +75,11 @@ export const eventCrudRouter = createTRPCRouter({
 				})
 				return event
 			} catch (error) {
+				if (error instanceof TRPCError) {
+					throw error
+				}
 				console.error('Error creating event:', error)
-				throw new TRPCError({
-					code: 'INTERNAL_SERVER_ERROR',
-					message: 'Failed to create event',
-				})
+				throw TRPCErrors.eventCreateFailed()
 			}
 		}),
 
@@ -89,10 +87,7 @@ export const eventCrudRouter = createTRPCRouter({
 		.input(UpdateEventInput)
 		.mutation(async ({ ctx, input }) => {
 			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: 'UNAUTHORIZED',
-					message: 'You must be logged in to update an event',
-				})
+				throw TRPCErrors.unauthorized()
 			}
 
 			const { slug, ...updateData } = input
@@ -104,10 +99,7 @@ export const eventCrudRouter = createTRPCRouter({
 				})
 
 				if (!existingEvent) {
-					throw new TRPCError({
-						code: 'NOT_FOUND',
-						message: 'Event not found',
-					})
+					throw TRPCErrors.eventNotFound()
 				}
 
 				if (
@@ -117,10 +109,7 @@ export const eventCrudRouter = createTRPCRouter({
 							c.userId === ctx.session.user.id && c.role === EventRole.CO_HOST
 					)
 				) {
-					throw new TRPCError({
-						code: 'UNAUTHORIZED',
-						message: 'You are not authorized to update this event',
-					})
+					throw TRPCErrors.eventEditForbidden()
 				}
 
 				const event = await ctx.prisma.event.update({
@@ -142,10 +131,7 @@ export const eventCrudRouter = createTRPCRouter({
 					throw error
 				}
 				console.error('Error updating event:', error)
-				throw new TRPCError({
-					code: 'INTERNAL_SERVER_ERROR',
-					message: 'Failed to update event',
-				})
+				throw TRPCErrors.eventUpdateFailed()
 			}
 		}),
 })

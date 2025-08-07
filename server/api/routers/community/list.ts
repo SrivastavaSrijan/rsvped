@@ -1,6 +1,6 @@
 import { MembershipRole, type Prisma } from '@prisma/client'
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
+import { TRPCErrors } from '@/server/api/shared/errors'
 import { PaginationSchema } from '@/server/api/shared/schemas'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 
@@ -24,7 +24,7 @@ const communityListBaseProcedure = protectedProcedure
 	.use(async ({ ctx, input, next }) => {
 		const { sort, page, size, roles, where, invert } = input
 		const user = ctx.session?.user
-		if (!user) throw new TRPCError({ code: 'UNAUTHORIZED' })
+		if (!user) throw TRPCErrors.unauthorized()
 
 		let roleFilter: Prisma.CommunityWhereInput | undefined
 		if (roles && roles.length > 0) {
