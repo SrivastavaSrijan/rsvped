@@ -1,3 +1,4 @@
+import { Mailbox } from 'lucide-react'
 import Link from 'next/link'
 import {
 	AvatarWithFallback,
@@ -63,9 +64,25 @@ export const CommunityHeader = ({
 				<div className="flex flex-col gap-2 lg:gap-2">
 					<div className="flex lg:flex-row flex-col items-start justify-between lg:gap-2 gap-2">
 						<div className="flex flex-col gap-1">
-							<h2 className="text-sm text-muted-foreground">
-								Curated by {owner?.name}
-							</h2>
+							<div className="flex flex-row items-center gap-2">
+								<h2 className="text-sm text-muted-foreground">
+									Curated by {owner?.name}
+								</h2>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<a href={`mailto:${owner?.email}`} className="contents">
+											<Button
+												variant="link"
+												size="icon"
+												className="text-muted-foreground size-3"
+											>
+												<Mailbox className="size-3" />
+											</Button>
+										</a>
+									</TooltipTrigger>
+									<TooltipContent>Email {owner?.email}</TooltipContent>
+								</Tooltip>
+							</div>
 							<div className="flex flex-row items-center gap-2">
 								<h1 className="text-2xl font-semibold">{name}</h1>
 								{role && <Badge variant={membershipBadgeVariant}>{role}</Badge>}

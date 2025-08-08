@@ -11,3 +11,4 @@ export async function getAPI() {
 }
 
 export type { RouterInput, RouterOutput } from './root'
+export * from './shared/types'

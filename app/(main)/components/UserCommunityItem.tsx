@@ -29,10 +29,18 @@ export const UserCommunityEventItem = ({
 		end: event?.endDate,
 	})
 	return (
-		<div className="flex flex-col gap-1">
-			<Link href={Routes.Main.Events.ViewBySlug(event.slug)} passHref>
-				<Button variant="link" size="sm" className="text-base -mx-2">
-					{event.title}
+		<div className="flex flex-col gap-1 w-full">
+			<Link
+				href={Routes.Main.Events.ViewBySlug(event.slug)}
+				passHref
+				className="contents"
+			>
+				<Button
+					variant="link"
+					size="sm"
+					className="text-base w-full flex px-0 has-[>svg]:px-0"
+				>
+					<p className="truncate w-full text-left">{event.title}</p>
 					<ArrowUpRight className="size-3" />
 				</Button>
 			</Link>
@@ -45,7 +53,7 @@ export const UserCommunityEventItem = ({
 }
 
 export const UserCommunityItem = (props: UserCommunityItemProps) => {
-	const { id, name, coverImage, _count } = props
+	const { id, name, coverImage, _count, slug } = props
 	// Check if this community has events data (enhanced)
 	const communityEvents = hasEvents(props) ? props.events : []
 
@@ -54,7 +62,7 @@ export const UserCommunityItem = (props: UserCommunityItemProps) => {
 			key={id}
 			className="bg-card lg:grid lg:grid-cols-12 flex flex-col gap-4 p-4 rounded-lg shadow-sm"
 		>
-			<div className="col-span-12 lg:col-span-4 flex flex-col items-start lg:gap-4 gap-2">
+			<div className="col-span-12 lg:col-span-4 flex flex-col items-start lg:gap-4 gap-3 w-full">
 				<Image
 					src={coverImage || AssetMap.NoEvents}
 					alt={name}
@@ -64,12 +72,16 @@ export const UserCommunityItem = (props: UserCommunityItemProps) => {
 					sizes={{ lg: '30vw', sm: '50vw' }}
 				/>
 				<div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
-					<div className="flex flex-col lg:gap-2 gap-1">
-						<h3 className="lg:text-lg text-base font-semibold">{name}</h3>
-						<p className="text-sm text-muted-foreground">
-							{_count.members} members
-						</p>
-						<Link href={Routes.Main.Communities.ViewBySlug(name)} passHref>
+					<div className="flex flex-col lg:gap-3 gap-3">
+						<div className="flex flex-col lg:gap-1 gap-1">
+							<h3 className="truncate lg:text-lg text-base font-semibold">
+								{name}
+							</h3>
+							<p className="text-sm text-muted-foreground">
+								{_count.members} members
+							</p>
+						</div>
+						<Link href={Routes.Main.Communities.ViewBySlug(slug)} passHref>
 							<Button variant="secondary">View</Button>
 						</Link>
 					</div>

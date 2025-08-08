@@ -3,12 +3,21 @@ import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { PaginationSchema } from '@/server/api/shared/schemas'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
+import { MembershipRoleOwner } from '../../shared/types'
 
 const GetCommunitiesInput = z
 	.object({
 		sort: z.enum(['asc', 'desc']).optional().default('asc'),
-		roles: z.array(z.nativeEnum(MembershipRole)).optional(),
-		invert: z.boolean().optional().default(false),
+		include: z
+			.array(
+				z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
+			)
+			.optional(),
+		exclude: z
+			.array(
+				z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
+			)
+			.optional(),
 		where: z
 			.object({
 				isPublic: z.boolean().optional().default(true),
@@ -22,21 +31,69 @@ const GetCommunitiesInput = z
 const communityListBaseProcedure = protectedProcedure
 	.input(GetCommunitiesInput)
 	.use(async ({ ctx, input, next }) => {
-		const { sort, page, size, roles, where, invert } = input
+		const { sort, page, size, include, exclude, where } = input
 		const user = ctx.session?.user
 		if (!user) throw TRPCErrors.unauthorized()
 
 		let roleFilter: Prisma.CommunityWhereInput | undefined
-		if (roles && roles.length > 0) {
-			roleFilter = {
-				members: {
-					some: {
-						userId: user.id,
-						role: {
-							[invert ? 'notIn' : 'in']: roles,
+
+		// Handle include logic
+		if (include && include.length > 0) {
+			const isOwnerIncluded = include.includes(MembershipRoleOwner.OWNER)
+			const membershipRoles = include.filter(
+				(role) => role !== MembershipRoleOwner.OWNER
+			)
+
+			const conditions: Prisma.CommunityWhereInput[] = []
+
+			if (isOwnerIncluded) {
+				conditions.push({ ownerId: user.id })
+			}
+
+			if (membershipRoles.length > 0) {
+				conditions.push({
+					members: {
+						some: {
+							userId: user.id,
+							role: { in: membershipRoles },
 						},
 					},
-				},
+				})
+			}
+
+			if (conditions.length > 0) {
+				roleFilter = { OR: conditions }
+			}
+		}
+
+		// Handle exclude logic
+		if (exclude && exclude.length > 0) {
+			const isOwnerExcluded = exclude.includes(MembershipRoleOwner.OWNER)
+			const membershipRoles = exclude.filter(
+				(role) => role !== MembershipRoleOwner.OWNER
+			)
+
+			const conditions: Prisma.CommunityWhereInput[] = []
+
+			if (isOwnerExcluded) {
+				conditions.push({ ownerId: { not: user.id } })
+			}
+
+			if (membershipRoles.length > 0) {
+				conditions.push({
+					members: {
+						none: {
+							userId: user.id,
+							role: { in: membershipRoles },
+						},
+					},
+				})
+			}
+
+			if (conditions.length > 0) {
+				roleFilter = roleFilter
+					? { AND: [roleFilter, ...conditions] }
+					: { AND: conditions }
 			}
 		}
 
@@ -98,10 +155,7 @@ const communityEnhancedSelect = {
 
 export const communityListRouter = createTRPCRouter({
 	core: communityListBaseProcedure.query(async ({ ctx }) => {
-		const { user, args } = ctx as typeof ctx & {
-			user: { id: string }
-			args: Parameters<typeof ctx.prisma.community.findMany>[0]
-		}
+		const { user, args } = ctx
 
 		const communities = await ctx.prisma.community.findMany({
 			...args,
@@ -133,10 +187,7 @@ export const communityListRouter = createTRPCRouter({
 	}),
 
 	enhanced: communityListBaseProcedure.query(async ({ ctx }) => {
-		const { user, args } = ctx as typeof ctx & {
-			user: { id: string }
-			args: Parameters<typeof ctx.prisma.community.findMany>[0]
-		}
+		const { user, args } = ctx
 
 		const communities = await ctx.prisma.community.findMany({
 			...args,

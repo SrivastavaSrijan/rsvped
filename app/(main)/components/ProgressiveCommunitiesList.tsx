@@ -1,14 +1,17 @@
-import type { MembershipRole } from '@prisma/client'
 import { Suspense } from 'react'
-import type { RouterInput, RouterOutput } from '@/server/api'
+import type {
+	CombinedMembershipRole,
+	RouterInput,
+	RouterOutput,
+} from '@/server/api'
 import { getAPI } from '@/server/api'
 import { ManagedCommunitiesGrid } from './ManagedCommunitiesGrid'
 import { UserCommunitiesList } from './UserCommunitiesList'
 
 export interface CreateCommunityListParams {
 	page?: number
-	roles?: MembershipRole[]
-	invert?: boolean
+	include?: CombinedMembershipRole[]
+	exclude?: CombinedMembershipRole[]
 	sort?: 'asc' | 'desc'
 }
 
@@ -20,19 +23,19 @@ type CreateCommunityListReturn = RouterInput['community']['list']['core']
 
 export function createCommunityListParams({
 	page = 1,
-	roles,
-	invert = false,
+	include,
+	exclude,
 	sort = 'asc',
 }: CreateCommunityListParams): CreateCommunityListReturn {
 	return {
 		page,
-		roles,
-		invert,
+		include,
+		exclude,
 		sort,
 		where: {
 			isPublic: true,
 		},
-	}
+	} satisfies CreateCommunityListReturn
 }
 
 /**

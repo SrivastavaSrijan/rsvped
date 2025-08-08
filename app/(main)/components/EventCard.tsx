@@ -43,7 +43,7 @@ const CollaboratorsSkeleton = () => (
 
 const RSVPSkeleton = () => (
 	<div className="flex gap-2">
-		<div className="h-5 w-16 animate-pulse rounded-full bg-white/20" />
+		<div className="h-2 w-16 animate-pulse rounded-full bg-white/20" />
 		<div className="flex gap-1">
 			<div className="size-4 animate-pulse rounded-full bg-white/20" />
 			<div className="size-4 animate-pulse rounded-full bg-white/20" />
@@ -203,11 +203,11 @@ export const EventCard = (props: EventCardProps) => {
 								<p className="text-muted-foreground text-sm">{range.time}</p>
 								<h2 className="font-semibold text-xl">{title}</h2>
 								{!canManage && eventCollaborators && (
-									<div className="flex flex-row items-center gap-2">
-										<div className="flex items-center gap-2">
+									<div className="flex flex-row items-center gap-2 w-full">
+										<div className="flex items-center gap-2 w-full">
 											{renderEventCollaborators()}
 
-											<p className="truncate font-medium text-muted-foreground text-sm">
+											<p className="truncate font-medium text-muted-foreground lg:text-sm text-xs w-fit">
 												By {host.name}{' '}
 												{hasEnhancedData &&
 													eventCollaborators?.length > 0 &&
@@ -241,7 +241,7 @@ export const EventCard = (props: EventCardProps) => {
 											<ArrowUpRight />
 										</Button>
 									</Link>
-									<div className="flex flex-col items-start gap-2 lg:flex-row lg:items-center">
+									<div className="flex flex-col items-start gap-2 lg:flex-row lg:items-center max-w-full">
 										{renderEventCollaborators()}
 										<p className="truncate font-medium text-muted-foreground text-sm">
 											By you

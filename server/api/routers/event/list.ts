@@ -97,9 +97,7 @@ const eventListBaseProcedure = protectedProcedure
 
 export const eventListRouter = createTRPCRouter({
 	core: eventListBaseProcedure.query(async ({ ctx }) => {
-		const { args } = ctx as typeof ctx & {
-			args: Parameters<typeof ctx.prisma.event.findMany>[0]
-		}
+		const { args } = ctx
 		const events = await ctx.prisma.event.findMany({
 			...args,
 			include: eventCoreInclude,
@@ -108,15 +106,7 @@ export const eventListRouter = createTRPCRouter({
 	}),
 
 	enhanced: eventListBaseProcedure.query(async ({ ctx }) => {
-		const { user, args } = ctx as typeof ctx & {
-			user: {
-				id: string
-				name: string | null
-				image: string | null
-				email: string | null
-			}
-			args: Parameters<typeof ctx.prisma.event.findMany>[0]
-		}
+		const { user, args } = ctx
 		const events = await ctx.prisma.event.findMany({
 			...args,
 			include: eventEnhancedInclude,
