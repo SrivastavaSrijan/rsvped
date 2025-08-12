@@ -38,7 +38,7 @@ export async function updateLocationAction(
 	if (session?.user) {
 		try {
 			const api = await getAPI()
-			await api.user.updateLocation(validation.data)
+			await api.user.preferences.updateLocation(validation.data)
 		} catch (error) {
 			console.error('Error updating user location in DB:', error)
 			return {

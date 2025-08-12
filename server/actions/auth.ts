@@ -34,7 +34,7 @@ export type AuthActionResponse = ServerActionResponse<
 async function checkUserExists(email: string) {
 	try {
 		const api = await getAPI()
-		const user = await api.user.findByEmail({ email })
+		const user = await api.user.profile.findByEmail({ email })
 		return user
 	} catch {
 		return null
@@ -45,7 +45,7 @@ async function createUser(data: Prisma.UserCreateInput): Promise<void> {
 	try {
 		const api = await getAPI()
 		const parsedData = registrationSchema.parse(data)
-		await api.user.create(parsedData)
+		await api.user.auth.create(parsedData)
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			throw new Error(AuthErrorCodes.VALIDATION_ERROR)
@@ -172,7 +172,7 @@ export const verifyPassword = async ({
 
 	if (parsedCredentials.success) {
 		const { email, password } = parsedCredentials.data
-		const user = await api.user.findByEmail({ email })
+		const user = await api.user.profile.findByEmail({ email })
 		if (!user || !user.password) return null
 
 		const passwordsMatch = await comparePasswords(password, user.password)
