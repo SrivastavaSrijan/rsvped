@@ -3,15 +3,23 @@ import { eventCoreInclude } from '@/server/api/routers/event/includes'
 
 export const categoryCoreInclude = {
 	_count: {
-		select: { events: { where: { isPublished: true, deletedAt: null } } },
+		select: {
+			events: { where: { event: { isPublished: true, deletedAt: null } } },
+		},
 	},
 } satisfies Prisma.CategoryInclude
 
 export const categoryEnhancedInclude = {
-	...categoryCoreInclude,
+	_count: {
+		select: { events: true },
+	},
 	events: {
 		take: 5,
-		where: { isPublished: true, deletedAt: null },
-		include: eventCoreInclude,
+		where: { event: { isPublished: true, deletedAt: null } },
+		include: {
+			event: {
+				include: eventCoreInclude,
+			},
+		},
 	},
 } satisfies Prisma.CategoryInclude

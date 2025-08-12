@@ -12,7 +12,7 @@ import {
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
 
-type CategoriesData = RouterOutput['category']['listNearby']
+type CategoriesData = RouterOutput['category']['list']['nearby']
 
 type CategoryDiscoverCardProps = CategoriesData[number]
 export const CategoryDiscoverCard = ({
