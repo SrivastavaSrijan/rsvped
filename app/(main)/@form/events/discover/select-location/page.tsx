@@ -7,7 +7,7 @@ import { getAPI } from '@/server/api'
 
 export default async function LocationForm() {
 	const api = await getAPI()
-	const locations = await api.location.list()
+	const locations = await api.location.list.core()
 	const prefill = await getEncryptedCookie<Partial<LocationFormData>>(
 		CookieNames.PrefillLocation
 	)

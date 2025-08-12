@@ -43,7 +43,7 @@ enum LocationStep {
 
 interface LocationModalProps {
 	prefill: Partial<LocationFormData> | null
-	locations: RouterOutput['location']['list']
+	locations: RouterOutput['location']['list']['core']
 }
 
 interface StepState {

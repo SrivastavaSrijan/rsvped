@@ -16,7 +16,7 @@ import type { RouterOutput } from '@/server/api'
 
 const MOBILE_PAGE_SIZE = 6 // 2 column * 3 rows
 
-type LocationsData = RouterOutput['location']['list']['continents']
+type LocationsData = RouterOutput['location']['list']['core']['continents']
 type LocationData = LocationsData[number]['locations'][number]
 interface Location extends LocationData {
 	link?: boolean
