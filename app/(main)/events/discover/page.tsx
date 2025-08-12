@@ -78,7 +78,9 @@ async function resolveUserLocation() {
 
 	if (savedLocationId) {
 		try {
-			const location = await api.location.byId({ id: savedLocationId })
+			const location = await api.location.get.byId({
+				id: savedLocationId,
+			})
 			if (location) {
 				return { locationId: savedLocationId, location }
 			}
@@ -90,7 +92,7 @@ async function resolveUserLocation() {
 	}
 
 	// 3. Fallback to the first available location in the system
-	const defaultLocation = await api.location.getDefault()
+	const defaultLocation = await api.location.get.default()
 	if (defaultLocation) {
 		return { locationId: defaultLocation.id, location: defaultLocation }
 	}
@@ -245,7 +247,7 @@ interface LocationsListProps {
 
 const LocationsList = async ({ defaultContinent }: LocationsListProps) => {
 	const api = await getAPI()
-	const { continents } = await api.location.list()
+	const { continents } = await api.location.list.core()
 
 	return <Locations continents={continents} defaultValue={defaultContinent} />
 }
