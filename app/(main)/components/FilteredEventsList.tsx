@@ -10,13 +10,13 @@ import {
 	ProgressiveEventsList,
 } from './index'
 
-interface CommunityEventsProps extends CreateEventListParams {}
+interface FilteredEventsListProps extends CreateEventListParams {}
 
-export const CommunityEvents = async ({
+export const FilteredEventsList = async ({
 	period,
 	page,
 	...props
-}: CommunityEventsProps) => {
+}: FilteredEventsListProps) => {
 	const api = await getAPI()
 	const params = createEventListParams({ period, ...props })
 	const coreEvents = await api.event.list.core(params)

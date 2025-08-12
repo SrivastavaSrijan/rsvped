@@ -13,7 +13,7 @@ import {
 	CategoryDiscoverCard,
 	CommunityDiscoverCard,
 	EventDiscoverCard,
-	Locations,
+	LocationsDiscover,
 	ResponsiveGridCarousel,
 } from '../../components'
 import { copy } from '../../copy'
@@ -249,7 +249,12 @@ const LocationsList = async ({ defaultContinent }: LocationsListProps) => {
 	const api = await getAPI()
 	const { continents } = await api.location.list.core()
 
-	return <Locations continents={continents} defaultValue={defaultContinent} />
+	return (
+		<LocationsDiscover
+			continents={continents}
+			defaultValue={defaultContinent}
+		/>
+	)
 }
 
 export default async function DiscoverEvents() {

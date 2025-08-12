@@ -38,6 +38,13 @@ export const copy = {
 		communities: 'Featured Communities',
 		location: 'Explore Local Events',
 	},
+	location: {
+		view: {
+			description(name: string, country: string, continent: string) {
+				return `Explore events in ${name}, ${country}, ${continent}. Find your next adventure!`
+			},
+		},
+	},
 	community: {
 		home: {
 			title: 'Communities',

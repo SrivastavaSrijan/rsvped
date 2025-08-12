@@ -1,6 +1,6 @@
 export const devConfig = {
 	delay: {
-		min: 500, // ms
-		max: 2500, // ms
+		min: 0, // ms
+		max: 0, // ms
 	},
 }

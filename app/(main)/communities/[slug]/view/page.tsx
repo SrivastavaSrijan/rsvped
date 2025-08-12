@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { CommunityEvents, CommunityHeader } from '@/app/(main)/components'
+import { CommunityHeader, FilteredEventsList } from '@/app/(main)/components'
 import { getAPI } from '@/server/api'
 
 interface ViewCommunityProps {
@@ -35,7 +35,7 @@ export default async function ViewCommunity({
 			<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
 				<CommunityHeader {...community} />
 				<div className="flex flex-col px-3 pb-6 lg:gap-8 lg:px-8 gap-4 lg:pb-8">
-					<CommunityEvents
+					<FilteredEventsList
 						communityId={community.id}
 						period={period as 'upcoming' | 'past'}
 						page={parseInt(page, 10)}

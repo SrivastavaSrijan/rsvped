@@ -18,18 +18,18 @@ const MOBILE_PAGE_SIZE = 6 // 2 column * 3 rows
 
 type LocationsData = RouterOutput['location']['list']['core']['continents']
 type LocationData = LocationsData[number]['locations'][number]
-interface Location extends LocationData {
+interface LocationDiscoverCardProps extends LocationData {
 	link?: boolean
 }
 
-export const Location = ({
+export const LocationDiscoverCard = ({
 	id,
 	name,
 	slug,
 	iconPath,
 	_count: count,
 	link = false,
-}: Location) => {
+}: LocationDiscoverCardProps) => {
 	const renderContent = (
 		<div className="flex flex-row  gap-2 lg:gap-2 items-center hover:bg-card lg:p-2 p-2 rounded-lg transition-colors">
 			<Image
@@ -72,11 +72,14 @@ export const Location = ({
 	)
 }
 
-interface LocationsProps {
+interface LocationsDiscoverProps {
 	continents: LocationsData
 	defaultValue?: string
 }
-export const Locations = ({ continents, defaultValue }: LocationsProps) => {
+export const LocationsDiscover = ({
+	continents,
+	defaultValue,
+}: LocationsDiscoverProps) => {
 	return (
 		<Tabs
 			defaultValue={defaultValue || Object.keys(continents)[0]}
@@ -93,7 +96,7 @@ export const Locations = ({ continents, defaultValue }: LocationsProps) => {
 				<TabsContent key={continent} value={continent}>
 					<div className="lg:grid hidden lg:grid-cols-4 grid-cols-2 lg:gap-4 gap-2">
 						{locations.map((location) => (
-							<Location link key={location.id} {...location} />
+							<LocationDiscoverCard link key={location.id} {...location} />
 						))}
 					</div>
 					<div className="lg:hidden flex flex-row">
@@ -107,7 +110,11 @@ export const Locations = ({ continents, defaultValue }: LocationsProps) => {
 											className="pl-3 basis-10/12 grid grid-cols-2 gap-3"
 										>
 											{chunkedLocations.map((location) => (
-												<Location key={location.id} link {...location} />
+												<LocationDiscoverCard
+													key={location.id}
+													link
+													{...location}
+												/>
 											))}
 										</CarouselItem>
 									)

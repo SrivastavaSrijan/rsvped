@@ -28,7 +28,7 @@ import { type LocationFormData, updateLocationAction } from '@/server/actions'
 import { LocationActionErrorCodeMap } from '@/server/actions/constants'
 import type { LocationUpdateActionResponse } from '@/server/actions/types'
 import type { RouterOutput } from '@/server/api'
-import { Location } from './Locations'
+import { LocationDiscoverCard } from './LocationsDiscover'
 
 const initialState: LocationUpdateActionResponse = {
 	success: false,
@@ -315,7 +315,7 @@ export const LocationModal = ({ locations }: LocationModalProps) => {
 													onClick={() => handleLocationSelect(location.id)}
 												>
 													<CardContent className="flex items-center justify-between p-0">
-														<Location {...location} />
+														<LocationDiscoverCard {...location} />
 														{stepState.selectedLocationId === location.id && (
 															<Check className="size-4 text-primary" />
 														)}

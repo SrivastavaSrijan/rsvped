@@ -309,4 +309,20 @@
 	--max-width-wide-page: 960px;
 	--max-width-extra-wide-page: 1080px;
 	--horizontal-padding: 1rem;
+	/* Blur mask gradients */
+	--mask-blur-mobile: linear-gradient(
+		to top,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 1) 70%,
+		rgba(0, 0, 0, 0.3) 75%,
+		rgba(0, 0, 0, 0) 80%
+	);
+	--mask-blur-desktop: linear-gradient(
+		to right,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 1) 50%,
+		rgba(0, 0, 0, 0.6) 55%,
+		rgba(0, 0, 0, 0.3) 60%,
+		rgba(0, 0, 0, 0) 65%
+	);
 }
