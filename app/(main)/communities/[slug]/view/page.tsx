@@ -1,16 +1,10 @@
 import { notFound } from 'next/navigation'
 import { CommunityHeader, FilteredEventsList } from '@/app/(main)/components'
-import { getAPI } from '@/server/api'
+import { type EventListSearchParams, getAPI } from '@/server/api'
 
 interface ViewCommunityProps {
 	params: Promise<{ slug: string }>
-	searchParams: Promise<{
-		period?: string
-		page?: string
-		on?: string
-		after?: string
-		before?: string
-	}>
+	searchParams: Promise<EventListSearchParams>
 }
 
 export default async function ViewCommunity({
@@ -18,15 +12,9 @@ export default async function ViewCommunity({
 	searchParams,
 }: ViewCommunityProps) {
 	const { slug } = await params
-	const {
-		period = 'upcoming',
-		page = '1',
-		on,
-		after,
-		before,
-	} = await searchParams
 	const api = await getAPI()
 	try {
+		1
 		const community = await api.community.get.enhanced({ slug })
 		if (!community) {
 			return notFound()
@@ -36,12 +24,8 @@ export default async function ViewCommunity({
 				<CommunityHeader {...community} />
 				<div className="flex flex-col px-3 pb-6 lg:gap-8 lg:px-8 gap-4 lg:pb-8">
 					<FilteredEventsList
-						communityId={community.id}
-						period={period as 'upcoming' | 'past'}
-						page={parseInt(page, 10)}
-						on={on}
-						after={after}
-						before={before}
+						where={{ communityId: community.id }}
+						{...(await searchParams)}
 					/>
 				</div>
 			</div>

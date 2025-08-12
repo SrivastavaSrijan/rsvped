@@ -1,16 +1,10 @@
 import { notFound } from 'next/navigation'
-import { getAPI } from '@/server/api'
+import { type EventListSearchParams, getAPI } from '@/server/api'
 import { FilteredEventsList, LocationHeader } from '../../../components'
 
 interface DiscoverLocationProps {
 	params: Promise<{ slug: string }>
-	searchParams: Promise<{
-		period?: string
-		page?: string
-		on?: string
-		after?: string
-		before?: string
-	}>
+	searchParams: Promise<EventListSearchParams>
 }
 
 export default async function DiscoverLocation({
@@ -18,13 +12,6 @@ export default async function DiscoverLocation({
 	searchParams,
 }: DiscoverLocationProps) {
 	const { slug } = await params
-	const {
-		period = 'upcoming',
-		page = '1',
-		on,
-		after,
-		before,
-	} = await searchParams
 	const api = await getAPI()
 	try {
 		const location = await api.location.get.core({ slug })
@@ -37,12 +24,8 @@ export default async function DiscoverLocation({
 				<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
 					<div className="flex flex-col px-3 pb-6 lg:gap-8 lg:px-8 gap-4 lg:pb-8">
 						<FilteredEventsList
-							locationId={location.id}
-							period={period as 'upcoming' | 'past'}
-							page={parseInt(page, 10)}
-							on={on}
-							after={after}
-							before={before}
+							where={{ locationId: location.id }}
+							{...(await searchParams)}
 						/>
 					</div>
 				</div>

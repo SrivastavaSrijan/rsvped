@@ -99,10 +99,10 @@ export const UserCommunityItem = (props: UserCommunityItemProps) => {
 					wrapperClassName="relative aspect-square h-[75px] w-[75px] rounded-lg"
 					sizes={{ lg: '30vw', sm: '50vw' }}
 				/>
-				<div className="col-span-12 lg:col-span-8 flex flex-col justify-center">
-					<div className="flex flex-col lg:gap-3 gap-3">
-						<div className="flex flex-col lg:gap-1 gap-1">
-							<h3 className="truncate lg:text-lg text-base font-semibold">
+				<div className="col-span-12 lg:col-span-8 w-full flex flex-col justify-center">
+					<div className="flex flex-col lg:gap-3 gap-3 w-full">
+						<div className="flex flex-col lg:gap-1 gap-1 w-full">
+							<h3 className="truncate lg:text-lg text-base font-semibold w-full">
 								{name}
 							</h3>
 							<p className="text-sm text-muted-foreground">
@@ -122,14 +122,14 @@ export const UserCommunityItem = (props: UserCommunityItemProps) => {
 						<UserCommunityEventsListSkeleton />
 					) : (
 						<>
-							<p className="text-xs text-muted-foreground">Upcoming Events</p>
+							<p className="text-xs text-muted-foreground">Latest Events</p>
 							{communityEventsCount > 0 ? (
 								communityEvents.map((event) => (
 									<UserCommunityEventItem key={event.id} event={event} />
 								))
 							) : (
 								<p className="text-sm text-muted-foreground">
-									No upcoming events
+									No latest events
 								</p>
 							)}
 						</>

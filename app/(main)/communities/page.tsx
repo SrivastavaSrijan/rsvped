@@ -1,30 +1,42 @@
 import { MembershipRole } from '@prisma/client'
+import dayjs from 'dayjs'
 import {
-	type CombinedMembershipRole,
+	type CommunityListSearchParams,
+	EventTimeFrame,
 	getAPI,
 	MembershipRoleOwner,
+	type RouterInput,
+	SortDirection,
 } from '@/server/api'
-import {
-	createCommunityListParams,
-	ProgressiveCommunitiesList,
-} from '../components'
+import { ProgressiveCommunitiesList } from '../components'
 import { copy } from '../copy'
 
+type BuildCommunityListInputParams = Pick<
+	RouterInput['community']['list']['core'],
+	'exclude' | 'include'
+> &
+	CommunityListSearchParams
+
 const getCommunities = async ({
-	include,
-	exclude,
-	page = '1',
-}: {
-	include?: CombinedMembershipRole[]
-	exclude?: CombinedMembershipRole[]
-	page?: string
-}) => {
+	period = EventTimeFrame.UPCOMING,
+	page,
+	size,
+	...rest
+}: BuildCommunityListInputParams) => {
+	const now = dayjs().toISOString()
+
 	const api = await getAPI()
-	const params = createCommunityListParams({
-		include,
-		exclude,
+	const params = {
+		sort:
+			period === EventTimeFrame.UPCOMING
+				? SortDirection.ASC
+				: SortDirection.DESC,
+		after: period === EventTimeFrame.UPCOMING ? now : undefined,
+		before: period === EventTimeFrame.PAST ? now : undefined,
 		page: parseInt(page ?? '1', 10) || 1,
-	})
+		size: parseInt(size ?? '10', 10) || 10,
+		...rest,
+	} satisfies RouterInput['community']['list']['core']
 	return {
 		communities: await api.community.list.core(params),
 		params,
@@ -34,15 +46,19 @@ const getCommunities = async ({
 export default async function ViewCommunities({
 	searchParams,
 }: {
-	searchParams: Promise<{ page?: string }>
+	searchParams: Promise<CommunityListSearchParams>
 }) {
-	const { page = '1' } = await searchParams
+	const searchParmsRes = await searchParams
 
 	const [managedResult, userResult] = await Promise.all([
 		// Communities where user is admin or owner
 		getCommunities({
-			include: [MembershipRole.ADMIN, MembershipRoleOwner.OWNER],
-			page,
+			include: [
+				MembershipRole.ADMIN,
+				MembershipRoleOwner.OWNER,
+				MembershipRole.MODERATOR,
+			],
+			...searchParmsRes,
 		}),
 		// Communities where user is a member but NOT admin, moderator, or owner
 		getCommunities({
@@ -52,7 +68,7 @@ export default async function ViewCommunities({
 				MembershipRole.MODERATOR,
 				MembershipRoleOwner.OWNER,
 			],
-			page,
+			...searchParmsRes,
 		}),
 	])
 

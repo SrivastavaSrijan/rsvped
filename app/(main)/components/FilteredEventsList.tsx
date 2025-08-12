@@ -5,12 +5,12 @@ import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { getAPI } from '@/server/api'
 import {
-	type CreateEventListParams,
-	createEventListParams,
+	type BuildEventListInputParams,
+	buildEventListQuery,
 	ProgressiveEventsList,
 } from './index'
 
-interface FilteredEventsListProps extends CreateEventListParams {}
+interface FilteredEventsListProps extends BuildEventListInputParams {}
 
 export const FilteredEventsList = async ({
 	period,
@@ -18,7 +18,7 @@ export const FilteredEventsList = async ({
 	...props
 }: FilteredEventsListProps) => {
 	const api = await getAPI()
-	const params = createEventListParams({ period, ...props })
+	const params = buildEventListQuery({ period, ...props })
 	const coreEvents = await api.event.list.core(params)
 
 	return (

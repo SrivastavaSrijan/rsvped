@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
+import { SortDirection } from '../../shared'
 import { locationCoreInclude, locationEnhancedInclude } from './includes'
 
 const GetLocationInput = z.object({ slug: z.string() })
@@ -67,7 +68,7 @@ export const locationGetRouter = createTRPCRouter({
 					some: { isPublished: true, deletedAt: null },
 				},
 			},
-			orderBy: { name: 'asc' },
+			orderBy: { name: SortDirection.ASC },
 		})
 		if (!location) {
 			throw TRPCErrors.locationNotFound()

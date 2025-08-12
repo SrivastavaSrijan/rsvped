@@ -1,42 +1,35 @@
-import type { EventRole } from '@prisma/client'
 import dayjs from 'dayjs'
 import { Suspense } from 'react'
 import { DateFilterMessage } from '@/components/shared'
-import type { RouterInput, RouterOutput } from '@/server/api'
-import { getAPI } from '@/server/api'
+import type {
+	EventListSearchParams,
+	RouterInput,
+	RouterOutput,
+} from '@/server/api'
+import { EventTimeFrame, getAPI, SortDirection } from '@/server/api'
 import { copy } from '../copy'
 import { EventCard } from './EventCard'
 import { EventsPagination } from './EventsPagination'
 import { NoEvents } from './NoEvents'
 import { PeriodTabs } from './PeriodTabs'
 
-export interface CreateEventListParams {
-	period?: 'upcoming' | 'past'
-	page?: number
-	roles?: EventRole[]
-	communityId?: string
-	locationId?: string
-	on?: string
-	after?: string
-	before?: string
-}
-/**
- * Creates a consistent set of parameters for core and enhanced event list queries
- * Based on common filtering patterns used across the app
- */
-type CreateEventListReturn = RouterInput['event']['list']['core'] & {
-	period?: 'upcoming' | 'past'
-}
-export function createEventListParams({
+export type BuildEventListInputParams = Pick<
+	RouterInput['event']['list']['core'],
+	'roles' | 'where'
+> &
+	EventListSearchParams
+
+export type EventListInput = RouterInput['event']['list']['core']
+
+export function buildEventListQuery({
 	on,
+	page,
+	size,
 	after,
 	before,
-	period,
-	page = 1,
-	roles,
-	communityId,
-	locationId,
-}: CreateEventListParams): CreateEventListReturn {
+	period = EventTimeFrame.UPCOMING,
+	...rest
+}: BuildEventListInputParams): EventListInput {
 	const now = dayjs().toISOString()
 
 	if (on) {
@@ -47,23 +40,23 @@ export function createEventListParams({
 	}
 	return {
 		period,
-		sort: period === 'upcoming' ? 'asc' : 'desc',
+		page: +(page ?? 1),
+		size: +(size ?? 10),
+		sort:
+			period === EventTimeFrame.UPCOMING
+				? SortDirection.ASC
+				: SortDirection.DESC,
 		after: after
 			? dayjs(after).startOf('day').toISOString()
-			: period === 'upcoming'
+			: period === EventTimeFrame.UPCOMING
 				? now
 				: undefined,
 		before: before
 			? dayjs(before).endOf('day').toISOString()
-			: period === 'past'
+			: period === EventTimeFrame.PAST
 				? now
 				: undefined,
-		page,
-		roles,
-		where: {
-			communityId,
-			locationId,
-		},
+		...rest,
 	}
 }
 
@@ -103,7 +96,7 @@ type CoreEventData = RouterOutput['event']['list']['core'][number]
 
 interface ProgressiveEventsListProps {
 	coreEvents: CoreEventData[]
-	params: CreateEventListReturn
+	params: EventListInput
 	isEmpty?: boolean
 	emptyStateSlot?: React.ReactNode
 }

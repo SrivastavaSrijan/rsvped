@@ -3,15 +3,17 @@ import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { PaginationSchema } from '@/server/api/shared/schemas'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
+import { EventTimeFrame, SortDirection } from '../../shared'
 import { eventCoreInclude, eventEnhancedInclude } from './includes'
 
 const GetEventsInput = z
 	.object({
-		sort: z.enum(['asc', 'desc']).default('asc'),
+		sort: z.enum(SortDirection).default(SortDirection.ASC),
 		before: z.string().optional(),
 		after: z.string().optional(),
 		on: z.string().optional(),
-		roles: z.array(z.nativeEnum(EventRole)).optional(),
+		period: z.enum(EventTimeFrame).default(EventTimeFrame.UPCOMING),
+		roles: z.array(z.enum(EventRole)).optional(),
 		where: z
 			.object({
 				locationId: z.string().optional().nullable(),

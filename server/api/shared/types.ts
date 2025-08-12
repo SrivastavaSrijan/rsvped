@@ -9,3 +9,26 @@ export enum MembershipRoleOwner {
 }
 
 export type CombinedMembershipRole = MembershipRole | MembershipRoleOwner
+export enum EventTimeFrame {
+	UPCOMING = 'upcoming',
+	PAST = 'past',
+}
+export enum SortDirection {
+	ASC = 'asc',
+	DESC = 'desc',
+}
+export interface EventListSearchParams {
+	period?: EventTimeFrame
+	on?: string
+	after?: string
+	before?: string
+	page?: string
+	size?: string
+}
+
+export interface CommunityListSearchParams {
+	period?: EventTimeFrame
+
+	page?: string
+	size?: string
+}

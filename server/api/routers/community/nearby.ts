@@ -35,6 +35,7 @@ export const communityNearbyRouter = publicProcedure
 				_count: true,
 			},
 			where: {
+				isPublic: true,
 				events: {
 					some: {
 						deletedAt: null,

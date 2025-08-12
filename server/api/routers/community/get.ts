@@ -3,6 +3,7 @@ import type { inferProcedureBuilderResolverOptions } from '@trpc/server'
 import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
+import { SortDirection } from '../../shared'
 
 const GetCommunityInput = z.object({ slug: z.string() })
 
@@ -33,7 +34,7 @@ const communityEnhancedSelect = {
 			priceCents: true,
 			currency: true,
 		},
-		orderBy: { priceCents: 'asc' },
+		orderBy: { priceCents: SortDirection.ASC },
 	},
 } satisfies Prisma.CommunitySelect
 

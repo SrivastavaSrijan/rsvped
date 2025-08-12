@@ -1,42 +1,10 @@
 import { Suspense } from 'react'
-import type {
-	CombinedMembershipRole,
-	RouterInput,
-	RouterOutput,
-} from '@/server/api'
+import type { RouterInput, RouterOutput } from '@/server/api'
 import { getAPI } from '@/server/api'
 import { ManagedCommunitiesGrid } from './ManagedCommunitiesGrid'
 import { UserCommunitiesList } from './UserCommunitiesList'
 
-export interface CreateCommunityListParams {
-	page?: number
-	include?: CombinedMembershipRole[]
-	exclude?: CombinedMembershipRole[]
-	sort?: 'asc' | 'desc'
-}
-
-/**
- * Creates a consistent set of parameters for core and enhanced community list queries
- * Based on common filtering patterns used across the app
- */
-type CreateCommunityListReturn = RouterInput['community']['list']['core']
-
-export function createCommunityListParams({
-	page = 1,
-	include,
-	exclude,
-	sort = 'asc',
-}: CreateCommunityListParams): CreateCommunityListReturn {
-	return {
-		page,
-		include,
-		exclude,
-		sort,
-		where: {
-			isPublic: true,
-		},
-	} satisfies CreateCommunityListReturn
-}
+type CommunityListInput = RouterInput['community']['list']['core']
 
 /**
  * Type guard to check if communities data is enhanced with additional relations
@@ -70,7 +38,7 @@ type CoreCommunityData = RouterOutput['community']['list']['core'][number]
 
 interface ProgressiveCommunitiesListProps {
 	coreCommunities: CoreCommunityData[]
-	params: CreateCommunityListReturn
+	params: CommunityListInput
 	variant: 'managed' | 'user'
 }
 

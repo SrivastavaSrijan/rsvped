@@ -1,7 +1,7 @@
 import { EventRole } from '@prisma/client'
 import type { Metadata } from 'next'
-import { getAPI } from '@/server/api'
-import { createEventListParams, ProgressiveEventsList } from '../../components'
+import { type EventListSearchParams, getAPI } from '@/server/api'
+import { buildEventListQuery, ProgressiveEventsList } from '../../components'
 
 export const metadata: Metadata = {
 	title: "Events · RSVP'd",
@@ -11,15 +11,13 @@ export const metadata: Metadata = {
 export default async function EventsHome({
 	searchParams,
 }: {
-	searchParams: Promise<{ period?: string; page?: string }>
+	searchParams: Promise<EventListSearchParams>
 }) {
-	const { period = 'upcoming', page = '1' } = await searchParams
 	const api = await getAPI()
 
-	const params = createEventListParams({
-		period: period as 'upcoming' | 'past',
-		page: parseInt(page, 10) || 1,
+	const params = buildEventListQuery({
 		roles: [EventRole.CHECKIN, EventRole.MANAGER, EventRole.CO_HOST],
+		...(await searchParams),
 	})
 
 	const coreEvents = await api.event.list.core(params)

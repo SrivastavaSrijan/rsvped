@@ -3,11 +3,13 @@ import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { PaginationSchema } from '@/server/api/shared/schemas'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
-import { MembershipRoleOwner } from '../../shared/types'
+import { MembershipRoleOwner, SortDirection } from '../../shared/types'
 
 const GetCommunitiesInput = z
 	.object({
-		sort: z.enum(['asc', 'desc']).optional().default('asc'),
+		sort: z.enum(SortDirection).optional().default(SortDirection.ASC),
+		before: z.string().optional(),
+		after: z.string().optional(),
 		include: z
 			.array(
 				z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
@@ -18,6 +20,8 @@ const GetCommunitiesInput = z
 				z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
 			)
 			.optional(),
+		page: z.number().int().min(1).optional().default(1),
+		size: z.number().int().min(1).max(100).optional().default(10),
 		where: z
 			.object({
 				isPublic: z.boolean().optional().default(true),
@@ -105,9 +109,10 @@ const communityListBaseProcedure = protectedProcedure
 			},
 			where: {
 				...where,
+
 				...(roleFilter && roleFilter),
 			},
-		}
+		} satisfies Prisma.CommunityFindManyArgs
 
 		return next({
 			ctx: {
@@ -148,7 +153,7 @@ const communityEnhancedSelect = {
 			endDate: true,
 		},
 		orderBy: {
-			startDate: 'asc',
+			startDate: SortDirection.DESC,
 		},
 	},
 } satisfies Prisma.CommunitySelect

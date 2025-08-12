@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
+import { SortDirection } from '../../shared'
 
 // Type for a location with event counts
 const locationSelect = {
@@ -96,7 +97,11 @@ const fetchGroupedLocations = async (prisma: PrismaClient) => {
 				some: { isPublished: true, deletedAt: null },
 			},
 		},
-		orderBy: [{ continent: 'asc' }, { country: 'asc' }, { name: 'asc' }],
+		orderBy: [
+			{ continent: SortDirection.ASC },
+			{ country: SortDirection.ASC },
+			{ name: SortDirection.ASC },
+		],
 		select: locationSelect,
 	})
 	return groupLocations(locationsData)
