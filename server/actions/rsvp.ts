@@ -37,7 +37,7 @@ export async function createRsvpAction(
 
 	try {
 		const api = await getAPI()
-		await api.rsvp.create(validation.data)
+		await api.rsvp.crud.create(validation.data)
 		return { success: true }
 	} catch (error) {
 		if (error instanceof TRPCError) {
