@@ -28,7 +28,7 @@ export const CommunityDiscoverCard = ({
 		: 'default'
 
 	return (
-		<Card className="w-full lg:gap-6 gap-3">
+		<Card className="w-full lg:gap-6 gap-3 border border-card hover:border-white/50 transition-colors">
 			<CardHeader>
 				<div className="flex items-start gap-4">
 					{/* Image */}

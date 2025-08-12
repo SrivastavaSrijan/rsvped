@@ -43,7 +43,7 @@ const CollaboratorsSkeleton = () => (
 
 const RSVPSkeleton = () => (
 	<div className="flex gap-2">
-		<div className="h-2 w-16 animate-pulse rounded-full bg-white/20" />
+		<div className="h-4 w-16 animate-pulse rounded-full bg-white/20" />
 		<div className="flex gap-1">
 			<div className="size-4 animate-pulse rounded-full bg-white/20" />
 			<div className="size-4 animate-pulse rounded-full bg-white/20" />

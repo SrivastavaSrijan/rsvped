@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
+import { nanoid } from 'nanoid'
 import Link from 'next/link'
-import { Button, Image } from '@/components/ui'
+import { Button, Image, Skeleton } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
 import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
@@ -52,8 +53,35 @@ export const UserCommunityEventItem = ({
 	)
 }
 
+// Add skeleton component for event item
+const UserCommunityEventItemSkeleton = () => {
+	return (
+		<div className="flex flex-col gap-1 w-full">
+			<div className="flex items-center gap-2 w-full">
+				<Skeleton className="h-5 flex-1" />
+				<Skeleton className="size-3" />
+			</div>
+			<Skeleton className="h-3 w-20" />
+			<Skeleton className="h-3 w-16" />
+		</div>
+	)
+}
+
+// Add skeleton for the entire events section
+const UserCommunityEventsListSkeleton = () => {
+	return (
+		<div className="flex flex-col gap-2">
+			<Skeleton className="h-3 w-24" />
+			{Array.from({ length: 2 }).map((_) => (
+				<UserCommunityEventItemSkeleton key={nanoid()} />
+			))}
+		</div>
+	)
+}
+
 export const UserCommunityItem = (props: UserCommunityItemProps) => {
 	const { id, name, coverImage, _count, slug } = props
+	const communityEventsCount = _count?.events ?? 0
 	// Check if this community has events data (enhanced)
 	const communityEvents = hasEvents(props) ? props.events : []
 
@@ -90,13 +118,21 @@ export const UserCommunityItem = (props: UserCommunityItemProps) => {
 			<hr className="lg:hidden" />
 			<div className="flex flex-col lg:col-span-8 gap-2">
 				<div className="flex gap-2 flex-col lg:gap-3">
-					<p className="text-xs text-muted-foreground">Upcoming Events</p>
-					{communityEvents.length > 0 ? (
-						communityEvents.map((event) => (
-							<UserCommunityEventItem key={event.id} event={event} />
-						))
+					{!communityEvents?.length && communityEventsCount > 0 ? (
+						<UserCommunityEventsListSkeleton />
 					) : (
-						<p className="text-sm text-muted-foreground">No upcoming events</p>
+						<>
+							<p className="text-xs text-muted-foreground">Upcoming Events</p>
+							{communityEventsCount > 0 ? (
+								communityEvents.map((event) => (
+									<UserCommunityEventItem key={event.id} event={event} />
+								))
+							) : (
+								<p className="text-sm text-muted-foreground">
+									No upcoming events
+								</p>
+							)}
+						</>
 					)}
 				</div>
 			</div>

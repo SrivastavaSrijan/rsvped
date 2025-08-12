@@ -112,10 +112,6 @@ export const ProgressiveEventsList = ({
 	coreEvents,
 	params,
 }: ProgressiveEventsListProps) => {
-	if (coreEvents.length === 0) {
-		return <NoEvents />
-	}
-
 	return (
 		<>
 			<div className="flex w-full flex-row justify-between gap-4">
@@ -131,6 +127,7 @@ export const ProgressiveEventsList = ({
 			</div>
 
 			<div className="flex h-full w-full flex-col items-center justify-center">
+				{coreEvents.length === 0 && <NoEvents />}
 				<Suspense
 					fallback={coreEvents.map((event, index) => (
 						<EventCard

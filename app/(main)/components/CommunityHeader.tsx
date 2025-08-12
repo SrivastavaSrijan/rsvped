@@ -43,6 +43,7 @@ export const CommunityHeader = ({
 						alt={name}
 						className="aspect-video lg:rounded-xl object-cover"
 						fill
+						priority
 						wrapperClassName="h-full w-full"
 						sizes={{ lg: '60vw', sm: '50vw' }}
 					/>

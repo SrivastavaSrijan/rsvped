@@ -4,8 +4,8 @@ import { headers } from 'next/headers'
 import type { Session } from 'next-auth'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
-
 import { auth } from '@/lib/auth'
+import { devConfig } from '@/lib/config'
 import { prisma } from '@/lib/prisma'
 import { TRPCErrors } from '@/server/api/shared/errors'
 
@@ -51,8 +51,20 @@ const t = initTRPC.context<Context>().create({
 	},
 })
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const delayMiddleware = t.middleware(async ({ next }) => {
+	if (process.env.NODE_ENV === 'development') {
+		const { min, max } = devConfig.delay
+		const delay = Math.floor(Math.random() * (max - min + 1)) + min
+		await sleep(delay)
+	}
+	return next()
+})
+const baseProcedure = t.procedure.use(delayMiddleware)
+export const publicProcedure = baseProcedure
+
 export const createTRPCRouter = t.router
-export const publicProcedure = t.procedure
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 	if (!ctx.session || !ctx.session.user) {
@@ -66,4 +78,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 	})
 })
 
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
+export const protectedProcedure = baseProcedure.use(enforceUserIsAuthed)

@@ -171,13 +171,14 @@ enum BillingInterval {
  */
 
 model Location {
-  id        String @id @default(cuid())
-  name      String // "New York City"
-  slug      String @unique // "nyc"
-  country   String // "United States"
-  continent String // "North America" 
-  timezone  String // "America/New_York"
-  iconPath  String // "/assets/location-icons/nyc-icon.png"
+  id         String  @id @default(cuid())
+  name       String  // "New York City"
+  slug       String  @unique // "nyc"
+  country    String  // "United States"
+  continent  String  // "North America" 
+  timezone   String  // "America/New_York"
+  iconPath   String  // "/assets/location-icons/nyc-icon.png"
+  coverImage String? // Unsplash landscape image URL
   
   events Event[]
   users  User[]

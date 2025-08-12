@@ -20,7 +20,7 @@ export const EventDiscoverCard = ({
 	})
 	return (
 		<Link href={Routes.Main.Events.ViewBySlug(slug)}>
-			<div className="flex flex-row gap-3 lg:gap-3 items-center">
+			<div className="flex flex-row gap-3 lg:gap-3 items-center hover:[&_img]:scale-105">
 				<div className="shrink-0">
 					{coverImage && (
 						<Image
@@ -28,7 +28,7 @@ export const EventDiscoverCard = ({
 							alt={title}
 							width={80}
 							height={80}
-							className="rounded-lg aspect-square object-cover"
+							className="rounded-lg aspect-square object-cover transition-transform"
 						/>
 					)}
 				</div>

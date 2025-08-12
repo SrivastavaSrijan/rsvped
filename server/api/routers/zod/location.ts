@@ -14,6 +14,7 @@ export const LocationModel = z.object({
 	continent: z.string(),
 	timezone: z.string(),
 	iconPath: z.string(),
+	coverImage: z.string().nullish(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 })

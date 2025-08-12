@@ -31,7 +31,7 @@ export const Location = ({
 	link = false,
 }: Location) => {
 	const renderContent = (
-		<div className="flex flex-row  gap-2 lg:gap-2 items-center">
+		<div className="flex flex-row  gap-2 lg:gap-2 items-center hover:bg-card lg:p-2 p-2 rounded-lg transition-colors">
 			<Image
 				unoptimized
 				fill
