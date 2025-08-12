@@ -76,6 +76,9 @@ const eventListBaseProcedure = protectedProcedure
 		const whereClause: Prisma.EventWhereInput = {
 			...(orConditions.length && { OR: orConditions }),
 			communityId: input?.where?.communityId ?? undefined,
+			locationId: input?.where?.locationId ?? undefined,
+			isPublished: true,
+			deletedAt: null,
 			...(startDate && { startDate }),
 		}
 
