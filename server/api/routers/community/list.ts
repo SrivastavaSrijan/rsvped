@@ -1,43 +1,46 @@
 import { MembershipRole, type Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
-import { PaginationSchema } from '@/server/api/shared/schemas'
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
-import { MembershipRoleOwner, SortDirection } from '../../shared/types'
+import { protectedPaginatedProcedure } from '@/server/api/shared/middleware'
+import { createTRPCRouter } from '@/server/api/trpc'
+import {
+	MembershipRoleOwner,
+	type PaginatedResponse,
+	SortDirection,
+} from '../../shared/types'
 
-const GetCommunitiesInput = z
-	.object({
-		sort: z.enum(SortDirection).optional().default(SortDirection.ASC),
-		before: z.string().optional(),
-		after: z.string().optional(),
-		include: z
-			.array(
-				z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
-			)
-			.optional(),
-		exclude: z
-			.array(
-				z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
-			)
-			.optional(),
-		page: z.number().int().min(1).optional().default(1),
-		size: z.number().int().min(1).max(100).optional().default(10),
-		where: z
-			.object({
-				isPublic: z.boolean().optional().default(true),
-			})
-			.partial()
-			.optional()
-			.default({ isPublic: true }),
-	})
-	.merge(PaginationSchema)
+const GetCommunitiesInput = z.object({
+	sort: z.enum(SortDirection).optional().default(SortDirection.ASC),
+	before: z.string().optional(),
+	after: z.string().optional(),
+	include: z
+		.array(
+			z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
+		)
+		.optional(),
+	exclude: z
+		.array(
+			z.union([z.enum(MembershipRole), z.literal(MembershipRoleOwner.OWNER)])
+		)
+		.optional(),
+	where: z
+		.object({
+			isPublic: z.boolean().optional().default(true),
+		})
+		.partial()
+		.optional()
+		.default({ isPublic: true }),
+})
 
-const communityListBaseProcedure = protectedProcedure
+const communityListBaseProcedure = protectedPaginatedProcedure
 	.input(GetCommunitiesInput)
 	.use(async ({ ctx, input, next }) => {
-		const { sort, page, size, include, exclude, where } = input
+		const { sort, include, exclude, where } = input
 		const user = ctx.session?.user
 		if (!user) throw TRPCErrors.unauthorized()
+
+		// Get pagination from middleware
+		const { skip, take } = ctx.pagination
 
 		let roleFilter: Prisma.CommunityWhereInput | undefined
 
@@ -102,8 +105,8 @@ const communityListBaseProcedure = protectedProcedure
 		}
 
 		const args = {
-			skip: (page - 1) * size,
-			take: size,
+			skip,
+			take,
 			orderBy: {
 				name: sort,
 			},
@@ -162,10 +165,14 @@ export const communityListRouter = createTRPCRouter({
 	core: communityListBaseProcedure.query(async ({ ctx }) => {
 		const { user, args } = ctx
 
-		const communities = await ctx.prisma.community.findMany({
-			...args,
-			select: communityCoreSelect,
-		})
+		// Get both data and count in parallel
+		const [communities, total] = await Promise.all([
+			ctx.prisma.community.findMany({
+				...args,
+				select: communityCoreSelect,
+			}),
+			ctx.prisma.community.count({ where: args.where }),
+		])
 
 		const communityIds = communities.map(({ id }) => id)
 		const userMemberships = await ctx.prisma.communityMembership.findMany({
@@ -183,21 +190,30 @@ export const communityListRouter = createTRPCRouter({
 			userMemberships.map(({ communityId, role }) => [communityId, role])
 		)
 
-		return communities.map((community) => ({
+		const data = communities.map((community) => ({
 			...community,
 			metadata: {
 				role: membershipMap.get(community.id) ?? null,
 			},
 		}))
+
+		return {
+			data,
+			pagination: ctx.pagination.createMetadata(total),
+		} satisfies PaginatedResponse<(typeof data)[number]>
 	}),
 
 	enhanced: communityListBaseProcedure.query(async ({ ctx }) => {
 		const { user, args } = ctx
 
-		const communities = await ctx.prisma.community.findMany({
-			...args,
-			select: communityEnhancedSelect,
-		})
+		// Get both data and count in parallel
+		const [communities, total] = await Promise.all([
+			ctx.prisma.community.findMany({
+				...args,
+				select: communityEnhancedSelect,
+			}),
+			ctx.prisma.community.count({ where: args.where }),
+		])
 
 		const communityIds = communities.map(({ id }) => id)
 		const userMemberships = await ctx.prisma.communityMembership.findMany({
@@ -215,11 +231,16 @@ export const communityListRouter = createTRPCRouter({
 			userMemberships.map(({ communityId, role }) => [communityId, role])
 		)
 
-		return communities.map((community) => ({
+		const data = communities.map((community) => ({
 			...community,
 			metadata: {
 				role: membershipMap.get(community.id) ?? null,
 			},
 		}))
+
+		return {
+			data,
+			pagination: ctx.pagination.createMetadata(total),
+		} satisfies PaginatedResponse<(typeof data)[number]>
 	}),
 })

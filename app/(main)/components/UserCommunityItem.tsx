@@ -4,17 +4,19 @@ import Link from 'next/link'
 import { Button, Image, Skeleton } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
 import { getEventDateTime } from '@/lib/hooks'
-import type { RouterOutput } from '@/server/api'
+import type { ExtractPaginatedData, RouterOutput } from '@/server/api'
 
 type CommunityData =
-	| RouterOutput['community']['list']['core'][number]
-	| RouterOutput['community']['list']['enhanced'][number]
+	| ExtractPaginatedData<RouterOutput['community']['list']['core']>
+	| ExtractPaginatedData<RouterOutput['community']['list']['enhanced']>
 type UserCommunityItemProps = CommunityData
 
 // Type guard to check if community data has events (enhanced data)
 function hasEvents(
 	community: CommunityData
-): community is RouterOutput['community']['list']['enhanced'][number] {
+): community is ExtractPaginatedData<
+	RouterOutput['community']['list']['enhanced']
+> {
 	return 'events' in community && Array.isArray(community.events)
 }
 
@@ -22,7 +24,9 @@ export const UserCommunityEventItem = ({
 	event,
 }: {
 	event: NonNullable<
-		RouterOutput['community']['list']['enhanced'][number]['events']
+		ExtractPaginatedData<
+			RouterOutput['community']['list']['enhanced']
+		>['events']
 	>[number]
 }) => {
 	const { range } = getEventDateTime({

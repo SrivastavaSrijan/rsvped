@@ -16,11 +16,13 @@ import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
 import { getEventDateTime } from '@/lib/hooks'
 import { cn } from '@/lib/utils'
-import type { RouterOutput } from '@/server/api'
+import type { ExtractPaginatedData, RouterOutput } from '@/server/api'
 import { EventLocation } from './EventLocation'
 
-type CoreEventData = RouterOutput['event']['list']['core'][number]
-type EnhancedEventData = RouterOutput['event']['list']['enhanced'][number]
+type CoreEventData = ExtractPaginatedData<RouterOutput['event']['list']['core']>
+type EnhancedEventData = ExtractPaginatedData<
+	RouterOutput['event']['list']['enhanced']
+>
 type EventCardData = CoreEventData | EnhancedEventData
 
 type EventCardProps = EventCardData & {

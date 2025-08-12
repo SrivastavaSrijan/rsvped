@@ -38,7 +38,7 @@ const getCommunities = async ({
 		...rest,
 	} satisfies RouterInput['community']['list']['core']
 	return {
-		communities: await api.community.list.core(params),
+		coreCommunities: await api.community.list.core(params),
 		params,
 	}
 }
@@ -50,7 +50,7 @@ export default async function ViewCommunities({
 }) {
 	const searchParmsRes = await searchParams
 
-	const [managedResult, userResult] = await Promise.all([
+	const [adminOwnerCommunities, memberCommunities] = await Promise.all([
 		// Communities where user is admin or owner
 		getCommunities({
 			include: [
@@ -81,18 +81,13 @@ export default async function ViewCommunities({
 			</div>
 
 			<ProgressiveCommunitiesList
-				coreCommunities={managedResult.communities}
-				params={managedResult.params}
+				{...adminOwnerCommunities}
 				variant="managed"
 			/>
 
 			<hr />
 
-			<ProgressiveCommunitiesList
-				coreCommunities={userResult.communities}
-				params={userResult.params}
-				variant="user"
-			/>
+			<ProgressiveCommunitiesList {...memberCommunities} variant="user" />
 		</div>
 	)
 }

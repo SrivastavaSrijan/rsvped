@@ -28,16 +28,16 @@ export const EnhancedCommunitiesList = async ({
 	const enhancedCommunities = await api.community.list.enhanced(params)
 
 	if (variant === 'managed') {
-		return <ManagedCommunitiesGrid communities={enhancedCommunities} />
+		return <ManagedCommunitiesGrid {...enhancedCommunities} />
 	}
 
-	return <UserCommunitiesList communities={enhancedCommunities} />
+	return <UserCommunitiesList {...enhancedCommunities} />
 }
 
-type CoreCommunityData = RouterOutput['community']['list']['core'][number]
+type CoreCommunityData = RouterOutput['community']['list']['core']
 
 interface ProgressiveCommunitiesListProps {
-	coreCommunities: CoreCommunityData[]
+	coreCommunities: CoreCommunityData
 	params: CommunityListInput
 	variant: 'managed' | 'user'
 }
@@ -50,10 +50,10 @@ export const ProgressiveCommunitiesList = ({
 	// Render core data as fallback while enhanced data loads
 	const CoreFallback = () => {
 		if (variant === 'managed') {
-			return <ManagedCommunitiesGrid communities={coreCommunities} />
+			return <ManagedCommunitiesGrid {...coreCommunities} />
 		}
 
-		return <UserCommunitiesList communities={coreCommunities} />
+		return <UserCommunitiesList {...coreCommunities} />
 	}
 
 	return (

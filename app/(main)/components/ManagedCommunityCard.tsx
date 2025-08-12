@@ -2,11 +2,11 @@ import Link from 'next/link'
 import { Badge, Card, CardHeader, CardTitle, Image } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
 import { MembershipBadgeVariants, MembershipLabels } from '@/lib/constants'
-import type { RouterOutput } from '@/server/api'
+import type { ExtractPaginatedData, RouterOutput } from '@/server/api'
 
 type CommunityData =
-	| RouterOutput['community']['list']['core'][number]
-	| RouterOutput['community']['list']['enhanced'][number]
+	| ExtractPaginatedData<RouterOutput['community']['list']['core']>
+	| ExtractPaginatedData<RouterOutput['community']['list']['enhanced']>
 type ManagedCommunityCardProps = CommunityData
 
 export const ManagedCommunityCard = ({

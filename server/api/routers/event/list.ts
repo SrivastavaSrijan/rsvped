@@ -1,8 +1,9 @@
 import { EventRole, type Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
+import { protectedPaginatedProcedure } from '@/server/api/shared/middleware'
 import { PaginationSchema } from '@/server/api/shared/schemas'
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
+import { createTRPCRouter } from '@/server/api/trpc'
 import { EventTimeFrame, SortDirection } from '../../shared'
 import { eventCoreInclude, eventEnhancedInclude } from './includes'
 
@@ -27,7 +28,7 @@ const GetEventsInput = z
 	})
 	.merge(PaginationSchema)
 
-const eventListBaseProcedure = protectedProcedure
+const eventListBaseProcedure = protectedPaginatedProcedure
 	.input(GetEventsInput)
 	.use(async ({ ctx, input, next }) => {
 		const user = ctx.session?.user
@@ -103,20 +104,34 @@ const eventListBaseProcedure = protectedProcedure
 export const eventListRouter = createTRPCRouter({
 	core: eventListBaseProcedure.query(async ({ ctx }) => {
 		const { args } = ctx
-		const events = await ctx.prisma.event.findMany({
-			...args,
-			include: eventCoreInclude,
-		})
-		return events
+		const [events, total] = await Promise.all([
+			ctx.prisma.event.findMany({
+				...args,
+				include: eventCoreInclude,
+			}),
+			ctx.prisma.event.count({ where: args.where }),
+		])
+		return {
+			data: events,
+			pagination: ctx.pagination.createMetadata(total),
+		}
 	}),
 
 	enhanced: eventListBaseProcedure.query(async ({ ctx }) => {
 		const { user, args } = ctx
-		const events = await ctx.prisma.event.findMany({
-			...args,
-			include: eventEnhancedInclude,
-		})
-		if (events.length === 0) return []
+		const [events, total] = await Promise.all([
+			ctx.prisma.event.findMany({
+				...args,
+				include: eventEnhancedInclude,
+			}),
+			ctx.prisma.event.count({ where: args.where }),
+		])
+		if (events.length === 0) {
+			return {
+				data: [],
+				pagination: ctx.pagination.createMetadata(total),
+			}
+		}
 		const eventIds = events.map((event) => event.id)
 		const userRsvps = await ctx.prisma.rsvp.findMany({
 			where: { userId: user.id, eventId: { in: eventIds } },
@@ -143,6 +158,9 @@ export const eventListRouter = createTRPCRouter({
 			}
 			return { ...event, metadata }
 		})
-		return eventsWithContext
+		return {
+			data: eventsWithContext,
+			pagination: ctx.pagination.createMetadata(total),
+		}
 	}),
 })

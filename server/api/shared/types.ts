@@ -17,6 +17,28 @@ export enum SortDirection {
 	ASC = 'asc',
 	DESC = 'desc',
 }
+
+// Pagination metadata for responses
+export interface PaginationMetadata {
+	page: number
+	size: number
+	total: number
+	totalPages: number
+	hasMore: boolean
+	hasPrevious: boolean
+}
+
+// Generic paginated response structure
+export interface PaginatedResponse<T> {
+	data: T[]
+	pagination: PaginationMetadata
+}
+
+// Helper types for extracting data from paginated responses
+export type ExtractPaginatedData<T> = T extends PaginatedResponse<infer U>
+	? U
+	: never
+
 export interface EventListSearchParams {
 	period?: EventTimeFrame
 	on?: string

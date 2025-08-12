@@ -9,7 +9,7 @@ import type {
 import { EventTimeFrame, getAPI, SortDirection } from '@/server/api'
 import { copy } from '../copy'
 import { EventCard } from './EventCard'
-import { EventsPagination } from './EventsPagination'
+import { GenericPagination } from './GenericPagination'
 import { NoEvents } from './NoEvents'
 import { PeriodTabs } from './PeriodTabs'
 
@@ -77,32 +77,32 @@ export const EnhancedEventsList = async ({
 	params,
 }: EnhancedEventsListProps) => {
 	const api = await getAPI()
-	const enhancedEvents = await api.event.list.enhanced(params)
+	const { data } = await api.event.list.enhanced(params)
 
 	return (
 		<>
-			{enhancedEvents.map((event, index) => (
+			{data.map((event, index) => (
 				<EventCard
 					key={`enhanced-${event.slug}`}
 					{...event}
-					isLast={index === enhancedEvents.length - 1}
+					isLast={index === data.length - 1}
 				/>
 			))}
 		</>
 	)
 }
 
-type CoreEventData = RouterOutput['event']['list']['core'][number]
+type CoreEventData = RouterOutput['event']['list']['core']
 
 interface ProgressiveEventsListProps {
-	coreEvents: CoreEventData[]
+	coreEvents: CoreEventData
 	params: EventListInput
 	isEmpty?: boolean
 	emptyStateSlot?: React.ReactNode
 }
 
 export const ProgressiveEventsList = ({
-	coreEvents,
+	coreEvents: { data, pagination },
 	params,
 }: ProgressiveEventsListProps) => {
 	return (
@@ -120,23 +120,18 @@ export const ProgressiveEventsList = ({
 			</div>
 
 			<div className="flex h-full w-full flex-col items-center justify-center">
-				{coreEvents.length === 0 && <NoEvents />}
+				{pagination?.total === 0 && <NoEvents />}
 				<Suspense
-					fallback={coreEvents.map((event, index) => (
+					fallback={data.map((event, index) => (
 						<EventCard
 							key={event.slug}
 							{...event}
-							isLast={index === coreEvents.length - 1}
+							isLast={index === data.length - 1}
 						/>
 					))}
 				>
 					<EnhancedEventsList params={params} />
-					{coreEvents.length > 0 && (
-						<EventsPagination
-							currentPage={params.page || 1}
-							hasMore={coreEvents.length !== 5}
-						/>
-					)}
+					{pagination?.total > 0 && <GenericPagination {...pagination} />}
 				</Suspense>
 			</div>
 		</>

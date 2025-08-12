@@ -6,14 +6,14 @@ import { copy } from '../copy'
 import { EmptyState } from './EmptyState'
 import { ManagedCommunityCard } from './ManagedCommunityCard'
 
-interface ManagedCommunitiesGridProps {
-	communities:
-		| RouterOutput['community']['list']['core']
-		| RouterOutput['community']['list']['enhanced']
+type CommunityData = RouterOutput['community']['list']['core']
+interface ManagedCommunitiesGridProps extends CommunityData {
+	// Add any additional props here
 }
 
 export const ManagedCommunitiesGrid = ({
-	communities,
+	data = [],
+	pagination,
 }: ManagedCommunitiesGridProps) => {
 	return (
 		<div className="flex flex-col gap-4 lg:gap-6 w-full">
@@ -23,7 +23,7 @@ export const ManagedCommunitiesGrid = ({
 					<Button variant="outline">Create Community</Button>
 				</Link>
 			</div>
-			{communities.length === 0 ? (
+			{pagination?.total === 0 ? (
 				<EmptyState
 					message={copy.community.home.emptyManaged}
 					label="Create Community"
@@ -31,7 +31,7 @@ export const ManagedCommunitiesGrid = ({
 				/>
 			) : (
 				<div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
-					{communities.map((community) => (
+					{data.map((community) => (
 						<ManagedCommunityCard key={community.id} {...community} />
 					))}
 				</div>
