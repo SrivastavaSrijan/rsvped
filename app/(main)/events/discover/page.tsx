@@ -63,7 +63,7 @@ const PageConfig = {
  */
 async function resolveUserLocation() {
 	const api = await getAPI()
-	const user = await api.user.getCurrentUser()
+	const user = await api.user.profile.enhanced()
 
 	// 1. Use authenticated user's location if available
 	if (user?.locationId && user.location) {
@@ -214,7 +214,7 @@ interface NearbyCategoriesProps {
 
 const NearbyCategories = async ({ locationId }: NearbyCategoriesProps) => {
 	const api = await getAPI()
-	const categories = await api.category.listNearby({
+	const categories = await api.category.list.nearby({
 		locationId,
 		take: PageConfig.categories.pageSize,
 	})

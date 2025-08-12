@@ -28,3 +28,15 @@ export const protectedPaginatedProcedure = protectedProcedure
 			},
 		})
 	})
+
+export const hostOnlyProcedure = protectedProcedure.use(async ({ next }) =>
+	next()
+)
+
+export const analyticsMiddleware = protectedProcedure.use(async ({ next }) =>
+	next()
+)
+
+export const rateLimitedProcedure = publicProcedure.use(async ({ next }) =>
+	next()
+)
