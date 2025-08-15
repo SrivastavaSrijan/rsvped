@@ -51,6 +51,12 @@ test-accounts.*
 test-accounts.json
 seed-logs/
 
+# Seed system data - keep structure, ignore generated content
+prisma/.local/logs/
+prisma/.local/seed-data/processed/
+prisma/.local/seed-data/batches/
+# Note: static/ folder should be committed as it contains base location/venue data
+
 # System files
 .DS_Store
 .DS_Store?

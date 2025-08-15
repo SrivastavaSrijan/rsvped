@@ -6,7 +6,7 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"includes": ["app/**", "components/**", "lib/**", "server/**"],
+		"includes": ["app/**", "components/**", "lib/**", "server/**", "prisma/**"],
 		"experimentalScannerIgnores": ["node_modules", ".next"]
 	},
 	"linter": {

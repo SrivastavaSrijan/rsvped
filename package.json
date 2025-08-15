@@ -15,7 +15,12 @@
 		"db:push": "prisma db push",
 		"db:studio": "prisma studio",
 		"vercel:build": "prisma migrate deploy && prisma generate && next build",
-		"seed:workflow": "tsx prisma/seed/workflow.ts"
+		"seed:workflow": "tsx prisma/seed/workflow.ts",
+		"seed:status": "tsx prisma/seed/workflow.ts status",
+		"seed:generate": "tsx prisma/seed/workflow.ts generate",
+		"seed:process": "tsx prisma/seed/workflow.ts process",
+		"seed:run": "tsx prisma/seed/workflow.ts seed",
+		"seed:full": "yarn seed:generate && yarn seed:process && yarn seed:run"
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.10.0",
