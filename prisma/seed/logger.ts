@@ -4,7 +4,7 @@
  * Production-ready logging system with levels, formatting, and file output.
  */
 
-import { writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { config, paths } from './config'
 
@@ -63,7 +63,6 @@ class SeedLogger {
 			error: '❌',
 		}
 
-		const timestamp = new Date().toISOString()
 		const elapsed = ((Date.now() - this.startTime) / 1000).toFixed(2)
 
 		let formatted = `${emoji[level]} [${elapsed}s] ${message}`

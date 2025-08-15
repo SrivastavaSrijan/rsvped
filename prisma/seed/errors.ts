@@ -114,7 +114,7 @@ export async function withRetry<T>(
 	for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
 		try {
 			if (attempt > 1) {
-				const delay = backoffMs * Math.pow(2, attempt - 2)
+				const delay = backoffMs * 2 ** (attempt - 2)
 				logger.debug(
 					`Retrying ${operationName} (attempt ${attempt}) after ${delay}ms delay`
 				)

@@ -6,29 +6,25 @@
  * batch data for seeding with proper error handling and logging.
  */
 
-import {
-	readFileSync,
-	writeFileSync,
-	existsSync,
-	readdirSync,
-	mkdirSync,
-} from 'node:fs'
+/** biome-ignore-all lint/suspicious/noExplicitAny: only seed */
+
+import { existsSync, mkdirSync, readdirSync } from 'node:fs'
 import path from 'node:path'
-import { config, paths, limits } from './config'
-import { logger } from './logger'
+import { config, paths } from './config'
 import {
-	setupGlobalErrorHandler,
-	validateFile,
 	safeReadJSON,
 	safeWriteJSON,
+	setupGlobalErrorHandler,
 	ValidationError,
+	validateFile,
 } from './errors'
+import { logger } from './logger'
 import {
 	communitiesBatchSchema,
-	usersBatchSchema,
 	locationsStaticSchema,
-	venuesStaticSchema,
+	usersBatchSchema,
 	validateBatchFile,
+	venuesStaticSchema,
 } from './validation'
 
 // Setup error handling
@@ -109,7 +105,7 @@ async function processData() {
 		// Create event distribution
 		logger.info('Creating event distribution system')
 		const eventsByCity: Record<string, any[]> = {}
-		locations.forEach((location: any) => {
+		locations.forEach((location) => {
 			eventsByCity[location.name] = []
 		})
 
