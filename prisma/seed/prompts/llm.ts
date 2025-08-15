@@ -11,16 +11,18 @@ Create realistic, diverse communities with appropriate events, pricing, and memb
 Each community should feel distinct and authentic to its location and focus area.
 Do not use generic placeholder names like "Tech Hub" or "Creative Space".`,
 
-	user: (batchSize: number, locationNames: string[]) =>
+	user: (batchSize: number, locationNames: string[], categories: string[]) =>
 		`Generate exactly ${batchSize} DIVERSE and REALISTIC communities for an event management platform.
 
 REQUIREMENTS:
 1. Each community MUST have a unique name and focus area
 2. Each community must be based in one of these locations: ${locationNames.join(', ')}
-3. Create 2-5 events for each community that make sense for their location and focus area
-4. Events should have realistic venue names for their cities
-5. Include realistic ticket pricing and membership tiers appropriate for the community type
-6. Ensure descriptions are detailed but concise (2-3 sentences)
+3. Each community should focus on one of these categories: ${categories.join(', ')}
+4. Create 2-5 events for each community that make sense for their location and focus area
+5. Events should have realistic venue names for their cities
+6. Include realistic ticket pricing and membership tiers appropriate for the community type
+7. Ensure descriptions are detailed but concise (2-3 sentences)
+8. The categories array should include the main category plus relevant subcategories
 
 CREATE DIVERSE COMMUNITY TYPES LIKE:
 - Professional networks for specific industries
@@ -37,14 +39,16 @@ export const UserPrompts = {
 	system: `You are generating diverse, realistic user personas for an event platform. 
 Only respond with a valid JSON object matching the provided schema.`,
 
-	user: (batchSize: number, locationNames: string[]) =>
+	user: (batchSize: number, locationNames: string[], categories: string[]) =>
 		`Generate exactly ${batchSize} realistic professional personas for an event platform.
 
 REQUIREMENTS:
 1. Each person MUST have their location selected from this list: ${locationNames.join(', ')}
-2. Create DIVERSE profiles across industries, experiences (junior/mid/senior/executive), and networking styles
-3. Use realistic first and last names for the specified locations
-4. Keep bio to a single concise sentence
+2. Each person should have interests related to these categories: ${categories.join(', ')}
+3. Create DIVERSE profiles across industries, experiences (junior/mid/senior/executive), and networking styles
+4. Use realistic first and last names for the specified locations
+5. Keep bio to a single concise sentence
+6. Make sure interests align with the provided categories
 
 Return a JSON object with a "users" array following the provided schema.`,
 }

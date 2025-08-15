@@ -20,6 +20,7 @@ import {
 } from './errors'
 import { logger } from './logger'
 import {
+	categoriesStaticSchema,
 	LLMCommunityBatchSchema,
 	LLMUserBatchSchema,
 	locationsStaticSchema,
@@ -55,7 +56,7 @@ async function processData() {
 		// Load and validate static data
 		logger.info('Loading static data files')
 
-		let locations: any, venues: any
+		let locations: any, venues: any, categories: any
 		try {
 			const locationsPath = path.join(paths.staticDir, 'locations.json')
 			logger.debug('Reading locations file', { path: locationsPath })
@@ -103,6 +104,28 @@ async function processData() {
 			logger.debug('Venues loaded successfully', { count: venues.length })
 		} catch (error) {
 			logger.error('Failed to load venues.json', error)
+			throw error
+		}
+
+		try {
+			const categoriesPath = path.join(paths.staticDir, 'categories.json')
+			logger.debug('Reading categories file', { path: categoriesPath })
+			const categoriesData = safeReadJSON(categoriesPath)
+
+			if (!categoriesData) {
+				throw new Error('Categories file returned null data')
+			}
+
+			categories = validateBatchFile(
+				categoriesData,
+				categoriesStaticSchema,
+				'categories.json'
+			)
+			logger.debug('Categories loaded successfully', {
+				count: categories.length,
+			})
+		} catch (error) {
+			logger.error('Failed to load categories.json', error)
 			throw error
 		}
 

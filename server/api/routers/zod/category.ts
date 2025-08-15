@@ -1,14 +1,21 @@
 import * as z from 'zod'
-import { type CompleteEventCategory, RelatedEventCategoryModel } from './index'
+import {
+	type CompleteEventCategory,
+	type CompleteUserCategory,
+	RelatedEventCategoryModel,
+	RelatedUserCategoryModel,
+} from './index'
 
 export const CategoryModel = z.object({
 	id: z.string(),
 	name: z.string(),
 	slug: z.string(),
+	subcategories: z.string().array(),
 })
 
 export interface CompleteCategory extends z.infer<typeof CategoryModel> {
 	events: CompleteEventCategory[]
+	users: CompleteUserCategory[]
 }
 
 /**
@@ -19,5 +26,6 @@ export interface CompleteCategory extends z.infer<typeof CategoryModel> {
 export const RelatedCategoryModel: z.ZodSchema<CompleteCategory> = z.lazy(() =>
 	CategoryModel.extend({
 		events: RelatedEventCategoryModel.array(),
+		users: RelatedUserCategoryModel.array(),
 	})
 )

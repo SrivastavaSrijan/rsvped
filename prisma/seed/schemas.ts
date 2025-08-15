@@ -116,6 +116,14 @@ export const locationSchema = z.object({
 	iconPath: z.string().optional(),
 })
 
+// Category schema
+export const categorySchema = z.object({
+	name: z.string().min(1).max(100),
+	slug: slugSchema,
+	description: z.string().min(10).max(500),
+	subcategories: z.array(z.string().min(1).max(100)).min(1).max(20),
+})
+
 // Venue schema
 export const venueSchema = z.object({
 	name: z.string().min(1).max(200),
@@ -138,6 +146,7 @@ export const venueSchema = z.object({
 
 // Static data batch schemas
 export const locationsStaticSchema = z.array(locationSchema).min(1).max(500)
+export const categoriesStaticSchema = z.array(categorySchema).min(1).max(100)
 export const venuesStaticSchema = z.record(
 	z
 		.string()
@@ -240,6 +249,15 @@ export const batchEventSchema = z.object({
 	tags: z.array(z.string().min(1).max(30)).max(10).default([]),
 })
 
+// RSVP schema (for generating realistic event attendance)
+export const batchRsvpSchema = z.object({
+	userId: z.string().min(1),
+	eventId: z.string().min(1),
+	status: z.enum(['CONFIRMED', 'WAITLIST', 'CANCELLED']).default('CONFIRMED'),
+	attendeeInterests: z.array(z.string().min(1).max(50)).max(5).default([]),
+	categoryAlignment: z.number().min(0).max(1), // How well user interests align with event category
+})
+
 // =============================================================================
 // Batch File Schemas - for validating complete batch files with metadata
 // =============================================================================
@@ -291,10 +309,10 @@ export const eventsBatchSchema = z.object({
 export const processedDataSchema = z.object({
 	locations: locationsStaticSchema,
 	venues: venuesStaticSchema,
+	categories: categoriesStaticSchema,
 	communities: z.array(batchCommunitySchema).min(1),
 	users: z.array(batchUserSchema).min(1),
 	eventsByCity: z.record(z.string(), z.array(batchEventSchema)),
-	categories: z.array(z.string().min(1).max(50)).min(1),
 	metadata: z.object({
 		communities: z.object({
 			generated: timestampSchema,
@@ -363,12 +381,14 @@ export type LLMUserBatch = z.infer<typeof LLMUserBatchSchema>
 
 // Static data types
 export type Location = z.infer<typeof locationSchema>
+export type Category = z.infer<typeof categorySchema>
 export type Venue = z.infer<typeof venueSchema>
 
 // Processing types
 export type BatchUser = z.infer<typeof batchUserSchema>
 export type BatchCommunity = z.infer<typeof batchCommunitySchema>
 export type BatchEvent = z.infer<typeof batchEventSchema>
+export type BatchRsvp = z.infer<typeof batchRsvpSchema>
 
 // Batch file types
 export type CommunitiesBatch = z.infer<typeof communitiesBatchSchema>

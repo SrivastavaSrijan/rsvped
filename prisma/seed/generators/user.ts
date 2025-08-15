@@ -4,12 +4,18 @@
  * Professional LLM-based user persona generation.
  */
 
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
-import { config } from '../config'
+import { config, paths } from '../config'
 import { logger } from '../logger'
 import { UserPrompts } from '../prompts/llm'
-import { LLMUserBatchSchema, type LLMUserPersona } from '../schemas'
+import {
+	type Category,
+	LLMUserBatchSchema,
+	type LLMUserPersona,
+} from '../schemas'
 import { cache } from './cache'
 import { llm } from './llm'
 
@@ -73,6 +79,7 @@ export class UserGenerator {
 		const batchSize = Math.min(50, Math.max(10, targetCount)) // Optimal batch size for users
 		const batches = Math.ceil(targetCount / batchSize)
 		const locations = await this.loadLocations()
+		const categories = this.loadCategories()
 		const locationNames = locations.map((l) => l.name)
 
 		const allUsers: LLMUserPersona[] = []
@@ -91,7 +98,9 @@ export class UserGenerator {
 			try {
 				const batchUsers = await this.generateSingleBatch(
 					currentBatchSize,
-					locationNames
+					locationNames,
+					categories,
+					i
 				)
 
 				if (batchUsers.length > 0) {
@@ -122,7 +131,9 @@ export class UserGenerator {
 	 */
 	private async generateSingleBatch(
 		batchSize: number,
-		locationNames: string[]
+		locationNames: string[],
+		categories: Category[],
+		batchIndex: number
 	): Promise<LLMUserPersona[]> {
 		// Select diverse locations for this batch
 		const batchLocations = faker.helpers.arrayElements(
@@ -130,7 +141,15 @@ export class UserGenerator {
 			Math.min(10, locationNames.length)
 		)
 
-		const prompt = UserPrompts.user(batchSize, batchLocations)
+		// Get categories for this batch to ensure diversity
+		const batchCategories = this.getCategoriesForBatch(
+			categories,
+			batchIndex,
+			batchSize
+		)
+		const categoryNames = batchCategories.map((cat: Category) => cat.name)
+
+		const prompt = UserPrompts.user(batchSize, batchLocations, categoryNames)
 		const result = await llm.generate(
 			prompt,
 			UserPrompts.system,
@@ -182,6 +201,69 @@ export class UserGenerator {
 
 		logger.info('Using fallback locations', { count: fallback.length })
 		return fallback
+	}
+
+	/**
+	 * Load categories from static data file
+	 */
+	private loadCategories(): Category[] {
+		try {
+			const categoriesPath = path.join(paths.staticDir, 'categories.json')
+			const categoriesData = JSON.parse(readFileSync(categoriesPath, 'utf8'))
+			return categoriesData as Category[]
+		} catch (error) {
+			logger.warn('Failed to load categories from static file', { error })
+			// Return a minimal fallback set of categories
+			return [
+				{
+					name: 'Technology & Programming',
+					slug: 'technology-programming',
+					description: 'Software development and tech innovation',
+					subcategories: ['Web Development', 'AI/ML', 'Mobile Development'],
+				},
+				{
+					name: 'Business & Entrepreneurship',
+					slug: 'business-entrepreneurship',
+					description: 'Startups and business development',
+					subcategories: [
+						'Startup Incubation',
+						'Business Strategy',
+						'Leadership',
+					],
+				},
+				{
+					name: 'Design & Creativity',
+					slug: 'design-creativity',
+					description: 'Creative arts and design',
+					subcategories: ['Graphic Design', 'UI/UX Design', 'Digital Art'],
+				},
+			] as Category[]
+		}
+	}
+
+	/**
+	 * Get categories for a specific batch to ensure diversity
+	 */
+	private getCategoriesForBatch(
+		categories: Category[],
+		batchIndex: number,
+		batchSize: number
+	): Category[] {
+		// For users, we want to distribute categories more broadly
+		// So we take a subset of categories per batch
+		const categoriesPerBatch = Math.min(
+			Math.ceil(categories.length / 2),
+			batchSize
+		)
+		const startIndex = (batchIndex * categoriesPerBatch) % categories.length
+		const result: Category[] = []
+
+		for (let i = 0; i < categoriesPerBatch; i++) {
+			const index = (startIndex + i) % categories.length
+			result.push(categories[index])
+		}
+
+		return result
 	}
 
 	/**

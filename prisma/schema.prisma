@@ -57,6 +57,9 @@ model User {
   eventReferrals       EventReferral[]
   eventCollaborators   EventCollaborator[]
 
+  // User category interests (many-to-many)
+  categoryInterests UserCategory[]
+
   createdAt DateTime    @default(now())
   EventView EventView[]
 }
@@ -316,10 +319,24 @@ enum LocationType {
  */
 
 model Category {
-  id     String          @id @default(cuid())
-  name   String          @unique
-  slug   String          @unique
-  events EventCategory[]
+  id            String          @id @default(cuid())
+  name          String          @unique
+  slug          String          @unique
+  subcategories String[]        @default([]) // Tags for better segmentation and keywords
+  events        EventCategory[]
+  users         UserCategory[]
+}
+
+model UserCategory {
+  userId     String
+  categoryId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Interest strength (1-10 scale for probabilistic RSVP generation)
+  interestLevel Int @default(5)
+
+  @@id([userId, categoryId])
 }
 
 model EventCategory {

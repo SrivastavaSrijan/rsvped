@@ -17,6 +17,7 @@ import {
 	type CompleteLocation,
 	type CompleteRsvp,
 	type CompleteSession,
+	type CompleteUserCategory,
 	RelatedAccountModel,
 	RelatedCommunityMembershipModel,
 	RelatedCommunityModel,
@@ -28,6 +29,7 @@ import {
 	RelatedLocationModel,
 	RelatedRsvpModel,
 	RelatedSessionModel,
+	RelatedUserCategoryModel,
 } from './index'
 
 export const UserModel = z.object({
@@ -60,6 +62,7 @@ export interface CompleteUser extends z.infer<typeof UserModel> {
 	eventMessages: CompleteEventMessage[]
 	eventReferrals: CompleteEventReferral[]
 	eventCollaborators: CompleteEventCollaborator[]
+	categoryInterests: CompleteUserCategory[]
 	EventView: CompleteEventView[]
 }
 
@@ -80,6 +83,7 @@ export const RelatedUserModel: z.ZodSchema<CompleteUser> = z.lazy(() =>
 		eventMessages: RelatedEventMessageModel.array(),
 		eventReferrals: RelatedEventReferralModel.array(),
 		eventCollaborators: RelatedEventCollaboratorModel.array(),
+		categoryInterests: RelatedUserCategoryModel.array(),
 		EventView: RelatedEventViewModel.array(),
 	})
 )

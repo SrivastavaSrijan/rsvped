@@ -314,6 +314,170 @@ async function ensureLocationsExist(locationData: any[]) {
 	}
 }
 
+// --- INTELLIGENT RSVP GENERATION --------------------------
+async function createIntelligentRsvps(
+	users: any[],
+	events: any[],
+	categories: any[]
+) {
+	const operation = logger.startOperation('create_intelligent_rsvps')
+
+	try {
+		// First, assign category interests to users (many-to-many)
+		await assignCategoryInterestsToUsers(users, categories)
+
+		// Then generate RSVPs based on category alignment
+		const rsvpCount = await generateCategoryBasedRsvps(users, events)
+
+		operation.complete({ rsvpCount })
+		logger.info(`✅ Generated ${rsvpCount} intelligent RSVPs`)
+	} catch (error) {
+		operation.fail(error)
+		throw error
+	}
+}
+
+async function assignCategoryInterestsToUsers(users: any[], categories: any[]) {
+	logger.info('Assigning category interests to users')
+
+	const userCategoryData: any[] = []
+
+	for (const user of users) {
+		// Each user gets 2-4 category interests
+		const numInterests = faker.number.int({ min: 2, max: 4 })
+		const selectedCategories = sampleSize(categories, numInterests)
+
+		for (const category of selectedCategories) {
+			// Interest level 1-10 (higher = more likely to RSVP)
+			const interestLevel = faker.number.int({ min: 3, max: 10 })
+
+			userCategoryData.push({
+				userId: user.id,
+				categoryId: category.id,
+				interestLevel,
+			})
+		}
+	}
+
+	// Bulk insert user category interests
+	if (userCategoryData.length > 0) {
+		await (prisma as any).userCategory.createMany({
+			data: userCategoryData,
+			skipDuplicates: true,
+		})
+	}
+
+	logger.info(
+		`📊 Assigned interests to ${users.length} users across ${categories.length} categories`
+	)
+}
+
+async function generateCategoryBasedRsvps(
+	users: any[],
+	events: any[]
+): Promise<number> {
+	logger.info('Generating category-based RSVPs')
+
+	const rsvpData: any[] = []
+
+	for (const event of events) {
+		// Get event categories
+		const eventCategories = await prisma.eventCategory.findMany({
+			where: { eventId: event.id },
+			include: { category: true },
+		})
+
+		if (eventCategories.length === 0) continue
+
+		// Find users interested in these categories
+		const interestedUsers = await (prisma as any).userCategory.findMany({
+			where: {
+				categoryId: { in: eventCategories.map((ec) => ec.categoryId) },
+			},
+			include: { user: true },
+		})
+
+		// Generate RSVPs probabilistically
+		for (const userCategory of interestedUsers) {
+			const user = userCategory.user
+
+			// Calculate RSVP probability based on interest level and randomization
+			const baseProbability = userCategory.interestLevel / 10 // 0.3 to 1.0
+			const locationBonus = user.locationId === event.locationId ? 0.3 : 0
+			const randomFactor = faker.number.float({ min: 0.1, max: 0.4 })
+
+			const rsvpProbability = Math.min(
+				baseProbability + locationBonus + randomFactor,
+				0.9
+			)
+
+			if (faker.datatype.boolean({ probability: rsvpProbability })) {
+				// Determine RSVP status based on interest level
+				let status: RsvpStatus = RsvpStatus.CONFIRMED
+				if (userCategory.interestLevel <= 4) {
+					const statusOptions = [RsvpStatus.CONFIRMED, RsvpStatus.CANCELLED]
+					status = faker.helpers.arrayElement(statusOptions)
+				}
+
+				rsvpData.push({
+					id: faker.string.uuid(),
+					eventId: event.id,
+					userId: user.id,
+					email: user.email,
+					name: user.name,
+					status,
+					paymentState: 'NONE',
+					createdAt: faker.date.past(),
+				})
+			}
+		}
+
+		// Add some random RSVPs from users not in categories (discovery)
+		const randomRsvpCount = faker.number.int({ min: 0, max: 3 })
+		const randomUsers = sampleSize(users, randomRsvpCount)
+
+		for (const user of randomUsers) {
+			// Lower probability for random RSVPs
+			if (faker.datatype.boolean({ probability: 0.15 })) {
+				rsvpData.push({
+					id: faker.string.uuid(),
+					eventId: event.id,
+					userId: user.id,
+					email: user.email,
+					name: user.name,
+					status: RsvpStatus.CONFIRMED,
+					paymentState: 'NONE',
+					createdAt: faker.date.past(),
+				})
+			}
+		}
+	}
+
+	// Bulk insert RSVPs
+	if (rsvpData.length > 0) {
+		// Remove duplicates (same user + event)
+		const uniqueRsvps = rsvpData.filter(
+			(rsvp, index, self) =>
+				index ===
+				self.findIndex(
+					(r) => r.userId === rsvp.userId && r.eventId === rsvp.eventId
+				)
+		)
+
+		await prisma.rsvp.createMany({
+			data: uniqueRsvps,
+			skipDuplicates: true,
+		})
+
+		logger.info(
+			`📝 Created ${uniqueRsvps.length} RSVPs (removed ${rsvpData.length - uniqueRsvps.length} duplicates)`
+		)
+		return uniqueRsvps.length
+	}
+
+	return 0
+}
+
 // --- SEED MAIN -------------------------------------------------
 async function main() {
 	const mainOperation = logger.startOperation('seed_main')
@@ -399,6 +563,9 @@ async function main() {
 							allLocations
 						)),
 					]
+
+		logger.info('Creating intelligent RSVPs')
+		await createIntelligentRsvps(users, events, categories)
 
 		logger.info('Backfilling daily stats')
 		await backfillDailyStats(events)
