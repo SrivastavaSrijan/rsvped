@@ -20,9 +20,9 @@ import {
 } from './errors'
 import { logger } from './logger'
 import {
-	communitiesBatchSchema,
+	LLMCommunityBatchSchema,
+	LLMUserBatchSchema,
 	locationsStaticSchema,
-	usersBatchSchema,
 	validateBatchFile,
 	venuesStaticSchema,
 } from './schemas'
@@ -113,63 +113,109 @@ async function processData() {
 		)
 		logger.debug('Found batch files', { files: batchFiles })
 
-		const communitiesFile = batchFiles.find((f) =>
+		const communitiesFiles = batchFiles.filter((f) =>
 			f.startsWith('communities-batch-')
 		)
-		const usersFile = batchFiles.find((f) => f.startsWith('users-batch-'))
+		const usersFiles = batchFiles.filter((f) => f.startsWith('users-batch-'))
 
 		logger.debug('Identified batch files', {
-			communitiesFile,
-			usersFile,
+			communitiesFiles,
+			usersFiles,
 		})
 
-		if (!communitiesFile || !usersFile) {
+		if (communitiesFiles.length === 0 || usersFiles.length === 0) {
 			throw new ValidationError(
 				'Missing required batch files. Expected communities-batch-*.json and users-batch-*.json',
 				'batch_files'
 			)
 		}
 
-		let communities: any, users: any
-		try {
-			logger.debug('Loading communities batch file', { file: communitiesFile })
-			const communitiesData = safeReadJSON(
-				path.join(paths.batchesDir, communitiesFile)
-			)
-			communities = validateBatchFile(
-				communitiesData,
-				communitiesBatchSchema,
-				communitiesFile
-			)
-			logger.debug('Communities loaded successfully', {
-				count: communities.communities?.length,
-			})
-		} catch (error) {
-			logger.error('Failed to load communities batch', {
-				file: communitiesFile,
-				error: error instanceof Error ? error.message : error,
-			})
-			throw error
+		// Load and combine all communities batch files
+		const allCommunities: any[] = []
+		for (const communitiesFile of communitiesFiles) {
+			try {
+				logger.debug('Loading communities batch file', {
+					file: communitiesFile,
+				})
+				const communitiesData = safeReadJSON(
+					path.join(paths.batchesDir, communitiesFile)
+				)
+
+				// Validate against LLM schema
+				const validatedData = validateBatchFile(
+					communitiesData,
+					LLMCommunityBatchSchema,
+					communitiesFile
+				)
+
+				allCommunities.push(...validatedData.communities)
+				logger.debug('Communities batch loaded successfully', {
+					file: communitiesFile,
+					count: validatedData.communities.length,
+				})
+			} catch (error) {
+				logger.error('Failed to load communities batch - discarding file', {
+					file: communitiesFile,
+					error: error instanceof Error ? error.message : error,
+				})
+				// Continue processing other files instead of failing completely
+			}
 		}
 
-		try {
-			logger.debug('Loading users batch file', { file: usersFile })
-			const usersData = safeReadJSON(path.join(paths.batchesDir, usersFile))
-			users = validateBatchFile(usersData, usersBatchSchema, usersFile)
-			logger.debug('Users loaded successfully', { count: users.users?.length })
-		} catch (error) {
-			logger.error('Failed to load users batch', {
-				file: usersFile,
-				error: error instanceof Error ? error.message : error,
-			})
-			throw error
+		// Load and combine all users batch files
+		const allUsers: any[] = []
+		for (const usersFile of usersFiles) {
+			try {
+				logger.debug('Loading users batch file', { file: usersFile })
+				const usersData = safeReadJSON(path.join(paths.batchesDir, usersFile))
+
+				// Validate against LLM schema
+				const validatedData = validateBatchFile(
+					usersData,
+					LLMUserBatchSchema,
+					usersFile
+				)
+
+				allUsers.push(...validatedData.users)
+				logger.debug('Users batch loaded successfully', {
+					file: usersFile,
+					count: validatedData.users.length,
+				})
+			} catch (error) {
+				logger.error('Failed to load users batch - discarding file', {
+					file: usersFile,
+					error: error instanceof Error ? error.message : error,
+				})
+				// Continue processing other files instead of failing completely
+			}
 		}
+
+		// Check if we have any valid data after processing all files
+		if (allCommunities.length === 0) {
+			throw new ValidationError(
+				'No valid communities found in any batch file',
+				'communities_validation'
+			)
+		}
+
+		if (allUsers.length === 0) {
+			throw new ValidationError(
+				'No valid users found in any batch file',
+				'users_validation'
+			)
+		}
+
+		// Create combined data structures for compatibility with existing code
+		const communities = { communities: allCommunities }
+		const users = { users: allUsers }
 
 		logger.info('Successfully loaded and validated data', {
 			communities: communities.communities.length,
 			users: users.users.length,
 			locations: locations.length,
 			venues: venues.length,
+			communitiesFilesProcessed: communitiesFiles.length,
+			usersFilesProcessed: usersFiles.length,
 		})
 
 		// Create event distribution
@@ -179,19 +225,86 @@ async function processData() {
 			eventsByCity[location.name] = []
 		})
 
-		// Place community events in their cities
+		// Helper function to find matching location with fault tolerance
+		const findMatchingLocation = (homeLocation: string) => {
+			const locationNames = locations.map((l: any) => l.name)
+
+			// 1. Try exact match first
+			const exactMatch = locationNames.find(
+				(name: any) => name.toLowerCase() === homeLocation.toLowerCase()
+			)
+			if (exactMatch) return exactMatch
+
+			// 2. Try partial matching (e.g., "Madrid, Spain" -> "Madrid")
+			const cityPart = homeLocation.split(',')[0].trim()
+			const partialMatch = locationNames.find(
+				(name: string) =>
+					name.toLowerCase().includes(cityPart.toLowerCase()) ||
+					cityPart.toLowerCase().includes(name.toLowerCase())
+			)
+			if (partialMatch) return partialMatch
+
+			// 3. Try fuzzy matching for common variations
+			const fuzzyMatch = locationNames.find((name: string) => {
+				const nameWords = name.toLowerCase().split(/[\s,]+/)
+				const locationWords = homeLocation.toLowerCase().split(/[\s,]+/)
+				return nameWords.some((word) =>
+					locationWords.some(
+						(lWord) => word.includes(lWord) || lWord.includes(word)
+					)
+				)
+			})
+			if (fuzzyMatch) return fuzzyMatch
+
+			// 4. Fallback to random location
+			return locationNames[Math.floor(Math.random() * locationNames.length)]
+		}
+
+		// Place community events in their cities with fault tolerance
+		let locationMismatches = 0
+		let exactMatches = 0
+		let fallbackAssignments = 0
+
 		communities.communities.forEach((community: any) => {
-			const cityName = community.homeLocation
-			if (eventsByCity[cityName]) {
-				community.events?.forEach((event: any) => {
-					eventsByCity[cityName].push({
-						...event,
-						communityName: community.name,
-						communityFocusArea: community.focusArea,
-						homeLocation: cityName,
-					})
+			const originalLocation = community.homeLocation
+			const matchedLocation = findMatchingLocation(originalLocation)
+
+			// Track matching statistics
+			if (originalLocation.toLowerCase() === matchedLocation.toLowerCase()) {
+				exactMatches++
+			} else if (locations.find((l: any) => l.name === matchedLocation)) {
+				locationMismatches++
+				logger.debug('Location mismatch resolved', {
+					original: originalLocation,
+					matched: matchedLocation,
+					community: community.name,
+				})
+			} else {
+				fallbackAssignments++
+				logger.debug('Random location assigned', {
+					original: originalLocation,
+					assigned: matchedLocation,
+					community: community.name,
 				})
 			}
+
+			// Assign events to the matched location
+			community.events?.forEach((event: any) => {
+				eventsByCity[matchedLocation].push({
+					...event,
+					communityName: community.name,
+					communityFocusArea: community.focusArea,
+					homeLocation: matchedLocation, // Use matched location
+					originalLocation: originalLocation, // Keep original for reference
+				})
+			})
+		})
+
+		logger.info('Location matching completed', {
+			exactMatches,
+			resolvedMismatches: locationMismatches,
+			fallbackAssignments,
+			totalCommunities: communities.communities.length,
 		})
 
 		// Ensure minimum events per city

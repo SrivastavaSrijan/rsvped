@@ -29,7 +29,7 @@ const envSchema = z.object({
 		.transform((val) => val === 'true'),
 	SHOULD_WIPE: z
 		.enum(['true', 'false'])
-		.default('false')
+		.default('true')
 		.transform((val) => val === 'true'),
 
 	// Logging

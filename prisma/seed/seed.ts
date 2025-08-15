@@ -3,7 +3,6 @@
 // prisma/seed.ts
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
 import { faker } from '@faker-js/faker'
 import {
 	BillingInterval,
@@ -25,153 +24,20 @@ import {
 import bcrypt from 'bcryptjs'
 import slugify from 'slugify'
 import { getAvatarURL } from '@/lib/config/routes'
+import { config, limits, paths } from './config'
+import {
+	DatabaseError,
+	ExternalAPIError,
+	processBatch,
+	setupGlobalErrorHandler,
+} from './errors'
+import { logger } from './logger'
 
 const prisma = new PrismaClient()
 
-// --- CONFIG ----------------------------------------------------
-const NUM_USERS = parseInt(process.env.NUM_USERS ?? '300', 10)
-const NUM_COMMUNITIES = parseInt(process.env.NUM_COMMUNITIES ?? '50', 10)
-const MAX_EVENTS_PER_COMMUNITY = 15
-const EXTRA_STANDALONE_EVENTS = parseInt(
-	process.env.EXTRA_STANDALONE_EVENTS ?? '100',
-	10
-) // events without a community
-const MAX_TICKET_TIERS_PER_EVENT = 4
-const MAX_PROMO_CODES_PER_EVENT = 4
-const MAX_REG_QUESTIONS_PER_EVENT = 5
-const MAX_COLLABORATORS_PER_EVENT = 4
-const MAX_CATEGORIES = 30
+// Setup error handling
+setupGlobalErrorHandler('seed')
 
-const ACCESS_KEY = 'YVL2f8WFV8VyM_htL_6t9IadGgTufVB6WgATOiA72jE'
-const COLLECTION_ID = 'j7hIPPKdCOU'
-
-// If you want to reset DB each run (default append-only):
-const SHOULD_WIPE = false
-const USE_LLM = process.env.USE_LLM !== 'false' // Default to true unless explicitly set to false
-const USE_BATCH_LOADER = process.env.USE_BATCH_LOADER !== 'false' // Use
-// --- DATA LOADING FUNCTIONS -----------------------------------------
-
-// Load processed JSON data from prisma/.local/seed-data
-function loadProcessedBatchData() {
-	const dataDir = path.resolve('./prisma/.local/seed-data')
-
-	try {
-		// Load static data
-		const locationsPath = `${dataDir}/static/locations.json`
-		const venuesPath = `${dataDir}/static/venues.json`
-
-		// Load processed data (get latest by filename)
-		const processedDir = `${dataDir}/processed`
-
-		if (!existsSync(processedDir)) {
-			console.warn('⚠️ No processed directory found. Run: yarn workflow process')
-			return null
-		}
-
-		const processedFiles = readdirSync(processedDir)
-			.filter((f) => f.endsWith('.json'))
-			.sort()
-			.reverse()
-
-		const communitiesFile = processedFiles.find((f) =>
-			f.startsWith('communities-final-')
-		)
-		const usersFile = processedFiles.find((f) => f.startsWith('users-final-'))
-		const eventsFile = processedFiles.find((f) =>
-			f.startsWith('events-distributed-')
-		)
-
-		if (!communitiesFile || !usersFile || !eventsFile) {
-			console.warn('⚠️ Missing processed files. Run: yarn workflow process')
-			return null
-		}
-
-		console.log(`📄 Loading: ${communitiesFile}`)
-		console.log(`📄 Loading: ${usersFile}`)
-		console.log(`📄 Loading: ${eventsFile}`)
-
-		// Load and parse files
-		const locations = JSON.parse(readFileSync(locationsPath, 'utf8'))
-		const venues = JSON.parse(readFileSync(venuesPath, 'utf8'))
-		const communitiesData = JSON.parse(
-			readFileSync(`${processedDir}/${communitiesFile}`, 'utf8')
-		)
-		const usersData = JSON.parse(
-			readFileSync(`${processedDir}/${usersFile}`, 'utf8')
-		)
-		const eventsData = JSON.parse(
-			readFileSync(`${processedDir}/${eventsFile}`, 'utf8')
-		)
-
-		// Extract categories from communities
-		const categories = new Set<string>()
-		communitiesData.communities.forEach((community: any) => {
-			community.categories?.forEach((cat: string) => {
-				categories.add(cat)
-			})
-			community.eventTypes?.forEach((type: string) => {
-				categories.add(type)
-			})
-		})
-
-		return {
-			locations,
-			venues,
-			communities: communitiesData.communities,
-			users: usersData.users,
-			eventsByCity: eventsData.eventsByCity,
-			categories: Array.from(categories),
-			metadata: {
-				communities: communitiesData.metadata,
-				users: usersData.metadata,
-				events: eventsData.metadata,
-			},
-		}
-	} catch (error) {
-		console.error('❌ Failed to load batch data:', error)
-		console.log('💡 Run: yarn workflow process')
-		return null
-	}
-}
-
-// Ensure locations from JSON exist in database
-async function ensureLocationsExist(locationData: any[]) {
-	console.log(
-		`📍 Ensuring ${locationData.length} locations exist in database...`
-	)
-
-	const locations: any[] = []
-
-	for (const location of locationData) {
-		try {
-			const existing = await prisma.location.findUnique({
-				where: { slug: location.slug },
-			})
-
-			if (existing) {
-				locations.push(existing)
-			} else {
-				const created = await prisma.location.create({
-					data: {
-						name: location.name,
-						slug: location.slug,
-						country: location.country,
-						continent: location.continent,
-						timezone: location.timezone,
-						iconPath: location.iconPath,
-					},
-				})
-				locations.push(created)
-				console.log(`  ✅ Created location: ${location.name}`)
-			}
-		} catch (error) {
-			console.warn(`  ⚠️ Failed to create location ${location.name}:`, error)
-		}
-	}
-
-	console.log(`📍 ${locations.length} locations ready`)
-	return locations
-}
 // --- UTILITIES -------------------------------------------------
 const rand = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 const sampleSize = <T>(arr: T[], n: number) =>
@@ -195,19 +61,35 @@ function addHours(date: Date, hours = 2) {
 	return new Date(date.getTime() + hours * 60 * 60 * 1000)
 }
 
-async function fetchUnsplashImages(count = 400): Promise<string[]> {
+async function fetchUnsplashImages(
+	count = limits.maxUnsplashImages
+): Promise<string[]> {
+	const operation = logger.startOperation('fetch_unsplash_images')
+
 	try {
+		if (!config.UNSPLASH_ACCESS_KEY) {
+			logger.warn('No Unsplash access key provided, using placeholder images')
+			return Array.from({ length: count }, () =>
+				faker.image.urlPicsumPhotos({ width: 1200, height: 630 })
+			)
+		}
+
 		const maxPerPage = 10
 		const totalPages = Math.ceil(count / maxPerPage)
 		const allImages: string[] = []
 
 		for (let page = 1; page <= totalPages; page++) {
 			const perPage = Math.min(maxPerPage, count - allImages.length)
-			const url = `https://api.unsplash.com/collections/${COLLECTION_ID}/photos?per_page=${perPage}&page=${page}&client_id=${ACCESS_KEY}`
+			const url = `https://api.unsplash.com/collections/${config.UNSPLASH_COLLECTION_ID}/photos?per_page=${perPage}&page=${page}&client_id=${config.UNSPLASH_ACCESS_KEY}`
 
 			const res = await fetch(url)
-			if (!res.ok)
-				throw new Error(`Unsplash error ${res.status} on page ${page}`)
+			if (!res.ok) {
+				throw new ExternalAPIError(
+					`Failed to fetch images from page ${page}`,
+					'unsplash',
+					res.status
+				)
+			}
 
 			const data: any[] = await res.json()
 			const pageImages = data.map((p) => p.urls?.regular).filter(Boolean)
@@ -218,13 +100,15 @@ async function fetchUnsplashImages(count = 400): Promise<string[]> {
 				break
 			}
 
-			// Add a small delay to be respectful to the API
+			// Rate limiting
 			await new Promise((resolve) => setTimeout(resolve, 100))
 		}
 
+		operation.complete({ imagesCount: allImages.length })
 		return allImages
-	} catch (e) {
-		console.warn('Unsplash failed, using placeholders.', e)
+	} catch (error) {
+		operation.fail(error)
+		logger.warn('Unsplash failed, using placeholders', { error })
 		return Array.from({ length: count }, () =>
 			faker.image.urlPicsumPhotos({ width: 1200, height: 630 })
 		)
@@ -232,127 +116,305 @@ async function fetchUnsplashImages(count = 400): Promise<string[]> {
 }
 
 async function wipeDb() {
-	// Order matters (respect FK constraints)
-	await prisma.$transaction([
-		prisma.eventDailyStat.deleteMany(),
-		prisma.eventView.deleteMany(),
-		prisma.eventFeedback.deleteMany(),
-		prisma.registrationAnswer.deleteMany(),
-		prisma.registrationQuestion.deleteMany(),
-		prisma.checkIn.deleteMany(),
-		prisma.eventCollaborator.deleteMany(),
-		prisma.eventMessage.deleteMany(),
-		prisma.eventReferral.deleteMany(),
-		prisma.rsvp.deleteMany(),
-		prisma.refund.deleteMany(),
-		prisma.payment.deleteMany(),
-		prisma.orderItem.deleteMany(),
-		prisma.order.deleteMany(),
-		prisma.promoCodeTier.deleteMany(),
-		prisma.promoCode.deleteMany(),
-		prisma.ticketTier.deleteMany(),
-		prisma.eventCategory.deleteMany(),
-		prisma.category.deleteMany(),
-		prisma.event.deleteMany(),
-		prisma.membershipTier.deleteMany(),
-		prisma.communityMembership.deleteMany(),
-		prisma.community.deleteMany(),
-		prisma.session.deleteMany(),
-		prisma.account.deleteMany(),
-		prisma.verificationToken.deleteMany(),
-		prisma.user.deleteMany(),
-	])
+	const operation = logger.startOperation('wipe_database')
+
+	try {
+		// Order matters (respect FK constraints)
+		await prisma.$transaction([
+			prisma.eventDailyStat.deleteMany(),
+			prisma.eventView.deleteMany(),
+			prisma.eventFeedback.deleteMany(),
+			prisma.registrationAnswer.deleteMany(),
+			prisma.registrationQuestion.deleteMany(),
+			prisma.checkIn.deleteMany(),
+			prisma.eventCollaborator.deleteMany(),
+			prisma.eventMessage.deleteMany(),
+			prisma.eventReferral.deleteMany(),
+			prisma.rsvp.deleteMany(),
+			prisma.refund.deleteMany(),
+			prisma.payment.deleteMany(),
+			prisma.orderItem.deleteMany(),
+			prisma.order.deleteMany(),
+			prisma.promoCodeTier.deleteMany(),
+			prisma.promoCode.deleteMany(),
+			prisma.ticketTier.deleteMany(),
+			prisma.eventCategory.deleteMany(),
+			prisma.category.deleteMany(),
+			prisma.event.deleteMany(),
+			prisma.membershipTier.deleteMany(),
+			prisma.communityMembership.deleteMany(),
+			prisma.community.deleteMany(),
+			prisma.session.deleteMany(),
+			prisma.account.deleteMany(),
+			prisma.verificationToken.deleteMany(),
+			prisma.user.deleteMany(),
+		])
+
+		operation.complete()
+	} catch (error) {
+		operation.fail(error)
+		throw new DatabaseError('Failed to wipe database', undefined, error)
+	}
+}
+
+// --- DATA LOADING FUNCTIONS -----------------------------------------
+
+function loadProcessedBatchData() {
+	const operation = logger.startOperation('load_batch_data')
+
+	try {
+		// Load processed data (get latest by filename)
+		const processedDir = `${paths.dataDir}/processed`
+
+		if (!existsSync(processedDir)) {
+			logger.warn('No processed directory found. Run: yarn workflow process')
+			operation.complete({ loaded: false })
+			return null
+		}
+
+		const processedFiles = readdirSync(processedDir)
+			.filter((f) => f.endsWith('.json'))
+			.sort()
+			.reverse()
+
+		const communitiesFile = processedFiles.find((f) =>
+			f.startsWith('communities-final-')
+		)
+		const usersFile = processedFiles.find((f) => f.startsWith('users-final-'))
+		const eventsFile = processedFiles.find((f) =>
+			f.startsWith('events-distributed-')
+		)
+
+		if (!communitiesFile || !usersFile || !eventsFile) {
+			logger.warn('Missing processed files. Run: yarn workflow process')
+			operation.complete({ loaded: false })
+			return null
+		}
+
+		logger.info('Loading processed batch files', {
+			communities: communitiesFile,
+			users: usersFile,
+			events: eventsFile,
+		})
+
+		// Load and parse files
+		const locations = JSON.parse(
+			readFileSync(`${paths.staticDir}/locations.json`, 'utf8')
+		)
+		const venues = JSON.parse(
+			readFileSync(`${paths.staticDir}/venues.json`, 'utf8')
+		)
+		const communitiesData = JSON.parse(
+			readFileSync(`${processedDir}/${communitiesFile}`, 'utf8')
+		)
+		const usersData = JSON.parse(
+			readFileSync(`${processedDir}/${usersFile}`, 'utf8')
+		)
+		const eventsData = JSON.parse(
+			readFileSync(`${processedDir}/${eventsFile}`, 'utf8')
+		)
+
+		// Extract categories from communities
+		const categories = new Set<string>()
+		communitiesData.communities.forEach((community: any) => {
+			community.categories?.forEach((cat: string) => {
+				categories.add(cat)
+			})
+			community.eventTypes?.forEach((type: string) => {
+				categories.add(type)
+			})
+		})
+
+		const result = {
+			locations,
+			venues,
+			communities: communitiesData.communities,
+			users: usersData.users,
+			eventsByCity: eventsData.eventsByCity,
+			categories: Array.from(categories),
+			metadata: {
+				communities: communitiesData.metadata,
+				users: usersData.metadata,
+				events: eventsData.metadata,
+			},
+		}
+
+		operation.complete({
+			loaded: true,
+			communities: result.communities.length,
+			users: result.users.length,
+			locations: result.locations.length,
+			totalEvents: Object.values(result.eventsByCity).reduce(
+				(sum: any, events: any) => sum + events.length,
+				0
+			),
+		})
+
+		return result
+	} catch (error) {
+		operation.fail(error)
+		logger.error('Failed to load batch data. Run: yarn workflow process')
+		return null
+	}
+}
+
+async function ensureLocationsExist(locationData: any[]) {
+	const operation = logger.startOperation('ensure_locations_exist')
+
+	try {
+		logger.info('Ensuring locations exist in database', {
+			count: locationData.length,
+		})
+
+		const { results: locations, errors } = await processBatch(
+			locationData,
+			async (location: any) => {
+				const existing = await prisma.location.findUnique({
+					where: { slug: location.slug },
+				})
+
+				if (existing) {
+					return existing
+				}
+
+				const created = await prisma.location.create({
+					data: {
+						name: location.name,
+						slug: location.slug,
+						country: location.country,
+						continent: location.continent,
+						timezone: location.timezone,
+						iconPath: location.iconPath,
+					},
+				})
+
+				logger.debug('Created location', { name: location.name })
+				return created
+			},
+			10,
+			'create_locations'
+		)
+
+		if (errors.length > 0) {
+			logger.warn('Some locations failed to create', {
+				failedCount: errors.length,
+				successCount: locations.length,
+			})
+		}
+
+		operation.complete({ locations: locations.length, errors: errors.length })
+		return locations
+	} catch (error) {
+		operation.fail(error)
+		throw new DatabaseError(
+			'Failed to ensure locations exist',
+			undefined,
+			error
+		)
+	}
 }
 
 // --- SEED MAIN -------------------------------------------------
 async function main() {
-	if (SHOULD_WIPE) {
-		console.log('Wiping DB…')
-		await wipeDb()
-	}
+	const mainOperation = logger.startOperation('seed_main')
 
-	console.log('Fetching Unsplash images…')
-	const images = await fetchUnsplashImages(400)
-	console.log('Fetched images:', images.length)
+	try {
+		logger.info('Starting database seeding', {
+			config: {
+				numUsers: config.NUM_USERS,
+				numCommunities: config.NUM_COMMUNITIES,
+				extraEvents: config.EXTRA_STANDALONE_EVENTS,
+				shouldWipe: config.SHOULD_WIPE,
+				useBatchLoader: config.USE_BATCH_LOADER,
+			},
+		})
 
-	console.log('Loading locations…')
-	let allLocations: any[] = []
-	let batchData = null
+		if (config.SHOULD_WIPE) {
+			logger.info('Wiping existing database data')
+			await wipeDb()
+		}
 
-	if (USE_BATCH_LOADER) {
-		console.log('🚀 Loading processed batch data...')
-		batchData = loadProcessedBatchData()
+		logger.info('Fetching images from Unsplash')
+		const images = await fetchUnsplashImages()
+		logger.info('Images ready', { count: images.length })
 
-		if (batchData) {
-			console.log(`� Batch data loaded:`)
-			console.log(`  - Communities: ${batchData.communities.length}`)
-			console.log(`  - Users: ${batchData.users.length}`)
-			console.log(`  - Locations: ${batchData.locations.length}`)
-			console.log(
-				`  - Cities with events: ${Object.keys(batchData.eventsByCity).length}`
-			)
-			console.log(
-				`  - Total events: ${Object.values(batchData.eventsByCity).reduce((sum: any, events: any) => sum + events.length, 0)}`
-			)
+		let allLocations: any[] = []
+		let batchData = null
 
-			// Use locations from batch data and ensure they exist in DB
-			allLocations = await ensureLocationsExist(batchData.locations)
+		if (config.USE_BATCH_LOADER) {
+			logger.info('Loading processed batch data')
+			batchData = loadProcessedBatchData()
+
+			if (batchData) {
+				// Use locations from batch data and ensure they exist in DB
+				allLocations = await ensureLocationsExist(batchData.locations)
+			} else {
+				logger.warn('Falling back to existing locations in DB')
+				allLocations = await prisma.location.findMany()
+			}
 		} else {
-			console.warn('⚠️ Falling back to existing locations in DB')
+			// Fallback to existing locations
 			allLocations = await prisma.location.findMany()
 		}
-	} else {
-		// Fallback to existing locations
-		allLocations = await prisma.location.findMany()
+
+		logger.info('Locations ready', { count: allLocations.length })
+
+		logger.info('Creating users')
+		const users = await createUsers(config.NUM_USERS, allLocations, batchData)
+
+		logger.info('Creating communities')
+		const { communities } = await createCommunities(
+			users,
+			images,
+			allLocations,
+			batchData
+		)
+
+		logger.info('Creating categories')
+		const categories = await createCategories(limits.maxCategories, batchData)
+
+		logger.info('Creating events')
+		const events =
+			config.USE_BATCH_LOADER && batchData
+				? await createEventsFromBatchData(
+						batchData,
+						users,
+						categories,
+						images,
+						allLocations
+					)
+				: [
+						...(await createEventsForCommunities(
+							communities,
+							users,
+							categories,
+							images,
+							allLocations
+						)),
+						...(await createStandaloneEvents(
+							config.EXTRA_STANDALONE_EVENTS,
+							users,
+							categories,
+							images,
+							allLocations
+						)),
+					]
+
+		logger.info('Backfilling daily stats')
+		await backfillDailyStats(events)
+
+		mainOperation.complete({
+			users: users.length,
+			communities: communities.length,
+			categories: categories.length,
+			events: events.length,
+		})
+
+		logger.info('Database seeding completed successfully!')
+	} catch (error) {
+		mainOperation.fail(error)
+		throw error
 	}
-
-	console.log(`Found ${allLocations.length} locations available for seeding`)
-
-	console.log('Creating users…')
-	const users = await createUsers(NUM_USERS, allLocations, batchData)
-
-	console.log('Creating communities…')
-	const { communities } = await createCommunities(
-		users,
-		images,
-		allLocations,
-		batchData
-	)
-
-	console.log('Creating categories…')
-	const categories = await createCategories(MAX_CATEGORIES, batchData)
-
-	console.log('Creating events…')
-	const events =
-		USE_BATCH_LOADER && batchData
-			? await createEventsFromBatchData(
-					batchData,
-					users,
-					categories,
-					images,
-					allLocations
-				)
-			: [
-					...(await createEventsForCommunities(
-						communities,
-						users,
-						categories,
-						images,
-						allLocations
-					)),
-					...(await createStandaloneEvents(
-						EXTRA_STANDALONE_EVENTS,
-						users,
-						categories,
-						images,
-						allLocations
-					)),
-				]
-
-	console.log('Backfilling daily stats…')
-	await backfillDailyStats(events)
-
-	console.log('Done!')
 }
 
 // --- CREATORS --------------------------------------------------
@@ -367,10 +429,10 @@ async function createUsers(count: number, locations?: any[], batchData?: any) {
 	const data: any[] = []
 
 	// Load cached LLM users, prefer batch data if available
-	const llmUsers = USE_LLM ? batchData?.users || [] : []
+	const llmUsers = config.USE_LLM ? batchData?.users || [] : []
 	const locationMap = new Map((locations || []).map((l: any) => [l.name, l]))
 
-	console.log(
+	logger.info(
 		`Creating ${count} users with hashed passwords... (Batch candidates: ${llmUsers.length})`
 	)
 
@@ -467,7 +529,7 @@ async function createUsers(count: number, locations?: any[], batchData?: any) {
 		})
 
 		if ((i + 1) % 50 === 0) {
-			console.log(`  Hashed passwords for ${i + 1}/${count} users...`)
+			logger.info(`  Hashed passwords for ${i + 1}/${count} users...`)
 		}
 	}
 
@@ -506,8 +568,8 @@ async function createUsers(count: number, locations?: any[], batchData?: any) {
 		JSON.stringify(testCredentials, null, 2),
 		'utf-8'
 	)
-	console.log(`📁 Test credentials saved to ./.local/test-accounts.json`)
-	console.log(
+	logger.info(`📁 Test credentials saved to ./.local/test-accounts.json`)
+	logger.info(
 		`✅ ${created.length} users created/updated (from batch: ${createdFromBatch})`
 	)
 
@@ -523,28 +585,28 @@ async function createCommunities(
 	// Try to load communities from batch data first, then fallback to LLM
 	let llmCommunities = []
 
-	if (USE_BATCH_LOADER && batchData?.communities) {
+	if (config.USE_BATCH_LOADER && batchData?.communities) {
 		llmCommunities = batchData.communities
-		console.log(`✅ Using ${llmCommunities.length} communities from batch data`)
-	} else if (USE_LLM) {
+		logger.info(`✅ Using ${llmCommunities.length} communities from batch data`)
+	} else if (config.USE_LLM) {
 		try {
 			llmCommunities = [] // No fallback to old cached communities
-			console.log(
+			logger.info(
 				`⚠️ No batch data available, communities will be generated with faker`
 			)
 		} catch (error) {
-			console.warn('⚠️ Failed to load LLM communities:', error)
+			logger.warn('⚠️ Failed to load LLM communities:', error)
 		}
 	}
 
-	const ownerPool = sampleSize(users, Math.ceil(NUM_COMMUNITIES * 0.8))
+	const ownerPool = sampleSize(users, Math.ceil(config.NUM_COMMUNITIES * 0.8))
 	const data: any[] = []
 
 	// Map of location names to IDs for finding correct locations later
 	const locationMap = new Map(locations.map((l) => [l.name, l]))
 
 	// Process communities - either from LLM or generate with faker
-	for (let i = 0; i < NUM_COMMUNITIES; i++) {
+	for (let i = 0; i < config.NUM_COMMUNITIES; i++) {
 		const owner = rand(ownerPool)
 
 		if (i < llmCommunities.length) {
@@ -713,17 +775,17 @@ async function createCategories(count: number, batchData?: any) {
 	// Collect categories from batch data first, then LLM communities, then faker
 	const categorySet = new Set<string>()
 
-	if (USE_BATCH_LOADER && batchData?.categories) {
+	if (config.USE_BATCH_LOADER && batchData?.categories) {
 		// Use pre-extracted categories from batch loader
 		;(batchData?.categories ?? []).forEach((cat: string) => {
 			categorySet.add(capitalize(cat.trim()))
 		})
-		console.log(
+		logger.info(
 			`✅ Using ${batchData.categories.length} categories from batch data`
 		)
 	} else {
 		// Fallback to faker categories (no old LLM cache)
-		console.log(
+		logger.info(
 			`⚠️ No batch data available, categories will be generated with faker`
 		)
 	}
@@ -780,7 +842,7 @@ async function createEventsForCommunities(
 		const llmEvents = community._llmData?.events || []
 		const eventCount =
 			llmEvents.length ||
-			faker.number.int({ min: 2, max: MAX_EVENTS_PER_COMMUNITY })
+			faker.number.int({ min: 2, max: limits.maxEventsPerCommunity })
 
 		const hostCandidates = users.filter(
 			(u: any) => u.id === community.ownerId || faker.datatype.boolean()
@@ -814,7 +876,7 @@ async function createEventsFromBatchData(
 	images: string[],
 	locations: any[]
 ) {
-	console.log(
+	logger.info(
 		'🗺️ Creating events from batch data with geographic distribution...'
 	)
 
@@ -825,13 +887,11 @@ async function createEventsFromBatchData(
 	for (const [cityName, cityEvents] of Object.entries(batchData.eventsByCity)) {
 		const location = locationMap.get(cityName)
 		if (!location) {
-			console.warn(
-				`⚠️ Location not found for city: ${cityName}, skipping events`
-			)
+			logger.warn(`⚠️ Location not found for city: ${cityName}, skipping events`)
 			continue
 		}
 
-		console.log(
+		logger.info(
 			`📍 Creating ${(cityEvents as any[]).length} events for ${cityName}`
 		)
 
@@ -901,7 +961,7 @@ async function createEventsFromBatchData(
 	}
 
 	// Create events in database
-	console.log(`💾 Creating ${all.length} events in database...`)
+	logger.info(`💾 Creating ${all.length} events in database...`)
 	const eventsToCreate = all.map(({ _batchEvent, ...rest }) => rest)
 	const createdEvents: any[] = []
 
@@ -988,7 +1048,7 @@ async function createEventsFromBatchData(
 
 	// Use the existing createEvents ticket tier and promo code logic but with batch data
 	// For now, let's use the existing logic from createEvents function
-	console.log(
+	logger.info(
 		`✅ Created ${createdEvents.length} events with geographic distribution`
 	)
 
@@ -1314,7 +1374,7 @@ async function createEvents(
 			// Use faker
 			const countTiers = faker.number.int({
 				min: 1,
-				max: MAX_TICKET_TIERS_PER_EVENT,
+				max: limits.maxTicketTiersPerEvent,
 			})
 			for (let i = 0; i < countTiers; i++) {
 				const name = faker.commerce.productName()
@@ -1379,7 +1439,7 @@ async function createEvents(
 			// Use faker
 			const promoCount = faker.number.int({
 				min: 0,
-				max: MAX_PROMO_CODES_PER_EVENT,
+				max: limits.maxPromoCodesPerEvent,
 			})
 			for (let i = 0; i < promoCount; i++) {
 				const appliesToAll = faker.datatype.boolean()
@@ -1461,7 +1521,7 @@ async function createEvents(
 	for (const e of createdEvents) {
 		const qCount = faker.number.int({
 			min: 0,
-			max: MAX_REG_QUESTIONS_PER_EVENT,
+			max: limits.maxRegQuestionsPerEvent,
 		})
 		for (let i = 0; i < qCount; i++) {
 			const type = rand([
@@ -1508,7 +1568,7 @@ async function createEvents(
 	for (const e of createdEvents) {
 		const countCollabs = faker.number.int({
 			min: 0,
-			max: MAX_COLLABORATORS_PER_EVENT,
+			max: limits.maxCollaboratorsPerEvent,
 		})
 		const collabUsers = sampleSize(hostCandidates, countCollabs)
 		for (const u of collabUsers) {
@@ -1554,7 +1614,7 @@ async function createEvents(
 					referralRows.map((r) => prisma.eventReferral.create({ data: r }))
 				)
 		: []
-	console.log('created event referrals', referrals)
+	logger.info('created event referrals', referrals)
 
 	// Orders + Payments + RSVPs (+ Answers, CheckIns, Feedback, Waitlist)
 	const orderRows: any[] = []
@@ -2036,7 +2096,7 @@ function uniqueSlug(base: string): string {
 // --- RUN -------------------------------------------------------
 main()
 	.catch((e) => {
-		console.error(e)
+		logger.error('Seeding failed', e)
 		process.exit(1)
 	})
 	.finally(async () => {
