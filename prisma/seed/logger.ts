@@ -155,16 +155,17 @@ class SeedLogger {
 
 	// Operation tracking
 	startOperation(operation: string, details?: unknown) {
+		const startTime = Date.now()
 		this.info(`Starting ${operation}`, details, operation)
 		return {
 			operation,
-			startTime: Date.now(),
+			startTime,
 			complete: (result?: unknown) => {
-				const duration = Date.now() - Date.now()
+				const duration = Date.now() - startTime
 				this.info(`Completed ${operation} in ${duration}ms`, result, operation)
 			},
 			fail: (error: unknown) => {
-				const duration = Date.now() - Date.now()
+				const duration = Date.now() - startTime
 				this.error(`Failed ${operation} after ${duration}ms`, error, operation)
 			},
 		}

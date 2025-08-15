@@ -25,7 +25,7 @@ import {
 	usersBatchSchema,
 	validateBatchFile,
 	venuesStaticSchema,
-} from './validation'
+} from './schemas'
 
 // Setup error handling
 setupGlobalErrorHandler('process')
@@ -54,27 +54,74 @@ async function processData() {
 
 		// Load and validate static data
 		logger.info('Loading static data files')
-		const locations = validateBatchFile(
-			safeReadJSON(path.join(paths.staticDir, 'locations.json')),
-			locationsStaticSchema,
-			'locations.json'
-		)
 
-		const venues = validateBatchFile(
-			safeReadJSON(path.join(paths.staticDir, 'venues.json')),
-			venuesStaticSchema,
-			'venues.json'
-		)
+		let locations: any, venues: any
+		try {
+			const locationsPath = path.join(paths.staticDir, 'locations.json')
+			logger.debug('Reading locations file', { path: locationsPath })
+
+			// Check if file exists
+			if (!existsSync(locationsPath)) {
+				throw new Error(`Locations file does not exist at: ${locationsPath}`)
+			}
+
+			const locationsData = safeReadJSON(locationsPath)
+			logger.debug('Raw locations data loaded', {
+				type: typeof locationsData,
+				isArray: Array.isArray(locationsData),
+				keys: locationsData ? Object.keys(locationsData) : 'null',
+			})
+
+			if (!locationsData) {
+				throw new Error('Locations file returned null data')
+			}
+
+			locations = validateBatchFile(
+				locationsData,
+				locationsStaticSchema,
+				'locations.json'
+			)
+			logger.debug('Locations loaded successfully', { count: locations.length })
+		} catch (error) {
+			logger.error('Failed to load locations.json', {
+				error: error instanceof Error ? error.message : error,
+				stack: error instanceof Error ? error.stack : undefined,
+			})
+			throw error
+		}
+
+		try {
+			const venuesPath = path.join(paths.staticDir, 'venues.json')
+			logger.debug('Reading venues file', { path: venuesPath })
+			const venuesData = safeReadJSON(venuesPath)
+
+			if (!venuesData) {
+				throw new Error('Venues file returned null data')
+			}
+
+			venues = validateBatchFile(venuesData, venuesStaticSchema, 'venues.json')
+			logger.debug('Venues loaded successfully', { count: venues.length })
+		} catch (error) {
+			logger.error('Failed to load venues.json', error)
+			throw error
+		}
 
 		// Load and validate batch data
 		logger.info('Loading batch data files')
 		const batchFiles = readdirSync(paths.batchesDir).filter((f) =>
 			f.endsWith('.json')
 		)
+		logger.debug('Found batch files', { files: batchFiles })
+
 		const communitiesFile = batchFiles.find((f) =>
 			f.startsWith('communities-batch-')
 		)
 		const usersFile = batchFiles.find((f) => f.startsWith('users-batch-'))
+
+		logger.debug('Identified batch files', {
+			communitiesFile,
+			usersFile,
+		})
 
 		if (!communitiesFile || !usersFile) {
 			throw new ValidationError(
@@ -83,17 +130,40 @@ async function processData() {
 			)
 		}
 
-		const communities = validateBatchFile(
-			safeReadJSON(path.join(paths.batchesDir, communitiesFile)),
-			communitiesBatchSchema,
-			communitiesFile
-		)
+		let communities: any, users: any
+		try {
+			logger.debug('Loading communities batch file', { file: communitiesFile })
+			const communitiesData = safeReadJSON(
+				path.join(paths.batchesDir, communitiesFile)
+			)
+			communities = validateBatchFile(
+				communitiesData,
+				communitiesBatchSchema,
+				communitiesFile
+			)
+			logger.debug('Communities loaded successfully', {
+				count: communities.communities?.length,
+			})
+		} catch (error) {
+			logger.error('Failed to load communities batch', {
+				file: communitiesFile,
+				error: error instanceof Error ? error.message : error,
+			})
+			throw error
+		}
 
-		const users = validateBatchFile(
-			safeReadJSON(path.join(paths.batchesDir, usersFile)),
-			usersBatchSchema,
-			usersFile
-		)
+		try {
+			logger.debug('Loading users batch file', { file: usersFile })
+			const usersData = safeReadJSON(path.join(paths.batchesDir, usersFile))
+			users = validateBatchFile(usersData, usersBatchSchema, usersFile)
+			logger.debug('Users loaded successfully', { count: users.users?.length })
+		} catch (error) {
+			logger.error('Failed to load users batch', {
+				file: usersFile,
+				error: error instanceof Error ? error.message : error,
+			})
+			throw error
+		}
 
 		logger.info('Successfully loaded and validated data', {
 			communities: communities.communities.length,
@@ -105,7 +175,7 @@ async function processData() {
 		// Create event distribution
 		logger.info('Creating event distribution system')
 		const eventsByCity: Record<string, any[]> = {}
-		locations.forEach((location) => {
+		locations.forEach((location: any) => {
 			eventsByCity[location.name] = []
 		})
 
