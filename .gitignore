@@ -41,6 +41,12 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
-seed.ts
 test-accounts.*
 .githooks/pre-commit
+
+# Local development files
+.local/
+.local/**
+*.local.json
+test-accounts.json
+seed-logs/
