@@ -1,7 +1,11 @@
 {
 	"compilerOptions": {
 		"target": "ES2017",
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
 		"allowJs": true,
 		"skipLibCheck": true,
 		"strict": true,
@@ -19,14 +23,34 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"],
-			"@/components/*": ["./components/*"],
-			"@/lib/*": ["./lib/*"],
-			"@/server/*": ["./server/*"],
-			"@/app/*": ["./app/*"],
-			"@/prisma/*": ["./prisma/*"]
+			"@/*": [
+				"./*"
+			],
+			"@/components/*": [
+				"./components/*"
+			],
+			"@/lib/*": [
+				"./lib/*"
+			],
+			"@/server/*": [
+				"./server/*"
+			],
+			"@/app/*": [
+				"./app/*"
+			],
+			"@/prisma/*": [
+				"./prisma/*"
+			]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-	"exclude": ["node_modules"]
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts",
+		"prisma/seed/prompts/llm.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }

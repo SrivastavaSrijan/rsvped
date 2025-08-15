@@ -91,7 +91,7 @@ export const LLMUserPersonaSchema = z.object({
 	profession: z.string().min(1),
 	industry: z.string().min(1),
 	experienceLevel: z.enum(['junior', 'mid', 'senior', 'executive']),
-	interests: z.array(z.string().min(1)),
+	interests: z.array(z.string().min(1)).min(1).max(5),
 	location: z.string().min(1),
 	networkingStyle: z.enum(['active', 'selective', 'casual']),
 	spendingPower: z.enum(['low', 'medium', 'high']),
@@ -171,7 +171,7 @@ export const batchUserSchema = z.object({
 	linkedinUrl: z.string().url().optional(),
 	twitterHandle: z.string().max(50).optional(),
 	websiteUrl: z.string().url().optional(),
-	interests: z.array(z.string().min(1).max(50)).max(10).default([]),
+	interests: z.array(z.string().min(1).max(50)).min(1).max(10),
 	locationPreference: slugSchema.optional(),
 })
 
@@ -247,15 +247,6 @@ export const batchEventSchema = z.object({
 	price: z.number().min(0).max(10000).default(0),
 	capacity: z.number().int().min(1).max(10000).optional(),
 	tags: z.array(z.string().min(1).max(30)).max(10).default([]),
-})
-
-// RSVP schema (for generating realistic event attendance)
-export const batchRsvpSchema = z.object({
-	userId: z.string().min(1),
-	eventId: z.string().min(1),
-	status: z.enum(['CONFIRMED', 'WAITLIST', 'CANCELLED']).default('CONFIRMED'),
-	attendeeInterests: z.array(z.string().min(1).max(50)).max(5).default([]),
-	categoryAlignment: z.number().min(0).max(1), // How well user interests align with event category
 })
 
 // =============================================================================
@@ -388,7 +379,6 @@ export type Venue = z.infer<typeof venueSchema>
 export type BatchUser = z.infer<typeof batchUserSchema>
 export type BatchCommunity = z.infer<typeof batchCommunitySchema>
 export type BatchEvent = z.infer<typeof batchEventSchema>
-export type BatchRsvp = z.infer<typeof batchRsvpSchema>
 
 // Batch file types
 export type CommunitiesBatch = z.infer<typeof communitiesBatchSchema>

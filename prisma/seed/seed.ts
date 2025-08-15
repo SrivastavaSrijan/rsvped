@@ -46,8 +46,6 @@ const slug = (s: string) =>
 	slugify(s, { lower: true, strict: true }).substring(0, 48) ||
 	faker.string.alphanumeric(8)
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
-
 function randomDateWithinRange({
 	startDaysAgo = 120,
 	endDaysAhead = 120,
@@ -214,24 +212,12 @@ function loadProcessedBatchData() {
 			readFileSync(`${processedDir}/${eventsFile}`, 'utf8')
 		)
 
-		// Extract categories from communities
-		const categories = new Set<string>()
-		communitiesData.communities.forEach((community: any) => {
-			community.categories?.forEach((cat: string) => {
-				categories.add(cat)
-			})
-			community.eventTypes?.forEach((type: string) => {
-				categories.add(type)
-			})
-		})
-
 		const result = {
 			locations,
 			venues,
 			communities: communitiesData.communities,
 			users: usersData.users,
 			eventsByCity: eventsData.eventsByCity,
-			categories: Array.from(categories),
 			metadata: {
 				communities: communitiesData.metadata,
 				users: usersData.metadata,
@@ -338,24 +324,70 @@ async function createIntelligentRsvps(
 }
 
 async function assignCategoryInterestsToUsers(users: any[], categories: any[]) {
-	logger.info('Assigning category interests to users')
+	logger.info(
+		'Assigning category interests to users based on LLM-generated interests'
+	)
 
 	const userCategoryData: any[] = []
+	const categoryMap = new Map(categories.map((c) => [c.name.toLowerCase(), c]))
 
 	for (const user of users) {
-		// Each user gets 2-4 category interests
-		const numInterests = faker.number.int({ min: 2, max: 4 })
-		const selectedCategories = sampleSize(categories, numInterests)
+		// Use LLM-generated interests if available, otherwise fallback to random
+		const userInterests =
+			Array.isArray(user.interests) && user.interests.length > 0
+				? user.interests
+				: []
 
-		for (const category of selectedCategories) {
-			// Interest level 1-10 (higher = more likely to RSVP)
-			const interestLevel = faker.number.int({ min: 3, max: 10 })
+		if (userInterests.length > 0) {
+			// Map user interests to categories
+			for (const interest of userInterests) {
+				// Try to find matching category
+				let matchedCategory = categoryMap.get(interest.toLowerCase())
 
-			userCategoryData.push({
-				userId: user.id,
-				categoryId: category.id,
-				interestLevel,
-			})
+				// If no exact match, try partial matching
+				if (!matchedCategory) {
+					for (const [categoryName, category] of categoryMap) {
+						if (
+							categoryName.includes(interest.toLowerCase()) ||
+							interest.toLowerCase().includes(categoryName)
+						) {
+							matchedCategory = category
+							break
+						}
+					}
+				}
+
+				if (matchedCategory) {
+					// Interest level based on how well the interest matches (8-10 for LLM matches)
+					const interestLevel = faker.number.int({ min: 8, max: 10 })
+
+					userCategoryData.push({
+						userId: user.id,
+						categoryId: matchedCategory.id,
+						interestLevel,
+					})
+				}
+			}
+		}
+
+		// If user has no matching categories or very few, add some random ones
+		const userCategoriesCount = userCategoryData.filter(
+			(uc) => uc.userId === user.id
+		).length
+		if (userCategoriesCount < 2) {
+			const additionalNeeded = Math.max(0, 2 - userCategoriesCount)
+			const selectedCategories = sampleSize(categories, additionalNeeded)
+
+			for (const category of selectedCategories) {
+				// Lower interest level for random assignments (3-6)
+				const interestLevel = faker.number.int({ min: 3, max: 6 })
+
+				userCategoryData.push({
+					userId: user.id,
+					categoryId: category.id,
+					interestLevel,
+				})
+			}
 		}
 	}
 
@@ -381,11 +413,30 @@ async function generateCategoryBasedRsvps(
 	const rsvpData: any[] = []
 
 	for (const event of events) {
-		// Get event categories
-		const eventCategories = await prisma.eventCategory.findMany({
-			where: { eventId: event.id },
-			include: { category: true },
-		})
+		// Get event categories through event -> community -> categories path
+		let eventCategories: any[] = []
+
+		if (event.communityId) {
+			// Get community with its categories
+			const community = await prisma.community.findUnique({
+				where: { id: event.communityId },
+				select: { id: true },
+			})
+
+			if (community) {
+				// Get categories assigned to events in this community
+				eventCategories = await prisma.eventCategory.findMany({
+					where: { eventId: event.id },
+					include: { category: true },
+				})
+			}
+		} else {
+			// For events without communities, get direct event categories
+			eventCategories = await prisma.eventCategory.findMany({
+				where: { eventId: event.id },
+				include: { category: true },
+			})
+		}
 
 		if (eventCategories.length === 0) continue
 
@@ -523,6 +574,11 @@ async function main() {
 
 		logger.info('Locations ready', { count: allLocations.length })
 
+		// Get categories from database (like locations)
+		logger.info('Loading categories from database')
+		const allCategories = await prisma.category.findMany()
+		logger.info('Categories ready', { count: allCategories.length })
+
 		logger.info('Creating users')
 		const users = await createUsers(config.NUM_USERS, allLocations, batchData)
 
@@ -534,38 +590,26 @@ async function main() {
 			batchData
 		)
 
-		logger.info('Creating categories')
-		const categories = await createCategories(limits.maxCategories, batchData)
-
 		logger.info('Creating events')
 		const events =
 			config.USE_BATCH_LOADER && batchData
 				? await createEventsFromBatchData(
 						batchData,
 						users,
-						categories,
 						images,
 						allLocations
 					)
-				: [
-						...(await createEventsForCommunities(
-							communities,
-							users,
-							categories,
-							images,
-							allLocations
-						)),
-						...(await createStandaloneEvents(
-							config.EXTRA_STANDALONE_EVENTS,
-							users,
-							categories,
-							images,
-							allLocations
-						)),
-					]
+				: await createEventsForCommunities(
+						communities,
+						users,
+						allCategories,
+						images,
+						allLocations,
+						config.EXTRA_STANDALONE_EVENTS // Add standalone event count to community events
+					)
 
 		logger.info('Creating intelligent RSVPs')
-		await createIntelligentRsvps(users, events, categories)
+		await createIntelligentRsvps(users, events, allCategories)
 
 		logger.info('Backfilling daily stats')
 		await backfillDailyStats(events)
@@ -573,7 +617,7 @@ async function main() {
 		mainOperation.complete({
 			users: users.length,
 			communities: communities.length,
-			categories: categories.length,
+			categories: allCategories.length,
 			events: events.length,
 		})
 
@@ -938,78 +982,30 @@ async function createCommunities(
 	return { communities, membershipTiers }
 }
 
-async function createCategories(count: number, batchData?: any) {
-	// Collect categories from batch data first, then LLM communities, then faker
-	const categorySet = new Set<string>()
-
-	if (config.USE_BATCH_LOADER && batchData?.categories) {
-		// Use pre-extracted categories from batch loader
-		;(batchData?.categories ?? []).forEach((cat: string) => {
-			categorySet.add(capitalize(cat.trim()))
-		})
-		logger.info(
-			`✅ Using ${batchData.categories.length} categories from batch data`
-		)
-	} else {
-		// Fallback to faker categories (no old LLM cache)
-		logger.info(
-			`⚠️ No batch data available, categories will be generated with faker`
-		)
-	}
-
-	// If we need more categories, generate with faker
-	const existingCount = categorySet.size
-	const usedNames = new Set<string>(categorySet)
-
-	if (existingCount < count) {
-		const additionalNeeded = count - existingCount
-		for (let i = 0; i < additionalNeeded; i++) {
-			let name = capitalize(faker.word.noun())
-			// Ensure unique names
-			while (usedNames.has(name)) {
-				name = capitalize(faker.word.noun())
-			}
-			usedNames.add(name)
-			categorySet.add(name)
-		}
-	}
-
-	// Convert to array and create data objects
-	const data = Array.from(categorySet)
-		.slice(0, count)
-		.map((name) => ({
-			name,
-			slug: slug(name),
-		}))
-
-	// Idempotent upserts by slug
-	const created: any[] = []
-	for (const c of data) {
-		const row = await prisma.category.upsert({
-			where: { slug: c.slug },
-			update: { name: c.name },
-			create: c,
-		})
-		created.push(row)
-	}
-	return created
-}
-
 async function createEventsForCommunities(
 	communities: any[],
 	users: any[],
 	categories: any[],
 	images: string[],
-	locations: any[]
+	locations: any[],
+	extraEventsCount: number = 0
 ) {
 	const all: any[] = []
+
+	// Calculate total extra events to distribute across communities
+	const extraEventsPerCommunity = Math.ceil(
+		extraEventsCount / communities.length
+	)
 
 	for (const community of communities) {
 		// Use LLM events if available, otherwise generate with faker
 		const llmEvents = community._llmData?.events || []
-		const eventCount =
+		const baseEventCount =
 			llmEvents.length ||
 			faker.number.int({ min: 2, max: limits.maxEventsPerCommunity })
+
+		// Add extra events to this community
+		const eventCount = baseEventCount + extraEventsPerCommunity
 
 		const hostCandidates = users.filter(
 			(u: any) => u.id === community.ownerId || faker.datatype.boolean()
@@ -1019,9 +1015,16 @@ async function createEventsForCommunities(
 		const location =
 			locations.find((l) => l.id === community._locationId) || rand(locations)
 
+		// Get community categories from LLM data or database
+		const communityCategories = community._llmData?.categories || []
+		const categoryObjects =
+			communityCategories.length > 0
+				? categories.filter((c) => communityCategories.includes(c.name))
+				: [rand(categories)] // Fallback to random category if no LLM data
+
 		const communityEvents = await createEvents(eventCount, {
 			hostCandidates,
-			categories,
+			categories: categoryObjects, // Pass the actual category objects for this community
 			communityId: community.id,
 			images,
 			locations,
@@ -1039,7 +1042,6 @@ async function createEventsForCommunities(
 async function createEventsFromBatchData(
 	batchData: any,
 	users: any[],
-	categories: any[],
 	images: string[],
 	locations: any[]
 ) {
@@ -1168,39 +1170,49 @@ async function createEventsFromBatchData(
 		e._batchEvent = all[i]._batchEvent
 	})
 
-	// Create categories, ticket tiers, promo codes etc. using the same logic as createEvents
-	// but using batch data instead of faker
-
-	// Categories relation
+	// Assign categories to events based on their community's categories
 	const eventCategoryRows: any[] = []
 	for (const e of createdEvents) {
-		const batchCategories = e._batchEvent?.categories || []
-
-		if (batchCategories.length > 0) {
-			// Match batch category names to actual category IDs
-			const catMap = new Map(
-				categories.map((c) => [c.name.toLowerCase(), c.id])
+		if (e.communityId) {
+			// Get the community and its categories from batch data
+			const community = batchData.communities?.find(
+				(c: any) => c.id === e.communityId
 			)
+			if (community?._llmData?.categories?.length > 0) {
+				// Get all categories from database to map LLM category names to database IDs
+				const allCategories = await prisma.category.findMany()
+				const categoryMap = new Map(
+					allCategories.map((c) => [c.name.toLowerCase(), c])
+				)
 
-			for (const catName of batchCategories) {
-				const catId = catMap.get(catName.toLowerCase())
-				if (catId) {
-					eventCategoryRows.push({ eventId: e.id, categoryId: catId })
+				// Map community's LLM categories to database categories
+				const communityCategories = community._llmData.categories
+					.map((catName: string) => categoryMap.get(catName.toLowerCase()))
+					.filter(Boolean)
+
+				if (communityCategories.length > 0) {
+					// Assign categories to the event (pick 1-3 categories)
+					const categoriesToAssign =
+						communityCategories.length > 3
+							? sampleSize(
+									communityCategories,
+									faker.number.int({ min: 1, max: 3 })
+								)
+							: communityCategories
+
+					for (const category of categoriesToAssign) {
+						eventCategoryRows.push({
+							eventId: e.id,
+							categoryId: category.id,
+						})
+					}
 				}
-			}
-		}
-
-		// If no batch categories or none matched, use random categories
-		if (!eventCategoryRows.some((r) => r.eventId === e.id)) {
-			const catCount = faker.number.int({ min: 1, max: 3 })
-			const cats = sampleSize(categories, catCount)
-			for (const c of cats) {
-				eventCategoryRows.push({ eventId: e.id, categoryId: c.id })
 			}
 		}
 	}
 
-	if (eventCategoryRows.length) {
+	// Create event-category relationships
+	if (eventCategoryRows.length > 0) {
 		if (prisma.eventCategory.createMany) {
 			await prisma.eventCategory.createMany({
 				data: eventCategoryRows,
@@ -1208,7 +1220,7 @@ async function createEventsFromBatchData(
 			})
 		} else {
 			await prisma.$transaction(
-				eventCategoryRows.map((r) => prisma.eventCategory.create({ data: r }))
+				eventCategoryRows.map((ec) => prisma.eventCategory.create({ data: ec }))
 			)
 		}
 	}
@@ -1220,25 +1232,6 @@ async function createEventsFromBatchData(
 	)
 
 	return createdEvents
-}
-
-async function createStandaloneEvents(
-	count: number,
-	users: any[],
-	categories: any[],
-	images: string[],
-	locations: any[]
-) {
-	const hostCandidates = users
-	return createEvents(count, {
-		hostCandidates,
-		categories,
-		images,
-		communityId: null,
-		locations,
-		location: null,
-		llmEvents: [],
-	})
 }
 
 // Maps LLM event types to LocationType enum
@@ -1471,37 +1464,28 @@ async function createEvents(
 		e._llmEvent = events[i]._llmEvent
 	})
 
-	// Categories relation
+	// Assign categories to events based on community categories or passed categories
 	const eventCategoryRows: any[] = []
 	for (const e of createdEvents) {
-		// Use LLM categories if available
-		const llmCategories = e._llmEvent?.categories || []
+		// For community events, get categories from the community
+		if (e.communityId && categories.length > 0) {
+			// Assign all community categories to the event, or pick a subset
+			const categoriesToAssign =
+				categories.length > 3
+					? sampleSize(categories, faker.number.int({ min: 1, max: 3 }))
+					: categories
 
-		if (llmCategories.length > 0) {
-			// Match LLM category names to actual category IDs
-			const catMap = new Map(
-				categories.map((c) => [c.name.toLowerCase(), c.id])
-			)
-
-			for (const catName of llmCategories) {
-				const catId = catMap.get(catName.toLowerCase())
-				if (catId) {
-					eventCategoryRows.push({ eventId: e.id, categoryId: catId })
-				}
-			}
-		}
-
-		// If no LLM categories or none matched, use random categories
-		if (!eventCategoryRows.some((r) => r.eventId === e.id)) {
-			const catCount = faker.number.int({ min: 1, max: 3 })
-			const cats = sampleSize(categories, catCount)
-			for (const c of cats) {
-				eventCategoryRows.push({ eventId: e.id, categoryId: c.id })
+			for (const category of categoriesToAssign) {
+				eventCategoryRows.push({
+					eventId: e.id,
+					categoryId: category.id,
+				})
 			}
 		}
 	}
 
-	if (eventCategoryRows.length) {
+	// Create event-category relationships
+	if (eventCategoryRows.length > 0) {
 		if (prisma.eventCategory.createMany) {
 			await prisma.eventCategory.createMany({
 				data: eventCategoryRows,
@@ -1509,7 +1493,7 @@ async function createEvents(
 			})
 		} else {
 			await prisma.$transaction(
-				eventCategoryRows.map((r) => prisma.eventCategory.create({ data: r }))
+				eventCategoryRows.map((ec) => prisma.eventCategory.create({ data: ec }))
 			)
 		}
 	}
