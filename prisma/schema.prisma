@@ -32,6 +32,16 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
+  // Persona metadata (LLM-generated)
+  profession      String?
+  industry        String?
+  experienceLevel ExperienceLevel?
+  interests       String[]
+  networkingStyle NetworkingStyle?
+  spendingPower   SpendingPower?
+  bio             String?   @db.Text
+  userCohort      UserCohort?
+
   // A user can both host and attend events
   hostedEvents Event[] @relation("Host")
   rsvps        Rsvp[]
@@ -164,6 +174,32 @@ enum SubscriptionStatus {
 enum BillingInterval {
   MONTHLY
   YEARLY
+}
+
+// Persona enums
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+  EXECUTIVE
+}
+
+enum NetworkingStyle {
+  ACTIVE
+  SELECTIVE
+  CASUAL
+}
+
+enum SpendingPower {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum UserCohort {
+  POWER
+  FRIEND_GROUP
+  CASUAL
 }
 
 /**

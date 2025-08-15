@@ -160,7 +160,6 @@ const NearbyEvents = async ({ locationId }: NearbyEventsProps) => {
 		locationId,
 		take: PageConfig.nearbyEvents.pageSize,
 	})
-
 	return (
 		<ResponsiveGridCarousel
 			config={{

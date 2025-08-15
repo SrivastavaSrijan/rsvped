@@ -1,3 +1,9 @@
+import {
+	ExperienceLevel,
+	NetworkingStyle,
+	SpendingPower,
+	UserCohort,
+} from '@prisma/client'
 import * as z from 'zod'
 import {
 	type CompleteAccount,
@@ -31,6 +37,14 @@ export const UserModel = z.object({
 	emailVerified: z.date().nullish(),
 	image: z.string().nullish(),
 	password: z.string().nullish(),
+	profession: z.string().nullish(),
+	industry: z.string().nullish(),
+	experienceLevel: z.nativeEnum(ExperienceLevel).nullish(),
+	interests: z.string().array(),
+	networkingStyle: z.nativeEnum(NetworkingStyle).nullish(),
+	spendingPower: z.nativeEnum(SpendingPower).nullish(),
+	bio: z.string().nullish(),
+	userCohort: z.nativeEnum(UserCohort).nullish(),
 	locationId: z.string().nullish(),
 	createdAt: z.date(),
 })
