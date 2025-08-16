@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod'
-import { logger } from './logger'
+import { logger } from '.'
 
 // Custom error classes
 export class SeedError extends Error {

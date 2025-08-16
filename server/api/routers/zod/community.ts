@@ -1,3 +1,4 @@
+import { CommunityExclusivity } from '@prisma/client'
 import * as z from 'zod'
 import {
 	type CompleteCommunityMembership,
@@ -17,6 +18,8 @@ export const CommunityModel = z.object({
 	description: z.string().nullish(),
 	coverImage: z.string().nullish(),
 	isPublic: z.boolean(),
+	exclusivity: z.nativeEnum(CommunityExclusivity),
+	targetAudience: z.string().nullish(),
 	ownerId: z.string(),
 	createdAt: z.date(),
 	updatedAt: z.date(),

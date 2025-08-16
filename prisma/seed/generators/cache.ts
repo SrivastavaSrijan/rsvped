@@ -6,10 +6,10 @@
 
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { paths } from '../config'
-import { safeReadJSON } from '../errors'
-import { logger } from '../logger'
-import type { LLMCommunity, LLMUserPersona } from '../schemas'
+import type { LLMCommunity, LLMUserPersona } from '../utils'
+import { logger } from '../utils'
+import { paths } from '../utils/config'
+import { safeReadJSON } from '../utils/errors'
 
 export class CacheManager {
 	constructor() {

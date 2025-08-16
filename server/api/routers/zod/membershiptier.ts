@@ -13,6 +13,7 @@ export const MembershipTierModel = z.object({
 	name: z.string(),
 	slug: z.string(),
 	description: z.string().nullish(),
+	benefits: z.string().array(),
 	priceCents: z.number().int().nullish(),
 	currency: z.string().nullish(),
 	billingInterval: z.nativeEnum(BillingInterval).nullish(),

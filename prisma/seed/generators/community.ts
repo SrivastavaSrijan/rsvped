@@ -8,14 +8,14 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
-import { config, paths } from '../config'
-import { logger } from '../logger'
 import { CommunityPrompts } from '../prompts/llm'
 import {
 	type Category,
 	type LLMCommunity,
 	LLMCommunityBatchSchema,
-} from '../schemas'
+	logger,
+} from '../utils'
+import { config, paths } from '../utils/config'
 import { cache } from './cache'
 import { llm } from './llm'
 
@@ -217,7 +217,6 @@ export class CommunityGenerator {
 					name: 'Technology & Programming',
 					slug: 'technology-programming',
 					description: 'Software development and tech innovation',
-					subcategories: ['Web Development', 'AI/ML', 'Mobile Development'],
 				},
 				{
 					name: 'Business & Entrepreneurship',

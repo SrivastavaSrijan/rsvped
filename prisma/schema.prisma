@@ -114,6 +114,8 @@ model Community {
   description String? @db.Text
   coverImage  String?
   isPublic    Boolean @default(true)
+  exclusivity CommunityExclusivity @default(OPEN)
+  targetAudience      String?
 
   ownerId String
   owner   User   @relation("CommunityOwner", fields: [ownerId], references: [id])
@@ -124,6 +126,12 @@ model Community {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum CommunityExclusivity {
+  OPEN
+  INVITE_ONLY
+  APPLICATION_BASED
 }
 
 model CommunityMembership {
@@ -151,6 +159,7 @@ model MembershipTier {
   name            String
   slug            String
   description     String?
+  benefits        String[]         @default([]) // List of benefits or perks
   priceCents      Int? // null = free
   currency        String?
   billingInterval BillingInterval?

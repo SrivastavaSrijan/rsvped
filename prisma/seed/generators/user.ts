@@ -8,14 +8,14 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { faker } from '@faker-js/faker'
 import { PrismaClient } from '@prisma/client'
-import { config, paths } from '../config'
-import { logger } from '../logger'
 import { UserPrompts } from '../prompts/llm'
 import {
 	type Category,
 	LLMUserBatchSchema,
 	type LLMUserPersona,
-} from '../schemas'
+	logger,
+} from '../utils'
+import { config, paths } from '../utils/config'
 import { cache } from './cache'
 import { llm } from './llm'
 
@@ -218,13 +218,10 @@ export class UserGenerator {
 				{
 					name: 'Technology & Programming',
 					slug: 'technology-programming',
-					description: 'Software development and tech innovation',
-					subcategories: ['Web Development', 'AI/ML', 'Mobile Development'],
 				},
 				{
 					name: 'Business & Entrepreneurship',
 					slug: 'business-entrepreneurship',
-					description: 'Startups and business development',
 					subcategories: [
 						'Startup Incubation',
 						'Business Strategy',
@@ -234,8 +231,6 @@ export class UserGenerator {
 				{
 					name: 'Design & Creativity',
 					slug: 'design-creativity',
-					description: 'Creative arts and design',
-					subcategories: ['Graphic Design', 'UI/UX Design', 'Digital Art'],
 				},
 			] as Category[]
 		}

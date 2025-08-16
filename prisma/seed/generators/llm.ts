@@ -6,14 +6,14 @@
 
 import { Together } from 'together-ai'
 import { z } from 'zod'
-import { config } from '../config'
-import { SeedError, withRetry } from '../errors'
-import { logger } from '../logger'
+import { logger } from '../utils'
+import { config } from '../utils/config'
+import { SeedError, withRetry } from '../utils/errors'
 
 export class LLMService {
 	private client?: Together
 	private model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo'
-	private maxTokens = 8000 // Increased for richer data
+	private maxTokens = 10000 // Increased for richer data
 	private temperature = 0.7
 
 	constructor() {

@@ -10,23 +10,23 @@
 
 import { existsSync, mkdirSync, readdirSync } from 'node:fs'
 import path from 'node:path'
-import { config, paths } from './config'
+import {
+	categoriesStaticSchema,
+	LLMCommunityBatchSchema,
+	LLMUserBatchSchema,
+	locationsStaticSchema,
+	logger,
+	validateBatchFile,
+	venuesStaticSchema,
+} from './utils'
+import { config, paths } from './utils/config'
 import {
 	safeReadJSON,
 	safeWriteJSON,
 	setupGlobalErrorHandler,
 	ValidationError,
 	validateFile,
-} from './errors'
-import { logger } from './logger'
-import {
-	categoriesStaticSchema,
-	LLMCommunityBatchSchema,
-	LLMUserBatchSchema,
-	locationsStaticSchema,
-	validateBatchFile,
-	venuesStaticSchema,
-} from './schemas'
+} from './utils/errors'
 
 // Setup error handling
 setupGlobalErrorHandler('process')
@@ -319,6 +319,7 @@ async function processData() {
 					communityFocusArea: community.focusArea,
 					homeLocation: matchedLocation, // Use matched location
 					originalLocation: originalLocation, // Keep original for reference
+					categories: community.categories,
 				})
 			})
 		})

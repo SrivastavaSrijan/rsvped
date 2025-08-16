@@ -4,11 +4,11 @@
  * Production-ready LLM data generation system.
  */
 
-import { config } from './config'
 import { cache } from './generators/cache'
 import { communityGenerator } from './generators/community'
 import { userGenerator } from './generators/user'
-import { logger } from './logger'
+import { logger } from './utils'
+import { config } from './utils/config'
 
 export class DataGenerator {
 	/**

@@ -13,17 +13,14 @@ const envSchema = z.object({
 	DATABASE_URL: z.string().url().optional(),
 
 	// Seed configuration
-	NUM_USERS: z.coerce.number().min(1).max(10000).default(300),
-	NUM_COMMUNITIES: z.coerce.number().min(1).max(1000).default(50),
-	EXTRA_STANDALONE_EVENTS: z.coerce.number().min(0).max(5000).default(100),
-	MIN_EVENTS_PER_CITY: z.coerce.number().min(1).max(100).default(15),
+	NUM_USERS: z.coerce.number().min(1).max(10000).default(600),
+	NUM_COMMUNITIES: z.coerce.number().min(1).max(1000).default(420),
+	EXTRA_STANDALONE_EVENTS: z.coerce.number().min(0).max(5000).default(0),
+	MIN_EVENTS_PER_CITY: z.coerce.number().min(1).max(100).default(8),
+	MAX_COLLABORATORS: z.coerce.number().min(0).max(10).default(4),
 
 	// Feature flags
 	USE_LLM: z
-		.enum(['true', 'false'])
-		.default('true')
-		.transform((val) => val === 'true'),
-	USE_BATCH_LOADER: z
 		.enum(['true', 'false'])
 		.default('true')
 		.transform((val) => val === 'true'),
@@ -69,6 +66,7 @@ export const paths = {
 	processedDir: './prisma/.local/seed-data/processed',
 	staticDir: './prisma/.local/seed-data/static',
 	logsDir: './prisma/.local/logs',
+	testAccountsFile: './prisma/.local/test-accounts.json',
 } as const
 
 // Event generation limits
