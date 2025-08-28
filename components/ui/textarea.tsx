@@ -22,7 +22,7 @@ const textareaVariants = cva(
 	}
 )
 
-interface TextareaProps
+export interface TextareaProps
 	extends React.ComponentProps<'textarea'>,
 		VariantProps<typeof textareaVariants> {}
 

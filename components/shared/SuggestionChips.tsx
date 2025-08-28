@@ -81,7 +81,7 @@ export const SuggestionChips = ({
 				<Badge
 					key={suggestion}
 					variant="outline"
-					className="cursor-pointer hover:bg-muted text-xs"
+					className="cursor-pointer border-muted-foreground hover:bg-brand text-xs"
 					onClick={() => setValue(suggestion)}
 				>
 					{suggestion}

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { Form } from '@/components/shared'
+import { Form, SmartInput } from '@/components/shared'
 import {
 	Button,
 	DateTimePicker,
@@ -27,7 +27,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 	Switch,
-	Textarea,
 } from '@/components/ui'
 import { TimezoneConfig } from '@/lib/config'
 import { LocationTypeLabels } from '@/lib/constants'
@@ -37,6 +36,7 @@ import {
 	type EventActionResponse,
 	saveEvent,
 } from '@/server/actions'
+import { Prompts } from '@/server/actions/ai/prompts'
 import type { RouterOutput } from '@/server/api'
 
 interface EventFormProps {
@@ -126,14 +126,21 @@ export function EventForm({
 						<Input type="hidden" name="slug" value={eventSlug} />
 					)}
 
+					{/* Title with WritingAssistant + SuggestionChips */}
 					<div className="flex flex-col gap-1">
-						<Input
+						<SmartInput
 							name="title"
 							placeholder="Event Name"
 							defaultValue={event?.title || ''}
 							variant="naked"
 							autoFocus
 							className="min-h-8 w-full p-2 font-semibold font-serif font-stretch-semi-condensed text-3xl lg:min-h-16 lg:p-2 lg:text-4xl"
+							assistant={{ enabled: true }}
+							suggestions={{
+								enabled: true,
+								promptTemplate: (title) => Prompts.Events.title(title),
+							}}
+							context={{ field: 'title', eventType: 'event' }}
 						/>
 						{fieldErrors.title && (
 							<p className="text-destructive text-sm">{fieldErrors.title[0]}</p>
@@ -194,11 +201,15 @@ export function EventForm({
 							<h3 className="font-semibold text-sm">Details</h3>
 						</div>
 						<div className="flex flex-col gap-3">
-							<Textarea
+							{/* Description with WritingAssistant */}
+							<SmartInput
+								type="textarea"
 								name="description"
 								placeholder="Add Description"
 								variant="naked"
 								defaultValue={event?.description || ''}
+								assistant={{ enabled: true }}
+								context={{ field: 'description', eventType: 'event' }}
 							/>
 							{fieldErrors.description && (
 								<p className="text-destructive text-sm">

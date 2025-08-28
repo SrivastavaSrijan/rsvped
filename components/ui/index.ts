@@ -88,7 +88,7 @@ export {
 	useFormField,
 } from './form'
 export { Image } from './image'
-export { Input, inputVariants } from './input'
+export { Input, type InputProps, inputVariants } from './input'
 export { InputWithError } from './input-with-error'
 export { Label } from './label'
 export * from './pagination'
@@ -117,7 +117,7 @@ export {
 	TableRow,
 } from './table'
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
-export { Textarea } from './textarea'
+export { Textarea, type TextareaProps } from './textarea'
 export {
 	Tooltip,
 	TooltipContent,
