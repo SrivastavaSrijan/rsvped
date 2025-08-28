@@ -146,34 +146,3 @@ export const ResponseUtils = {
 	): AIActionState =>
 		createAIErrorResponse(AIActionErrorCode.VALIDATION_ERROR, fieldErrors),
 }
-
-/**
- * Operation utilities
- */
-export const OperationUtils = {
-	/**
-	 * Generate operation name for LLM calls
-	 */
-	createOperationName: (
-		action: string,
-		resourceType?: string,
-		resourceId?: string
-	): string => {
-		const parts = [action]
-		if (resourceType) parts.push(resourceType)
-		if (resourceId) parts.push(resourceId)
-		return parts.join('-')
-	},
-
-	/**
-	 * Check if LLM service is available
-	 */
-	checkLLMAvailability: (llm: {
-		isAvailable: () => boolean
-	}): AIActionState | null => {
-		if (!llm.isAvailable()) {
-			return createAIErrorResponse(AIActionErrorCode.LLM_UNAVAILABLE)
-		}
-		return null
-	},
-}

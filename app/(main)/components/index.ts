@@ -1,5 +1,4 @@
-// AI Components
-export { AIFeaturesDemo } from './AIFeaturesDemo'
+// Main Components
 export { CategoryDiscoverCard } from './CategoryDiscoverCard'
 export { CommunityDiscoverCard } from './CommunityDiscoverCard'
 export { CommunityHeader } from './CommunityHeader'
@@ -7,7 +6,6 @@ export { CommunitySubscribeModal } from './CommunitySubscribeModal'
 export { CommunityTabs } from './CommunityTabs'
 export { EmptyState } from './EmptyState'
 export { EventCard } from './EventCard'
-export { EventDescriptionEnhancer } from './EventDescriptionEnhancer'
 export { EventDiscoverCard } from './EventDiscoverCard'
 export { EventForm } from './EventForm'
 export { EventPage } from './EventPage'

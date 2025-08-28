@@ -12,53 +12,24 @@ import { z } from 'zod'
  */
 export const InputSchemas = {
 	/**
-	 * Event Title Generation Input
+	 * Form Enhancement Schemas for EventForm integration
 	 */
-	GenerateEventTitles: z.object({
-		description: z
-			.string()
-			.min(10, 'Description must be at least 10 characters'),
+	GenerateDescriptionSuggestions: z.object({
+		title: z.string().min(3, 'Title must be at least 3 characters'),
+		existingDescription: z.string().optional(),
 		eventType: z.string().optional(),
-		tone: z
-			.enum(['professional', 'casual', 'creative', 'urgent'])
-			.default('professional'),
 	}),
 
-	/**
-	 * Event Description Generation Input
-	 */
-	GenerateEventDescription: z.object({
-		title: z.string().min(5, 'Title must be at least 5 characters'),
-		basicInfo: z.string().min(10, 'Basic info must be at least 10 characters'),
-		targetAudience: z.string().optional(),
-		tone: z
-			.enum(['professional', 'casual', 'creative', 'formal'])
-			.default('professional'),
-		length: z.enum(['short', 'medium', 'detailed']).default('medium'),
+	GenerateLocationSuggestions: z.object({
+		title: z.string().min(3, 'Title must be at least 3 characters'),
+		description: z.string().optional(),
+		locationType: z.enum(['PHYSICAL', 'ONLINE', 'HYBRID']),
 	}),
 
-	/**
-	 * Event Description Enhancement Input
-	 */
-	EnhanceEventDescription: z.object({
-		eventSlug: z.string().min(1, 'Event slug is required'),
-		currentDescription: z.string().min(1, 'Current description is required'),
-		enhancementType: z.enum([
-			'professional',
-			'engaging',
-			'detailed',
-			'concise',
-			'creative',
-		]),
-		additionalContext: z.string().optional(),
-	}),
-
-	/**
-	 * Apply Enhanced Description Input
-	 */
-	ApplyEnhancedDescription: z.object({
-		eventSlug: z.string().min(1, 'Event slug is required'),
-		enhancedDescription: z.string().min(1, 'Enhanced description is required'),
+	GenerateTimingSuggestions: z.object({
+		title: z.string().min(3, 'Title must be at least 3 characters'),
+		description: z.string().optional(),
+		currentStartDate: z.string().optional(),
 	}),
 }
 
@@ -67,64 +38,72 @@ export const InputSchemas = {
  */
 export const ResponseSchemas = {
 	/**
-	 * Event Title Suggestions Response
+	 * Form Enhancement Response Schemas
 	 */
-	EventTitleSuggestions: z.object({
+	DescriptionSuggestions: z.object({
 		suggestions: z
 			.array(
 				z.object({
-					title: z.string(),
+					text: z.string(),
 					reason: z.string(),
+					tone: z.enum(['professional', 'casual', 'engaging', 'formal']),
 				})
 			)
-			.min(3)
-			.max(8),
-		bestPick: z.string(),
+			.min(2)
+			.max(4),
 		tips: z.array(z.string()),
 	}),
 
-	/**
-	 * Event Description Generation Response
-	 */
-	EventDescriptionGeneration: z.object({
-		description: z.string(),
-		keyFeatures: z.array(z.string()),
-		callToAction: z.string(),
+	LocationSuggestions: z.object({
+		suggestions: z
+			.array(
+				z.object({
+					venueName: z.string(),
+					venueAddress: z.string().optional(),
+					reason: z.string(),
+					type: z.enum(['venue', 'area', 'online_platform']),
+				})
+			)
+			.min(2)
+			.max(5),
 		tips: z.array(z.string()),
 	}),
 
-	/**
-	 * Event Description Enhancement Response
-	 */
-	EventDescriptionEnhancement: z.object({
-		enhancedDescription: z.string(),
-		improvements: z.array(z.string()),
-		tone: z.string(),
+	TimingSuggestions: z.object({
+		suggestions: z
+			.array(
+				z.object({
+					timeSlot: z.string(),
+					duration: z.string(),
+					reason: z.string(),
+					dayOfWeek: z.string().optional(),
+				})
+			)
+			.min(2)
+			.max(4),
+		tips: z.array(z.string()),
 	}),
 }
 
 /**
  * Type exports for use in actions
  */
-export type GenerateEventTitlesInput = z.infer<
-	typeof InputSchemas.GenerateEventTitles
+export type GenerateDescriptionSuggestionsInput = z.infer<
+	typeof InputSchemas.GenerateDescriptionSuggestions
 >
-export type GenerateEventDescriptionInput = z.infer<
-	typeof InputSchemas.GenerateEventDescription
+export type GenerateLocationSuggestionsInput = z.infer<
+	typeof InputSchemas.GenerateLocationSuggestions
 >
-export type EnhanceEventDescriptionInput = z.infer<
-	typeof InputSchemas.EnhanceEventDescription
->
-export type ApplyEnhancedDescriptionInput = z.infer<
-	typeof InputSchemas.ApplyEnhancedDescription
+export type GenerateTimingSuggestionsInput = z.infer<
+	typeof InputSchemas.GenerateTimingSuggestions
 >
 
-export type EventTitleSuggestionsResponse = z.infer<
-	typeof ResponseSchemas.EventTitleSuggestions
+export type DescriptionSuggestionsResponse = z.infer<
+	typeof ResponseSchemas.DescriptionSuggestions
 >
-export type EventDescriptionGenerationResponse = z.infer<
-	typeof ResponseSchemas.EventDescriptionGeneration
+export type LocationSuggestionsResponse = z.infer<
+	typeof ResponseSchemas.LocationSuggestions
 >
-export type EventDescriptionEnhancementResponse = z.infer<
-	typeof ResponseSchemas.EventDescriptionEnhancement
+export type TimingSuggestionsResponse = z.infer<
+	typeof ResponseSchemas.TimingSuggestions
 >

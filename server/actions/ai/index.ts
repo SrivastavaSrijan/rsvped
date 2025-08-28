@@ -1,31 +1,31 @@
 /**
  * AI Server Actions - Barrel Export
  *
- * Exports all AI-related server actions and types.
- * Organized structure following seed system patterns.
+ * Exports AI-related server actions for EventForm integration.
+ * Cleaned up to remove demo-only actions.
  */
 
-// Action implementations
+// Form Enhancement Actions (actual EventForm integration)
 export {
-	generateEventDescription,
-	generateEventTitles,
-} from './actions/contentGeneration'
-export {
-	applyEnhancedDescription,
-	enhanceEventDescription,
-} from './actions/eventEnhancement'
-// Prompts (for potential customization/extension)
-export { ContentGenerationPrompts, EnhancementPrompts } from './prompts'
-// Centralized schemas and types
+	generateDescriptionSuggestions,
+	generateLocationSuggestions,
+	generateTimingSuggestions,
+} from './actions/formEnhancement'
+
+// Prompts
+export { FormEnhancementPrompts } from './prompts'
+
+// Schemas and types
 export type {
-	EnhanceEventDescriptionInput,
-	EventDescriptionEnhancementResponse,
-	EventDescriptionGenerationResponse,
-	EventTitleSuggestionsResponse,
-	GenerateEventDescriptionInput,
-	GenerateEventTitlesInput,
+	DescriptionSuggestionsResponse,
+	GenerateDescriptionSuggestionsInput,
+	GenerateLocationSuggestionsInput,
+	GenerateTimingSuggestionsInput,
+	LocationSuggestionsResponse,
+	TimingSuggestionsResponse,
 } from './schemas'
-// Types and core utilities
+
+// Core types and utilities
 export type { AIActionState } from './types'
 export {
 	AI_CONFIG,
@@ -34,10 +34,10 @@ export {
 	createAIErrorResponse,
 	initialAIActionState,
 } from './types'
+
 // Utility functions
 export {
 	ErrorUtils,
-	OperationUtils,
 	ResponseUtils,
 	ValidationUtils,
 } from './utils'

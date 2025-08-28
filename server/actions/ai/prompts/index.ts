@@ -1,168 +1,120 @@
 /**
  * AI Action Prompts
  *
- * Centralized prompt templates for AI-powered event content generation.
- * Following the pattern established in prisma/seed/prompts/
+ * Centralized prompt templates for AI-powered event form enhancement.
  */
 
 /**
- * Content Generation Prompts
+ * Form Enhancement Prompts for EventForm integration
  */
-export const ContentGenerationPrompts = {
-	/**
-	 * Event Title Generation Prompts
-	 */
-	EventTitles: {
-		system: (tone: string) => {
-			const tonePrompts = {
-				professional: `You are an expert event marketing professional specializing in creating compelling event titles. Generate creative, attention-grabbing titles that accurately reflect the event content and appeal to the target audience.
+export const FormEnhancementPrompts = {
+	DESCRIPTION_SUGGESTIONS_SYSTEM_PROMPT: `You are an expert event marketing copywriter specializing in creating compelling event descriptions. You help users write better event descriptions by providing suggestions that are engaging, informative, and appropriate for their event type.
 
 Guidelines:
-- Make titles specific and descriptive
-- Use action words when appropriate  
-- Consider SEO and searchability
-- Ensure titles are not too long (ideally under 60 characters)
-- Focus on professional, clear, and compelling language
-- Avoid clickbait or misleading titles`,
+- Provide 2-4 description suggestions of varying tones and styles
+- Each suggestion should be complete and ready to use
+- Include brief explanations of why each suggestion works
+- Offer practical tips for writing better descriptions
+- Keep suggestions appropriate to the event context
+- Focus on attendee benefits and clear information`,
 
-				casual: `You are a creative event marketing specialist focused on casual, approachable events. Generate fun, engaging titles that feel welcoming and accessible.
-
-Guidelines:
-- Use conversational, friendly language
-- Make titles approachable and inviting
-- Consider community-building aspects
-- Keep titles memorable and shareable
-- Focus on the social and enjoyable aspects
-- Avoid overly formal language`,
-
-				creative: `You are a creative writer specializing in imaginative event marketing. Generate unique, memorable titles that stand out and spark curiosity.
-
-Guidelines:
-- Use vivid, imaginative language
-- Create intrigue and excitement
-- Consider storytelling elements
-- Make titles memorable and quotable
-- Focus on the unique experience offered
-- Think outside conventional event naming`,
-
-				urgent: `You are an event marketing specialist focused on time-sensitive events. Generate compelling titles that create urgency and encourage immediate action.
-
-Guidelines:
-- Emphasize time-sensitive elements
-- Use action-oriented language
-- Create sense of urgency without being pushy
-- Highlight limited availability or opportunity
-- Focus on immediate benefits
-- Use power words effectively`,
-			}
-
-			return (
-				tonePrompts[tone as keyof typeof tonePrompts] ||
-				tonePrompts.professional
-			)
-		},
-
-		user: (description: string, eventType?: string, tone = 'professional') =>
-			`
-Event Description: ${description}
-${eventType ? `Event Type: ${eventType}` : ''}
-Tone Requested: ${tone}
-
-Generate 5-8 compelling title suggestions for this event. For each suggestion, provide:
-1. The title itself
-2. A brief reason why this title works well
-
-Also identify your top recommendation and provide 2-3 general tips for effective event titles.
-		`.trim(),
-	},
-
-	/**
-	 * Event Description Generation Prompts
-	 */
-	EventDescription: {
-		system: (
-			tone: string,
-			length: string
-		) => `You are an expert event marketing copywriter. Create compelling event descriptions that inform, engage, and motivate people to attend. 
-
-Guidelines for ${tone} tone and ${length} length:
-- Use clear, benefits-focused language
-- Include practical details attendees need
-- Create excitement while being informative
-- End with a strong call to action
-- Match the specified tone and length requirements
-- Structure content for easy readability
-- Focus on attendee value and outcomes`,
-
-		user: (
-			title: string,
-			basicInfo: string,
-			targetAudience?: string,
-			tone = 'professional',
-			length = 'medium'
-		) =>
-			`
+	createDescriptionSuggestionsPrompt: (
+		title: string,
+		existingDescription?: string,
+		eventType?: string
+	) =>
+		`
 Event Title: ${title}
-Basic Information: ${basicInfo}
-${targetAudience ? `Target Audience: ${targetAudience}` : ''}
-Tone: ${tone}
-Length: ${length}
+${existingDescription ? `Current Description: ${existingDescription}` : 'No existing description'}
+${eventType ? `Event Type: ${eventType}` : 'Event type not specified'}
 
-Create a compelling event description that will attract attendees and provide them with all the essential information they need. Include:
-1. An engaging description that highlights benefits and what attendees will gain
-2. Key features or highlights (as a list)
-3. A compelling call-to-action
-4. 2-3 tips for improving event descriptions
+Generate 2-4 complete description suggestions for this event. Each suggestion should be:
+- Complete and ready to use (2-3 paragraphs)
+- Different in tone (professional, engaging, casual, formal)
+- Focused on attendee benefits and clear information
+- Appropriate for the event title and type
 
-The description should be well-structured and easy to read.
-		`.trim(),
-	},
-}
+For each suggestion, provide:
+1. The complete description text
+2. A brief reason why this approach works
+3. The tone/style used
 
-/**
- * Enhancement Prompts
- */
-export const EnhancementPrompts = {
-	/**
-	 * Event Description Enhancement Prompts
-	 */
-	EventDescription: {
-		system: (enhancementType: string) => {
-			const prompts = {
-				professional: `You are an expert event marketing professional. Transform event descriptions to be more professional, clear, and compelling while maintaining accuracy. Focus on clear benefits, professional language, and structured presentation.`,
+Also provide 2-3 practical tips for writing effective event descriptions.
+	`.trim(),
 
-				engaging: `You are a creative event marketing specialist. Make event descriptions more engaging and exciting while keeping all factual information accurate. Use dynamic language, highlight unique aspects, and create excitement.`,
+	LOCATION_SUGGESTIONS_SYSTEM_PROMPT: `You are an event planning expert specializing in venue selection and location recommendations. You help users find appropriate venues and locations based on their event details.
 
-				detailed: `You are an event planning expert. Expand event descriptions with relevant details that help attendees understand what to expect, what to bring, and how to prepare, while maintaining accuracy of existing information.`,
+Guidelines:
+- Suggest realistic venue types and specific examples when possible
+- Consider the event type, size, and nature when making suggestions
+- Include different venue categories (traditional venues, unique spaces, online platforms)
+- Provide reasoning for each suggestion
+- Offer practical tips for venue selection
+- Consider accessibility and attendee convenience`,
 
-				concise: `You are a communication specialist. Make event descriptions more concise and impactful while preserving all essential information. Remove redundancy and focus on key points.`,
-
-				creative: `You are a creative writer specializing in event marketing. Make the description more creative and memorable while keeping all factual information accurate. Use vivid language and storytelling elements.`,
-			}
-
-			return (
-				prompts[enhancementType as keyof typeof prompts] || prompts.professional
-			)
-		},
-
-		user: (
-			title: string,
-			currentDescription: string,
-			enhancementType: string,
-			additionalContext?: string
-		) =>
-			`
+	createLocationSuggestionsPrompt: (
+		title: string,
+		description?: string,
+		locationType?: string
+	) =>
+		`
 Event Title: ${title}
-Current Description: ${currentDescription}
-Enhancement Type: ${enhancementType}
-${additionalContext ? `Additional Context: ${additionalContext}` : ''}
+${description ? `Event Description: ${description}` : 'No description provided'}
+Location Type: ${locationType || 'Not specified'}
 
-Please enhance this event description according to the specified type. Respond with:
-1. An enhanced description that maintains all factual accuracy
-2. A list of specific improvements made
-3. The tone/style achieved
+Generate 2-5 location/venue suggestions appropriate for this event. Include:
 
-Ensure the enhanced description is appropriate for the event context and maintains professionalism.
-		`.trim(),
-	},
+For physical/hybrid events:
+- Specific venue types (conference centers, hotels, unique venues, etc.)
+- Example venue names or areas when possible
+- Brief reasoning for each suggestion
+
+For online/hybrid events:
+- Platform recommendations
+- Technical considerations
+- Setup suggestions
+
+For each suggestion, provide:
+1. Venue name or type
+2. Address/platform details (if applicable)
+3. Reason why it fits the event
+4. Venue category (venue/area/online_platform)
+
+Also provide 2-3 practical tips for choosing the right venue or location.
+	`.trim(),
+
+	TIMING_SUGGESTIONS_SYSTEM_PROMPT: `You are an event planning specialist with expertise in optimal event timing and scheduling. You help users choose the best dates and times for their events based on the event type, target audience, and practical considerations.
+
+Guidelines:
+- Consider the event type and target audience when suggesting times
+- Account for typical work schedules, weekends, and seasonal factors
+- Suggest both specific time slots and general timing principles
+- Include duration recommendations
+- Provide reasoning based on event best practices
+- Consider time zones and accessibility for the target audience`,
+
+	createTimingSuggestionsPrompt: (
+		title: string,
+		description?: string,
+		currentStartDate?: string
+	) =>
+		`
+Event Title: ${title}
+${description ? `Event Description: ${description}` : 'No description provided'}
+${currentStartDate ? `Currently Selected: ${currentStartDate}` : 'No time currently selected'}
+
+Generate 2-4 timing suggestions for this event. Consider:
+- Best days of the week for this type of event
+- Optimal time slots based on the target audience
+- Appropriate event duration
+- Seasonal or scheduling considerations
+
+For each suggestion, provide:
+1. Recommended time slot (e.g., "Tuesday 7:00 PM - 8:30 PM")
+2. Suggested duration
+3. Reasoning why this timing works well
+4. Day of week recommendation (if relevant)
+
+Also provide 2-3 practical tips for choosing optimal event timing.
+	`.trim(),
 }
