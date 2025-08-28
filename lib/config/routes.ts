@@ -23,10 +23,10 @@ export const Routes = {
 				return `${this.Root}/home`
 			},
 			get Managed() {
-				return `${this.Root}?tab=managed`
+				return `${this.Home}?tab=managed`
 			},
 			get Member() {
-				return `${this.Root}?tab=member`
+				return `${this.Home}?tab=member`
 			},
 			get Discover() {
 				return `${this.Root}/discover`

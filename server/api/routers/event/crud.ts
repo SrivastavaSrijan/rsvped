@@ -31,7 +31,7 @@ const CreateEventInput = EventModel.pick({
 	coverImage: true,
 })
 
-const UpdateEventInput = CreateEventInput.extend({
+const UpdateEventInput = CreateEventInput.partial().extend({
 	slug: z.string(),
 })
 
