@@ -1,6 +1,7 @@
 import { Clock } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import Link from 'next/link'
+import type { PropsWithChildren } from 'react'
 import {
 	AvatarWithFallback,
 	Button,
@@ -19,7 +20,7 @@ import { EventLocation } from './EventLocation'
 type EventPageData =
 	| RouterOutput['event']['get']['enhanced']
 	| RouterOutput['event']['get']['core']
-type EventPageProps = EventPageData
+type EventPageProps = EventPageData & PropsWithChildren
 
 /**
  * Type guard to check if event data is enhanced with additional relations
@@ -44,6 +45,7 @@ export const EventPage = (props: EventPageProps) => {
 		venueAddress,
 		locationType,
 		onlineUrl,
+		children,
 	} = props
 
 	// Enhanced properties with type guard
@@ -125,6 +127,7 @@ export const EventPage = (props: EventPageProps) => {
 							<RsvpListSkeleton />
 						)}
 					</div>
+					<div className="lg:flex hidden">{children}</div>
 				</div>
 			</div>
 			<div className="col-span-full lg:col-span-7 flex flex-col gap-3 lg:gap-4">
@@ -208,6 +211,7 @@ export const EventPage = (props: EventPageProps) => {
 						</div>
 					</div>
 				)}
+				<div className="flex lg:hidden">{children}</div>
 			</div>
 		</div>
 	)

@@ -3,10 +3,12 @@ import { userActivityRouter } from './activity'
 import { userAuthRouter } from './auth'
 import { userPreferencesRouter } from './preferences'
 import { userProfileRouter } from './profile'
+import { recommendationsRouter } from './recommendations'
 
 export const userRouter = createTRPCRouter({
 	profile: userProfileRouter,
 	auth: userAuthRouter,
 	preferences: userPreferencesRouter,
 	activity: userActivityRouter,
+	recommendations: recommendationsRouter,
 })

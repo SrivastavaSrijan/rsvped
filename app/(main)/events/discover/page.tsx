@@ -34,6 +34,15 @@ const PageConfig = {
 			return this.pageSize / 3
 		},
 	},
+	recommended: {
+		pageSize: 12,
+		get lg() {
+			return this.pageSize / 2
+		},
+		get sm() {
+			return this.pageSize / 3
+		},
+	},
 	categories: {
 		pageSize: 12,
 		get lg() {
@@ -149,6 +158,18 @@ const LocationsSkeleton = () => (
 	</div>
 )
 
+const RecommendationsSkeleton = () => (
+	<div className="grid lg:grid-cols-6 grid-cols-4 gap-4">
+		{Array.from({ length: 6 }, () => (
+			<div key={nanoid()} className="flex flex-col gap-2">
+				<Skeleton className="aspect-video w-full rounded-lg" />
+				<Skeleton className="h-4 w-3/4" />
+				<Skeleton className="h-3 w-1/2" />
+			</div>
+		))}
+	</div>
+)
+
 // Individual async components for streaming
 interface NearbyEventsProps {
 	locationId: string
@@ -256,6 +277,49 @@ const LocationsList = async ({ defaultContinent }: LocationsListProps) => {
 	)
 }
 
+interface RecommendedEventsProps {
+	locationId: string
+}
+
+const RecommendedEvents = async (_props: RecommendedEventsProps) => {
+	const api = await getAPI()
+
+	try {
+		// Check if user is authenticated - if not, don't show recommendations
+		const user = await api.user.profile.enhanced()
+		if (!user) return null
+
+		const recommendations = await api.user.recommendations.events({
+			limit: PageConfig.recommended.pageSize,
+		})
+
+		return (
+			<div className="flex flex-col gap-4 lg:gap-6">
+				<div className="flex w-full flex-row justify-between gap-4">
+					<div className="flex flex-col gap-2 lg:gap-2">
+						<h2 className="text-xl font-semibold">
+							{copy.discover.recommended}
+						</h2>
+					</div>
+				</div>
+				<ResponsiveGridCarousel
+					config={{
+						pageSize: {
+							lg: PageConfig.recommended.lg,
+							sm: PageConfig.recommended.sm,
+						},
+					}}
+					data={recommendations}
+					item={EventDiscoverCard}
+				/>
+			</div>
+		)
+	} catch {
+		// If there's an error (like user not authenticated), silently return null
+		return null
+	}
+}
+
 export default async function DiscoverEvents() {
 	const { locationId, location } = await resolveUserLocation()
 
@@ -271,6 +335,7 @@ export default async function DiscoverEvents() {
 			</div>
 
 			<div className="flex flex-col gap-4 lg:gap-6">
+				{/* Add hr only if recommendations exist */}
 				<div className="flex w-full flex-row justify-between gap-4">
 					<div className="flex flex-col gap-2 lg:gap-2">
 						<h2 className="text-xl font-semibold">{copy.discover.upcoming}</h2>
@@ -289,6 +354,13 @@ export default async function DiscoverEvents() {
 					<NearbyEvents locationId={locationId} />
 				</Suspense>
 			</div>
+
+			<hr />
+
+			{/* Recommended Events Section */}
+			<Suspense fallback={<RecommendationsSkeleton />}>
+				<RecommendedEvents locationId={locationId} />
+			</Suspense>
 
 			<hr />
 

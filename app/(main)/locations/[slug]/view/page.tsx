@@ -32,7 +32,7 @@ export default async function DiscoverLocation({
 			</div>
 		)
 	} catch (e) {
-		console.log('Error fetching location:', e)
+		console.error('Error fetching location:', e)
 		return notFound()
 	}
 }
