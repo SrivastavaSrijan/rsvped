@@ -121,6 +121,9 @@ export class LLMService {
 		const jsonSchema = zodToJsonSchema(schema)
 
 		return withRetry(async () => {
+			if (!this.client) {
+				throw new LLMError('LLM client is not initialized', operation)
+			}
 			const response = await this.client.chat.completions.create({
 				model: LLM_CONFIG.model,
 				messages: [
