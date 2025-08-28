@@ -18,7 +18,7 @@ function UserCommunityItemSkeleton() {
 			<div className="flex items-start gap-4 lg:col-span-4">
 				<Skeleton className="aspect-square h-[75px] w-[75px] rounded-lg" />
 				<div className="flex flex-col gap-2">
-					<Skeleton className="h-5 w-32" />
+					<Skeleton className="h-5 w-16" />
 					<Skeleton className="h-4 w-24" />
 					<Skeleton className="h-6 w-20 rounded-md" />
 				</div>
@@ -42,28 +42,38 @@ export default function Loading() {
 				<Skeleton className="h-8 w-40" />
 			</div>
 
-			<div className="flex flex-col gap-4 lg:gap-6">
-				<div className="flex w-full flex-row justify-between gap-4">
-					<Skeleton className="h-6 w-40" />
-					<Skeleton className="h-9 w-32 rounded-md" />
+			{/* Tabs Skeleton */}
+			<div className="w-full">
+				<div className="inline-flex h-9 w-full items-center justify-center rounded-lg p-[3px]">
+					<div className="grid w-full grid-cols-2 gap-[3px] h-full">
+						<Skeleton className="h-[calc(100%-1px)] rounded-md" />
+						<Skeleton className="h-[calc(100%-1px)] rounded-md" />
+					</div>
 				</div>
-				<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-					{Array.from({ length: 3 }).map((_, index) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: mock data, not real content
-						<ManagedCommunityCardSkeleton key={index} />
-					))}
-				</div>
-			</div>
 
-			<Skeleton className="h-px w-full" />
+				{/* Tab Content Skeleton - Representative of both layouts */}
+				<div className="mt-6 space-y-4">
+					{/* Header section (common to both layouts) */}
+					<div className="flex w-full flex-row justify-between gap-4">
+						<Skeleton className="h-6 w-40" />
+						<Skeleton className="h-9 w-32 rounded-md" />
+					</div>
 
-			<div className="flex flex-col gap-4 lg:gap-6">
-				<Skeleton className="h-6 w-40" />
-				<div className="flex flex-col gap-4 lg:gap-6">
-					{Array.from({ length: 3 }).map((_, index) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: mock data, not real content
-						<UserCommunityItemSkeleton key={index} />
-					))}
+					{/* Mixed content - Grid cards that can represent either layout */}
+					<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+						{Array.from({ length: 3 }).map((_, index) => (
+							// biome-ignore lint/suspicious/noArrayIndexKey: mock data, not real content
+							<ManagedCommunityCardSkeleton key={index} />
+						))}
+					</div>
+
+					{/* List items that represent user communities layout */}
+					<div className="flex flex-col gap-4 lg:gap-6">
+						{Array.from({ length: 2 }).map((_, index) => (
+							// biome-ignore lint/suspicious/noArrayIndexKey: mock data, not real content
+							<UserCommunityItemSkeleton key={index} />
+						))}
+					</div>
 				</div>
 			</div>
 		</div>

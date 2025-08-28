@@ -48,7 +48,7 @@ export const copy = {
 	community: {
 		home: {
 			title: 'Communities',
-			user: 'Subscribed Communities',
+			member: 'Subscribed Communities',
 			managed: 'My Communities',
 			empty: "You haven't subscribed to any communities yet.",
 			emptyManaged:

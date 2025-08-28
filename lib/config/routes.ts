@@ -19,6 +19,12 @@ export const Routes = {
 	Main: {
 		Communities: {
 			Root: '/communities',
+			get Managed() {
+				return `${this.Root}?tab=managed`
+			},
+			get Member() {
+				return `${this.Root}?tab=member`
+			},
 			get Discover() {
 				return `${this.Root}/discover`
 			},
