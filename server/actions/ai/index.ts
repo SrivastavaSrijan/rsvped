@@ -5,39 +5,17 @@
  * Cleaned up to remove demo-only actions.
  */
 
-// Form Enhancement Actions (actual EventForm integration)
+/**
+ * AI Actions
+ *
+ * Server actions for AI-powered features
+ */
+
+// Prompt templates
+export { Prompts } from './prompts'
+// Universal AI actions
 export {
-	generateDescriptionSuggestions,
-	generateLocationSuggestions,
-	generateTimingSuggestions,
-} from './actions/formEnhancement'
-
-// Prompts
-export { FormEnhancementPrompts } from './prompts'
-
-// Schemas and types
-export type {
-	DescriptionSuggestionsResponse,
-	GenerateDescriptionSuggestionsInput,
-	GenerateLocationSuggestionsInput,
-	GenerateTimingSuggestionsInput,
-	LocationSuggestionsResponse,
-	TimingSuggestionsResponse,
-} from './schemas'
-
-// Core types and utilities
-export type { AIActionState } from './types'
-export {
-	AI_CONFIG,
-	AIActionErrorCode,
-	AIActionErrorCodeMap,
-	createAIErrorResponse,
-	initialAIActionState,
-} from './types'
-
-// Utility functions
-export {
-	ErrorUtils,
-	ResponseUtils,
-	ValidationUtils,
-} from './utils'
+	enhanceText,
+	generateSuggestions,
+	getRecommendations,
+} from './universal'

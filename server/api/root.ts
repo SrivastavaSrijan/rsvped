@@ -1,5 +1,6 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import {
+	aiRouter,
 	categoryRouter,
 	communityRouter,
 	eventRouter,
@@ -17,6 +18,7 @@ import { createTRPCRouter } from '@/server/api/trpc'
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+	ai: aiRouter,
 	event: eventRouter,
 	rsvp: rsvpRouter,
 	image: imageRouter,

@@ -66,6 +66,7 @@
 		"superjson": "^2.2.2",
 		"tailwind-merge": "^3.3.1",
 		"unsplash-js": "^7.0.19",
+		"use-debounce": "^10.0.5",
 		"zod": "^4.0.17"
 	},
 	"simple-git-hooks": {

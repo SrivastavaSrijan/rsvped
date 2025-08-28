@@ -1,120 +1,120 @@
 /**
- * AI Action Prompts
+ * AI Prompts
  *
- * Centralized prompt templates for AI-powered event form enhancement.
+ * Centralized prompt templates organized by consumer/domain.
+ * Similar to Routes pattern - easy to import and maintain.
  */
 
-/**
- * Form Enhancement Prompts for EventForm integration
- */
-export const FormEnhancementPrompts = {
-	DESCRIPTION_SUGGESTIONS_SYSTEM_PROMPT: `You are an expert event marketing copywriter specializing in creating compelling event descriptions. You help users write better event descriptions by providing suggestions that are engaging, informative, and appropriate for their event type.
+export const Prompts = {
+	/**
+	 * Event-related prompts for EventForm and event pages
+	 */
+	Events: {
+		/**
+		 * Generate alternative event titles
+		 */
+		title: (currentTitle: string, description?: string, eventType?: string) =>
+			`Generate 3 alternative event titles based on:
+Title: "${currentTitle}"
+${description ? `Description: "${description}"` : ''}
+${eventType ? `Type: ${eventType}` : ''}
 
-Guidelines:
-- Provide 2-4 description suggestions of varying tones and styles
-- Each suggestion should be complete and ready to use
-- Include brief explanations of why each suggestion works
-- Offer practical tips for writing better descriptions
-- Keep suggestions appropriate to the event context
-- Focus on attendee benefits and clear information`,
+Make them engaging and clear. Return as JSON with "suggestions" array containing 3 title strings.`,
 
-	createDescriptionSuggestionsPrompt: (
-		title: string,
-		existingDescription?: string,
-		eventType?: string
-	) =>
-		`
-Event Title: ${title}
-${existingDescription ? `Current Description: ${existingDescription}` : 'No existing description'}
-${eventType ? `Event Type: ${eventType}` : 'Event type not specified'}
+		/**
+		 * Generate event description suggestions
+		 */
+		description: (
+			title: string,
+			currentDescription?: string,
+			eventType?: string
+		) =>
+			`Generate 3 event description suggestions for: "${title}"
+${currentDescription ? `Current: "${currentDescription}"` : ''}
+${eventType ? `Type: ${eventType}` : ''}
 
-Generate 2-4 complete description suggestions for this event. Each suggestion should be:
-- Complete and ready to use (2-3 paragraphs)
-- Different in tone (professional, engaging, casual, formal)
-- Focused on attendee benefits and clear information
-- Appropriate for the event title and type
+Make them compelling and informative (2-3 sentences each). Return as JSON with "suggestions" array.`,
 
-For each suggestion, provide:
-1. The complete description text
-2. A brief reason why this approach works
-3. The tone/style used
+		/**
+		 * Generate location/venue suggestions
+		 */
+		location: (title: string, description?: string, locationType?: string) =>
+			`Suggest 3-5 venues/locations for this event:
+Title: "${title}"
+${description ? `Description: "${description}"` : ''}
+Location Type: ${locationType || 'any'}
 
-Also provide 2-3 practical tips for writing effective event descriptions.
-	`.trim(),
+Include venue types, specific examples when possible. Return as JSON with "suggestions" array.`,
 
-	LOCATION_SUGGESTIONS_SYSTEM_PROMPT: `You are an event planning expert specializing in venue selection and location recommendations. You help users find appropriate venues and locations based on their event details.
+		/**
+		 * Generate timing suggestions
+		 */
+		timing: (title: string, description?: string) =>
+			`Suggest optimal timing for this event:
+Title: "${title}"
+${description ? `Description: "${description}"` : ''}
 
-Guidelines:
-- Suggest realistic venue types and specific examples when possible
-- Consider the event type, size, and nature when making suggestions
-- Include different venue categories (traditional venues, unique spaces, online platforms)
-- Provide reasoning for each suggestion
-- Offer practical tips for venue selection
-- Consider accessibility and attendee convenience`,
+Suggest 3 different time slots with reasoning. Return as JSON with "suggestions" array containing time slot strings.`,
+	},
 
-	createLocationSuggestionsPrompt: (
-		title: string,
-		description?: string,
-		locationType?: string
-	) =>
-		`
-Event Title: ${title}
-${description ? `Event Description: ${description}` : 'No description provided'}
-Location Type: ${locationType || 'Not specified'}
+	/**
+	 * General text enhancement prompts
+	 */
+	Text: {
+		/**
+		 * Improve general text
+		 */
+		improve: (text: string, context?: Record<string, unknown>) =>
+			`Improve this text to be clearer and more engaging:
+"${text}"
+${context ? `\nContext: ${JSON.stringify(context)}` : ''}
 
-Generate 2-5 location/venue suggestions appropriate for this event. Include:
+Return as JSON with "text" field containing the improved version.`,
 
-For physical/hybrid events:
-- Specific venue types (conference centers, hotels, unique venues, etc.)
-- Example venue names or areas when possible
-- Brief reasoning for each suggestion
+		/**
+		 * Make text more professional
+		 */
+		professional: (text: string, context?: Record<string, unknown>) =>
+			`Make this text more professional and polished:
+"${text}"
+${context ? `\nContext: ${JSON.stringify(context)}` : ''}
 
-For online/hybrid events:
-- Platform recommendations
-- Technical considerations
-- Setup suggestions
+Return as JSON with "text" field containing the professional version.`,
 
-For each suggestion, provide:
-1. Venue name or type
-2. Address/platform details (if applicable)
-3. Reason why it fits the event
-4. Venue category (venue/area/online_platform)
+		/**
+		 * Fix grammar and readability
+		 */
+		fix: (text: string, context?: Record<string, unknown>) =>
+			`Fix grammar, spelling, and improve readability:
+"${text}"
+${context ? `\nContext: ${JSON.stringify(context)}` : ''}
 
-Also provide 2-3 practical tips for choosing the right venue or location.
-	`.trim(),
+Return as JSON with "text" field containing the corrected version.`,
+	},
 
-	TIMING_SUGGESTIONS_SYSTEM_PROMPT: `You are an event planning specialist with expertise in optimal event timing and scheduling. You help users choose the best dates and times for their events based on the event type, target audience, and practical considerations.
+	/**
+	 * Community-related prompts
+	 */
+	Communities: {
+		/**
+		 * Generate community name suggestions
+		 */
+		name: (description: string, interests?: string[]) =>
+			`Generate 3 community name suggestions based on:
+Description: "${description}"
+${interests?.length ? `Interests: ${interests.join(', ')}` : ''}
 
-Guidelines:
-- Consider the event type and target audience when suggesting times
-- Account for typical work schedules, weekends, and seasonal factors
-- Suggest both specific time slots and general timing principles
-- Include duration recommendations
-- Provide reasoning based on event best practices
-- Consider time zones and accessibility for the target audience`,
+Make them memorable and relevant. Return as JSON with "suggestions" array.`,
 
-	createTimingSuggestionsPrompt: (
-		title: string,
-		description?: string,
-		currentStartDate?: string
-	) =>
-		`
-Event Title: ${title}
-${description ? `Event Description: ${description}` : 'No description provided'}
-${currentStartDate ? `Currently Selected: ${currentStartDate}` : 'No time currently selected'}
+		/**
+		 * Generate community description suggestions
+		 */
+		description: (name: string, currentDescription?: string) =>
+			`Generate 3 community description suggestions for: "${name}"
+${currentDescription ? `Current: "${currentDescription}"` : ''}
 
-Generate 2-4 timing suggestions for this event. Consider:
-- Best days of the week for this type of event
-- Optimal time slots based on the target audience
-- Appropriate event duration
-- Seasonal or scheduling considerations
+Make them welcoming and clear about purpose. Return as JSON with "suggestions" array.`,
+	},
+} as const
 
-For each suggestion, provide:
-1. Recommended time slot (e.g., "Tuesday 7:00 PM - 8:30 PM")
-2. Suggested duration
-3. Reasoning why this timing works well
-4. Day of week recommendation (if relevant)
-
-Also provide 2-3 practical tips for choosing optimal event timing.
-	`.trim(),
-}
+export type PromptType = (typeof Prompts)[keyof typeof Prompts]
