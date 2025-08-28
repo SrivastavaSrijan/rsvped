@@ -19,6 +19,9 @@ export const Routes = {
 	Main: {
 		Communities: {
 			Root: '/communities',
+			get Home() {
+				return `${this.Root}/home`
+			},
 			get Managed() {
 				return `${this.Root}?tab=managed`
 			},

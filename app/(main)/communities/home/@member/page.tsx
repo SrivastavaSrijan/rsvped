@@ -8,11 +8,11 @@ import {
 	type RouterInput,
 	SortDirection,
 } from '@/server/api'
-import { ProgressiveCommunitiesList } from '../../components'
+import { ProgressiveCommunitiesList } from '../../../components'
 
 type CommunityPageSearchParams = CommunityListSearchParams & { tab?: string }
 
-const getManagedCommunities = async (
+const getMemberCommunities = async (
 	searchParams: CommunityListSearchParams
 ) => {
 	const { period = EventTimeFrame.UPCOMING, page, size } = searchParams
@@ -27,11 +27,12 @@ const getManagedCommunities = async (
 		after: period === EventTimeFrame.UPCOMING ? now : undefined,
 		before: period === EventTimeFrame.PAST ? now : undefined,
 		page: +(page || '1'),
-		size: +(size || '6'),
-		include: [
+		size: +(size || '4'),
+		include: [MembershipRole.MEMBER],
+		exclude: [
 			MembershipRole.ADMIN,
-			MembershipRoleOwner.OWNER,
 			MembershipRole.MODERATOR,
+			MembershipRoleOwner.OWNER,
 		],
 	} satisfies RouterInput['community']['list']['core']
 
@@ -41,7 +42,7 @@ const getManagedCommunities = async (
 	}
 }
 
-export default async function ManagedCommunitiesPage({
+export default async function MemberCommunitiesPage({
 	searchParams,
 }: {
 	searchParams: Promise<CommunityPageSearchParams>
@@ -49,16 +50,14 @@ export default async function ManagedCommunitiesPage({
 	const searchParamsRes = await searchParams
 	const { tab, ...communitySearchParams } = searchParamsRes
 
-	// Only render if this tab is active (default to managed if no tab specified)
-	const isActive = !tab || tab === 'managed'
+	// Only render if member tab is active
+	const isActive = tab === 'member'
 
 	if (!isActive) {
 		return null
 	}
 
-	const managedCommunities = await getManagedCommunities(communitySearchParams)
+	const memberCommunities = await getMemberCommunities(communitySearchParams)
 
-	return (
-		<ProgressiveCommunitiesList {...managedCommunities} variant="managed" />
-	)
+	return <ProgressiveCommunitiesList {...memberCommunities} variant="user" />
 }

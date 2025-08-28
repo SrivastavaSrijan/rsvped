@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { CommunityTabs } from '../components'
-import { copy } from '../copy'
+import { CommunityTabs } from '../../components'
+import { copy } from '../../copy'
 
 interface CommunitiesLayoutProps {
 	children: ReactNode

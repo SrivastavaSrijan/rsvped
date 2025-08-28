@@ -36,7 +36,7 @@ const styleMap: Record<string, PageStyle> = {
 	[Routes.Main.Events.Home]: {
 		pseudoElement: getRandomGradient,
 	},
-	[Routes.Main.Communities.Root]: {
+	[Routes.Main.Communities.Home]: {
 		pseudoElement: getRandomGradient,
 	},
 	[Routes.Main.Events.ManageBySlug(':slug')]: {

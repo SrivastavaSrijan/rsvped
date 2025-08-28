@@ -36,7 +36,7 @@ export const Navbar = async () => {
 							{copy.nav.events}
 						</ActiveLink>
 						<ActiveLink
-							href={Routes.Main.Communities.Root}
+							href={Routes.Main.Communities.Home}
 							icon={<Users className="size-3" />}
 						>
 							{copy.nav.communities}
