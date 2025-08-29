@@ -110,6 +110,7 @@ export const SmartInput = ({
 							disabled={disabled}
 							rows={rows}
 							className={className}
+							variant={restProps.variant}
 							{...textareaProps}
 						/>
 					) : (

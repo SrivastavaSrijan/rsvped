@@ -148,7 +148,7 @@ const SuggestionsSection = ({
 			{suggestions.map((suggestion) => (
 				<Badge
 					key={suggestion}
-					className="cursor-pointer text-xs bg-white/10 text-white border-white/30 hover:bg-white/20 hover:backdrop-blur-sm hover:border-white/50 flex-shrink-0 whitespace-normal text-left"
+					className="cursor-pointer text-xs bg-white/10 text-white py-2 px-2 hover:bg-white/20 hover:backdrop-blur-sm hover:border-white/50 flex-shrink-0 whitespace-normal text-left"
 					onClick={() => onSuggestionClick(suggestion)}
 				>
 					{suggestion}
@@ -432,14 +432,6 @@ export const WritingAssistant = ({
 							suggestions={suggestions}
 							onSuggestionClick={handleSuggestionClick}
 						/>
-					)}
-
-					{/* Show loading for suggestions when no text */}
-					{!hasText && loading === 'suggestions' && (
-						<div className="flex items-center gap-1 text-xs text-white">
-							<Loader2 className="size-3 animate-spin text-white" />
-							Generating suggestions...
-						</div>
 					)}
 
 					{/* CASE 2: Has text - Show all enhancement options + generate suggestions */}

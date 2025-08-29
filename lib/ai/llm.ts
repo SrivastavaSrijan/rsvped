@@ -79,15 +79,7 @@ async function withRetry<T>(
  */
 function zodToJsonSchema(schema: z.ZodSchema): Record<string, unknown> {
 	try {
-		// Use built-in Zod function if available
-		// biome-ignore lint/suspicious/noExplicitAny: checking for zod extension
-		if (typeof (z as any).toJSONSchema === 'function') {
-			// biome-ignore lint/suspicious/noExplicitAny: calling zod extension
-			return (z as any).toJSONSchema(schema)
-		}
-
-		// Simplified implementation for basic schemas
-		return { type: 'object' }
+		return z.toJSONSchema(schema)
 	} catch (error) {
 		console.error('Error converting Zod schema to JSON schema', error)
 		return { type: 'object' }
