@@ -15,7 +15,8 @@ import {
 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { Form, SmartInput } from '@/components/shared'
+import { Form } from '@/components/shared'
+import { SmartInput } from '@/components/shared/assistant'
 import {
 	Button,
 	DateTimePicker,
@@ -145,7 +146,6 @@ export function EventForm({
 					<div className="flex flex-col gap-1">
 						<SmartInput
 							name="title"
-							type="textarea"
 							placeholder="Event Name"
 							defaultValue={event?.title || ''}
 							variant="naked"
@@ -223,7 +223,6 @@ export function EventForm({
 						<div className="flex flex-col gap-3">
 							{/* Description with direct EventPrompts call */}
 							<SmartInput
-								type="textarea"
 								name="description"
 								placeholder="Add Description"
 								variant="naked"
