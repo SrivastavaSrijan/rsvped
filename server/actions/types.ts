@@ -58,3 +58,36 @@ export type LocationUpdateActionResponse = ServerActionResponse<
 	LocationUpdateActionErrorCode,
 	LocationFormData
 >
+
+export enum AIErrorCodes {
+	INVALID_INPUT = 'INVALID_INPUT',
+	AI_UNAVAILABLE = 'AI_UNAVAILABLE',
+	SERVER_ERROR = 'SERVER_ERROR',
+	INVALID_TYPE = 'INVALID_TYPE',
+	GENERATION_FAILED = 'GENERATION_FAILED',
+	PROMPT_REQUIRED = 'PROMPT_REQUIRED',
+	TEXT_REQUIRED = 'TEXT_REQUIRED',
+}
+
+export type SuggestionFormData = {
+	prompt: string
+}
+
+export type EnhanceTextFormData = {
+	text: string
+	type: string
+	context?: string
+	customPrompt?: string
+}
+
+export type SuggestionActionResponse = ServerActionResponse<
+	{ suggestions: string[] },
+	AIErrorCodes,
+	SuggestionFormData
+>
+
+export type EnhanceTextActionResponse = ServerActionResponse<
+	{ text: string },
+	AIErrorCodes,
+	EnhanceTextFormData
+>

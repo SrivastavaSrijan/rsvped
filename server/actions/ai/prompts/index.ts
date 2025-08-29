@@ -1,120 +1,220 @@
 /**
- * AI Prompts
+ * AI Prompts - System prompts and domain-specific prompt builders
  *
- * Centralized prompt templates organized by consumer/domain.
- * Similar to Routes pattern - easy to import and maintain.
+ * Main system prompts for enhancements, plus domain-specific prompt builders
+ * that follow the Routes pattern for parent components to use.
  */
 
 export const Prompts = {
 	/**
-	 * Event-related prompts for EventForm and event pages
+	 * Text enhancement prompts - for WritingAssistant buttons
 	 */
-	Events: {
-		/**
-		 * Generate alternative event titles
-		 */
-		title: (currentTitle: string, description?: string, eventType?: string) =>
-			`Generate 3 alternative event titles based on:
-Title: "${currentTitle}"
-${description ? `Description: "${description}"` : ''}
-${eventType ? `Type: ${eventType}` : ''}
+	Enhancements: {
+		proofread: (text: string, context?: Record<string, unknown>) =>
+			`Proofread and fix grammar, spelling, punctuation, and clarity issues in this text: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
 
-Make them engaging and clear. Return as JSON with "suggestions" array containing 3 title strings.`,
+Return as JSON with "text" field containing the corrected version.`,
 
-		/**
-		 * Generate event description suggestions
-		 */
-		description: (
-			title: string,
-			currentDescription?: string,
-			eventType?: string
-		) =>
-			`Generate 3 event description suggestions for: "${title}"
-${currentDescription ? `Current: "${currentDescription}"` : ''}
-${eventType ? `Type: ${eventType}` : ''}
-
-Make them compelling and informative (2-3 sentences each). Return as JSON with "suggestions" array.`,
-
-		/**
-		 * Generate location/venue suggestions
-		 */
-		location: (title: string, description?: string, locationType?: string) =>
-			`Suggest 3-5 venues/locations for this event:
-Title: "${title}"
-${description ? `Description: "${description}"` : ''}
-Location Type: ${locationType || 'any'}
-
-Include venue types, specific examples when possible. Return as JSON with "suggestions" array.`,
-
-		/**
-		 * Generate timing suggestions
-		 */
-		timing: (title: string, description?: string) =>
-			`Suggest optimal timing for this event:
-Title: "${title}"
-${description ? `Description: "${description}"` : ''}
-
-Suggest 3 different time slots with reasoning. Return as JSON with "suggestions" array containing time slot strings.`,
-	},
-
-	/**
-	 * General text enhancement prompts
-	 */
-	Text: {
-		/**
-		 * Improve general text
-		 */
-		improve: (text: string, context?: Record<string, unknown>) =>
-			`Improve this text to be clearer and more engaging:
-"${text}"
-${context ? `\nContext: ${JSON.stringify(context)}` : ''}
+		rewrite: (text: string, context?: Record<string, unknown>) =>
+			`Rewrite this text to improve clarity, engagement, and quality: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
 
 Return as JSON with "text" field containing the improved version.`,
 
-		/**
-		 * Make text more professional
-		 */
+		friendly: (text: string, context?: Record<string, unknown>) =>
+			`Make this text more friendly, welcoming, and approachable: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
+
+Return as JSON with "text" field containing the friendly version.`,
+
 		professional: (text: string, context?: Record<string, unknown>) =>
-			`Make this text more professional and polished:
-"${text}"
-${context ? `\nContext: ${JSON.stringify(context)}` : ''}
+			`Make this text more professional, polished, and business-appropriate: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
 
 Return as JSON with "text" field containing the professional version.`,
 
-		/**
-		 * Fix grammar and readability
-		 */
-		fix: (text: string, context?: Record<string, unknown>) =>
-			`Fix grammar, spelling, and improve readability:
-"${text}"
-${context ? `\nContext: ${JSON.stringify(context)}` : ''}
+		concise: (text: string, context?: Record<string, unknown>) =>
+			`Make this text more concise while preserving all important information: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
 
-Return as JSON with "text" field containing the corrected version.`,
+Return as JSON with "text" field containing the concise version.`,
+
+		keypoints: (text: string, context?: Record<string, unknown>) =>
+			`Convert this text into clear, well-organized bullet points: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
+
+Return as JSON with "text" field containing the bullet points.`,
+
+		summary: (text: string, context?: Record<string, unknown>) =>
+			`Create a concise summary that captures the main points: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
+
+Return as JSON with "text" field containing the summary.`,
+
+		table: (text: string, context?: Record<string, unknown>) =>
+			`Organize this information into a clear table format: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
+
+Return as JSON with "text" field containing the table in markdown format.`,
+
+		custom: (
+			text: string,
+			customPrompt: string,
+			context?: Record<string, unknown>
+		) =>
+			`Apply this change: "${customPrompt}"
+
+Original text: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}
+
+Return as JSON with "text" field containing the modified text.`,
 	},
 
 	/**
-	 * Community-related prompts
+	 * Generic system prompts for different contexts
 	 */
-	Communities: {
-		/**
-		 * Generate community name suggestions
-		 */
-		name: (description: string, interests?: string[]) =>
-			`Generate 3 community name suggestions based on:
-Description: "${description}"
-${interests?.length ? `Interests: ${interests.join(', ')}` : ''}
+	System: {
+		suggestions: (domain: string) =>
+			`You are an AI assistant helping users with ${domain} in RSVP'd - an event management and community platform. 
+			
+Users create events, manage RSVPs, and build communities around shared interests. 
+Generate specific, actionable suggestions based on the user's request. 
+Always return structured JSON with a "suggestions" array containing 3-5 suggestion strings.`,
 
-Make them memorable and relevant. Return as JSON with "suggestions" array.`,
-
-		/**
-		 * Generate community description suggestions
-		 */
-		description: (name: string, currentDescription?: string) =>
-			`Generate 3 community description suggestions for: "${name}"
-${currentDescription ? `Current: "${currentDescription}"` : ''}
-
-Make them welcoming and clear about purpose. Return as JSON with "suggestions" array.`,
+		enhancement: (domain: string) =>
+			`You are an AI writing assistant helping users improve their ${domain} content in RSVP'd - an event management and community platform.
+			
+Users write event descriptions, community posts, and other content to engage their audience.
+Return enhanced text as JSON with a "text" field containing the improved content.`,
 	},
-} as const
+}
+
+/**
+ * Event-specific prompts - follows Routes pattern
+ */
+export const EventPrompts = {
+	title(
+		currentValue: string,
+		options?: {
+			description?: string
+			locationType?: string
+			category?: string
+			startDate?: string
+		}
+	) {
+		const { description, locationType, category, startDate } = options || {}
+
+		return `Generate 3-5 creative event title alternatives for:
+Current title: "${currentValue}"
+${description ? `Description: "${description}"` : ''}
+${locationType ? `Location type: ${locationType}` : ''}
+${category ? `Category: ${category}` : ''}
+${startDate ? `Date: ${startDate}` : ''}
+
+Make titles specific, engaging, and appropriate for the event type and location.
+Focus on clarity and appeal to the target audience.
+Avoid generic phrases like "amazing" or "incredible".`
+	},
+
+	description(
+		currentValue: string,
+		options?: {
+			title?: string
+			locationType?: string
+			category?: string
+			startDate?: string
+		}
+	) {
+		const { title, locationType, category, startDate } = options || {}
+
+		return `Generate 3-5 compelling event description alternatives for${title ? `: "${title}"` : ' this event'}
+Current description: "${currentValue}"
+${locationType ? `Location type: ${locationType}` : ''}
+${category ? `Category: ${category}` : ''}
+${startDate ? `Date: ${startDate}` : ''}
+
+Create descriptions that:
+- Are 2-3 sentences long
+- Clearly explain what attendees can expect
+- Include relevant details about format/activities
+- Are appropriate for the event category and location type
+- Encourage registration`
+	},
+
+	venueName(
+		currentValue: string,
+		options?: {
+			title?: string
+			venueAddress?: string
+			locationType?: string
+		}
+	) {
+		const { title, venueAddress, locationType } = options || {}
+
+		return `Generate 3-5 venue name alternatives for:
+Current venue name: "${currentValue}"
+${title ? `Event title: "${title}"` : ''}
+${venueAddress ? `Address: "${venueAddress}"` : ''}
+${locationType ? `Location type: ${locationType}` : ''}
+
+Suggest venue names that are:
+- Appropriate for the event type
+- Professional and clear
+- Suitable for the location/address provided`
+	},
+}
+
+/**
+ * Community-specific prompts - follows Routes pattern
+ */
+export const CommunityPrompts = {
+	name(
+		currentValue: string,
+		options?: {
+			description?: string
+			category?: string
+			location?: string
+		}
+	) {
+		const { description, category, location } = options || {}
+
+		return `Generate 3-5 memorable community name alternatives for:
+Current name: "${currentValue}"
+${description ? `Description: "${description}"` : ''}
+${category ? `Focus area: ${category}` : ''}
+${location ? `Location: ${location}` : ''}
+
+Create names that are:
+- Memorable and brandable
+- Relevant to the community focus
+- Appropriate for the location/region
+- Not too generic or common`
+	},
+
+	description(
+		currentValue: string,
+		options?: {
+			name?: string
+			category?: string
+			location?: string
+		}
+	) {
+		const { name, category, location } = options || {}
+
+		return `Generate 3-5 welcoming community description alternatives for:
+${name ? `Community name: "${name}"` : 'This community'}
+Current description: "${currentValue}"
+${category ? `Focus area: ${category}` : ''}
+${location ? `Location: ${location}` : ''}
+
+Create descriptions that:
+- Welcome new members clearly
+- Explain the community's purpose and activities
+- Are 2-3 sentences long
+- Encourage participation
+- Reflect the community's focus area`
+	},
+}
 
 export type PromptType = (typeof Prompts)[keyof typeof Prompts]

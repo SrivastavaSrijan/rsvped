@@ -7,86 +7,143 @@
 
 'use client'
 
-import { Loader2, Wand2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useDebounce } from 'use-debounce'
+import { Loader2, Undo2, Wand2 } from 'lucide-react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { generateSuggestions } from '@/server/actions/ai/universal'
+import { Button } from '@/components/ui/button'
+import { AIActionErrorCodeMap } from '@/server/actions'
+import { generateCustomSuggestions } from '@/server/actions/ai/universal'
+
+type AIContext = {
+	// Must-have context - simplified to strings
+	domain: string
+	page: string
+	field: string
+	location?: string
+	category?: string
+	// Additional flexible metadata
+	metadata?: Record<string, unknown>
+}
 
 interface SuggestionChipsProps {
 	getValue: () => string
 	setValue: (value: string) => void
-	promptTemplate: (
-		currentValue: string,
-		context?: Record<string, unknown>
-	) => string
-	context?: Record<string, unknown>
+	suggestionPrompt: string
+	context: AIContext // Required context from parent
 	minLength?: number
 }
 
 export const SuggestionChips = ({
 	getValue,
 	setValue,
-	promptTemplate,
-	context = {},
+	suggestionPrompt,
+	context,
 	minLength = 3,
 }: SuggestionChipsProps) => {
 	const [suggestions, setSuggestions] = useState<string[]>([])
+	const [previousValue, setPreviousValue] = useState<string>('')
 	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
 
 	const currentValue = getValue()
-	const [debouncedValue] = useDebounce(currentValue, 800)
 
-	// Generate suggestions when value changes
-	useEffect(() => {
-		if (debouncedValue.length < minLength) {
-			setSuggestions([])
-			return
-		}
+	const handleGenerateSuggestions = async () => {
+		if (currentValue.length < minLength || loading) return
 
-		const fetchSuggestions = async () => {
-			setLoading(true)
+		setLoading(true)
+		setError(null)
 
-			try {
-				const prompt = promptTemplate(debouncedValue, context)
-				const formData = new FormData()
-				formData.append('prompt', prompt)
+		try {
+			const result = await generateCustomSuggestions(suggestionPrompt, context)
 
-				const result = await generateSuggestions(null, formData)
-				if (result.success && result.suggestions) {
-					setSuggestions(result.suggestions.slice(0, 4))
-				}
-			} finally {
-				setLoading(false)
+			if (result.success && result.data?.suggestions) {
+				setSuggestions(result.data.suggestions)
+			} else if (result.error) {
+				const errorMessage =
+					AIActionErrorCodeMap[
+						result.error as keyof typeof AIActionErrorCodeMap
+					] || 'Failed to generate suggestions'
+				setError(errorMessage)
 			}
+		} catch {
+			setError('Something went wrong. Please try again.')
+		} finally {
+			setLoading(false)
 		}
+	}
 
-		fetchSuggestions()
-	}, [debouncedValue, promptTemplate, context, minLength])
+	const handleSuggestionClick = (suggestion: string) => {
+		setPreviousValue(currentValue)
+		setValue(suggestion)
+		setSuggestions([])
+		setError(null)
+	}
 
-	if (!suggestions.length && !loading) return null
+	const handleUndo = () => {
+		if (previousValue) {
+			setValue(previousValue)
+			setPreviousValue('')
+		}
+	}
+
+	const canUndo = previousValue.length > 0 && previousValue !== currentValue
+	const canGenerate = currentValue.length >= minLength && !loading
 
 	return (
-		<div className="flex flex-wrap gap-2 mt-2">
-			<div className="flex items-center gap-1 text-xs text-muted-foreground">
-				{loading ? (
-					<Loader2 className="size-3 animate-spin" />
-				) : (
-					<Wand2 className="size-3" />
-				)}
-				{loading ? 'Thinking...' : 'Try:'}
-			</div>
-
-			{suggestions.map((suggestion) => (
-				<Badge
-					key={suggestion}
-					variant="outline"
-					className="cursor-pointer border-muted-foreground hover:bg-brand text-xs"
-					onClick={() => setValue(suggestion)}
+		<div className="flex flex-wrap items-center gap-2 mt-2">
+			{canUndo && (
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					onClick={handleUndo}
+					className="h-6 px-2 text-xs"
 				>
-					{suggestion}
-				</Badge>
-			))}
+					<Undo2 className="size-3 mr-1" />
+					Undo
+				</Button>
+			)}
+
+			{canGenerate && suggestions.length === 0 && (
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					onClick={handleGenerateSuggestions}
+					className="h-6 px-2 text-xs"
+				>
+					<Wand2 className="size-3 mr-1" />
+					Get suggestions
+				</Button>
+			)}
+
+			{loading && (
+				<div className="flex items-center gap-1 text-xs text-muted-foreground">
+					<Loader2 className="size-3 animate-spin" />
+					Thinking...
+				</div>
+			)}
+
+			{suggestions.length > 0 && (
+				<>
+					<div className="flex items-center gap-1 text-xs text-muted-foreground">
+						<Wand2 className="size-3" />
+						Try:
+					</div>
+					{suggestions.map((suggestion) => (
+						<Badge
+							key={suggestion}
+							variant="outline"
+							className="cursor-pointer text-xs"
+							onClick={() => handleSuggestionClick(suggestion)}
+						>
+							{suggestion}
+						</Badge>
+					))}
+				</>
+			)}
+
+			{error && <div className="text-destructive text-xs mt-1">{error}</div>}
 		</div>
 	)
 }

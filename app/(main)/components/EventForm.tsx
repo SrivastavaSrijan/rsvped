@@ -36,7 +36,7 @@ import {
 	type EventActionResponse,
 	saveEvent,
 } from '@/server/actions'
-import { Prompts } from '@/server/actions/ai/prompts'
+import { EventPrompts } from '@/server/actions/ai/prompts'
 import type { RouterOutput } from '@/server/api'
 
 interface EventFormProps {
@@ -94,7 +94,22 @@ export function EventForm({
 	// Extract field errors from state
 	const fieldErrors = state?.fieldErrors || {}
 
-	// Computed values for form inputs
+	// Build AI context for this form
+	const createAIContext = (
+		field: string,
+		additionalMetadata?: Record<string, unknown>
+	) => ({
+		domain: 'events',
+		page: isEditMode ? 'edit' : 'create',
+		field,
+		location: event?.location?.name,
+		metadata: {
+			locationType: locationType,
+			startDate: startDate?.toLocaleDateString(),
+			eventTitle: event?.title,
+			...additionalMetadata,
+		},
+	})
 
 	return (
 		<div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
@@ -126,7 +141,7 @@ export function EventForm({
 						<Input type="hidden" name="slug" value={eventSlug} />
 					)}
 
-					{/* Title with WritingAssistant + SuggestionChips */}
+					{/* Title with direct EventPrompts call */}
 					<div className="flex flex-col gap-1">
 						<SmartInput
 							name="title"
@@ -135,12 +150,16 @@ export function EventForm({
 							variant="naked"
 							autoFocus
 							className="min-h-8 w-full p-2 font-semibold font-serif font-stretch-semi-condensed text-3xl lg:min-h-16 lg:p-2 lg:text-4xl"
-							assistant={{ enabled: true }}
-							suggestions={{
+							assistant={{
 								enabled: true,
-								promptTemplate: (title) => Prompts.Events.title(title),
+								context: createAIContext('title'),
+								generatePrompt: (currentValue: string) =>
+									EventPrompts.title(currentValue, {
+										description: event?.description ?? undefined,
+										locationType: locationType,
+										startDate: startDate?.toLocaleDateString(),
+									}),
 							}}
-							context={{ field: 'title', eventType: 'event' }}
 						/>
 						{fieldErrors.title && (
 							<p className="text-destructive text-sm">{fieldErrors.title[0]}</p>
@@ -201,24 +220,35 @@ export function EventForm({
 							<h3 className="font-semibold text-sm">Details</h3>
 						</div>
 						<div className="flex flex-col gap-3">
-							{/* Description with WritingAssistant */}
+							{/* Description with direct EventPrompts call */}
 							<SmartInput
 								type="textarea"
 								name="description"
 								placeholder="Add Description"
 								variant="naked"
 								defaultValue={event?.description || ''}
-								assistant={{ enabled: true }}
-								context={{ field: 'description', eventType: 'event' }}
+								assistant={{
+									enabled: true,
+									context: createAIContext('description', {
+										currentTitle: event?.title,
+									}),
+									generatePrompt: (currentValue: string) =>
+										EventPrompts.description(currentValue, {
+											title: event?.title,
+											locationType: locationType,
+											startDate: startDate?.toLocaleDateString(),
+										}),
+								}}
 							/>
 							{fieldErrors.description && (
-								<p className="text-destructive text-sm">
+								<p className="text-destructive text-xs">
 									{fieldErrors.description[0]}
 								</p>
 							)}
 						</div>
 					</div>
 
+					{/* Location section */}
 					<div className="flex flex-col gap-3 rounded-lg bg-white/10 p-3 lg:gap-3">
 						<div className="flex items-center gap-2">
 							<LocateIcon className="size-3" />
@@ -266,7 +296,7 @@ export function EventForm({
 									<div className="flex flex-col gap-1">
 										<Input
 											name="venueName"
-											placeholder="Name"
+											placeholder="Venue Name"
 											defaultValue={event?.venueName || ''}
 											className="col-span-1"
 										/>
