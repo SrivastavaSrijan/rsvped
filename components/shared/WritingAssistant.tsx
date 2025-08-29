@@ -22,10 +22,9 @@ import {
 	Undo2,
 	Wand2,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
 	Popover,
 	PopoverContent,
@@ -128,13 +127,33 @@ const FORMAT_OPTIONS: readonly ActionOption<FormatActionType>[] = [
 	},
 ] as const
 
+// Custom hook for auto-expanding textarea
+const useAutoExpand = (value: string) => {
+	const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+	useEffect(() => {
+		if (textareaRef.current) {
+			textareaRef.current.style.height = 'auto'
+			textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+		}
+	}, [])
+
+	return textareaRef
+}
+
 // Unified suggestions section component
 const SuggestionsSection = ({
 	suggestions,
 	onSuggestionClick,
+	previewSuggestion,
+	onPreviewClick,
 }: {
-	suggestions: string[]
+	suggestions: { text: string; disposition: string }[]
 	onSuggestionClick: (suggestion: string) => void
+	previewSuggestion: { text: string; disposition: string } | null
+	onPreviewClick: (
+		suggestion: { text: string; disposition: string } | null
+	) => void
 }) => (
 	<div className="flex flex-col gap-2">
 		<div className="flex items-center gap-1 text-xs text-white">
@@ -144,14 +163,40 @@ const SuggestionsSection = ({
 		<div className="flex gap-2 flex-wrap w-full">
 			{suggestions.map((suggestion) => (
 				<Badge
-					key={suggestion}
-					className="cursor-pointer text-xs bg-white/10 text-white py-2 px-2 hover:bg-white/20 hover:backdrop-blur-sm hover:border-white/50 flex-shrink-0 whitespace-normal text-left"
-					onClick={() => onSuggestionClick(suggestion)}
+					key={`${suggestion.disposition}-${suggestion.text.slice(0, 20)}`}
+					className="cursor-pointer text-xs bg-white/10 text-white py-2 px-2 hover:bg-white/20 hover:backdrop-blur-sm hover:border-white/50 flex-shrink-0 whitespace-nowrap"
+					onClick={() => onPreviewClick(suggestion)}
 				>
-					{suggestion}
+					{suggestion.disposition}
 				</Badge>
 			))}
 		</div>
+
+		{previewSuggestion && (
+			<div className="mt-3 p-3 bg-black/20 rounded-lg border border-white/10">
+				<div className="text-xs text-white/70 mb-2">Preview:</div>
+				<div className="text-sm text-white/90 leading-relaxed mb-3 max-h-32 overflow-y-auto">
+					{previewSuggestion.text}
+				</div>
+				<div className="flex gap-2">
+					<Button
+						size="sm"
+						className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+						onClick={() => onSuggestionClick(previewSuggestion.text)}
+					>
+						Apply
+					</Button>
+					<Button
+						size="sm"
+						variant="ghost"
+						className="text-white/70 hover:text-white hover:bg-white/5"
+						onClick={() => onPreviewClick(null)}
+					>
+						Cancel
+					</Button>
+				</div>
+			</div>
+		)}
 	</div>
 )
 
@@ -169,13 +214,20 @@ export const WritingAssistant = ({
 	const [previousValue, setPreviousValue] = useState<string>('')
 	const [customPrompt, setCustomPrompt] = useState<string>('')
 	const [error, setError] = useState<string | null>(null)
-	const [suggestions, setSuggestions] = useState<string[]>([])
+	const [suggestions, setSuggestions] = useState<
+		{ text: string; disposition: string }[]
+	>([])
+	const [previewSuggestion, setPreviewSuggestion] = useState<{
+		text: string
+		disposition: string
+	} | null>(null)
 
 	const text = getValue()
 	const hasText = text.trim().length > 0
 	const canUndo = previousValue.length > 0 && previousValue !== text
 	const isBusy = Boolean(loading)
 	const isPromptActive = customPrompt.trim().length > 0
+	const textareaRef = useAutoExpand(customPrompt)
 
 	const handleEnhance = async (type: EnhancementType, prompt?: string) => {
 		if (!text.trim()) return
@@ -243,6 +295,13 @@ export const WritingAssistant = ({
 		setValue(suggestion)
 		setSuggestions([])
 		setCustomPrompt('')
+		setPreviewSuggestion(null)
+	}
+
+	const handlePreviewClick = (
+		suggestion: { text: string; disposition: string } | null
+	) => {
+		setPreviewSuggestion(suggestion)
 	}
 
 	const handleCustomAction = () => {
@@ -257,7 +316,7 @@ export const WritingAssistant = ({
 		}
 	}
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === 'Enter') {
 			e.preventDefault()
 			e.stopPropagation()
@@ -357,7 +416,7 @@ export const WritingAssistant = ({
 
 			<PopoverContent
 				align="end"
-				className="w-72 p-0 bg-black/5 backdrop-blur-2xl border-gray-70/20"
+				className="w-96 p-0 bg-black/5 backdrop-blur-2xl border-gray-70/20"
 				style={{
 					backdropFilter: 'blur(20px)',
 				}}
@@ -386,18 +445,19 @@ export const WritingAssistant = ({
 						</Button>
 					)}
 
-					{/* Custom Prompt Input - clean styling */}
+					{/* Custom Prompt Input - auto-expanding textarea */}
 					<div className="relative">
 						<div className="absolute -inset-0.5 bg-gradient-to-r from-cranberry-40 via-purple-40 to-blue-40 rounded-lg blur opacity-30 animate-pulse" />
 						<div className="relative">
-							<div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+							<div className="absolute left-3 top-[18px] -translate-y-1/2 z-10">
 								{loading === 'custom' || loading === 'suggestions' ? (
 									<Loader2 className="size-3 animate-spin" />
 								) : (
 									<Sparkle className="size-3 stroke-white" />
 								)}
 							</div>
-							<Input
+							<textarea
+								ref={textareaRef}
 								value={customPrompt}
 								onChange={(e) => setCustomPrompt(e.target.value)}
 								placeholder={
@@ -405,9 +465,10 @@ export const WritingAssistant = ({
 										? 'Describe your change'
 										: 'What suggestions do you need?'
 								}
-								className="h-10 text-sm rounded-3xl bg-gray-90/80 border-gray-70/30 text-gray-10 placeholder:text-gray-10 focus:border-cranberry-40/50 focus:ring-cranberry-40/20 pl-10 pr-12"
+								className="w-full min-h-[40px] max-h-32 text-sm bg-black/5 rounded-3xl  border-gray-70/30 text-gray-10 placeholder:text-gray-10 focus:border-cranberry-40/50 focus:ring-cranberry-40/20 pl-10 pr-12 py-2.5 resize-none overflow-hidden focus:outline-none focus:ring-1"
 								onKeyDown={handleKeyDown}
 								disabled={isBusy}
+								rows={1}
 							/>
 							<Button
 								type="button"
@@ -415,7 +476,7 @@ export const WritingAssistant = ({
 								size="sm"
 								onClick={handleCustomAction}
 								disabled={isBusy || !isPromptActive}
-								className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full"
+								className="absolute right-1 top-1 h-8 w-8 p-0 rounded-full"
 								style={{ zIndex: 20 }}
 							>
 								<Send className="size-3" />
@@ -428,6 +489,8 @@ export const WritingAssistant = ({
 						<SuggestionsSection
 							suggestions={suggestions}
 							onSuggestionClick={handleSuggestionClick}
+							previewSuggestion={previewSuggestion}
+							onPreviewClick={handlePreviewClick}
 						/>
 					)}
 
@@ -470,6 +533,8 @@ export const WritingAssistant = ({
 								<SuggestionsSection
 									suggestions={suggestions}
 									onSuggestionClick={handleSuggestionClick}
+									previewSuggestion={previewSuggestion}
+									onPreviewClick={handlePreviewClick}
 								/>
 							)}
 

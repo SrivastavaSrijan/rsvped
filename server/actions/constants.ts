@@ -1,4 +1,5 @@
 import {
+	AIErrorCodes,
 	AuthErrorCodes,
 	EventErrorCodes,
 	LocationUpdateActionErrorCode,
@@ -65,4 +66,14 @@ export const LocationActionErrorCodeMap: Record<
 		'You do not have permission to perform this action.',
 	[LocationUpdateActionErrorCode.VALIDATION_ERROR]:
 		'Please check the fields and try again.',
+}
+
+export const AIActionErrorCodeMap = {
+	[AIErrorCodes.INVALID_INPUT]: 'Please check your input and try again.',
+	[AIErrorCodes.AI_UNAVAILABLE]:
+		'AI service is temporarily unavailable. Please try again later.',
+	[AIErrorCodes.SERVER_ERROR]: 'Something went wrong. Please try again.',
+	[AIErrorCodes.INVALID_TYPE]: 'Invalid enhancement type.',
+	[AIErrorCodes.GENERATION_FAILED]:
+		'Failed to generate content. Please try again.',
 }

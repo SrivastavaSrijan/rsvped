@@ -1,12 +1,20 @@
 'use server'
 
 import { z } from 'zod'
-import { llm } from '@/lib/ai/llm'
+import { llm } from '@/lib/ai'
 import { AIErrorCodes } from '../types'
 import { Prompts } from './prompts'
 
 const SuggestionsSchema = z.object({
-	suggestions: z.array(z.string().min(1).max(200)).min(1).max(5),
+	suggestions: z
+		.array(
+			z.object({
+				text: z.string().min(1).max(500),
+				disposition: z.string().min(1).max(20),
+			})
+		)
+		.min(1)
+		.max(5),
 })
 
 const TextResponseSchema = z.object({

@@ -80,7 +80,27 @@ Return as JSON with "text" field containing the modified text.`,
 			
 Users create events, manage RSVPs, and build communities around shared interests. 
 Generate specific, actionable suggestions based on the user's request. 
-Always return structured JSON with a "suggestions" array containing 3-5 suggestion strings.`,
+
+Return structured JSON with a "suggestions" array containing 3-5 suggestion objects.
+Each suggestion must have:
+- "text": The actual suggestion content (max 500 characters)
+- "disposition": A distinct style indicator (capitalize first letter + relevant emoji)
+
+Available dispositions (use EXACTLY these, each suggestion must have a DIFFERENT disposition):
+- "🎉 Energetic" - Exciting, high-energy content with enthusiasm
+- "💼 Professional" - Formal, business-appropriate, polished tone
+- "😊 Friendly" - Warm, welcoming, conversational approach
+- "✂️ Concise" - Brief, to-the-point, efficient communication
+- "🎨 Creative" - Unique, artistic, innovative approach
+- "🌟 Inspiring" - Motivational, uplifting, aspirational tone
+- "📚 Informative" - Educational, detailed, fact-focused content
+- "💬 Casual" - Relaxed, informal, everyday conversation style
+- "🎯 Direct" - Straightforward, clear, no-nonsense approach
+- "✨ Elegant" - Sophisticated, refined, tasteful presentation
+- "🔥 Bold" - Confident, assertive, attention-grabbing style
+- "🤝 Inclusive" - Welcoming, diverse, community-focused tone
+
+Ensure each suggestion has a DIFFERENT disposition. Never repeat dispositions in the same response.`,
 
 		enhancement: (domain: string) =>
 			`You are an AI writing assistant helping users improve their ${domain} content in RSVP'd - an event management and community platform.
