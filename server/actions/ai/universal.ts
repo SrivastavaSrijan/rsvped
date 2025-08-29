@@ -27,7 +27,7 @@ type AIContext = {
 /**
  * Generate suggestions based on user-provided prompt with context
  */
-export async function generateCustomSuggestions(
+export async function generateSuggestions(
 	userPrompt: string,
 	context: AIContext
 ) {

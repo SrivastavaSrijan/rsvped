@@ -32,10 +32,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { AIActionErrorCodeMap } from '@/server/actions'
-import {
-	enhanceText,
-	generateCustomSuggestions,
-} from '@/server/actions/ai/universal'
+import { enhanceText, generateSuggestions } from '@/server/actions/ai/universal'
 
 type AIContext = {
 	// Must-have context - simplified to strings
@@ -223,7 +220,7 @@ export const WritingAssistant = ({
 				finalPrompt = `${suggestionPrompt(currentValue)}\n\nUser request: "${customPrompt}"`
 			}
 
-			const result = await generateCustomSuggestions(finalPrompt, context)
+			const result = await generateSuggestions(finalPrompt, context)
 
 			if (result.success && result.data?.suggestions) {
 				setSuggestions(result.data.suggestions)

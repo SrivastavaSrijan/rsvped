@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AIActionErrorCodeMap } from '@/server/actions'
-import { generateCustomSuggestions } from '@/server/actions/ai/universal'
+import { generateSuggestions } from '@/server/actions/ai/universal'
 
 type AIContext = {
 	// Must-have context - simplified to strings
@@ -54,7 +54,7 @@ export const SuggestionChips = ({
 		setError(null)
 
 		try {
-			const result = await generateCustomSuggestions(suggestionPrompt, context)
+			const result = await generateSuggestions(suggestionPrompt, context)
 
 			if (result.success && result.data?.suggestions) {
 				setSuggestions(result.data.suggestions)

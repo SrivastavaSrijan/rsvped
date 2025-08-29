@@ -74,7 +74,9 @@
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": [
-			"biome format --write"
+			"biome check --write",
+			"biome format --write",
+			"bash -c 'yarn type-check'"
 		]
 	},
 	"devDependencies": {

@@ -17,5 +17,4 @@ export { Prompts } from './prompts'
 export {
 	enhanceText,
 	generateSuggestions,
-	getRecommendations,
 } from './universal'
