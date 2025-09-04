@@ -7,6 +7,7 @@ import {
 	imageRouter,
 	locationRouter,
 	rsvpRouter,
+	stirRouter,
 	userRouter,
 } from '@/server/api/routers'
 import type { createTRPCContext } from '@/server/api/trpc'
@@ -19,6 +20,7 @@ import { createTRPCRouter } from '@/server/api/trpc'
  */
 export const appRouter = createTRPCRouter({
 	ai: aiRouter,
+	stir: stirRouter,
 	event: eventRouter,
 	rsvp: rsvpRouter,
 	image: imageRouter,
