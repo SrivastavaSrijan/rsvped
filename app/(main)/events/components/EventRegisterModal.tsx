@@ -1,6 +1,7 @@
 'use client'
 import { Check, Loader2, Ticket } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+import { copy } from '@/app/(main)/copy'
 import { Form } from '@/components/shared'
 import {
 	Badge,
@@ -28,7 +29,6 @@ import {
 	type RsvpFormData,
 } from '@/server/actions'
 import type { RouterOutput } from '@/server/api'
-import { copy } from '../copy'
 
 const initalState: RsvpActionResponse = {
 	success: false,

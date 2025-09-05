@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
+import { copy } from '@/app/(main)/copy'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui'
 import { Routes } from '@/lib/config/routes'
-import { copy } from '../copy'
 
 interface CommunitiesTabsProps {
 	managed: React.ReactNode

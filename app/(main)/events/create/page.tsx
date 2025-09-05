@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
+import { EventForm } from '@/app/(main)/events/components'
 import { getAPI } from '@/server/api'
-import { EventForm } from '../../components/EventForm'
 
 export const metadata: Metadata = {
 	title: "Create an Event · RSVP'd",

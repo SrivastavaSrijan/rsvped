@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { LocationModal } from '@/app/(main)/components'
+import { LocationModal } from '@/app/(main)/locations/components'
 import { CookieNames } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'

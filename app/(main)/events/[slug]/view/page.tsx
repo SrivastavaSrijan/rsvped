@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { ProgressiveEventPage } from '@/app/(main)/components'
+import { ProgressiveEventPage } from '@/app/(main)/events/components'
 import { getAPI } from '@/server/api'
 
 export const generateMetadata = async ({

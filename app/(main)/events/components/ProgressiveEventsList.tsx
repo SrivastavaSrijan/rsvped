@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { Suspense } from 'react'
+import { copy } from '@/app/(main)/copy'
 import { DateFilterMessage } from '@/components/shared'
 import type {
 	EventListSearchParams,
@@ -7,7 +8,6 @@ import type {
 	RouterOutput,
 } from '@/server/api'
 import { EventTimeFrame, getAPI, SortDirection } from '@/server/api'
-import { copy } from '../copy'
 import { EventCard } from './EventCard'
 import { GenericPagination } from './GenericPagination'
 import { NoEvents } from './NoEvents'
