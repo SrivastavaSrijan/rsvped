@@ -96,7 +96,7 @@ export async function createIntelligentRSVPs(
 		const rsvpRows: any[] = []
 
 		let totalMatches = 0
-		let categoryBasedRsvps = 0
+		let _categoryBasedRsvps = 0
 
 		for (const event of eventsWithCategories) {
 			const eventTiers = tiersByEvent.get(event.id) || []
@@ -129,7 +129,7 @@ export async function createIntelligentRSVPs(
 				interestedUsers,
 				targetAttendance
 			)
-			categoryBasedRsvps += selectedAttendees.filter(
+			_categoryBasedRsvps += selectedAttendees.filter(
 				(a) => a.matchReason === 'category'
 			).length
 			totalMatches += selectedAttendees.length
@@ -268,7 +268,7 @@ export async function createEventCollaborators(
 		})) as UserWithCategories[]
 
 		const collaboratorRows: any[] = []
-		let categoryMatchedCollaborators = 0
+		let _categoryMatchedCollaborators = 0
 
 		for (const event of eventsWithCategories) {
 			const maxCollaborators = faker.number.int({
@@ -300,7 +300,7 @@ export async function createEventCollaborators(
 				faker
 			)
 
-			categoryMatchedCollaborators += selectedCollaborators.filter(
+			_categoryMatchedCollaborators += selectedCollaborators.filter(
 				(c) => c.categoryMatched
 			).length
 

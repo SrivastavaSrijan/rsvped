@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: only seed */
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { faker } from '@faker-js/faker'
 import { logger } from '../utils'
-import { config, limits, paths } from './config'
+import { config, limits } from './config'
 import { ExternalAPIError } from './errors'
 
 export async function fetchUnsplashImages(

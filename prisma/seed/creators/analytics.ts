@@ -53,7 +53,7 @@ export async function createEventReferrals(
 export async function createEventMessages(
 	prisma: PrismaClient,
 	events: any[],
-	users: any[]
+	_users: any[]
 ) {
 	const operation = logger.startOperation('create_event_messages')
 	const { faker } = await import('@faker-js/faker')

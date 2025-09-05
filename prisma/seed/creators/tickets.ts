@@ -95,7 +95,7 @@ export async function createPromoCodes(
 
 		const promoRows: any[] = []
 		const promoTiersRows: any[] = []
-		let llmPromoCount = 0
+		let _llmPromoCount = 0
 
 		// Group ticket tiers by event for easier lookup
 		const tiersByEvent = ticketTiers.reduce((acc, tier) => {
@@ -110,7 +110,7 @@ export async function createPromoCodes(
 
 			if (llmEvent?.promoCodes && llmEvent.promoCodes.length > 0) {
 				// Use LLM-generated promo codes
-				llmPromoCount++
+				_llmPromoCount++
 				for (const llmPromo of llmEvent.promoCodes) {
 					const promoId = `${event.id}_${llmPromo.code}` // Temporary unique ID
 

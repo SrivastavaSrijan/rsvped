@@ -3,10 +3,8 @@ import {
 	EventStatus,
 	EventVisibility,
 	LocationType,
-	type Prisma,
 	type PrismaClient,
 } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
 import type { BatchProcessedData } from '../utils'
 import { logger, timeOperation } from '../utils'
 import {

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { Suspense } from 'react'
+import { GenericPagination, PeriodTabs } from '@/app/(main)/components'
 import { copy } from '@/app/(main)/copy'
 import { DateFilterMessage } from '@/components/shared'
 import type {
@@ -9,9 +10,7 @@ import type {
 } from '@/server/api'
 import { EventTimeFrame, getAPI, SortDirection } from '@/server/api'
 import { EventCard } from './EventCard'
-import { GenericPagination } from './GenericPagination'
 import { NoEvents } from './NoEvents'
-import { PeriodTabs } from './PeriodTabs'
 
 export type BuildEventListInputParams = Pick<
 	RouterInput['event']['list']['core'],
