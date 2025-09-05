@@ -37,7 +37,7 @@ import {
 	type EventActionResponse,
 	saveEvent,
 } from '@/server/actions'
-import { EventPrompts } from '@/server/actions/ai/prompts'
+import { EventPrompts } from '@/server/actions/ai/prompts/event'
 import type { RouterOutput } from '@/server/api'
 
 interface EventFormProps {

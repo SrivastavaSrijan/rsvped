@@ -111,7 +111,7 @@ export class LLMService {
 		operation: string
 	): Promise<T> {
 		const jsonSchema = zodToJsonSchema(schema)
-
+		console.log(jsonSchema)
 		return withRetry(async () => {
 			if (!this.client) {
 				throw new LLMError('LLM client is not initialized', operation)
@@ -125,6 +125,14 @@ export class LLMService {
 				response_format: { type: 'json_object', schema: jsonSchema },
 				max_tokens: LLM_CONFIG.maxTokens,
 				temperature: LLM_CONFIG.temperature,
+			})
+
+			// Log response for debugging (includes usage stats, model info, etc.)
+			console.debug(`LLM ${operation} response:`, {
+				model: response.model,
+				usage: response.usage,
+				finishReason: response.choices[0]?.finish_reason,
+				contentLength: response.choices[0]?.message?.content?.length,
 			})
 
 			const content = response.choices[0]?.message?.content
