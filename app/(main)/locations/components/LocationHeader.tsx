@@ -3,10 +3,10 @@ import tz from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { Clock } from 'lucide-react'
 import Link from 'next/link'
+import { copy } from '@/app/(main)/copy'
 import { Button, Image } from '@/components/ui'
 import { AssetMap, Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
-import { copy } from '../copy'
 
 dayjs.extend(tz)
 dayjs.extend(utc)

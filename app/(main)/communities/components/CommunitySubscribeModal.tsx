@@ -2,6 +2,7 @@
 
 import { Check, Loader2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+import { copy } from '@/app/(main)/copy'
 import { Form } from '@/components/shared'
 import {
 	Button,
@@ -26,7 +27,6 @@ import {
 	subscribeToCommunityAction,
 } from '@/server/actions'
 import type { RouterOutput } from '@/server/api'
-import { copy } from '../copy'
 
 const initialState: MembershipActionResponse = {
 	success: false,

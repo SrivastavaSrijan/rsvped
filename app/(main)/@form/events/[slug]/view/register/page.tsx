@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { EventRegisterModal } from '@/app/(main)/components'
+import { EventRegisterModal } from '@/app/(main)/events/components'
 import { getAPI } from '@/server/api'
 
 interface ManageFormProps {

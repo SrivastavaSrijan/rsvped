@@ -2,6 +2,7 @@ import { Clock } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import Link from 'next/link'
 import type { PropsWithChildren } from 'react'
+import { copy } from '@/app/(main)/copy'
 import {
 	AvatarWithFallback,
 	Button,
@@ -13,7 +14,6 @@ import {
 import { Routes } from '@/lib/config'
 import { getEventDateTime } from '@/lib/hooks'
 import type { RouterOutput } from '@/server/api'
-import { copy } from '../copy'
 import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
 

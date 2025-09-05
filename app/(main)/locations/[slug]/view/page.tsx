@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
+import { FilteredEventsList } from '@/app/(main)/events/components'
+import { LocationHeader } from '@/app/(main)/locations/components'
 import { type EventListSearchParams, getAPI } from '@/server/api'
-import { FilteredEventsList, LocationHeader } from '../../../components'
 
 interface DiscoverLocationProps {
 	params: Promise<{ slug: string }>

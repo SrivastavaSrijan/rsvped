@@ -1,10 +1,9 @@
 import Link from 'next/link'
+import { EmptyState, GenericPagination } from '@/app/(main)/components'
+import { copy } from '@/app/(main)/copy'
 import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
-import { copy } from '../copy'
-import { EmptyState } from './EmptyState'
-import { GenericPagination } from './GenericPagination'
 import { ManagedCommunityCard } from './ManagedCommunityCard'
 
 type CommunityData = RouterOutput['community']['list']['core']

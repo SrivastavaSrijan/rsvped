@@ -1,5 +1,6 @@
 import { MembershipRole } from '@prisma/client'
 import dayjs from 'dayjs'
+import { ProgressiveCommunitiesList } from '@/app/(main)/communities/components'
 import {
 	type CommunityListSearchParams,
 	EventTimeFrame,
@@ -8,7 +9,6 @@ import {
 	type RouterInput,
 	SortDirection,
 } from '@/server/api'
-import { ProgressiveCommunitiesList } from '../../../components'
 
 type CommunityPageSearchParams = CommunityListSearchParams & { tab?: string }
 

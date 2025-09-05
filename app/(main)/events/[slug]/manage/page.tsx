@@ -1,7 +1,7 @@
 import { ArrowUpLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ProgressiveManageEventCard } from '@/app/(main)/components'
+import { ProgressiveManageEventCard } from '@/app/(main)/events/components'
 import {
 	Button,
 	Tabs,

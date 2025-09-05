@@ -1,7 +1,10 @@
 import { EventRole } from '@prisma/client'
 import type { Metadata } from 'next'
+import {
+	buildEventListQuery,
+	ProgressiveEventsList,
+} from '@/app/(main)/events/components'
 import { type EventListSearchParams, getAPI } from '@/server/api'
-import { buildEventListQuery, ProgressiveEventsList } from '../../components'
 
 export const metadata: Metadata = {
 	title: "Events · RSVP'd",

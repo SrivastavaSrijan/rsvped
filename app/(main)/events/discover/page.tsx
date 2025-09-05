@@ -4,19 +4,19 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import { copy } from '@/app/(main)/copy'
+import {
+	CategoryDiscoverCard,
+	CommunityDiscoverCard,
+	EventDiscoverCard,
+	ResponsiveGridCarousel,
+} from '@/app/(main)/events/components'
+import { LocationsDiscover } from '@/app/(main)/locations/components'
 import { Button, Skeleton } from '@/components/ui'
 import { CookieNames, Routes } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
-import {
-	CategoryDiscoverCard,
-	CommunityDiscoverCard,
-	EventDiscoverCard,
-	LocationsDiscover,
-	ResponsiveGridCarousel,
-} from '../../components'
-import { copy } from '../../copy'
 
 export const metadata: Metadata = {
 	title: "Discover Events  · RSVP'd",

@@ -1,8 +1,8 @@
 import { TRPCError } from '@trpc/server'
 import type { Metadata } from 'next'
 import { notFound, unauthorized } from 'next/navigation'
+import { EventForm } from '@/app/(main)/events/components'
 import { getAPI } from '@/server/api'
-import { EventForm } from '../../../components'
 
 export const metadata: Metadata = {
 	title: "Edit Event · RSVP'd",

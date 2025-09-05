@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: only seed */
-import type { EventFeedback, PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 import { logger, timeOperation } from '../utils'
 import {
 	createEngagementData,

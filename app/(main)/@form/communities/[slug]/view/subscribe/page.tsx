@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { CommunitySubscribeModal } from '@/app/(main)/components'
+import { CommunitySubscribeModal } from '@/app/(main)/communities/components'
 import { getAPI } from '@/server/api'
 
 interface SubscribePageProps {

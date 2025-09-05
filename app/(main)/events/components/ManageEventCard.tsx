@@ -1,12 +1,11 @@
 import { Camera, Edit } from 'lucide-react'
 import Link from 'next/link'
+import { ShareActions, ShareLink } from '@/app/(main)/components'
 import { Button, Card, Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
 import { EventDateTime } from './EventDateTime'
 import { EventLocation } from './EventLocation'
-import { ShareActions } from './ShareActions'
-import { ShareLink } from './ShareLink'
 
 // import { Stats } from './Stats'
 

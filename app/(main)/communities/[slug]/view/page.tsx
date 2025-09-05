@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
-import { CommunityHeader, FilteredEventsList } from '@/app/(main)/components'
+import { CommunityHeader } from '@/app/(main)/communities/components'
+import { FilteredEventsList } from '@/app/(main)/events/components'
 import { type EventListSearchParams, getAPI } from '@/server/api'
 
 interface ViewCommunityProps {
