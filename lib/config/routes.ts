@@ -84,6 +84,15 @@ export const Routes = {
 				return `${this.Root}/${slug}/edit`
 			},
 		},
+		Stir: {
+			Root: '/stir',
+			Search(query: string, type?: 'all' | 'events' | 'users' | 'communities') {
+				const q = encodeURIComponent(query)
+				return type && type !== 'all'
+					? `${this.Root}?q=${q}&type=${type}`
+					: `${this.Root}?q=${q}`
+			},
+		},
 	},
 }
 

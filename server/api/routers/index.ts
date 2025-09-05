@@ -1,4 +1,3 @@
-export * from '@/server/api/routers/ai'
 export * from '@/server/api/routers/category'
 export * from '@/server/api/routers/community'
 export * from '@/server/api/routers/event'

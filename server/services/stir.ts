@@ -32,7 +32,41 @@ export class StirService {
 	async parseSearchIntent(query: string): Promise<SearchIntent> {
 		const prompt = StirPrompts.buildIntentPrompt(query)
 		const system = StirSystemPrompts.intent
-		return llm.generate(prompt, system, SearchIntentSchema, 'stir-parse-intent')
+		const raw = await llm.generate(
+			prompt,
+			system,
+			SearchIntentSchema,
+			'stir-parse-intent'
+		)
+		// Normalize optional arrays/objects to keep downstream logic stable
+		const normalized: SearchIntent = {
+			primaryType: raw.primaryType,
+			keywords: raw.keywords ?? [],
+			eventFilters: {
+				categories: raw.eventFilters?.categories ?? [],
+				price: raw.eventFilters?.price ?? {},
+				location: raw.eventFilters?.location,
+				dateRange: raw.eventFilters?.dateRange ?? {},
+				online: raw.eventFilters?.online,
+			},
+			userFilters: {
+				professions: raw.userFilters?.professions ?? [],
+				experienceLevels: raw.userFilters?.experienceLevels ?? [],
+				interests: raw.userFilters?.interests ?? [],
+				location: raw.userFilters?.location,
+			},
+			communityFilters: {
+				topics: raw.communityFilters?.topics ?? [],
+				location: raw.communityFilters?.location,
+				isPublic: raw.communityFilters?.isPublic,
+			},
+			summary: {
+				interpretation: raw.summary.interpretation,
+				extracted: raw.summary.extracted ?? {},
+				suggestions: raw.summary.suggestions ?? [],
+			},
+		}
+		return normalized
 	}
 
 	// Helper: map string category names/slugs to IDs
@@ -115,13 +149,13 @@ export class StirService {
 		)
 
 		const categoryIds = await this.resolveCategoryIds(
-			intent.eventFilters.categories
+			intent.eventFilters?.categories ?? []
 		)
 		const locationId =
-			(await this.resolveLocationId(intent.eventFilters.location)) ||
+			(await this.resolveLocationId(intent.eventFilters?.location)) ||
 			(await this.resolveLocationId(input.location))
 
-		const dateRange = intent.eventFilters.dateRange
+		const dateRange = intent.eventFilters?.dateRange
 		const start = dateRange?.start ? new Date(dateRange.start) : undefined
 		const end = dateRange?.end ? new Date(dateRange.end) : undefined
 
@@ -153,7 +187,7 @@ export class StirService {
 				categoryIds: catIds,
 				locationId: e.locationId,
 				userInterestMap,
-				queryKeywords: intent.keywords,
+				queryKeywords: intent.keywords ?? [],
 			})
 			return {
 				id: e.id,
@@ -172,7 +206,7 @@ export class StirService {
 	async searchUsers(intent: SearchIntent, input: StirSearchInput) {
 		// Privacy-first: only return users that have at least one RSVP or community membership (basic discoverability heuristic)
 		const locationId =
-			(await this.resolveLocationId(intent.userFilters.location)) ||
+			(await this.resolveLocationId(intent.userFilters?.location)) ||
 			(await this.resolveLocationId(input.location))
 
 		const users = await this.prisma.user.findMany({
@@ -192,7 +226,7 @@ export class StirService {
 			take: input.limit,
 		})
 
-		const interestNames = intent.userFilters.interests
+		const interestNames = intent.userFilters?.interests ?? []
 		const interestIds = await this.resolveCategoryIds(interestNames)
 
 		return users.map((u) => {
@@ -200,8 +234,8 @@ export class StirService {
 			const overlap = userInterestIds.filter((id) =>
 				interestIds.includes(id)
 			).length
-			const expMatch = intent.userFilters.experienceLevels?.includes(
-				(u.experienceLevel as any) ?? 'MID'
+			const expMatch = intent.userFilters?.experienceLevels?.includes(
+				u.experienceLevel ?? 'MID'
 			)
 			let score = 0
 			let reason = ''
@@ -217,7 +251,7 @@ export class StirService {
 				id: u.id,
 				name: u.name,
 				profession: u.profession ?? null,
-				experienceLevel: (u.experienceLevel as any) ?? null,
+				experienceLevel: u.experienceLevel ?? null,
 				score: Math.max(0, Math.min(1, score)),
 				reason: reason || 'Relevant',
 			}
@@ -226,15 +260,15 @@ export class StirService {
 
 	async searchCommunities(intent: SearchIntent, input: StirSearchInput) {
 		const locationId = await this.resolveLocationId(
-			intent.communityFilters.location || input.location
+			intent.communityFilters?.location || input.location
 		)
-		const topics = intent.communityFilters.topics ?? []
+		const topics = intent.communityFilters?.topics ?? []
 		const topicIds = await this.resolveCategoryIds(topics)
 
 		// Simple heuristic: communities with events in those categories/locations
 		const communities = await this.prisma.community.findMany({
 			where: {
-				...(intent.communityFilters.isPublic === true
+				...(intent.communityFilters?.isPublic === true
 					? { isPublic: true }
 					: {}),
 			},

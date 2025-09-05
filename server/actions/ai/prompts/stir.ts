@@ -15,51 +15,51 @@ Return scores from 0 to 1 and short reasons (max 100 chars).`,
 // Input schema for Stir search
 export const StirSearchInputSchema = z.object({
 	query: z.string().min(1).max(500),
-	type: z.enum(['all', 'events', 'users', 'communities']).default('all'),
+	type: z.enum(['all', 'events', 'users', 'communities']).optional(),
 	location: z.string().optional(),
 	dateRange: z
 		.object({
-			start: z.string(), // ISO date
-			end: z.string(), // ISO date
+			start: z.string().optional(), // ISO date
+			end: z.string().optional(), // ISO date
 		})
 		.optional(),
-	limit: z.number().min(1).max(50).default(20),
+	limit: z.number().min(1).max(50).optional(),
 })
 
 // Intent parsing response schema
 export const SearchIntentSchema = z.object({
 	primaryType: z.enum(['events', 'users', 'communities', 'mixed']),
-	keywords: z.array(z.string()).default([]),
+	keywords: z.array(z.string()).optional(),
 	eventFilters: z
 		.object({
-			categories: z.array(z.string()).default([]),
+			categories: z.array(z.string()).optional(),
 			price: z
 				.object({ max: z.number().int().nonnegative().optional() })
-				.default({}),
+				.optional(),
 			location: z.string().optional(),
 			dateRange: z
 				.object({ start: z.string().optional(), end: z.string().optional() })
-				.default({}),
+				.optional(),
 			online: z.boolean().optional(),
 		})
-		.default({ categories: [], price: {}, dateRange: {} }),
+		.optional(),
 	userFilters: z
 		.object({
-			professions: z.array(z.string()).default([]),
+			professions: z.array(z.string()).optional(),
 			experienceLevels: z
 				.array(z.enum(['JUNIOR', 'MID', 'SENIOR', 'EXECUTIVE']))
-				.default([]),
-			interests: z.array(z.string()).default([]),
+				.optional(),
+			interests: z.array(z.string()).optional(),
 			location: z.string().optional(),
 		})
-		.default({ professions: [], experienceLevels: [], interests: [] }),
+		.optional(),
 	communityFilters: z
 		.object({
-			topics: z.array(z.string()).default([]),
+			topics: z.array(z.string()).optional(),
 			location: z.string().optional(),
 			isPublic: z.boolean().optional(),
 		})
-		.default({ topics: [] }),
+		.optional(),
 	summary: z.object({
 		interpretation: z.string(),
 		extracted: z
@@ -70,8 +70,8 @@ export const SearchIntentSchema = z.object({
 					.optional(),
 				budget: z.number().optional(),
 			})
-			.default({}),
-		suggestions: z.array(z.string()).default([]),
+			.optional(),
+		suggestions: z.array(z.string()).optional(),
 	}),
 })
 
@@ -85,11 +85,11 @@ export const StirSearchOutputSchema = z.object({
 				startDate: z.date(),
 				locationId: z.string().nullable(),
 				communityId: z.string().nullable().optional(),
-				score: z.number().min(0).max(1).default(0),
+				score: z.number().min(0).max(1).optional(),
 				reason: z.string().optional(),
 			})
 		)
-		.default([]),
+		.optional(),
 	users: z
 		.array(
 			z.object({
@@ -100,26 +100,26 @@ export const StirSearchOutputSchema = z.object({
 					.enum(['JUNIOR', 'MID', 'SENIOR', 'EXECUTIVE'])
 					.nullable()
 					.optional(),
-				score: z.number().min(0).max(1).default(0),
+				score: z.number().min(0).max(1).optional(),
 				reason: z.string().optional(),
 			})
 		)
-		.default([]),
+		.optional(),
 	communities: z
 		.array(
 			z.object({
 				id: z.string(),
 				name: z.string(),
 				isPublic: z.boolean(),
-				score: z.number().min(0).max(1).default(0),
+				score: z.number().min(0).max(1).optional(),
 				reason: z.string().optional(),
 			})
 		)
-		.default([]),
+		.optional(),
 	searchSummary: z.object({
 		interpretation: z.string(),
-		filters: z.record(z.string(), z.unknown()).default({}),
-		suggestions: z.array(z.string()).default([]),
+		filters: z.record(z.string(), z.unknown()).optional(),
+		suggestions: z.array(z.string()).optional(),
 	}),
 })
 
