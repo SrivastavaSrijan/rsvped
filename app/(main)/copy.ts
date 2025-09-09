@@ -5,6 +5,7 @@ export const copy = {
 		events: 'Events',
 		communities: 'Communities',
 		discover: 'Discover',
+		stir: 'Stir',
 		signIn: 'Sign In',
 		dashboard: 'Hey there',
 		profile: 'Settings',

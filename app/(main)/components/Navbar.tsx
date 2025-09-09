@@ -1,4 +1,4 @@
-import { ArrowUpRight, Calendar, Compass, Users } from 'lucide-react'
+import { ArrowUpRight, Calendar, Compass, Sparkle, Users } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileDropdown } from '@/components/shared'
 import { Button, Image } from '@/components/ui'
@@ -46,6 +46,12 @@ export const Navbar = async () => {
 							icon={<Compass className="size-3" />}
 						>
 							{copy.nav.discover}
+						</ActiveLink>
+						<ActiveLink
+							href={Routes.Main.Stir.Root}
+							icon={<Sparkle className="size-3" />}
+						>
+							{copy.nav.stir}
 						</ActiveLink>
 					</div>
 					<div className="flex-1" />

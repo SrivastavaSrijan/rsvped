@@ -1,4 +1,5 @@
-import { EventRole, type MembershipRole } from '@prisma/client'
+import { EventRole } from '@prisma/client'
+import type { SearchMatchInfo } from '@/server/api/routers/stir/helpers'
 import type { Context } from '@/server/api/trpc'
 
 // Helper function to enhance events with user metadata
@@ -8,6 +9,11 @@ export async function enhanceEvents<
 		host: { id: string }
 		communityId: string | null
 		eventCollaborators?: Array<{ user: { id: string }; role: EventRole }>
+		_searchMetadata?: {
+			matches: SearchMatchInfo[]
+			score: number
+			query: string
+		}
 	},
 >(
 	events: T[],
@@ -72,6 +78,15 @@ export async function enhanceEvents<
 					? (membershipMap.get(event.communityId) ?? null)
 					: null,
 			},
+			// Include search metadata if present
+			...(event._searchMetadata && {
+				search: {
+					matches: event._searchMetadata.matches,
+					score: event._searchMetadata.score,
+					query: event._searchMetadata.query,
+					primaryMatch: event._searchMetadata.matches[0] || null,
+				},
+			}),
 		}
 
 		return { ...event, metadata }

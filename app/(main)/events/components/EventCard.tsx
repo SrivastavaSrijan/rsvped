@@ -14,17 +14,31 @@ import {
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
-import { getEventDateTime } from '@/lib/hooks'
-import { useHighlighter } from '@/lib/hooks/useHighlighter'
+import {
+	getEventDateTime,
+	useHighlighter,
+	useSearchMatchReason,
+} from '@/lib/hooks'
 import { cn } from '@/lib/utils'
 import type { ExtractPaginatedData, RouterOutput } from '@/server/api'
+import type { SearchMatchInfo } from '@/server/api/routers/stir/helpers'
 import { EventLocation } from './EventLocation'
 
 type CoreEventData = ExtractPaginatedData<RouterOutput['event']['list']['core']>
 type EnhancedEventData = ExtractPaginatedData<
 	RouterOutput['event']['list']['enhanced']
 >
-type EventCardData = CoreEventData | EnhancedEventData
+
+// Add search metadata support to event data
+type EventDataWithSearchMetadata = (CoreEventData | EnhancedEventData) & {
+	_searchMetadata?: {
+		matches: SearchMatchInfo[]
+		score: number
+		query: string
+	}
+}
+
+type EventCardData = EventDataWithSearchMetadata
 
 type EventCardProps = EventCardData & {
 	isLast: boolean
@@ -67,6 +81,7 @@ export function EventCard(props: EventCardProps) {
 	// Type guard determines if we have enhanced data
 	const {
 		title,
+		description,
 		startDate,
 		endDate,
 		slug,
@@ -87,6 +102,21 @@ export function EventCard(props: EventCardProps) {
 
 	// Type guard determines if we have enhanced data
 	const hasEnhancedData = isEnhancedEventData(props)
+
+	// Check for search metadata - either in enhanced metadata or directly on the event
+	let searchMetadata = null
+	if (hasEnhancedData && props.metadata.search) {
+		searchMetadata = props.metadata.search
+	} else if ('_searchMetadata' in props && props._searchMetadata) {
+		searchMetadata = props._searchMetadata
+	}
+	const matchReason = useSearchMatchReason(
+		searchMetadata || undefined,
+		searchQuery,
+		{ title, description: description || undefined },
+		undefined,
+		'title' // Don't show match reason for title field since it's already highlighted
+	)
 
 	// Now TypeScript knows the exact type in each branch
 	const canManage = hasEnhancedData
@@ -200,6 +230,22 @@ export function EventCard(props: EventCardProps) {
 					<p className="font-medium text-base text-bold">{relative}</p>
 					<p className="text-muted-foreground text-sm">{start.dayOfWeek}</p>
 				</div>
+				{/* Search match display */}
+				{matchReason && searchQuery && (
+					<div className="rounded-md bg-blue-500/10 border border-blue-500/20 px-3 py-2">
+						<div className="flex items-center gap-2">
+							<div className="size-1.5 rounded-full bg-blue-400" />
+							<p className="text-blue-200 text-sm font-medium">
+								<span className="opacity-75">
+									Match in {matchReason.field}:
+								</span>{' '}
+								<span className="line-clamp-1">
+									{highlighter(matchReason.text)}
+								</span>
+							</p>
+						</div>
+					</div>
+				)}{' '}
 				<Card className="mb-3 w-full border-0 p-3 text-white lg:mb-6 lg:p-6">
 					<div className="grid grid-cols-3 flex-col justify-between gap-4">
 						<div className="col-span-2 flex flex-col gap-3.5 lg:gap-3.5">
