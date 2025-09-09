@@ -86,11 +86,9 @@ export const Routes = {
 		},
 		Stir: {
 			Root: '/stir',
-			Search(query: string, type?: 'all' | 'events' | 'users' | 'communities') {
+			Search(query: string) {
 				const q = encodeURIComponent(query)
-				return type && type !== 'all'
-					? `${this.Root}?q=${q}&type=${type}`
-					: `${this.Root}?q=${q}`
+				return `${this.Root}?q=${q}`
 			},
 		},
 	},

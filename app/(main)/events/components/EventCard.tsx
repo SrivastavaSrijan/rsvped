@@ -15,6 +15,7 @@ import {
 import { Routes } from '@/lib/config'
 import { RSVPBadgeVariants, RSVPLabels } from '@/lib/constants'
 import { getEventDateTime } from '@/lib/hooks'
+import { useHighlighter } from '@/lib/hooks/useHighlighter'
 import { cn } from '@/lib/utils'
 import type { ExtractPaginatedData, RouterOutput } from '@/server/api'
 import { EventLocation } from './EventLocation'
@@ -27,6 +28,7 @@ type EventCardData = CoreEventData | EnhancedEventData
 
 type EventCardProps = EventCardData & {
 	isLast: boolean
+	searchQuery?: string
 }
 
 // Type guard functions
@@ -58,7 +60,11 @@ const ManageButtonSkeleton = () => (
 	<div className="h-9 w-28 animate-pulse rounded-md bg-white/20" />
 )
 
-export const EventCard = (props: EventCardProps) => {
+export function EventCard(props: EventCardProps) {
+	const { searchQuery } = props
+	const highlighter = useHighlighter(searchQuery || '')
+
+	// Type guard determines if we have enhanced data
 	const {
 		title,
 		startDate,
@@ -203,7 +209,7 @@ export const EventCard = (props: EventCardProps) => {
 								className="contents hover:[&_h2]:underline underline-offset-2"
 							>
 								<p className="text-muted-foreground text-sm">{range.time}</p>
-								<h2 className="font-semibold text-xl">{title}</h2>
+								<h2 className="font-semibold text-xl">{highlighter(title)}</h2>
 								{!canManage && eventCollaborators && (
 									<div className="flex flex-row items-center gap-2 w-full">
 										<div className="flex items-center gap-2 w-full">

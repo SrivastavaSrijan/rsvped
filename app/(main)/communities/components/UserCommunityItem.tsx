@@ -9,7 +9,9 @@ import type { ExtractPaginatedData, RouterOutput } from '@/server/api'
 type CommunityData =
 	| ExtractPaginatedData<RouterOutput['community']['list']['core']>
 	| ExtractPaginatedData<RouterOutput['community']['list']['enhanced']>
-type UserCommunityItemProps = CommunityData
+type UserCommunityItemProps = CommunityData & {
+	nameRenderer?: (name: string) => React.ReactNode
+}
 
 // Type guard to check if community data has events (enhanced data)
 function hasEvents(
@@ -107,7 +109,7 @@ export const UserCommunityItem = (props: UserCommunityItemProps) => {
 					<div className="flex flex-col lg:gap-3 gap-3 w-full">
 						<div className="flex flex-col lg:gap-1 gap-1 w-full">
 							<h3 className="truncate lg:text-lg text-base font-semibold w-full">
-								{name}
+								{props.nameRenderer ? props.nameRenderer(name) : name}
 							</h3>
 							<p className="text-sm text-muted-foreground">
 								{_count.members} members

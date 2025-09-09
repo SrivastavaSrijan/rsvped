@@ -56,4 +56,19 @@ export const copy = {
 				"You haven't created any communities yet. Create one to get started!",
 		},
 	},
+	search: {
+		title: 'Search Results',
+		emptyState: {
+			title: 'No results found',
+			description: 'Try adjusting your search terms or filters',
+		},
+		sections: {
+			events: 'Events',
+			communities: 'Communities',
+			people: 'Find people to go with',
+		},
+		sidebar: {
+			comingSoon: 'People matching your search — Coming soon!',
+		},
+	},
 }

@@ -3,8 +3,9 @@ import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { protectedPaginatedProcedure } from '@/server/api/shared/middleware'
 import { PaginationSchema } from '@/server/api/shared/schemas'
-import { createTRPCRouter } from '@/server/api/trpc'
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 import { EventTimeFrame, SortDirection } from '../../shared'
+import { enhanceEvents } from './enhancement'
 import { eventCoreInclude, eventEnhancedInclude } from './includes'
 
 const GetEventsInput = z
@@ -126,41 +127,32 @@ export const eventListRouter = createTRPCRouter({
 			}),
 			ctx.prisma.event.count({ where: args.where }),
 		])
-		if (events.length === 0) {
-			return {
-				data: [],
-				pagination: ctx.pagination.createMetadata(total),
-			}
-		}
-		const eventIds = events.map((event) => event.id)
-		const userRsvps = await ctx.prisma.rsvp.findMany({
-			where: { userId: user.id, eventId: { in: eventIds } },
-			include: { ticketTier: true },
-		})
-		const rsvpMap = new Map(userRsvps.map((rsvp) => [rsvp.eventId, rsvp]))
-		const eventsWithContext = events.map((event) => {
-			const isHost = event.host.id === user.id
-			const collaboratorRole = event.eventCollaborators?.find(
-				(c) => c.user.id === user.id
-			)?.role
-			const metadata = {
-				user: {
-					id: user.id,
-					name: user.name,
-					image: user.image,
-					email: user.email,
-					rsvp: rsvpMap.get(event.id) ?? null,
-					access: {
-						manager: isHost || collaboratorRole === EventRole.MANAGER,
-						cohost: collaboratorRole === EventRole.CO_HOST,
-					},
-				},
-			}
-			return { ...event, metadata }
-		})
+
+		// Use shared enhancement logic
+		const eventsWithContext = await enhanceEvents(events, user, ctx.prisma)
+
 		return {
 			data: eventsWithContext,
 			pagination: ctx.pagination.createMetadata(total),
 		}
 	}),
+
+	enhanceByIds: protectedProcedure
+		.input(z.object({ ids: z.array(z.string()).min(1) }))
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) throw TRPCErrors.unauthorized()
+
+			const events = await ctx.prisma.event.findMany({
+				where: {
+					id: { in: input.ids },
+					isPublished: true,
+					deletedAt: null,
+				},
+				include: eventEnhancedInclude,
+			})
+
+			// Use shared enhancement logic
+			return enhanceEvents(events, user, ctx.prisma)
+		}),
 })

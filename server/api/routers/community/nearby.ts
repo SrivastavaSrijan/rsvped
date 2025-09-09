@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { publicProcedure } from '@/server/api/trpc'
+import { enhanceCommunities } from './enhancement'
 
 export const communityNearbyRouter = publicProcedure
 	.input(
@@ -60,26 +61,6 @@ export const communityNearbyRouter = publicProcedure
 			}))
 		}
 
-		const communityIds = communities.map(({ id }) => id)
-		const userMemberships = await ctx.prisma.communityMembership.findMany({
-			where: {
-				userId: user.id,
-				communityId: { in: communityIds },
-			},
-			select: {
-				communityId: true,
-				role: true,
-			},
-		})
-
-		const membershipMap = new Map(
-			userMemberships.map(({ communityId, role }) => [communityId, role])
-		)
-
-		return communities.map((community) => ({
-			...community,
-			metadata: {
-				role: membershipMap.get(community.id) ?? null,
-			},
-		}))
+		// Use shared enhancement logic
+		return enhanceCommunities(communities, user.id, ctx.prisma)
 	})

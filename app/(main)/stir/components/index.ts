@@ -1,0 +1,5 @@
+export { StirCommunitiesTab } from './StirCommunitiesTab'
+export { StirEventsTab } from './StirEventsTab'
+export { StirSearch } from './StirSearch'
+export { StirSlotSwitch } from './StirSlotSwitch'
+export { StirTabsHeader } from './StirTabsHeader'

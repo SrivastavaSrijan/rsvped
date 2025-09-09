@@ -2,12 +2,13 @@ import { MembershipRole, type Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { TRPCErrors } from '@/server/api/shared/errors'
 import { protectedPaginatedProcedure } from '@/server/api/shared/middleware'
-import { createTRPCRouter } from '@/server/api/trpc'
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
+import { MembershipRoleOwner, SortDirection } from '../../shared/types'
 import {
-	MembershipRoleOwner,
-	type PaginatedResponse,
-	SortDirection,
-} from '../../shared/types'
+	communityCoreSelect,
+	communityEnhancedSelect,
+	enhanceCommunities,
+} from './enhancement'
 
 const GetCommunitiesInput = z.object({
 	sort: z.enum(SortDirection).optional().default(SortDirection.ASC),
@@ -126,41 +127,6 @@ const communityListBaseProcedure = protectedPaginatedProcedure
 		})
 	})
 
-const communityCoreSelect = {
-	id: true,
-	name: true,
-	slug: true,
-	description: true,
-	coverImage: true,
-	_count: {
-		select: {
-			events: true,
-			members: true,
-		},
-	},
-} satisfies Prisma.CommunitySelect
-
-const communityEnhancedSelect = {
-	...communityCoreSelect,
-	events: {
-		take: 2,
-		where: {
-			deletedAt: null,
-			isPublished: true,
-		},
-		select: {
-			title: true,
-			slug: true,
-			id: true,
-			startDate: true,
-			endDate: true,
-		},
-		orderBy: {
-			startDate: SortDirection.DESC,
-		},
-	},
-} satisfies Prisma.CommunitySelect
-
 export const communityListRouter = createTRPCRouter({
 	core: communityListBaseProcedure.query(async ({ ctx }) => {
 		const { user, args } = ctx
@@ -174,33 +140,13 @@ export const communityListRouter = createTRPCRouter({
 			ctx.prisma.community.count({ where: args.where }),
 		])
 
-		const communityIds = communities.map(({ id }) => id)
-		const userMemberships = await ctx.prisma.communityMembership.findMany({
-			where: {
-				userId: user.id,
-				communityId: { in: communityIds },
-			},
-			select: {
-				communityId: true,
-				role: true,
-			},
-		})
-
-		const membershipMap = new Map(
-			userMemberships.map(({ communityId, role }) => [communityId, role])
-		)
-
-		const data = communities.map((community) => ({
-			...community,
-			metadata: {
-				role: membershipMap.get(community.id) ?? null,
-			},
-		}))
+		// Use shared enhancement logic
+		const data = await enhanceCommunities(communities, user.id, ctx.prisma)
 
 		return {
 			data,
 			pagination: ctx.pagination.createMetadata(total),
-		} satisfies PaginatedResponse<(typeof data)[number]>
+		}
 	}),
 
 	enhanced: communityListBaseProcedure.query(async ({ ctx }) => {
@@ -215,32 +161,34 @@ export const communityListRouter = createTRPCRouter({
 			ctx.prisma.community.count({ where: args.where }),
 		])
 
-		const communityIds = communities.map(({ id }) => id)
-		const userMemberships = await ctx.prisma.communityMembership.findMany({
-			where: {
-				userId: user.id,
-				communityId: { in: communityIds },
-			},
-			select: {
-				communityId: true,
-				role: true,
-			},
-		})
-
-		const membershipMap = new Map(
-			userMemberships.map(({ communityId, role }) => [communityId, role])
-		)
-
-		const data = communities.map((community) => ({
-			...community,
-			metadata: {
-				role: membershipMap.get(community.id) ?? null,
-			},
-		}))
+		// Use shared enhancement logic
+		const data = await enhanceCommunities(communities, user.id, ctx.prisma)
 
 		return {
 			data,
 			pagination: ctx.pagination.createMetadata(total),
-		} satisfies PaginatedResponse<(typeof data)[number]>
+		}
 	}),
+
+	enhanceByIds: protectedProcedure
+		.input(z.object({ ids: z.array(z.string()).min(1) }))
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) throw TRPCErrors.unauthorized()
+
+			const communities = await ctx.prisma.community.findMany({
+				where: {
+					id: { in: input.ids },
+					isPublic: true,
+				},
+				select: communityEnhancedSelect,
+			})
+
+			if (communities.length === 0) {
+				return []
+			}
+
+			// Use shared enhancement logic
+			return enhanceCommunities(communities, user.id, ctx.prisma)
+		}),
 })
