@@ -18,10 +18,10 @@ export default async function StirLayout({
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
 			<div className="flex flex-col gap-2 lg:gap-3">
 				<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
-					{copy.discover.title}
+					{copy.stir.title}
 				</h1>
 				<p className="text-muted-foreground text-sm lg:text-base">
-					{copy.discover.description}
+					{copy.stir.description}
 				</p>
 			</div>
 

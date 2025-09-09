@@ -40,6 +40,11 @@ export const copy = {
 		communities: 'Featured Communities',
 		location: 'Explore Local Events',
 	},
+	stir: {
+		title: "Let's Stir Things Up!",
+		description:
+			'Start here to find interesting events, communties and people to connect with!',
+	},
 	location: {
 		view: {
 			description(name: string, country: string, continent: string) {
