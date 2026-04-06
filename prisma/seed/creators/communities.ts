@@ -175,26 +175,86 @@ export async function createCommunities(
 				)
 			: []
 
-	// Memberships
+	// Interest-aware memberships: match users to communities by category overlap + location
 	const membershipsToCreate: any[] = []
+	const seenPairs = new Set<string>()
+
 	for (const c of communities) {
-		const communityUsers = sampleSize(
-			users,
-			faker.number.int({ min: users.length * 0.2, max: users.length * 0.6 })
+		const communityCategories: string[] = c._llmData?.categories || []
+		const communityLocationId = c._locationId
+
+		// Score each user by interest overlap + location match
+		const scored = users.map((u: any) => {
+			const userInterests: string[] = u._llmUser?.interests || []
+			const overlap = communityCategories.filter((cat) =>
+				userInterests.includes(cat)
+			).length
+			const interestScore = overlap / Math.max(communityCategories.length, 1)
+			const userLocId =
+				u._llmUser?.location && locationMap.get(u._llmUser.location)?.id
+			const locationBonus = userLocId === communityLocationId ? 0.3 : 0
+			return { user: u, score: interestScore + locationBonus, overlap }
+		})
+
+		scored.sort((a, b) => b.score - a.score)
+
+		// Target: 5-20% of users, minimum 8
+		const targetCount = Math.max(
+			8,
+			faker.number.int({
+				min: Math.floor(users.length * 0.05),
+				max: Math.floor(users.length * 0.2),
+			})
 		)
+
+		// 70% interest-matched, 30% random for diversity
+		const interestedPool = scored.filter((s) => s.score > 0)
+		const interestedCount = Math.min(
+			interestedPool.length,
+			Math.floor(targetCount * 0.7)
+		)
+		const interested = interestedPool.slice(0, interestedCount)
+		const interestedIds = new Set(interested.map((s) => s.user.id))
+		const randomPool = scored.filter((s) => !interestedIds.has(s.user.id))
+		const randoms = sampleSize(randomPool, targetCount - interested.length)
+
+		const communityUsers = [
+			...interested.map((s) => s.user),
+			...randoms.map((s) => s.user),
+		]
+
+		// Get tiers for this community, sorted by price (cheapest first)
+		const tiers = membershipTiers
+			.filter((t: any) => t.communityId === c.id)
+			.sort((a: any, b: any) => (a.priceCents ?? 0) - (b.priceCents ?? 0))
+
 		for (const u of communityUsers) {
+			const pairKey = `${u.id}|${c.id}`
+			if (seenPairs.has(pairKey)) continue
+			seenPairs.add(pairKey)
+
 			const role = faker.helpers.weightedArrayElement([
 				{ weight: 80, value: MembershipRole.MEMBER },
 				{ weight: 15, value: MembershipRole.MODERATOR },
 				{ weight: 5, value: MembershipRole.ADMIN },
 			])
-			const tier = membershipTiers.filter((t: any) => t.communityId === c.id)
-			const pickTier = tier.length ? rand(tier) : null
+
+			// Spending-power-aware tier selection
+			let pickTier: any = null
+			if (tiers.length > 0) {
+				const spending = (u._llmUser?.spendingPower || '').toLowerCase()
+				if (spending === 'high')
+					pickTier = tiers[tiers.length - 1] // most expensive
+				else if (spending === 'medium')
+					pickTier = tiers[Math.floor(tiers.length / 2)]
+				else pickTier = tiers[0] // cheapest / free
+			}
+
 			membershipsToCreate.push({
 				userId: u.id,
 				communityId: c.id,
 				role,
-				membershipTierId: (pickTier as any)?.id ?? null,
+				membershipTierId: pickTier?.id ?? null,
 				subscriptionStatus: pickTier
 					? rand(Object.values(SubscriptionStatus))
 					: null,

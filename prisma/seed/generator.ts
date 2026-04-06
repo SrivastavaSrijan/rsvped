@@ -313,12 +313,33 @@ export class DataGenerator {
 			totalCost: `$${getBatchTotalCost().toFixed(4)}`,
 		})
 
+		const totalCost = getBatchTotalCost()
 		logger.info('All passes complete', {
 			communities: communities.length,
 			users: users.length,
 			venues: Object.keys(venues).length,
-			totalCost: `$${getBatchTotalCost().toFixed(4)}`,
+			totalCost: `$${totalCost.toFixed(4)}`,
 		})
+
+		// Persist cost report
+		mkdirSync(paths.logsDir, { recursive: true })
+		writeFileSync(
+			`${paths.logsDir}/cost-report-${new Date().toISOString().split('T')[0]}.json`,
+			JSON.stringify(
+				{
+					timestamp: new Date().toISOString(),
+					totalCostUsd: totalCost,
+					profile: config.SEED_PROFILE,
+					counts: {
+						communities: communities.length,
+						users: users.length,
+						venues: Object.keys(venues).length,
+					},
+				},
+				null,
+				2
+			)
+		)
 
 		return { communities, users, venues }
 	}
