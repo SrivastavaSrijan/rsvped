@@ -9,6 +9,7 @@
 		"includes": [
 			"app/**",
 			"components/**",
+			"e2e/**",
 			"lib/**",
 			"server/**",
 			"prisma/**/*.ts"
