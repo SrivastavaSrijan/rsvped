@@ -81,30 +81,24 @@ async function main() {
 			await loadStaticData(prisma)
 		})
 
-		// Shared state across stages
-		let images: Awaited<ReturnType<typeof fetchUnsplashImages>> = []
-		let batchData: ReturnType<typeof loadProcessedBatchData> = null
-		let allCategories: any[] = []
-		let allLocations: any[] = []
+		// Shared state — always loaded (even on resume) since these are in-memory
 		let users: any[] = []
 		let communities: any[] = []
 		let events: any[] = []
 		let ticketTiers: any[] = []
 
-		await pipeline.runStage('load-data', async () => {
-			logger.info('Fetching images from Unsplash')
-			images = await fetchUnsplashImages()
-			logger.success(`Images ready: ${images.length} available`)
+		logger.info('Fetching images from Unsplash')
+		const images = await fetchUnsplashImages()
+		logger.success(`Images ready: ${images.length} available`)
 
-			logger.info('Loading processed batch data')
-			batchData = loadProcessedBatchData()
+		logger.info('Loading processed batch data')
+		const batchData = loadProcessedBatchData()
 
-			logger.info('Loading locations, categories from database')
-			allCategories = await prisma.category.findMany()
-			logger.info('Categories ready', { count: allCategories.length })
-			allLocations = await prisma.location.findMany()
-			logger.info('Locations ready', { count: allLocations.length })
-		})
+		logger.info('Loading locations, categories from database')
+		const allCategories = await prisma.category.findMany()
+		logger.info('Categories ready', { count: allCategories.length })
+		const allLocations = await prisma.location.findMany()
+		logger.info('Locations ready', { count: allLocations.length })
 
 		await pipeline.runStage('create-users', async () => {
 			logger.info('Creating users')

@@ -24,8 +24,13 @@ export async function createCommunities(
 
 	const data: any[] = []
 
-	// Map of location names to IDs for finding correct locations later
-	const locationMap = new Map(locations.map((l) => [l.name, l]))
+	// Map by both slug and name so LLM data (slug) and faker data (name) both resolve
+	const locationMap = new Map(
+		locations.flatMap((l) => [
+			[l.slug, l],
+			[l.name, l],
+		])
+	)
 
 	// Process communities - either from LLM or generate with faker
 	for (let i = 0; i < config.NUM_COMMUNITIES; i++) {

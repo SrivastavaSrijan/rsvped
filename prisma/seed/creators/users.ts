@@ -27,7 +27,13 @@ export async function createUsers(
 
 	// Load cached LLM users, prefer batch data if available
 	const llmUsers = config.USE_LLM ? batchData?.users || [] : []
-	const locationMap = new Map((locations || []).map((l: any) => [l.name, l]))
+	// Map by both slug and name so LLM users (slug) and faker users (name) both resolve
+	const locationMap = new Map(
+		(locations || []).flatMap((l: any) => [
+			[l.slug, l],
+			[l.name, l],
+		])
+	)
 
 	logger.info(
 		`Creating ${count} users with concurrent password hashing... (LLM candidates: ${llmUsers.length})`
@@ -91,11 +97,7 @@ export async function createUsers(
 			image: getAvatarURL(name),
 			password: hash,
 			emailVerified: faker.datatype.boolean() ? faker.date.past() : null,
-			location: {
-				connect: {
-					id: loc?.id ?? null,
-				},
-			},
+			location: loc ? { connect: { id: loc.id } } : undefined,
 			profession: persona.profession ?? null,
 			industry: persona.industry ?? null,
 			experienceLevel: persona.experienceLevel
@@ -149,13 +151,9 @@ export async function createUsers(
 			password: hash,
 			image: getAvatarURL(name),
 			emailVerified: faker.datatype.boolean() ? faker.date.past() : null,
-			location: {
-				connect: {
-					id: locations?.length
-						? faker.helpers.arrayElement(locations).id
-						: null,
-				},
-			},
+			location: locations?.length
+				? { connect: { id: faker.helpers.arrayElement(locations).id } }
+				: undefined,
 
 			userCohort: faker.helpers.weightedArrayElement([
 				{ weight: 2, value: 'POWER' },
