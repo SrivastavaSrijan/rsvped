@@ -1,4 +1,10 @@
-import { LocationType, MembershipRole, RsvpStatus } from '@prisma/client'
+import {
+	type ActivityType,
+	type FriendshipStatus,
+	LocationType,
+	MembershipRole,
+	RsvpStatus,
+} from '@prisma/client'
 import type { VariantProps } from 'class-variance-authority'
 import type { badgeVariants } from '@/components/ui'
 
@@ -37,4 +43,28 @@ export const MembershipBadgeVariants: Record<
 	[MembershipRole.ADMIN]: 'success',
 	[MembershipRole.MEMBER]: 'default',
 	[MembershipRole.MODERATOR]: 'outline',
+}
+
+export const FriendshipLabels: Record<FriendshipStatus, string> = {
+	PENDING: 'Pending',
+	ACCEPTED: 'Friends',
+	BLOCKED: 'Blocked',
+}
+
+export const FriendshipBadgeVariants: Record<
+	FriendshipStatus,
+	BadgeVariantProps['variant']
+> = {
+	PENDING: 'secondary',
+	ACCEPTED: 'success',
+	BLOCKED: 'destructive',
+}
+
+export const ActivityTypeLabels: Record<ActivityType, string> = {
+	RSVP_EVENT: "RSVP'd to an event",
+	HOST_EVENT: 'Hosted an event',
+	JOIN_COMMUNITY: 'Joined a community',
+	LEAVE_COMMUNITY: 'Left a community',
+	SEND_FRIEND_REQUEST: 'Sent a friend request',
+	ACCEPT_FRIEND_REQUEST: 'Became friends',
 }

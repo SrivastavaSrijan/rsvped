@@ -25,6 +25,7 @@ generator zod {
 model User {
   id            String    @id @default(cuid())
   name          String?
+  username      String?   @unique
   email         String?   @unique
   emailVerified DateTime?
   image         String?
@@ -61,6 +62,11 @@ model User {
 
   // User category interests (many-to-many)
   categoryInterests UserCategory[]
+
+  // Social features
+  sentFriendRequests     Friendship[]   @relation("SentFriendRequests")
+  receivedFriendRequests Friendship[]   @relation("ReceivedFriendRequests")
+  activities             UserActivity[]
 
   createdAt DateTime    @default(now())
   EventView EventView[]
@@ -745,4 +751,58 @@ model EventDailyStat {
 
   @@unique([eventId, date])
   @@index([date])
+}
+
+/**
+ * ---------- Social / Friendship ----------
+ */
+
+model Friendship {
+  id         String           @id @default(cuid())
+  userId     String
+  friendId   String
+  status     FriendshipStatus @default(PENDING)
+  createdAt  DateTime         @default(now())
+  acceptedAt DateTime?
+
+  user   User @relation("SentFriendRequests", fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation("ReceivedFriendRequests", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId, status])
+  @@index([friendId, status])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+/**
+ * ---------- Activity Feed ----------
+ */
+
+model UserActivity {
+  id         String       @id @default(cuid())
+  userId     String
+  type       ActivityType
+  targetId   String
+  targetType String       // "event", "community", "user"
+  metadata   String?      @db.Text
+  createdAt  DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([targetId, targetType])
+}
+
+enum ActivityType {
+  RSVP_EVENT
+  HOST_EVENT
+  JOIN_COMMUNITY
+  LEAVE_COMMUNITY
+  SEND_FRIEND_REQUEST
+  ACCEPT_FRIEND_REQUEST
 }

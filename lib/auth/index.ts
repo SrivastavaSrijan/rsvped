@@ -9,10 +9,10 @@ import { config } from './config'
 
 import './types'
 
-async function fetchUserRoleAndDemo(id: string) {
+async function fetchUserSessionData(id: string) {
 	return prisma.user.findUnique({
 		where: { id },
-		select: { role: true, isDemo: true },
+		select: { role: true, isDemo: true, username: true },
 	})
 }
 
@@ -43,20 +43,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			// On initial sign-in, populate from the user object
 			if (user) {
 				token.id = user.id
-				// Fetch role and isDemo from DB (user object from authorize doesn't include these)
-				const dbUser = await fetchUserRoleAndDemo(user.id as string)
+				// Fetch role, isDemo, username from DB (user object from authorize doesn't include these)
+				const dbUser = await fetchUserSessionData(user.id as string)
 				if (dbUser) {
 					token.role = dbUser.role
 					token.isDemo = dbUser.isDemo
+					token.username = dbUser.username
 				}
 			}
 
 			// On session update trigger, refresh from DB
 			if (trigger === 'update' && token.id) {
-				const dbUser = await fetchUserRoleAndDemo(token.id as string)
+				const dbUser = await fetchUserSessionData(token.id as string)
 				if (dbUser) {
 					token.role = dbUser.role
 					token.isDemo = dbUser.isDemo
+					token.username = dbUser.username
 				}
 			}
 
@@ -67,6 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				session.user.id = token.id as string
 				session.user.role = token.role as Session['user']['role']
 				session.user.isDemo = token.isDemo as boolean
+				session.user.username = token.username as string | null
 			}
 			return session
 		},

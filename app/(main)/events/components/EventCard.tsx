@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
+import { UserHoverCard } from '@/components/shared'
 import {
 	Avatar,
 	AvatarFallback,
@@ -144,24 +145,23 @@ export function EventCard(props: EventCardProps) {
 					({ user: collaborator }) =>
 						collaborator?.image &&
 						collaborator?.name && (
-							<Tooltip key={collaborator.id}>
-								<TooltipTrigger>
-									<AvatarWithFallback
-										className="size-4"
-										src={collaborator.image}
-										name={collaborator.name}
-									/>
-								</TooltipTrigger>
-								<TooltipContent>{collaborator.name}</TooltipContent>
-							</Tooltip>
+							<UserHoverCard key={collaborator.id} userId={collaborator.id}>
+								<AvatarWithFallback
+									className="size-4"
+									src={collaborator.image}
+									name={collaborator.name}
+								/>
+							</UserHoverCard>
 						)
 				)}
 				{host?.name && (
-					<AvatarWithFallback
-						src={host?.image}
-						name={host?.name}
-						className="size-4"
-					/>
+					<UserHoverCard userId={host.id}>
+						<AvatarWithFallback
+							src={host?.image}
+							name={host?.name}
+							className="size-4"
+						/>
+					</UserHoverCard>
 				)}
 			</div>
 		)
@@ -178,21 +178,28 @@ export function EventCard(props: EventCardProps) {
 				{rsvps.length > 0 && (
 					<div className="-space-x-1 flex">
 						{rsvps.map(
-							({ user: guestUser, name: guestName }, index) =>
-								(guestUser?.name || guestName) && (
-									<Tooltip key={guestUser?.id ?? `${guestName}-${index}`}>
+							({ user: guestUser, name: guestName }) =>
+								(guestUser?.name || guestName) &&
+								(guestUser?.id ? (
+									<UserHoverCard key={guestUser.id} userId={guestUser.id}>
+										<AvatarWithFallback
+											className="size-4"
+											src={guestUser.image ?? undefined}
+											name={guestUser.name ?? guestName ?? undefined}
+										/>
+									</UserHoverCard>
+								) : (
+									<Tooltip key={`guest-${guestName}`}>
 										<TooltipTrigger>
 											<AvatarWithFallback
 												className="size-4"
-												src={guestUser?.image ?? undefined}
-												name={guestUser?.name ?? guestName ?? undefined}
+												src={undefined}
+												name={guestName ?? undefined}
 											/>
 										</TooltipTrigger>
-										<TooltipContent>
-											{guestUser?.name ?? guestName}
-										</TooltipContent>
+										<TooltipContent>{guestName}</TooltipContent>
 									</Tooltip>
-								)
+								))
 						)}
 						{rsvpCount > 5 && (
 							<Avatar>

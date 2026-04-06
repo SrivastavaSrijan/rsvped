@@ -1,8 +1,10 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import {
+	activityRouter,
 	categoryRouter,
 	communityRouter,
 	eventRouter,
+	friendshipRouter,
 	imageRouter,
 	locationRouter,
 	rsvpRouter,
@@ -18,6 +20,7 @@ import { createTRPCRouter } from '@/server/api/trpc'
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+	activity: activityRouter,
 	stir: stirRouter,
 	event: eventRouter,
 	rsvp: rsvpRouter,
@@ -25,6 +28,7 @@ export const appRouter = createTRPCRouter({
 	category: categoryRouter,
 	location: locationRouter,
 	community: communityRouter,
+	friendship: friendshipRouter,
 	user: userRouter,
 })
 

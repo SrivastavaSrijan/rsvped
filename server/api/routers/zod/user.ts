@@ -15,9 +15,11 @@ import {
 	type CompleteEventMessage,
 	type CompleteEventReferral,
 	type CompleteEventView,
+	type CompleteFriendship,
 	type CompleteLocation,
 	type CompleteRsvp,
 	type CompleteSession,
+	type CompleteUserActivity,
 	type CompleteUserCategory,
 	RelatedAccountModel,
 	RelatedCommunityMembershipModel,
@@ -27,15 +29,18 @@ import {
 	RelatedEventModel,
 	RelatedEventReferralModel,
 	RelatedEventViewModel,
+	RelatedFriendshipModel,
 	RelatedLocationModel,
 	RelatedRsvpModel,
 	RelatedSessionModel,
+	RelatedUserActivityModel,
 	RelatedUserCategoryModel,
 } from './index'
 
 export const UserModel = z.object({
 	id: z.string(),
 	name: z.string().nullish(),
+	username: z.string().nullish(),
 	email: z.string().nullish(),
 	emailVerified: z.date().nullish(),
 	image: z.string().nullish(),
@@ -66,6 +71,9 @@ export interface CompleteUser extends z.infer<typeof UserModel> {
 	eventReferrals: CompleteEventReferral[]
 	eventCollaborators: CompleteEventCollaborator[]
 	categoryInterests: CompleteUserCategory[]
+	sentFriendRequests: CompleteFriendship[]
+	receivedFriendRequests: CompleteFriendship[]
+	activities: CompleteUserActivity[]
 	EventView: CompleteEventView[]
 }
 
@@ -87,6 +95,9 @@ export const RelatedUserModel: z.ZodSchema<CompleteUser> = z.lazy(() =>
 		eventReferrals: RelatedEventReferralModel.array(),
 		eventCollaborators: RelatedEventCollaboratorModel.array(),
 		categoryInterests: RelatedUserCategoryModel.array(),
+		sentFriendRequests: RelatedFriendshipModel.array(),
+		receivedFriendRequests: RelatedFriendshipModel.array(),
+		activities: RelatedUserActivityModel.array(),
 		EventView: RelatedEventViewModel.array(),
 	})
 )

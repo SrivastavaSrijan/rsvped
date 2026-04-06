@@ -3,9 +3,11 @@
 
 import { PrismaClient } from '@prisma/client'
 import {
+	backfillActivities,
 	backfillDailyStats,
 	createCommunities,
 	createEventsFromBatchData,
+	createFriendships,
 	createOrdersAndRSVPs,
 	createPromoCodes,
 	createRegistrationQuestions,
@@ -158,6 +160,16 @@ async function main() {
 				ticketTiers,
 				[] // questions loaded in previous stage
 			)
+		})
+
+		await pipeline.runStage('create-friendships', async () => {
+			logger.info('Creating friendships based on shared interests')
+			await createFriendships(prisma, users)
+		})
+
+		await pipeline.runStage('backfill-activities', async () => {
+			logger.info('Backfilling activity feed data')
+			await backfillActivities(prisma)
 		})
 
 		await pipeline.runStage('analytics', async () => {
