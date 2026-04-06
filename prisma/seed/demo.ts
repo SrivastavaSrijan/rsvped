@@ -2,9 +2,9 @@
  * Demo user seed & reset module.
  *
  * Creates a demo user (isDemo: true) with pre-populated data:
- * - Community memberships (joins top communities)
- * - RSVPs to upcoming events
- * - 2 hosted events
+ * - Community memberships (member of ~5, manager of ~2)
+ * - RSVPs to upcoming free events (~6)
+ * - Host of ~2 existing seeded events (reassigned, not created)
  *
  * Can be run standalone or called from the cron reset endpoint.
  */
@@ -51,28 +51,17 @@ export async function resetDemoUser(prisma: PrismaClient) {
 		await prisma.order.deleteMany({ where: { id: { in: orderIds } } })
 	}
 
-	// Delete events hosted by demo user and their dependents
-	const hostedEventIds = (
-		await prisma.event.findMany({
+	// Reassign hosted events back to the first non-demo user
+	// (demo user doesn't own these events, just borrowed them)
+	const fallbackHost = await prisma.user.findFirst({
+		where: { id: { not: userId }, isDemo: { not: true } },
+		select: { id: true },
+	})
+	if (fallbackHost) {
+		await prisma.event.updateMany({
 			where: { hostId: userId },
-			select: { id: true },
+			data: { hostId: fallbackHost.id },
 		})
-	).map((e) => e.id)
-
-	if (hostedEventIds.length > 0) {
-		const eventFilter = { eventId: { in: hostedEventIds } }
-		await prisma.eventDailyStat.deleteMany({ where: eventFilter })
-		await prisma.eventCategory.deleteMany({ where: eventFilter })
-		await prisma.registrationAnswer.deleteMany({
-			where: { question: eventFilter },
-		})
-		await prisma.registrationQuestion.deleteMany({ where: eventFilter })
-		await prisma.eventFeedback.deleteMany({ where: eventFilter })
-		await prisma.checkIn.deleteMany({ where: { rsvp: eventFilter } })
-		await prisma.rsvp.deleteMany({ where: eventFilter })
-		await prisma.promoCode.deleteMany({ where: eventFilter })
-		await prisma.ticketTier.deleteMany({ where: eventFilter })
-		await prisma.event.deleteMany({ where: { id: { in: hostedEventIds } } })
 	}
 
 	// Finally delete the user (cascades Account, Session)
@@ -123,7 +112,7 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		},
 	})
 
-	// Join top communities (up to 5)
+	// Join top communities: member of 5, manager of 2
 	const topCommunities = await prisma.community.findMany({
 		where: { isPublic: true },
 		orderBy: { events: { _count: 'desc' } },
@@ -131,7 +120,8 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		select: { id: true },
 	})
 
-	for (const community of topCommunities) {
+	for (let i = 0; i < topCommunities.length; i++) {
+		const community = topCommunities[i]
 		await prisma.communityMembership.upsert({
 			where: {
 				userId_communityId: {
@@ -143,7 +133,7 @@ export async function seedDemoUser(prisma: PrismaClient) {
 			create: {
 				userId: demoUser.id,
 				communityId: community.id,
-				role: 'MEMBER',
+				role: i < 2 ? 'ADMIN' : 'MEMBER',
 			},
 		})
 	}
@@ -215,53 +205,28 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		})
 	}
 
-	// Create 2 hosted events for the demo user
-	if (defaultLocation && topCommunities.length > 0) {
-		const now = new Date()
-		const demoEvents = [
-			{
-				title: 'Design Systems Meetup',
-				slug: `demo-design-systems-${demoUser.id.slice(0, 8)}`,
-				description:
-					'A casual meetup for designers and developers who care about design systems, component libraries, and cross-functional collaboration.',
-				startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-				endDate: new Date(
-					now.getTime() + 7 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000
-				),
-			},
-			{
-				title: 'Weekend Hackathon: AI Tools',
-				slug: `demo-hackathon-ai-${demoUser.id.slice(0, 8)}`,
-				description:
-					'Build something cool with AI in a weekend. All skill levels welcome. Prizes for the most creative project.',
-				startDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
-				endDate: new Date(now.getTime() + 16 * 24 * 60 * 60 * 1000),
-			},
-		]
+	// Associate demo user as host of 2 existing seeded events
+	// (avoids creating events without proper images from the Unsplash system)
+	// Skip events already RSVP'd to avoid the demo user hosting their own RSVP'd events
+	const rsvpEventIds = upcomingEvents.map((e) => e.id)
+	const existingEvents = await prisma.event.findMany({
+		where: {
+			isPublished: true,
+			deletedAt: null,
+			startDate: { gte: new Date() },
+			community: { isPublic: true },
+			id: { notIn: rsvpEventIds },
+		},
+		orderBy: { startDate: 'asc' },
+		take: 2,
+		select: { id: true },
+	})
 
-		for (const eventData of demoEvents) {
-			const event = await prisma.event.create({
-				data: {
-					...eventData,
-					isPublished: true,
-					locationType: 'PHYSICAL',
-					host: { connect: { id: demoUser.id } },
-					location: { connect: { id: defaultLocation.id } },
-					community: { connect: { id: topCommunities[0].id } },
-				},
-			})
-
-			await prisma.ticketTier.create({
-				data: {
-					eventId: event.id,
-					name: 'General Admission',
-					description: 'Free entry',
-					priceCents: 0,
-					quantityTotal: 100,
-					visibility: 'PUBLIC',
-				},
-			})
-		}
+	for (const event of existingEvents) {
+		await prisma.event.update({
+			where: { id: event.id },
+			data: { hostId: demoUser.id },
+		})
 	}
 
 	// Add some category interests

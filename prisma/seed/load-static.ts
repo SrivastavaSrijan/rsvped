@@ -44,7 +44,7 @@ async function main() {
 				country,
 				continent,
 				timezone,
-				iconPath: icon.includes('/') ? icon : `/assets/location-icons/${icon}`,
+				iconPath: icon,
 				coverImage,
 			},
 		})

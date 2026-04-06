@@ -1,5 +1,5 @@
-import type { ModelMessage } from '@ai-sdk/provider-utils'
-import { stepCountIs, streamText, tool } from 'ai'
+import type { UIMessage } from 'ai'
+import { convertToModelMessages, stepCountIs, streamText, tool } from 'ai'
 import { z } from 'zod'
 import { getModel, isAvailable } from '@/lib/ai'
 import { auth } from '@/lib/auth'
@@ -49,17 +49,19 @@ export async function POST(request: Request) {
 		)
 	}
 
-	let messages: ModelMessage[]
+	let uiMessages: UIMessage[]
 	try {
 		const body = await request.json()
-		messages = body.messages
+		uiMessages = body.messages
 	} catch {
 		return Response.json({ error: 'Invalid request body' }, { status: 400 })
 	}
 
-	if (!Array.isArray(messages)) {
+	if (!Array.isArray(uiMessages)) {
 		return Response.json({ error: 'Missing messages array' }, { status: 400 })
 	}
+
+	const messages = await convertToModelMessages(uiMessages)
 
 	const result = streamText({
 		model: getModel(),
