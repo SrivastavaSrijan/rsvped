@@ -10,11 +10,8 @@ export const Routes = {
 		Profile: '/profile',
 	},
 	Static: {
-		About: '/about',
 		Terms: '/terms',
 		Privacy: '/privacy',
-		Pricing: '/pricing',
-		WhatsNew: '/whats-new',
 	},
 	Main: {
 		Communities: {
@@ -100,13 +97,14 @@ export const RouteDefs = {
 		Routes.Main.Events.Create,
 		Routes.Main.Events.Home,
 		Routes.Main.Events.EditBySlug('[slug]'),
+		Routes.Main.Communities.Home,
+		Routes.Main.Stir.Root,
+		Routes.Auth.Profile,
 	],
 	Public: [
 		Routes.Main.Events.Discover,
 		Routes.Main.Events.ViewBySlug('[slug]'),
-
 		Routes.Main.Events.ViewBySlugRegister('[slug]'),
-		Routes.Main.Communities.Discover,
 		Routes.Main.Communities.SubscribeTo('[slug]'),
 	],
 }

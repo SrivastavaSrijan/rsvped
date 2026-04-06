@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { initTRPC } from '@trpc/server'
 import type { CreateNextContextOptions } from '@trpc/server/adapters/next'
 import { headers } from 'next/headers'
@@ -61,7 +62,12 @@ const delayMiddleware = t.middleware(async ({ next }) => {
 	}
 	return next()
 })
-const baseProcedure = t.procedure.use(delayMiddleware)
+
+const sentryMiddleware = t.middleware(
+	Sentry.trpcMiddleware({ attachRpcInput: true })
+)
+
+const baseProcedure = t.procedure.use(sentryMiddleware).use(delayMiddleware)
 export const publicProcedure = baseProcedure
 
 export const createTRPCRouter = t.router

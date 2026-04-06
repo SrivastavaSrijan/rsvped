@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { llm } from '@/lib/ai'
+import { generate, isAvailable } from '@/lib/ai'
 import { AIErrorCodes } from '../types'
 import { Prompts } from './prompts'
 
@@ -22,13 +22,11 @@ const TextResponseSchema = z.object({
 })
 
 type AIContext = {
-	// Must-have context - simplified to strings
 	domain: string
 	page: string
 	field: string
 	location?: string
 	category?: string
-	// Additional flexible metadata
 	metadata?: Record<string, unknown>
 }
 
@@ -47,14 +45,13 @@ export async function generateSuggestions(
 			}
 		}
 
-		if (!llm.isAvailable()) {
+		if (!isAvailable()) {
 			return {
 				success: false,
 				error: AIErrorCodes.AI_UNAVAILABLE,
 			}
 		}
 
-		// Build contextual prompt with context info
 		const contextualPrompt = `${userPrompt}
 
 Context:
@@ -67,7 +64,7 @@ ${context.metadata ? `- Additional context: ${JSON.stringify(context.metadata)}`
 
 		const systemPrompt = Prompts.System.suggestions(context.domain)
 
-		const result = await llm.generate(
+		const result = await generate(
 			contextualPrompt,
 			systemPrompt,
 			SuggestionsSchema,
@@ -111,14 +108,13 @@ export async function enhanceText(
 			}
 		}
 
-		if (!llm.isAvailable()) {
+		if (!isAvailable()) {
 			return {
 				success: false,
 				error: AIErrorCodes.AI_UNAVAILABLE,
 			}
 		}
 
-		// Map enhancement types to prompts
 		const promptFn =
 			Prompts.Enhancements[type as keyof typeof Prompts.Enhancements]
 		if (!promptFn) {
@@ -128,7 +124,6 @@ export async function enhanceText(
 			}
 		}
 
-		// Generate the prompt using our templates
 		const prompt =
 			type === 'custom' && customPrompt
 				? (promptFn as typeof Prompts.Enhancements.custom)(
@@ -141,7 +136,7 @@ export async function enhanceText(
 		const domain = (context as AIContext)?.domain || 'content'
 		const systemPrompt = Prompts.System.enhancement(domain)
 
-		const result = await llm.generate(
+		const result = await generate(
 			prompt,
 			systemPrompt,
 			TextResponseSchema,

@@ -1,12 +1,13 @@
 /**
  * LLM Service - Application Level
  *
- * Production-ready LLM integration for server actions and application features.
- * Extracted from seed system with enhancements for broader application use.
+ * Uses Vercel AI SDK with Anthropic Claude for structured output,
+ * text generation, and streaming.
  */
 
-import { Together } from 'together-ai'
-import { z } from 'zod'
+import { createAnthropic } from '@ai-sdk/anthropic'
+import { generateObject, generateText } from 'ai'
+import type { z } from 'zod'
 
 /**
  * Application-specific error for LLM operations
@@ -23,159 +24,91 @@ export class LLMError extends Error {
 	}
 }
 
-/**
- * LLM Service configuration
- */
-const LLM_CONFIG = {
-	model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-	maxTokens: 10000,
-	temperature: 0.7,
-	maxRetries: 3,
-	baseDelayMs: 1000,
-} as const
+const MODEL_ID = 'claude-sonnet-4-20250514'
+
+function getProvider() {
+	const apiKey = process.env.ANTHROPIC_API_KEY
+	if (!apiKey) return null
+	return createAnthropic({ apiKey })
+}
 
 /**
- * Retry utility with exponential backoff
+ * Generate structured output from LLM using a Zod schema.
+ * The AI SDK handles JSON parsing and validation automatically.
  */
-async function withRetry<T>(
-	operation: () => Promise<T>,
-	operationName: string,
-	maxRetries = LLM_CONFIG.maxRetries
+export async function generate<T>(
+	prompt: string,
+	systemPrompt: string,
+	schema: z.ZodSchema<T>,
+	operation: string
 ): Promise<T> {
-	let lastError: Error | undefined
-
-	for (let attempt = 0; attempt <= maxRetries; attempt++) {
-		try {
-			return await operation()
-		} catch (error) {
-			lastError = error as Error
-
-			if (attempt === maxRetries) break
-
-			// Don't retry on validation errors
-			if (error instanceof LLMError && !error.isRetriable) {
-				throw error
-			}
-
-			const delay = LLM_CONFIG.baseDelayMs * 2 ** attempt
-			console.warn(
-				`LLM operation ${operationName} failed (attempt ${attempt + 1}), retrying in ${delay}ms`,
-				error
-			)
-			await new Promise((resolve) => setTimeout(resolve, delay))
-		}
+	const provider = getProvider()
+	if (!provider) {
+		throw new LLMError('Anthropic API key not configured', operation)
 	}
 
-	throw new LLMError(
-		`LLM operation failed after ${maxRetries + 1} attempts: ${lastError?.message}`,
-		operationName,
-		false,
-		lastError
-	)
-}
-
-/**
- * Convert Zod schema to JSON schema for Together API
- */
-function zodToJsonSchema(schema: z.ZodSchema): Record<string, unknown> {
 	try {
-		return z.toJSONSchema(schema)
+		const { object } = await generateObject({
+			model: provider(MODEL_ID),
+			schema,
+			system: systemPrompt,
+			prompt,
+		})
+		return object
 	} catch (error) {
-		console.error('Error converting Zod schema to JSON schema', error)
-		return { type: 'object' }
+		throw new LLMError(
+			`LLM generation failed: ${(error as Error).message}`,
+			operation,
+			true,
+			error as Error
+		)
 	}
 }
 
 /**
- * LLM Service for application use
+ * Generate plain text from LLM (for streaming fallback / simple cases).
  */
-export class LLMService {
-	private client: Together | null = null
-	private apiKey: string | null = null
-
-	constructor() {
-		const apiKey = process.env.TOGETHER_API_KEY
-		if (apiKey) {
-			this.apiKey = apiKey
-			this.client = new Together({ apiKey })
-		}
+export async function generatePlainText(
+	prompt: string,
+	systemPrompt: string,
+	operation: string
+): Promise<string> {
+	const provider = getProvider()
+	if (!provider) {
+		throw new LLMError('Anthropic API key not configured', operation)
 	}
 
-	/**
-	 * Generate structured content using LLM
-	 */
-	async generate<T>(
-		prompt: string,
-		systemPrompt: string,
-		schema: z.ZodSchema<T>,
-		operation: string
-	): Promise<T> {
-		const jsonSchema = zodToJsonSchema(schema)
-		console.log(jsonSchema)
-		return withRetry(async () => {
-			if (!this.client) {
-				throw new LLMError('LLM client is not initialized', operation)
-			}
-			const response = await this.client.chat.completions.create({
-				model: LLM_CONFIG.model,
-				messages: [
-					{ role: 'system', content: systemPrompt },
-					{ role: 'user', content: prompt },
-				],
-				response_format: { type: 'json_object', schema: jsonSchema },
-				max_tokens: LLM_CONFIG.maxTokens,
-				temperature: LLM_CONFIG.temperature,
-			})
-
-			// Log response for debugging (includes usage stats, model info, etc.)
-			console.debug(`LLM ${operation} response:`, {
-				model: response.model,
-				usage: response.usage,
-				finishReason: response.choices[0]?.finish_reason,
-				contentLength: response.choices[0]?.message?.content?.length,
-			})
-
-			const content = response.choices[0]?.message?.content
-			if (!content) {
-				throw new LLMError('Empty response from LLM', operation)
-			}
-
-			let parsed: unknown
-			try {
-				parsed = JSON.parse(content)
-			} catch (error) {
-				throw new LLMError(
-					'Failed to parse LLM response as JSON',
-					operation,
-					false,
-					error as Error
-				)
-			}
-
-			const validation = schema.safeParse(parsed)
-			if (!validation.success) {
-				const errorMessage = validation.error.issues
-					.map((i) => `${i.path.join('.')}: ${i.message}`)
-					.join(', ')
-
-				throw new LLMError(
-					`LLM response validation failed: ${errorMessage}`,
-					operation,
-					false
-				)
-			}
-
-			return validation.data
-		}, operation)
-	}
-
-	/**
-	 * Check if LLM is available and configured
-	 */
-	isAvailable(): boolean {
-		return !!process.env.TOGETHER_API_KEY
+	try {
+		const { text } = await generateText({
+			model: provider(MODEL_ID),
+			system: systemPrompt,
+			prompt,
+		})
+		return text
+	} catch (error) {
+		throw new LLMError(
+			`LLM generation failed: ${(error as Error).message}`,
+			operation,
+			true,
+			error as Error
+		)
 	}
 }
 
-// Export singleton instance
-export const llm = new LLMService()
+/**
+ * Check if LLM is available and configured
+ */
+export function isAvailable(): boolean {
+	return !!process.env.ANTHROPIC_API_KEY
+}
+
+/**
+ * Get the Anthropic provider instance (for route handlers that need streaming).
+ */
+export function getModel() {
+	const provider = getProvider()
+	if (!provider) {
+		throw new LLMError('Anthropic API key not configured', 'getModel')
+	}
+	return provider(MODEL_ID)
+}

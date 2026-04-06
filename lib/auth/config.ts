@@ -46,14 +46,6 @@ export const config = {
 				)
 			}
 
-			if (isProtectedRoute && !isLoggedIn) {
-				const next = pathname + search
-				const encodedNext = encodeURIComponent(next)
-				return NextResponse.redirect(
-					new URL(`${Routes.Auth.SignIn}?next=${encodedNext}`, nextUrl)
-				)
-			}
-
 			return true
 		},
 	},

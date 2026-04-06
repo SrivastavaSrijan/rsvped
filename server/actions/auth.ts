@@ -6,23 +6,14 @@ import { AuthError } from 'next-auth'
 import { z } from 'zod'
 import { signIn, signOut } from '@/lib/auth'
 import { comparePasswords } from '@/lib/auth/password'
-import { CookieNames, getAvatarURL, Routes } from '@/lib/config'
+import { CookieNames, DemoUser, getAvatarURL, Routes } from '@/lib/config'
 import { setEncryptedCookie } from '@/lib/cookies'
 import { getAPI } from '@/server/api'
+import { loginSchema, registrationSchema } from './auth.schemas'
 import { AuthActionErrorCodeMap } from './constants'
 import { AuthErrorCodes, type ServerActionResponse } from './types'
 
 const DefaultNextRoute = Routes.Main.Events.Home
-
-const loginSchema = z.object({
-	email: z.string().email('Invalid email address'),
-	password: z.string().min(4, 'Password must be at least 4 characters'),
-})
-
-const registrationSchema = loginSchema.extend({
-	name: z.string().min(2, 'Name must be at least 2 characters'),
-	image: z.string().optional(),
-})
 
 export type AuthFormData = z.infer<typeof registrationSchema>
 export type AuthActionResponse = ServerActionResponse<
@@ -88,10 +79,11 @@ async function performSignIn(
 		illustration: image,
 	})
 
-	const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
-	redirect(
-		`${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : DefaultNextRoute}`
-	)
+	const nextRoute =
+		next && next.startsWith('/') && !next.startsWith('//')
+			? encodeURIComponent(next)
+			: DefaultNextRoute
+	redirect(`${Routes.Utility.HoldOn}?next=${nextRoute}`)
 }
 
 export async function authAction(
@@ -139,7 +131,7 @@ export async function authAction(
 	const user = await checkUserExists(email)
 	if (!user) {
 		// Set form data in a temporary, encrypted cookie
-		await setEncryptedCookie(CookieNames.PrefillForm, { email, password })
+		await setEncryptedCookie(CookieNames.PrefillForm, { email })
 		redirect(Routes.Auth.SignUp)
 	}
 	return await performSignIn(
@@ -180,13 +172,52 @@ export const verifyPassword = async ({
 			return user
 		}
 	}
+
+	return null
 }
 export const signInWithGoogle = async (next: string | null) => {
 	await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
 		title: 'Hey there.',
 		description: "Welcome to RSVP'd!",
 	})
-	const hasValidNext = next && (next.startsWith('/') || next.startsWith('http'))
-	const redirectTo = `${Routes.Utility.HoldOn}?next=${hasValidNext ? encodeURIComponent(next) : DefaultNextRoute}`
+	const nextRoute =
+		next && next.startsWith('/') && !next.startsWith('//')
+			? encodeURIComponent(next)
+			: DefaultNextRoute
+	const redirectTo = `${Routes.Utility.HoldOn}?next=${nextRoute}`
 	await signIn('google', { redirectTo })
+}
+
+export async function signInAsDemo(): Promise<void> {
+	let signInError: AuthError | null = null
+
+	try {
+		await signIn('credentials', {
+			email: DemoUser.email,
+			password: DemoUser.password,
+			redirect: false,
+		})
+	} catch (error) {
+		if (error instanceof AuthError && error.type === 'CredentialsSignin') {
+			signInError = error
+		} else {
+			throw error
+		}
+	}
+
+	// redirect() throws internally — must be outside try/catch
+	if (signInError) {
+		redirect(
+			`${Routes.Auth.SignIn}?error=${AuthErrorCodes.INVALID_CREDENTIALS}`
+		)
+	}
+
+	await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
+		title: `Welcome, ${DemoUser.name}!`,
+		description: "You're exploring RSVP'd as a demo user.",
+	})
+
+	redirect(
+		`${Routes.Utility.HoldOn}?next=${encodeURIComponent(DefaultNextRoute)}`
+	)
 }

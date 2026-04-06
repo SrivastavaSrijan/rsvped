@@ -65,6 +65,55 @@ jobs:
           yarn lint:check
           yarn tsc --noEmit
 
+  test:
+    name: "Unit & Integration Tests"
+    runs-on: ubuntu-latest
+    needs: setup
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 3
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: needs.setup.outputs.yarn-cache-hit != 'true'
+        run: yarn --frozen-lockfile --prefer-offline
+
+      - name: Setup database
+        run: |
+          yarn prisma migrate deploy
+          yarn prisma generate
+
+      - name: Run tests
+        run: yarn test
+
   test-migrations:
     name: "Test Database Migrations"
     runs-on: ubuntu-latest
@@ -114,7 +163,7 @@ jobs:
   build:
     name: "Build Application"
     runs-on: ubuntu-latest
-    needs: [lint, test-migrations]
+    needs: [lint, test, test-migrations]
     services:
       postgres:
         image: postgres:15-alpine
@@ -172,3 +221,59 @@ jobs:
 
       - name: Build Next.js App
         run: yarn build
+
+  e2e:
+    name: "E2E Tests"
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 3
+        ports:
+          - 5432:5432
+    env:
+      SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      DATABASE_URL_UNPOOLED: postgresql://postgres:password@localhost:5432/test_db
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: needs.setup.outputs.yarn-cache-hit != 'true'
+        run: yarn --frozen-lockfile --prefer-offline
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup database
+        run: |
+          yarn prisma migrate deploy
+          yarn prisma generate
+
+      - name: Build and run E2E tests
+        run: |
+          yarn build
+          npx playwright test
