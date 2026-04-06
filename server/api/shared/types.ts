@@ -35,8 +35,9 @@ export interface PaginatedResponse<T> {
 }
 
 // Helper types for extracting data from paginated responses
-export type ExtractPaginatedData<T> =
-	T extends PaginatedResponse<infer U> ? U : never
+export type ExtractPaginatedData<T> = T extends PaginatedResponse<infer U>
+	? U
+	: never
 
 export interface EventListSearchParams {
 	period?: EventTimeFrame

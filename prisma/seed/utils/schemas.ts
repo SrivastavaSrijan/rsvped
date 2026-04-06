@@ -187,8 +187,12 @@ export const venueSchema = z.object({
 export const locationsStaticSchema = z.array(locationSchema).min(1).max(500)
 export const categoriesStaticSchema = z.array(categorySchema).min(1).max(100)
 export const venuesStaticSchema = z.record(
-	z.string().min(1), // city name
-	z.array(z.string().min(1).max(200)).min(1) // array of venue names
+	z
+		.string()
+		.min(1), // city name
+	z
+		.array(z.string().min(1).max(200))
+		.min(1) // array of venue names
 )
 
 // =============================================================================
