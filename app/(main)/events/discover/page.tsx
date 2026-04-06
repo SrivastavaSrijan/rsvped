@@ -26,7 +26,6 @@ const AIDiscover = dynamic(
 		),
 	{
 		loading: () => <Skeleton className="h-10 w-full rounded-lg" />,
-		ssr: false,
 	}
 )
 
