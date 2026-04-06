@@ -789,7 +789,7 @@ model UserActivity {
   type       ActivityType
   targetId   String
   targetType String       // "event", "community", "user"
-  metadata   Json?
+  metadata   String?      @db.Text
   createdAt  DateTime     @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
