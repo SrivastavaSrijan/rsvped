@@ -70,13 +70,13 @@ export const LLMEventSchema = z.object({
 	subtitle: z.string().min(1),
 	description: z.string().min(10),
 	eventType: z.string().min(1),
-	targetCapacity: z.number().min(1),
+	targetCapacity: z.number().describe('Target capacity, must be >= 1'),
 	isPaid: z.boolean(),
 	ticketTiers: z.array(
 		z.object({
 			name: z.string().min(1),
 			description: z.string().min(1),
-			priceCents: z.number().min(0),
+			priceCents: z.number().describe('Price in cents, 0 for free'),
 			capacity: z.number().nullable(),
 		})
 	),
@@ -84,7 +84,9 @@ export const LLMEventSchema = z.object({
 		z.object({
 			code: z.string().min(1),
 			description: z.string().min(1),
-			discountPercent: z.number().min(0.1).max(100),
+			discountPercent: z
+				.number()
+				.describe('Discount percentage between 0.1 and 100'),
 		})
 	),
 })

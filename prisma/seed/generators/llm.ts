@@ -83,7 +83,7 @@ function checkBudget(operation: string): void {
 // LLM Service
 // ---------------------------------------------------------------------------
 
-const MODEL_ID = 'claude-haiku-4-5-20250315'
+const MODEL_ID = 'claude-haiku-4-5-20251001'
 const MAX_SELF_HEAL_ATTEMPTS = 3
 
 export class LLMService {
