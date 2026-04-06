@@ -1,5 +1,7 @@
+export { StirAISummaryCard } from './StirAISummaryCard'
 export { StirCommunitiesTab } from './StirCommunitiesTab'
 export { StirEventsTab } from './StirEventsTab'
 export { StirSearch } from './StirSearch'
 export { StirSlotSwitch } from './StirSlotSwitch'
+export { StirSuggestionChips } from './StirSuggestionChips'
 export { StirTabsHeader } from './StirTabsHeader'

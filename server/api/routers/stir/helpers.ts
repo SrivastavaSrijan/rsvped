@@ -584,3 +584,144 @@ export function buildPaginationMeta(total: number, page: number, size: number) {
 		hasPrevious,
 	}
 }
+
+/**
+ * Create enhanced event search WHERE from LLM-interpreted query
+ */
+export function createEnhancedEventSearchWhere(interpreted: {
+	keywords: string[]
+	city: string | null
+	category: string | null
+	dateRange: { after: string | null; before: string | null }
+	locationType: 'PHYSICAL' | 'ONLINE' | 'HYBRID' | null
+}): Prisma.EventWhereInput {
+	const conditions: Prisma.EventWhereInput[] = []
+
+	// Keywords — reuse existing text search
+	if (interpreted.keywords.length > 0) {
+		const textWhere = createEventSearchWhere(interpreted.keywords.join(' '))
+		const { isPublished: _, deletedAt: __, ...textConditions } = textWhere
+		conditions.push(textConditions)
+	}
+
+	// City — match location name or slug
+	if (interpreted.city) {
+		conditions.push({
+			location: {
+				OR: [
+					{
+						name: {
+							contains: interpreted.city,
+							mode: 'insensitive' as const,
+						},
+					},
+					{
+						slug: {
+							contains: interpreted.city.toLowerCase(),
+							mode: 'insensitive' as const,
+						},
+					},
+				],
+			},
+		})
+	}
+
+	// Category
+	if (interpreted.category) {
+		conditions.push({
+			categories: {
+				some: {
+					category: {
+						name: {
+							contains: interpreted.category,
+							mode: 'insensitive' as const,
+						},
+					},
+				},
+			},
+		})
+	}
+
+	// Date range — handles multi-day events spanning the range
+	const { after, before } = interpreted.dateRange
+	if (after || before) {
+		const dateConditions: Prisma.EventWhereInput[] = []
+		if (after && before) {
+			dateConditions.push({
+				OR: [
+					{ startDate: { gte: new Date(after), lte: new Date(before) } },
+					{
+						AND: [
+							{ startDate: { lte: new Date(before) } },
+							{ endDate: { gte: new Date(after) } },
+						],
+					},
+				],
+			})
+		} else if (after) {
+			dateConditions.push({ startDate: { gte: new Date(after) } })
+		} else if (before) {
+			dateConditions.push({ startDate: { lte: new Date(before) } })
+		}
+		if (dateConditions.length > 0) {
+			conditions.push(...dateConditions)
+		}
+	}
+
+	// Location type
+	if (interpreted.locationType) {
+		conditions.push({ locationType: interpreted.locationType })
+	}
+
+	return {
+		isPublished: true,
+		deletedAt: null,
+		...(conditions.length > 0 && { AND: conditions }),
+	}
+}
+
+/**
+ * Create enhanced community search WHERE from LLM-interpreted query
+ */
+export function createEnhancedCommunitySearchWhere(interpreted: {
+	keywords: string[]
+	city: string | null
+}): Prisma.CommunityWhereInput {
+	const conditions: Prisma.CommunityWhereInput[] = []
+
+	if (interpreted.keywords.length > 0) {
+		const textWhere = createCommunitySearchWhere(interpreted.keywords.join(' '))
+		const { isPublic: _, ...textConditions } = textWhere
+		conditions.push(textConditions)
+	}
+
+	if (interpreted.city) {
+		conditions.push({
+			events: {
+				some: {
+					location: {
+						OR: [
+							{
+								name: {
+									contains: interpreted.city,
+									mode: 'insensitive' as const,
+								},
+							},
+							{
+								slug: {
+									contains: interpreted.city.toLowerCase(),
+									mode: 'insensitive' as const,
+								},
+							},
+						],
+					},
+				},
+			},
+		})
+	}
+
+	return {
+		isPublic: true,
+		...(conditions.length > 0 && { AND: conditions }),
+	}
+}
