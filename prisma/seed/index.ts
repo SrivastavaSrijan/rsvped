@@ -1,4 +1,4 @@
 export {
+	DataGenerator,
 	generateCommunitiesWithLLM,
-	loadAllCachedCommunities,
 } from './generator'

@@ -101,7 +101,6 @@
 		"simple-git-hooks": "^2.13.0",
 		"slugify": "^1.6.6",
 		"tailwindcss": "^4.1.11",
-		"together-ai": "^0.22.0",
 		"tsx": "^4.20.3",
 		"tw-animate-css": "^1.3.5",
 		"typescript": "^5",

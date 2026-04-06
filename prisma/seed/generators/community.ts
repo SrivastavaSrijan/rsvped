@@ -1,287 +1,104 @@
 /**
  * Community Generator
  *
- * Professional LLM-based community data generation.
+ * Simplified: batch orchestration moved to generator.ts.
+ * This module provides faker-based fallback generation for USE_LLM=false.
  */
 
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
 import { faker } from '@faker-js/faker'
-import { PrismaClient } from '@prisma/client'
-import { CommunityPrompts } from '../prompts/llm'
-import {
-	type Category,
-	type LLMCommunity,
-	LLMCommunityBatchSchema,
-	logger,
-} from '../utils'
-import { config, paths } from '../utils/config'
-import { cache } from './cache'
-import { llm } from './llm'
+import type { Category, LLMCommunity } from '../utils'
+import { logger } from '../utils'
+import { LOCATION_SLUG_TO_NAME, LOCATION_SLUGS } from '../utils/schemas'
 
+/**
+ * Generate a batch of communities using faker (no LLM).
+ */
+export function generateFakerCommunities(
+	count: number,
+	categories: Category[]
+): LLMCommunity[] {
+	logger.info('Generating communities with faker', { count })
+
+	const communities: LLMCommunity[] = []
+	const membershipStyles = ['open', 'invite-only', 'application-based'] as const
+
+	for (let i = 0; i < count; i++) {
+		const category = categories[i % categories.length]
+		const slug = faker.helpers.arrayElement([...LOCATION_SLUGS])
+		const cityName = LOCATION_SLUG_TO_NAME[slug] ?? slug
+
+		const name = `${cityName} ${category.name} ${faker.word.adjective()} ${faker.helpers.arrayElement(['Society', 'Network', 'Guild', 'Collective', 'Circle', 'Club', 'League'])}`
+
+		const events = Array.from(
+			{ length: faker.number.int({ min: 2, max: 4 }) },
+			() => ({
+				title: `${faker.word.adjective()} ${category.name} ${faker.helpers.arrayElement(['Workshop', 'Meetup', 'Conference', 'Social', 'Hackathon', 'Summit'])}`,
+				subtitle: faker.company.catchPhrase(),
+				description: faker.lorem.sentences(2),
+				eventType: faker.helpers.arrayElement([
+					'workshop',
+					'meetup',
+					'conference',
+					'social',
+					'hackathon',
+				]),
+				targetCapacity: faker.number.int({ min: 20, max: 200 }),
+				isPaid: faker.datatype.boolean(),
+				ticketTiers: [
+					{
+						name: 'General Admission',
+						description: 'Standard entry',
+						priceCents: faker.number.int({ min: 0, max: 5000 }),
+						capacity: null,
+					},
+				],
+				promoCodes: faker.datatype.boolean()
+					? [
+							{
+								code: faker.string.alphanumeric(8).toUpperCase(),
+								description: 'Early bird discount',
+								discountPercent: faker.number.int({ min: 10, max: 30 }),
+							},
+						]
+					: [],
+			})
+		)
+
+		communities.push({
+			name,
+			description: `${faker.lorem.sentences(2)} Based in ${cityName}.`,
+			focusArea: category.name,
+			targetAudience: faker.company.buzzPhrase(),
+			membershipStyle: faker.helpers.arrayElement(membershipStyles),
+			homeLocation: slug,
+			membershipTiers: [
+				{
+					name: 'Free',
+					description: 'Basic membership',
+					priceCents: null,
+					benefits: ['Access to events', 'Community chat'],
+				},
+			],
+			eventTypes: ['meetup', 'workshop'],
+			categories: [category.name],
+			events,
+		})
+	}
+
+	return communities
+}
+
+// Backward-compatible export
 export class CommunityGenerator {
-	private prisma: PrismaClient
-
-	constructor() {
-		this.prisma = new PrismaClient()
-	}
-
-	/**
-	 * Generate communities using LLM with intelligent caching
-	 */
 	async generate(): Promise<LLMCommunity[]> {
-		logger.info('Starting community generation', {
-			target: config.NUM_COMMUNITIES,
-			useLLM: config.USE_LLM,
-		})
-
-		// Check existing cache
-		const existingCommunities = cache.loadCachedCommunities()
-		logger.info('Loaded cached communities', {
-			count: existingCommunities.length,
-		})
-
-		if (existingCommunities.length >= config.NUM_COMMUNITIES) {
-			logger.info('Sufficient cached communities found')
-			return existingCommunities.slice(0, config.NUM_COMMUNITIES)
-		}
-
-		if (!config.USE_LLM || !llm.isAvailable()) {
-			logger.warn('LLM unavailable, returning cached data only')
-			return existingCommunities.slice(0, config.NUM_COMMUNITIES)
-		}
-
-		// Generate remaining communities
-		const remaining = config.NUM_COMMUNITIES - existingCommunities.length
-		const newCommunities = await this.generateBatches(remaining)
-
-		// Combine and deduplicate
-		const allCommunities = [...existingCommunities, ...newCommunities]
-		const final = this.deduplicate(allCommunities).slice(
-			0,
-			config.NUM_COMMUNITIES
-		)
-
-		logger.info('Community generation complete', {
-			cached: existingCommunities.length,
-			generated: newCommunities.length,
-			final: final.length,
-		})
-
-		return final
-	}
-
-	/**
-	 * Generate communities in optimized batches
-	 */
-	private async generateBatches(targetCount: number): Promise<LLMCommunity[]> {
-		const batchSize = Math.min(config.BATCH_SIZE, 8) // Reduced for richer content
-		const batches = Math.ceil(targetCount / batchSize)
-		const locations = await this.loadLocations()
-		const categories = this.loadCategories()
-		const locationNames = locations.map((l) => l.name)
-
-		const allCommunities: LLMCommunity[] = []
-
-		for (let i = 0; i < batches; i++) {
-			const currentBatchSize = Math.min(
-				batchSize,
-				targetCount - allCommunities.length
-			)
-			if (currentBatchSize <= 0) break
-
-			logger.info(`Generating community batch ${i + 1}/${batches}`, {
-				size: currentBatchSize,
-			})
-
-			try {
-				const batchCommunities = await this.generateSingleBatch(
-					currentBatchSize,
-					locationNames,
-					categories,
-					i
-				)
-
-				if (batchCommunities.length > 0) {
-					cache.saveCommunityBatch(batchCommunities, `gen-${Date.now()}-${i}`)
-					allCommunities.push(...batchCommunities)
-					logger.info(`Batch ${i + 1} completed`, {
-						generated: batchCommunities.length,
-					})
-				} else {
-					logger.warn(`Batch ${i + 1} generated no communities`)
-				}
-
-				// Rate limiting between batches
-				if (i < batches - 1) {
-					await new Promise((resolve) => setTimeout(resolve, 1500))
-				}
-			} catch (error) {
-				logger.error(`Batch ${i + 1} failed`, { error })
-				// Continue with next batch
-			}
-		}
-
-		return allCommunities
-	}
-
-	/**
-	 * Generate a single batch of communities
-	 */
-	private async generateSingleBatch(
-		batchSize: number,
-		locationNames: string[],
-		categories: Category[],
-		batchIndex: number
-	): Promise<LLMCommunity[]> {
-		// Select diverse locations for this batch
-		const batchLocations = faker.helpers.arrayElements(
-			locationNames,
-			Math.min(batchSize * 2, locationNames.length)
-		)
-
-		// Cycle through categories for this batch to ensure diversity
-		const batchCategories = this.getCategoriesForBatch(
-			categories,
-			batchIndex,
-			batchSize
-		)
-		const categoryNames = batchCategories.map((cat: Category) => cat.name)
-
-		const prompt = CommunityPrompts.user(
-			batchSize,
-			batchLocations,
-			categoryNames
-		)
-		const result = await llm.generate(
-			prompt,
-			CommunityPrompts.system,
-			LLMCommunityBatchSchema,
-			`community-batch-${batchSize}`
-		)
-
-		return (result as { communities: LLMCommunity[] }).communities || []
-	}
-
-	/**
-	 * Load location data from database or fallback
-	 */
-	private async loadLocations(): Promise<Array<{ name: string }>> {
-		try {
-			const locations = await this.prisma.location.findMany({
-				select: { name: true },
-				orderBy: { name: 'asc' },
-			})
-
-			if (locations.length > 0) {
-				logger.debug('Loaded locations from database', {
-					count: locations.length,
-				})
-				return locations
-			}
-		} catch (error) {
-			logger.warn('Failed to load locations from database', { error })
-		}
-
-		// Fallback to static locations
-		const fallback = [
-			{ name: 'New York City' },
-			{ name: 'San Francisco' },
-			{ name: 'London' },
-			{ name: 'Berlin' },
-			{ name: 'Tokyo' },
-			{ name: 'Sydney' },
-			{ name: 'Toronto' },
-			{ name: 'Paris' },
-			{ name: 'Singapore' },
-			{ name: 'Amsterdam' },
-		]
-
-		logger.info('Using fallback locations', { count: fallback.length })
-		return fallback
-	}
-
-	/**
-	 * Load categories from static data file
-	 */
-	private loadCategories(): Category[] {
-		try {
-			const categoriesPath = path.join(paths.staticDir, 'categories.json')
-			const categoriesData = JSON.parse(readFileSync(categoriesPath, 'utf8'))
-			return categoriesData as Category[]
-		} catch (error) {
-			logger.warn('Failed to load categories from static file', { error })
-			// Return a minimal fallback set of categories
-			return [
-				{
-					name: 'Technology & Programming',
-					slug: 'technology-programming',
-					description: 'Software development and tech innovation',
-				},
-				{
-					name: 'Business & Entrepreneurship',
-					slug: 'business-entrepreneurship',
-					description: 'Startups and business development',
-					subcategories: [
-						'Startup Incubation',
-						'Business Strategy',
-						'Leadership',
-					],
-				},
-				{
-					name: 'Design & Creativity',
-					slug: 'design-creativity',
-					description: 'Creative arts and design',
-					subcategories: ['Graphic Design', 'UI/UX Design', 'Digital Art'],
-				},
-			] as Category[]
-		}
-	}
-
-	/**
-	 * Get categories for a specific batch to ensure diversity
-	 */
-	private getCategoriesForBatch(
-		categories: Category[],
-		batchIndex: number,
-		batchSize: number
-	): Category[] {
-		// Cycle through categories to ensure each batch gets different ones
-		const startIndex = (batchIndex * batchSize) % categories.length
-		const result: Category[] = []
-
-		for (let i = 0; i < batchSize; i++) {
-			const index = (startIndex + i) % categories.length
-			result.push(categories[index])
-		}
-
-		return result
-	}
-
-	/**
-	 * Deduplicate communities by name and location
-	 */
-	private deduplicate(communities: LLMCommunity[]): LLMCommunity[] {
-		const seen = new Set<string>()
-		const deduplicated: LLMCommunity[] = []
-
-		for (const community of communities) {
-			if (!community?.name || !community?.homeLocation) continue
-
-			const key = `${community.name.toLowerCase().trim()}|${community.homeLocation.toLowerCase().trim()}`
-			if (seen.has(key)) continue
-
-			seen.add(key)
-			deduplicated.push(community)
-		}
-
-		return deduplicated
+		const { loadCategorySlugs } = await import('../utils/data-loaders')
+		const categories = loadCategorySlugs()
+		return generateFakerCommunities(10, categories)
 	}
 
 	async cleanup(): Promise<void> {
-		await this.prisma.$disconnect()
+		// no-op
 	}
 }
 
-// Export singleton
 export const communityGenerator = new CommunityGenerator()

@@ -2,8 +2,8 @@
 /**
  * Process Batch Data
  *
- * Production-ready processor that validates, transforms, and distributes
- * batch data for seeding with proper error handling and logging.
+ * Validates, transforms, and distributes batch data for seeding.
+ * With enum-enforced location slugs, fuzzy location matching is no longer needed.
  */
 
 /** biome-ignore-all lint/suspicious/noExplicitAny: only seed */
@@ -14,6 +14,7 @@ import {
 	categoriesStaticSchema,
 	LLMCommunityBatchSchema,
 	LLMUserBatchSchema,
+	LOCATION_SLUG_TO_NAME,
 	locationsStaticSchema,
 	logger,
 	validateBatchFile,
@@ -61,18 +62,11 @@ async function processData() {
 			const locationsPath = path.join(paths.staticDir, 'locations.json')
 			logger.debug('Reading locations file', { path: locationsPath })
 
-			// Check if file exists
 			if (!existsSync(locationsPath)) {
 				throw new Error(`Locations file does not exist at: ${locationsPath}`)
 			}
 
 			const locationsData = safeReadJSON(locationsPath)
-			logger.debug('Raw locations data loaded', {
-				type: typeof locationsData,
-				isArray: Array.isArray(locationsData),
-				keys: locationsData ? Object.keys(locationsData) : 'null',
-			})
-
 			if (!locationsData) {
 				throw new Error('Locations file returned null data')
 			}
@@ -141,11 +135,6 @@ async function processData() {
 		)
 		const usersFiles = batchFiles.filter((f) => f.startsWith('users-batch-'))
 
-		logger.debug('Identified batch files', {
-			communitiesFiles,
-			usersFiles,
-		})
-
 		if (communitiesFiles.length === 0 || usersFiles.length === 0) {
 			throw new ValidationError(
 				'Missing required batch files. Expected communities-batch-*.json and users-batch-*.json',
@@ -157,31 +146,20 @@ async function processData() {
 		const allCommunities: any[] = []
 		for (const communitiesFile of communitiesFiles) {
 			try {
-				logger.debug('Loading communities batch file', {
-					file: communitiesFile,
-				})
 				const communitiesData = safeReadJSON(
 					path.join(paths.batchesDir, communitiesFile)
 				)
-
-				// Validate against LLM schema
 				const validatedData = validateBatchFile(
 					communitiesData,
 					LLMCommunityBatchSchema,
 					communitiesFile
 				)
-
 				allCommunities.push(...validatedData.communities)
-				logger.debug('Communities batch loaded successfully', {
-					file: communitiesFile,
-					count: validatedData.communities.length,
-				})
 			} catch (error) {
 				logger.error('Failed to load communities batch - discarding file', {
 					file: communitiesFile,
 					error: error instanceof Error ? error.message : error,
 				})
-				// Continue processing other files instead of failing completely
 			}
 		}
 
@@ -189,31 +167,21 @@ async function processData() {
 		const allUsers: any[] = []
 		for (const usersFile of usersFiles) {
 			try {
-				logger.debug('Loading users batch file', { file: usersFile })
 				const usersData = safeReadJSON(path.join(paths.batchesDir, usersFile))
-
-				// Validate against LLM schema
 				const validatedData = validateBatchFile(
 					usersData,
 					LLMUserBatchSchema,
 					usersFile
 				)
-
 				allUsers.push(...validatedData.users)
-				logger.debug('Users batch loaded successfully', {
-					file: usersFile,
-					count: validatedData.users.length,
-				})
 			} catch (error) {
 				logger.error('Failed to load users batch - discarding file', {
 					file: usersFile,
 					error: error instanceof Error ? error.message : error,
 				})
-				// Continue processing other files instead of failing completely
 			}
 		}
 
-		// Check if we have any valid data after processing all files
 		if (allCommunities.length === 0) {
 			throw new ValidationError(
 				'No valid communities found in any batch file',
@@ -228,7 +196,6 @@ async function processData() {
 			)
 		}
 
-		// Create combined data structures for compatibility with existing code
 		const communities = { communities: allCommunities }
 		const users = { users: allUsers }
 
@@ -237,97 +204,42 @@ async function processData() {
 			users: users.users.length,
 			locations: locations.length,
 			venues: venues.length,
-			communitiesFilesProcessed: communitiesFiles.length,
-			usersFilesProcessed: usersFiles.length,
 		})
 
 		// Create event distribution
+		// With enum-enforced location slugs, communities already have valid slugs.
+		// Use the slug-to-name map to distribute events by city name.
 		logger.info('Creating event distribution system')
 		const eventsByCity: Record<string, any[]> = {}
 		locations.forEach((location: any) => {
 			eventsByCity[location.name] = []
 		})
 
-		// Helper function to find matching location with fault tolerance
-		const findMatchingLocation = (homeLocation: string) => {
-			const locationNames = locations.map((l: any) => l.name)
-
-			// 1. Try exact match first
-			const exactMatch = locationNames.find(
-				(name: any) => name.toLowerCase() === homeLocation.toLowerCase()
-			)
-			if (exactMatch) return exactMatch
-
-			// 2. Try partial matching (e.g., "Madrid, Spain" -> "Madrid")
-			const cityPart = homeLocation.split(',')[0].trim()
-			const partialMatch = locationNames.find(
-				(name: string) =>
-					name.toLowerCase().includes(cityPart.toLowerCase()) ||
-					cityPart.toLowerCase().includes(name.toLowerCase())
-			)
-			if (partialMatch) return partialMatch
-
-			// 3. Try fuzzy matching for common variations
-			const fuzzyMatch = locationNames.find((name: string) => {
-				const nameWords = name.toLowerCase().split(/[\s,]+/)
-				const locationWords = homeLocation.toLowerCase().split(/[\s,]+/)
-				return nameWords.some((word) =>
-					locationWords.some(
-						(lWord) => word.includes(lWord) || lWord.includes(word)
-					)
-				)
-			})
-			if (fuzzyMatch) return fuzzyMatch
-
-			// 4. Fallback to random location
-			return locationNames[Math.floor(Math.random() * locationNames.length)]
-		}
-
-		// Place community events in their cities with fault tolerance
-		let locationMismatches = 0
-		let exactMatches = 0
-		let fallbackAssignments = 0
-
+		// Place community events in their cities — direct slug lookup, no fuzzy matching
 		communities.communities.forEach((community: any) => {
-			const originalLocation = community.homeLocation
-			const matchedLocation = findMatchingLocation(originalLocation)
+			const slug = community.homeLocation
+			const cityName = LOCATION_SLUG_TO_NAME[slug]
 
-			// Track matching statistics
-			if (originalLocation.toLowerCase() === matchedLocation.toLowerCase()) {
-				exactMatches++
-			} else if (locations.find((l: any) => l.name === matchedLocation)) {
-				locationMismatches++
-				logger.debug('Location mismatch resolved', {
-					original: originalLocation,
-					matched: matchedLocation,
+			if (!cityName || !eventsByCity[cityName]) {
+				logger.warn('Unknown location slug, skipping community events', {
+					slug,
 					community: community.name,
 				})
-			} else {
-				fallbackAssignments++
-				logger.debug('Random location assigned', {
-					original: originalLocation,
-					assigned: matchedLocation,
-					community: community.name,
-				})
+				return
 			}
 
-			// Assign events to the matched location
 			community.events?.forEach((event: any) => {
-				eventsByCity[matchedLocation].push({
+				eventsByCity[cityName].push({
 					...event,
 					communityName: community.name,
 					communityFocusArea: community.focusArea,
-					homeLocation: matchedLocation, // Use matched location
-					originalLocation: originalLocation, // Keep original for reference
+					homeLocation: cityName,
 					categories: community.categories,
 				})
 			})
 		})
 
-		logger.info('Location matching completed', {
-			exactMatches,
-			resolvedMismatches: locationMismatches,
-			fallbackAssignments,
+		logger.info('Direct location mapping complete', {
 			totalCommunities: communities.communities.length,
 		})
 
@@ -368,49 +280,40 @@ async function processData() {
 			mkdirSync(paths.processedDir, { recursive: true })
 		}
 
-		// Save processed files with timestamps
+		// Save processed files
 		const timestamp = getTimestamp()
 
-		// 1. Save communities
 		const communitiesOutputFile = path.join(
 			paths.processedDir,
 			`communities-final-${timestamp}.json`
 		)
-		const communitiesData = {
+		safeWriteJSON(communitiesOutputFile, {
 			metadata: {
 				generatedAt: new Date().toISOString(),
 				totalCommunities: communities.communities.length,
 				processor: 'batch-processor',
 			},
 			communities: communities.communities,
-		}
-		safeWriteJSON(communitiesOutputFile, communitiesData)
-		logger.debug('Saved communities file', {
-			file: path.basename(communitiesOutputFile),
 		})
 
-		// 2. Save users
 		const usersOutputFile = path.join(
 			paths.processedDir,
 			`users-final-${timestamp}.json`
 		)
-		const usersData = {
+		safeWriteJSON(usersOutputFile, {
 			metadata: {
 				generatedAt: new Date().toISOString(),
 				totalUsers: users.users.length,
 				processor: 'batch-processor',
 			},
 			users: users.users,
-		}
-		safeWriteJSON(usersOutputFile, usersData)
-		logger.debug('Saved users file', { file: path.basename(usersOutputFile) })
+		})
 
-		// 3. Save distributed events
 		const eventsFile = path.join(
 			paths.processedDir,
 			`events-distributed-${timestamp}.json`
 		)
-		const eventsData = {
+		safeWriteJSON(eventsFile, {
 			metadata: {
 				generatedAt: new Date().toISOString(),
 				minEventsPerCity: config.MIN_EVENTS_PER_CITY,
@@ -420,18 +323,11 @@ async function processData() {
 				processor: 'batch-processor',
 			},
 			eventsByCity,
-		}
-		safeWriteJSON(eventsFile, eventsData)
-		logger.debug('Saved events file', { file: path.basename(eventsFile) })
+		})
 
 		logger.info('Processing completed successfully', {
 			processedFiles: 3,
 			outputDirectory: paths.processedDir,
-			filesCreated: [
-				path.basename(communitiesOutputFile),
-				path.basename(usersOutputFile),
-				path.basename(eventsFile),
-			],
 		})
 
 		operation.complete({

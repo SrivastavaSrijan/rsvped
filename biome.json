@@ -22,7 +22,6 @@
 		},
 		"rules": {
 			"nursery": {
-				"noUnknownAtRule": "off",
 				"recommended": true
 			}
 		}

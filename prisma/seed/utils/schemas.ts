@@ -7,6 +7,8 @@
  * - Pipeline processing validation
  */
 
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { z } from 'zod'
 import type { loadProcessedBatchData } from './data-loaders'
 
@@ -20,6 +22,44 @@ const slugSchema = z
 	.max(48)
 	.regex(/^[a-z0-9-]+$/, 'Invalid slug format')
 const timestampSchema = z.string().datetime()
+
+// =============================================================================
+// Location slug enum — built dynamically from locations.csv
+// =============================================================================
+
+function loadLocationSlugs(): [string, ...string[]] {
+	const csvPath = path.join(__dirname, '..', 'init', 'locations.csv')
+	const lines = readFileSync(csvPath, 'utf8').trim().split('\n')
+	const slugs = lines.map((line) => line.split(',')[2]).filter(Boolean)
+	if (slugs.length === 0) {
+		throw new Error('No location slugs found in locations.csv')
+	}
+	return slugs as [string, ...string[]]
+}
+
+/** All valid location slugs from locations.csv */
+export const LOCATION_SLUGS = loadLocationSlugs()
+
+/** Zod enum of valid location slugs */
+export const locationSlugEnum = z.enum(LOCATION_SLUGS)
+
+/** Build a slug-to-name lookup from the CSV */
+function loadSlugToNameMap(): Record<string, string> {
+	const csvPath = path.join(__dirname, '..', 'init', 'locations.csv')
+	const lines = readFileSync(csvPath, 'utf8').trim().split('\n')
+	const map: Record<string, string> = {}
+	for (const line of lines) {
+		const parts = line.split(',')
+		const name = parts[1]
+		const slug = parts[2]
+		if (slug && name) {
+			map[slug] = name
+		}
+	}
+	return map
+}
+
+export const LOCATION_SLUG_TO_NAME = loadSlugToNameMap()
 
 // =============================================================================
 // LLM Output Schemas - for validating raw LLM-generated data
@@ -49,14 +89,14 @@ export const LLMEventSchema = z.object({
 	),
 })
 
-// Community schema with nested events (LLM output)
+// Community schema with nested events (LLM output) — uses location slug enum
 export const LLMCommunitySchema = z.object({
 	name: z.string().min(1),
 	description: z.string().min(10),
 	focusArea: z.string().min(1),
 	targetAudience: z.string().min(1),
 	membershipStyle: z.enum(['open', 'invite-only', 'application-based']),
-	homeLocation: z.string().min(1),
+	homeLocation: locationSlugEnum,
 	membershipTiers: z.array(
 		z.object({
 			name: z.string().min(1),
@@ -83,7 +123,7 @@ export const LLMCommunityBatchSchema = z.object({
 	communities: z.array(LLMCommunitySchema),
 })
 
-// User persona schema (LLM output)
+// User persona schema (LLM output) — uses location slug enum
 export const LLMUserPersonaSchema = z.object({
 	firstName: z.string().min(1),
 	lastName: z.string().min(1),
@@ -91,7 +131,7 @@ export const LLMUserPersonaSchema = z.object({
 	industry: z.string().min(1),
 	experienceLevel: z.enum(['junior', 'mid', 'senior', 'executive']),
 	interests: z.array(z.string().min(1)).min(1).max(5),
-	location: z.string().min(1),
+	location: locationSlugEnum,
 	networkingStyle: z.enum(['active', 'selective', 'casual']),
 	spendingPower: z.enum(['low', 'medium', 'high']),
 	bio: z.string().min(5),
@@ -147,12 +187,8 @@ export const venueSchema = z.object({
 export const locationsStaticSchema = z.array(locationSchema).min(1).max(500)
 export const categoriesStaticSchema = z.array(categorySchema).min(1).max(100)
 export const venuesStaticSchema = z.record(
-	z
-		.string()
-		.min(1), // city name
-	z
-		.array(z.string().min(1).max(200))
-		.min(1) // array of venue names
+	z.string().min(1), // city name
+	z.array(z.string().min(1).max(200)).min(1) // array of venue names
 )
 
 // =============================================================================

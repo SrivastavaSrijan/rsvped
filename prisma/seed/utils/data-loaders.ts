@@ -1,7 +1,38 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: only seed */
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 import { logger, processedDataSchema } from '../utils'
 import { paths } from './config'
+import type { Category } from './schemas'
+
+/**
+ * Load category data from the categories CSV for prompt generation.
+ */
+export function loadCategorySlugs(): Category[] {
+	const csvPath = path.join(__dirname, '..', 'init', 'categories.csv')
+	try {
+		const lines = readFileSync(csvPath, 'utf8').trim().split('\n')
+		return lines
+			.map((line) => {
+				const match = line.match(/^([^,]+),([^,]+),([^,]+),(.+)$/)
+				if (!match) return null
+				const [, , name, slug] = match
+				return { name, slug } as Category
+			})
+			.filter((c): c is Category => c !== null)
+	} catch {
+		logger.warn('Failed to load categories from CSV, using fallback')
+		return [
+			{ name: 'Tech & Startups', slug: 'tech-startups' },
+			{ name: 'Arts & Culture', slug: 'arts-culture' },
+			{ name: 'Food & Drinks', slug: 'food-drinks' },
+			{ name: 'Sports & Fitness', slug: 'sports-fitness' },
+			{ name: 'Music & Concerts', slug: 'music-concerts' },
+			{ name: 'Networking & Career', slug: 'networking-career' },
+		]
+	}
+}
+
 export function loadProcessedBatchData() {
 	const operation = logger.startOperation('load_batch_data')
 

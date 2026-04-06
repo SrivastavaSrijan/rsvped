@@ -40,18 +40,22 @@ yarn db:studio        # GUI browser
 ### Architecture
 ```
 prisma/seed/
-├── seed.ts           # Entry point — orchestrates the full pipeline
-├── generator.ts      # DataGenerator class — coordinates LLM generation
+├── seed.ts           # Entry point — pipeline runner with checkpoint/resume
+├── generator.ts      # Multi-pass generator (communities → digest → users)
+├── workflow.ts       # CLI entry point (generate | process | seed | all)
 ├── creators/         # DB writers — take generated data, insert via Prisma
-├── generators/       # LLM-powered data generation (Together AI, cached)
-└── utils/            # Logger, config, database helpers, faker extensions
+├── generators/       # LLM service (Claude Haiku via Vercel AI SDK) + faker fallback
+├── prompts/          # Coherence-focused LLM prompts
+└── utils/            # Logger, config, profiles, pipeline, database helpers
 ```
 
 ### Rules
 - **Do not modify the seed system** unless explicitly asked — it's complex and works
-- Seed generators use Together AI (Llama 3.1) via `together-ai` package — this is intentional and separate from app-level AI
-- Generated data is cached in `prisma/seed/generators/cache.ts` to avoid re-calling LLMs
+- Seed generators use Claude Haiku via Vercel AI SDK (`generateObject` + `@ai-sdk/anthropic`)
+- Location slugs are enforced via `z.enum()` built from `prisma/seed/init/locations.csv`
+- `SEED_PROFILE` env var selects presets (dev/demo/full/stress); individual vars override
 - Config in `prisma/seed/utils/config.ts` controls `NUM_USERS`, `NUM_COMMUNITIES`, `USE_LLM`
+- Pipeline runner in `seed.ts` supports checkpoint/resume via `pipeline-state.json`
 - The seed pipeline runs `wipeDb()` → create users → create communities → create events → create orders
 
 ### Image System

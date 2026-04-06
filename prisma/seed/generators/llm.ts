@@ -1,62 +1,97 @@
 /**
  * LLM Service
  *
- * Production-ready LLM integration with proper error handling and retry logic.
+ * Claude Haiku integration via Vercel AI SDK with structured output,
+ * self-healing retries, and cost tracking.
  */
 
-import { Together } from 'together-ai'
-import { z } from 'zod'
+import { anthropic } from '@ai-sdk/anthropic'
+import { generateObject } from 'ai'
+import type { z } from 'zod'
 import { logger } from '../utils'
 import { config } from '../utils/config'
-import { SeedError, withRetry } from '../utils/errors'
+import { SeedError } from '../utils/errors'
+
+// ---------------------------------------------------------------------------
+// Cost tracking
+// ---------------------------------------------------------------------------
+
+/** Anthropic Haiku pricing (per 1M tokens) */
+const HAIKU_INPUT_COST_PER_M = 0.8 // $0.80 / 1M input tokens
+const HAIKU_OUTPUT_COST_PER_M = 4.0 // $4.00 / 1M output tokens
+
+export interface CostEntry {
+	operation: string
+	inputTokens: number
+	outputTokens: number
+	costUsd: number
+}
+
+let totalCostUsd = 0
+const costLog: CostEntry[] = []
+
+function trackCost(
+	operation: string,
+	inputTokens: number | undefined,
+	outputTokens: number | undefined
+): CostEntry {
+	const inp = inputTokens ?? 0
+	const out = outputTokens ?? 0
+	const cost =
+		(inp / 1_000_000) * HAIKU_INPUT_COST_PER_M +
+		(out / 1_000_000) * HAIKU_OUTPUT_COST_PER_M
+
+	totalCostUsd += cost
+	const entry: CostEntry = {
+		operation,
+		inputTokens: inp,
+		outputTokens: out,
+		costUsd: cost,
+	}
+	costLog.push(entry)
+	return entry
+}
+
+export function getTotalCostUsd(): number {
+	return totalCostUsd
+}
+
+export function getCostLog(): readonly CostEntry[] {
+	return costLog
+}
+
+export function resetCostTracking(): void {
+	totalCostUsd = 0
+	costLog.length = 0
+}
+
+// ---------------------------------------------------------------------------
+// Budget gate
+// ---------------------------------------------------------------------------
+
+function checkBudget(operation: string): void {
+	const budget = config.SEED_BUDGET_USD
+	if (totalCostUsd >= budget) {
+		throw new SeedError(
+			`Seed budget exhausted: spent $${totalCostUsd.toFixed(4)} of $${budget} budget. Stopping before ${operation}.`,
+			operation
+		)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// LLM Service
+// ---------------------------------------------------------------------------
+
+const MODEL_ID = 'claude-haiku-4-5-20250315'
+const MAX_SELF_HEAL_ATTEMPTS = 3
 
 export class LLMService {
-	private client?: Together
-	private model = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo'
-	private maxTokens = 10000 // Increased for richer data
-	private temperature = 0.7
-
-	constructor() {
-		if (!config.USE_LLM) {
-			logger.warn('LLM is disabled via configuration')
-			return
-		}
-
-		const apiKey = process.env.TOGETHER_API_KEY
-		if (!apiKey) {
-			throw new SeedError(
-				'TOGETHER_API_KEY environment variable is required',
-				'llm-init'
-			)
-		}
-
-		this.client = new Together({ apiKey })
-	}
-
 	/**
-	 * Convert Zod schema to JSON schema for Together API
-	 */
-	private zodToJsonSchema(schema: z.ZodSchema): Record<string, unknown> {
-		if (!schema) return {}
-
-		try {
-			// Use built-in Zod function if available
-			// biome-ignore lint/suspicious/noExplicitAny: checking for zod extension
-			if (typeof (z as any).toJSONSchema === 'function') {
-				// biome-ignore lint/suspicious/noExplicitAny: calling zod extension
-				return (z as any).toJSONSchema(schema)
-			}
-
-			// Simplified implementation for basic schemas
-			return { type: 'object' }
-		} catch (error) {
-			logger.error('Error converting Zod schema to JSON schema', { error })
-			return { type: 'object' }
-		}
-	}
-
-	/**
-	 * Call LLM with retry logic and proper error handling
+	 * Generate a structured object using Claude Haiku via Vercel AI SDK.
+	 *
+	 * Includes self-healing: if validation fails, the error details are
+	 * injected into the next prompt for up to MAX_SELF_HEAL_ATTEMPTS.
 	 */
 	async generate<T>(
 		prompt: string,
@@ -68,78 +103,72 @@ export class LLMService {
 			throw new SeedError('LLM is disabled via configuration', operation)
 		}
 
-		if (!this.client) {
-			throw new SeedError('LLM client not initialized', operation)
-		}
+		checkBudget(operation)
 
-		const jsonSchema = this.zodToJsonSchema(schema)
+		let lastError: string | undefined
+		for (let attempt = 1; attempt <= MAX_SELF_HEAL_ATTEMPTS; attempt++) {
+			try {
+				const healingContext =
+					attempt > 1 && lastError
+						? `\n\nPREVIOUS ATTEMPT FAILED WITH ERROR:\n${lastError}\nPlease fix the issue and try again.`
+						: ''
 
-		return withRetry(
-			async () => {
-				logger.debug('LLM generation attempt', { operation })
-
-				if (!this.client) {
-					throw new SeedError('LLM client not initialized', operation)
-				}
-
-				const response = await this.client.chat.completions.create({
-					model: this.model,
-					messages: [
-						{ role: 'system', content: systemPrompt },
-						{ role: 'user', content: prompt },
-					],
-					response_format: { type: 'json_object', schema: jsonSchema },
-					max_tokens: this.maxTokens,
-					temperature: this.temperature,
+				const result = await generateObject({
+					model: anthropic(MODEL_ID),
+					schema,
+					system: systemPrompt,
+					prompt: `${prompt}${healingContext}`,
+					maxRetries: 2,
 				})
 
-				const content = response.choices[0]?.message?.content
-				if (!content) {
-					throw new SeedError('Empty response from LLM', operation)
-				}
+				// Track cost from usage metadata
+				const costEntry = trackCost(
+					operation,
+					result.usage.inputTokens,
+					result.usage.outputTokens
+				)
 
-				let parsed: unknown
-				try {
-					parsed = JSON.parse(content)
-				} catch (error) {
-					throw new SeedError(
-						'Failed to parse LLM response as JSON',
-						operation,
-						false,
-						error
+				logger.info(`LLM generation successful`, {
+					operation,
+					attempt,
+					inputTokens: costEntry.inputTokens,
+					outputTokens: costEntry.outputTokens,
+					costUsd: `$${costEntry.costUsd.toFixed(4)}`,
+					totalCostUsd: `$${totalCostUsd.toFixed(4)}`,
+				})
+
+				return result.object
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error)
+				lastError = message
+
+				logger.warn(`LLM attempt ${attempt}/${MAX_SELF_HEAL_ATTEMPTS} failed`, {
+					operation,
+					error: message,
+				})
+
+				if (attempt === MAX_SELF_HEAL_ATTEMPTS) {
+					logger.error(
+						`LLM generation failed after ${MAX_SELF_HEAL_ATTEMPTS} attempts`,
+						{ operation }
 					)
-				}
-
-				const validation = schema.safeParse(parsed)
-				if (!validation.success) {
-					logger.warn('LLM response validation failed', {
-						operation,
-						errors: validation.error.issues,
-					})
 					throw new SeedError(
-						`LLM response validation failed: ${validation.error.issues
-							.map((i) => `${i.path.join('.')}: ${i.message}`)
-							.join(', ')}`,
+						`LLM generation failed after ${MAX_SELF_HEAL_ATTEMPTS} self-healing attempts: ${message}`,
 						operation
 					)
 				}
-
-				logger.info('LLM generation successful', { operation })
-				return validation.data
-			},
-			operation,
-			{
-				maxRetries: 3,
-				backoffMs: 2000,
 			}
-		)
+		}
+
+		// TypeScript exhaustiveness — unreachable
+		throw new SeedError('Unreachable', operation)
 	}
 
 	/**
 	 * Check if LLM is available and configured
 	 */
 	isAvailable(): boolean {
-		return config.USE_LLM && !!process.env.TOGETHER_API_KEY
+		return config.USE_LLM && !!process.env.ANTHROPIC_API_KEY
 	}
 }
 

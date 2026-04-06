@@ -6,6 +6,10 @@
  */
 
 import { z } from 'zod'
+import { applyProfileDefaults } from './profiles'
+
+// Apply profile defaults BEFORE config parsing
+applyProfileDefaults()
 
 // Environment schema validation
 const envSchema = z.object({
@@ -29,10 +33,23 @@ const envSchema = z.object({
 		.default('true')
 		.transform((val) => val === 'true'),
 
+	// Seed profiles
+	SEED_PROFILE: z.enum(['dev', 'demo', 'full', 'stress']).default('dev'),
+
+	// Cost budget
+	SEED_BUDGET_USD: z.coerce.number().min(0).default(5),
+
+	// Dry run mode — validates output without DB writes
+	SEED_DRY_RUN: z
+		.enum(['true', 'false'])
+		.default('false')
+		.transform((val) => val === 'true'),
+
 	// Logging
 	LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 
 	// External APIs
+	ANTHROPIC_API_KEY: z.string().optional(),
 	UNSPLASH_ACCESS_KEY: z.string().optional(),
 	UNSPLASH_COLLECTION_ID: z.string().default('j7hIPPKdCOU'),
 
@@ -44,9 +61,18 @@ const envSchema = z.object({
 // Parse and validate environment
 function getConfig() {
 	try {
-		return envSchema.parse(process.env)
+		const parsed = envSchema.parse(process.env)
+
+		// Validate ANTHROPIC_API_KEY when LLM is enabled
+		if (parsed.USE_LLM && !parsed.ANTHROPIC_API_KEY) {
+			console.warn(
+				'Warning: USE_LLM=true but ANTHROPIC_API_KEY is not set. LLM generation will be skipped.'
+			)
+		}
+
+		return parsed
 	} catch (error) {
-		console.error('❌ Invalid environment configuration:')
+		console.error('Invalid environment configuration:')
 		if (error instanceof z.ZodError) {
 			for (const issue of error.issues) {
 				console.error(`  - ${issue.path.join('.')}: ${issue.message}`)
@@ -67,6 +93,7 @@ export const paths = {
 	staticDir: './prisma/.local/seed-data/static',
 	logsDir: './prisma/.local/logs',
 	testAccountsFile: './prisma/.local/test-accounts.json',
+	pipelineStateFile: './prisma/.local/pipeline-state.json',
 } as const
 
 // Event generation limits
