@@ -823,28 +823,33 @@ async function createManyWithReturn(model: any, data: any[]) {
  */
 export async function updateEventCounters(prisma: PrismaClient, events: any[]) {
 	return await timeOperation('Updating event counters', async () => {
-		await Promise.all(
-			events.map(async (event) => {
-				const [rsvpCount, paidRsvpCount, viewCount] = await Promise.all([
-					prisma.rsvp.count({
-						where: { eventId: event.id, status: 'CONFIRMED' },
-					}),
-					prisma.rsvp.count({
-						where: {
-							eventId: event.id,
-							status: 'CONFIRMED',
-							order: { status: 'PAID', totalCents: { gt: 0 } },
-						},
-					}),
-					prisma.eventView.count({ where: { eventId: event.id } }),
-				])
+		// Process in batches of 20 to avoid exhausting connection pool on remote DBs
+		const BATCH = 20
+		for (let i = 0; i < events.length; i += BATCH) {
+			const batch = events.slice(i, i + BATCH)
+			await Promise.all(
+				batch.map(async (event) => {
+					const [rsvpCount, paidRsvpCount, viewCount] = await Promise.all([
+						prisma.rsvp.count({
+							where: { eventId: event.id, status: 'CONFIRMED' },
+						}),
+						prisma.rsvp.count({
+							where: {
+								eventId: event.id,
+								status: 'CONFIRMED',
+								order: { status: 'PAID', totalCents: { gt: 0 } },
+							},
+						}),
+						prisma.eventView.count({ where: { eventId: event.id } }),
+					])
 
-				await prisma.event.update({
-					where: { id: event.id },
-					data: { rsvpCount, paidRsvpCount, viewCount },
+					await prisma.event.update({
+						where: { id: event.id },
+						data: { rsvpCount, paidRsvpCount, viewCount },
+					})
 				})
-			})
-		)
+			)
+		}
 
 		logger.success(`Updated counters for ${events.length} events`)
 	})
