@@ -108,5 +108,8 @@
 		"vitest": "^4.1.2",
 		"zod-prisma": "^0.5.4",
 		"zod-to-json-schema": "^3.24.6"
+	},
+	"resolutions": {
+		"import-in-the-middle": "^3.0.0"
 	}
 }

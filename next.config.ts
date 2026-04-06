@@ -55,6 +55,10 @@ export default withSentryConfig(nextConfig, {
 		disable: !process.env.NEXT_PUBLIC_SENTRY_DSN,
 	},
 
-	// Automatically tree-shake Sentry logger statements
-	disableLogger: true,
+	// Tree-shake Sentry logger statements to reduce bundle size
+	webpack: {
+		treeshake: {
+			removeDebugLogging: true,
+		},
+	},
 })

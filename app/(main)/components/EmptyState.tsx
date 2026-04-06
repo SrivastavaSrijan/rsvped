@@ -16,6 +16,8 @@ export function EmptyState({ message, label, href }: EmptyStateProps) {
 				alt={'No events'}
 				width={200}
 				height={200}
+				priority
+				unoptimized
 				className="mb-4"
 			/>
 			<p className="text-muted-foreground text-sm">{message}</p>
