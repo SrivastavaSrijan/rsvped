@@ -2,22 +2,25 @@ import { createApi } from 'unsplash-js'
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
-// The unsplash-js library relies on the global fetch API.
-// Node.js < 18 needs a polyfill. Since your runtime is >= 20, this might not be strictly
-// necessary, but it's good practice for compatibility.
-// globalThis.fetch = fetch;
-const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY
-if (!UNSPLASH_ACCESS_KEY) {
-	throw new Error(
-		'UNSPLASH_ACCESS_KEY is not defined in the environment variables.'
-	)
+// Lazy initialization — avoids crashing at module load when env var is missing (e.g. in tests)
+let unsplashInstance: ReturnType<typeof createApi> | null = null
+
+function getUnsplash() {
+	if (!unsplashInstance) {
+		const key = process.env.UNSPLASH_ACCESS_KEY
+		if (!key) {
+			throw new Error(
+				'UNSPLASH_ACCESS_KEY is not defined in the environment variables.'
+			)
+		}
+		unsplashInstance = createApi({ accessKey: key })
+	}
+	return unsplashInstance
 }
 
-const unsplash = createApi({
-	accessKey: UNSPLASH_ACCESS_KEY,
-})
-
-const collectionIds = process.env.UNSPLASH_COLLECTION_IDS?.split(',') ?? []
+function getCollectionIds() {
+	return process.env.UNSPLASH_COLLECTION_IDS?.split(',') ?? []
+}
 
 export const imageRouter = createTRPCRouter({
 	getRandom: publicProcedure
@@ -37,8 +40,8 @@ export const imageRouter = createTRPCRouter({
 			})
 		)
 		.query(async () => {
-			const result = await unsplash.photos.getRandom({
-				collectionIds: collectionIds,
+			const result = await getUnsplash().photos.getRandom({
+				collectionIds: getCollectionIds(),
 				count: 1,
 			})
 
