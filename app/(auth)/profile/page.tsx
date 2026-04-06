@@ -2,9 +2,10 @@ import {
 	Briefcase,
 	Calendar,
 	Edit,
+	ExternalLink,
 	LogOut,
 	MapPin,
-	Shield,
+	Sparkles,
 	Users,
 	Zap,
 } from 'lucide-react'
@@ -15,7 +16,10 @@ import {
 	Badge,
 	Button,
 	buttonVariants,
-	Separator,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 } from '@/components/ui'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
@@ -35,29 +39,31 @@ export default async function ProfilePage() {
 	const [profile, communities, rsvps] = await Promise.all([
 		api.user.profile.enhanced(),
 		api.user.activity.communities({ page: 1, size: 10 }),
-		api.user.activity.rsvps({ page: 1, size: 10 }),
+		api.user.activity.rsvps({ page: 1, size: 20 }),
 	])
 
 	if (!profile) {
 		redirect(Routes.Auth.SignIn)
 	}
 
+	const friendCount =
+		profile._count.sentFriendRequests + profile._count.receivedFriendRequests
 	const upcomingRsvps = rsvps.filter(
 		(r) => new Date(r.event.startDate) >= new Date()
 	)
 
 	return (
-		<div className="mx-auto flex w-full max-w-page flex-col gap-8 px-4 py-12">
+		<div className="mx-auto flex w-full max-w-page flex-col gap-6 px-4 py-12">
 			{/* Header */}
 			<div className="flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:gap-6">
 				<AvatarWithFallback
 					src={profile.image}
 					name={profile.name ?? undefined}
-					className="size-20 text-2xl"
+					className="size-24 text-3xl"
 				/>
 				<div className="flex flex-1 flex-col items-center gap-2 lg:items-start">
 					<div className="flex items-center gap-3">
-						<h1 className="font-bold text-2xl text-text-primary">
+						<h1 className="font-bold text-2xl text-foreground">
 							{profile.name ?? 'Anonymous'}
 						</h1>
 						<Link
@@ -71,27 +77,20 @@ export default async function ProfilePage() {
 							Edit Profile
 						</Link>
 					</div>
+
 					{profile.username ? (
-						<p className="text-sm text-text-secondary">@{profile.username}</p>
+						<p className="text-sm text-muted-foreground">@{profile.username}</p>
 					) : null}
-					<p className="text-sm text-text-secondary">{profile.email}</p>
+
 					{profile.bio ? (
-						<p className="max-w-lg text-sm text-text-secondary">
+						<p className="max-w-lg text-sm text-muted-foreground">
 							{profile.bio}
 						</p>
 					) : null}
+
 					<div className="flex flex-wrap items-center gap-2">
-						<Badge variant="secondary" className="gap-1">
-							<Shield className="size-3" />
-							{profile.role}
-						</Badge>
-						{profile.isDemo ? (
-							<Badge variant="outline" className="text-yellow-400">
-								Demo User
-							</Badge>
-						) : null}
 						{profile.profession ? (
-							<Badge variant="outline" className="gap-1">
+							<Badge variant="secondary" className="gap-1">
 								<Briefcase className="size-3" />
 								{profile.profession}
 							</Badge>
@@ -102,6 +101,12 @@ export default async function ProfilePage() {
 								{profile.experienceLevel}
 							</Badge>
 						) : null}
+						{profile.networkingStyle ? (
+							<Badge variant="outline" className="gap-1">
+								<Sparkles className="size-3" />
+								{profile.networkingStyle}
+							</Badge>
+						) : null}
 						{profile.location ? (
 							<Badge variant="outline" className="gap-1">
 								<MapPin className="size-3" />
@@ -109,21 +114,21 @@ export default async function ProfilePage() {
 							</Badge>
 						) : null}
 					</div>
+
 					{profile.username ? (
 						<Link
 							href={Routes.Main.Users.ViewByUsername(profile.username)}
-							className="text-xs text-brand hover:underline"
+							className="flex items-center gap-1 text-xs text-brand hover:underline"
 						>
+							<ExternalLink className="size-3" />
 							View Public Profile
 						</Link>
 					) : null}
 				</div>
 			</div>
 
-			<Separator />
-
 			{/* Stats */}
-			<div className="flex justify-center gap-8 lg:justify-start">
+			<div className="flex justify-center gap-8 border-y border-border py-4 lg:justify-start">
 				<StatItem
 					icon={<Calendar className="size-4" />}
 					value={profile._count.hostedEvents}
@@ -135,117 +140,152 @@ export default async function ProfilePage() {
 					label="Communities"
 				/>
 				<StatItem
+					icon={<Users className="size-4" />}
+					value={friendCount}
+					label="Friends"
+				/>
+				<StatItem
 					icon={<Zap className="size-4" />}
 					value={profile._count.rsvps}
 					label="RSVPs"
 				/>
 			</div>
 
-			<Separator />
-
-			{/* Communities */}
-			<section className="flex flex-col gap-3">
-				<div className="flex items-center gap-2">
-					<Users className="size-5 text-text-secondary" />
-					<h2 className="font-semibold text-lg text-text-primary">
-						Communities ({communities.length})
-					</h2>
+			{/* Interests */}
+			{profile.categoryInterests.length > 0 ? (
+				<div className="flex flex-wrap gap-2">
+					{profile.categoryInterests.map((ci) => (
+						<Badge key={ci.category.id} variant="secondary">
+							{ci.category.name}
+						</Badge>
+					))}
 				</div>
-				{communities.length > 0 ? (
-					<ul className="flex flex-col gap-2">
-						{communities.map((m) => (
-							<li
-								key={m.community.id}
-								className="rounded-lg bg-bg-secondary px-4 py-3 text-sm text-text-primary"
-							>
-								{m.community.name}
-							</li>
-						))}
-					</ul>
-				) : (
-					<p className="text-sm text-text-tertiary">
-						You haven&apos;t joined any communities yet.
-					</p>
-				)}
-			</section>
+			) : null}
 
-			<Separator />
+			{/* Tabs */}
+			<Tabs defaultValue="events">
+				<TabsList className="w-full justify-start">
+					<TabsTrigger value="events" className="cursor-pointer gap-1">
+						<Calendar className="size-4" />
+						Events
+					</TabsTrigger>
+					<TabsTrigger value="communities" className="cursor-pointer gap-1">
+						<Users className="size-4" />
+						Communities
+					</TabsTrigger>
+					<TabsTrigger value="rsvps" className="cursor-pointer gap-1">
+						<Zap className="size-4" />
+						Upcoming
+					</TabsTrigger>
+				</TabsList>
 
-			{/* Upcoming RSVPs */}
-			<section className="flex flex-col gap-3">
-				<h2 className="font-semibold text-lg text-text-primary">
-					Upcoming RSVPs ({upcomingRsvps.length})
-				</h2>
-				{upcomingRsvps.length > 0 ? (
-					<ul className="flex flex-col gap-2">
-						{upcomingRsvps.map((r) => (
-							<li
-								key={r.id}
-								className="flex items-center justify-between rounded-lg bg-bg-secondary px-4 py-3"
-							>
-								<span className="text-sm text-text-primary">
-									{r.event.title}
-								</span>
-								<span className="text-xs text-text-tertiary">
-									{new Date(r.event.startDate).toLocaleDateString('en-US', {
-										month: 'short',
-										day: 'numeric',
-										year: 'numeric',
-									})}
-								</span>
-							</li>
-						))}
-					</ul>
-				) : (
-					<p className="text-sm text-text-tertiary">No upcoming RSVPs.</p>
-				)}
-			</section>
+				<TabsContent value="events">
+					{profile.hostedEvents.length > 0 ? (
+						<div className="flex flex-col gap-2 py-4">
+							{profile.hostedEvents.map((event) => (
+								<Link
+									key={event.id}
+									href={Routes.Main.Events.ViewBySlug(event.slug)}
+									className="flex items-center justify-between rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
+								>
+									<div className="flex flex-col gap-0.5">
+										<span className="text-sm font-medium text-foreground">
+											{event.title}
+										</span>
+										{event.location ? (
+											<span className="text-xs text-muted-foreground">
+												{event.location.name}
+											</span>
+										) : null}
+									</div>
+									<div className="flex items-center gap-2">
+										<Badge variant="secondary">
+											{event._count.rsvps} RSVPs
+										</Badge>
+										<span className="text-xs text-muted-foreground">
+											{new Date(event.startDate).toLocaleDateString('en-US', {
+												month: 'short',
+												day: 'numeric',
+											})}
+										</span>
+									</div>
+								</Link>
+							))}
+						</div>
+					) : (
+						<EmptyTab message="You haven't hosted any events yet." />
+					)}
+				</TabsContent>
 
-			<Separator />
+				<TabsContent value="communities">
+					{communities.length > 0 ? (
+						<div className="flex flex-col gap-2 py-4">
+							{communities.map((m) => (
+								<Link
+									key={m.community.id}
+									href={Routes.Main.Communities.ViewBySlug(m.community.slug)}
+									className="flex items-center justify-between rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
+								>
+									<span className="text-sm font-medium text-foreground">
+										{m.community.name}
+									</span>
+									<Badge variant="outline">{m.role}</Badge>
+								</Link>
+							))}
+						</div>
+					) : (
+						<EmptyTab message="You haven't joined any communities yet." />
+					)}
+				</TabsContent>
 
-			{/* Hosted Events */}
-			<section className="flex flex-col gap-3">
-				<h2 className="font-semibold text-lg text-text-primary">
-					Hosted Events ({profile._count.hostedEvents})
-				</h2>
-				{profile.hostedEvents.length > 0 ? (
-					<ul className="flex flex-col gap-2">
-						{profile.hostedEvents.map((event) => (
-							<li
-								key={event.id}
-								className="flex items-center justify-between rounded-lg bg-bg-secondary px-4 py-3"
-							>
-								<span className="text-sm text-text-primary">{event.title}</span>
-								<span className="text-xs text-text-tertiary">
-									{new Date(event.startDate).toLocaleDateString('en-US', {
-										month: 'short',
-										day: 'numeric',
-										year: 'numeric',
-									})}
-								</span>
-							</li>
-						))}
-					</ul>
-				) : (
-					<p className="text-sm text-text-tertiary">
-						You haven&apos;t hosted any events yet.
-					</p>
-				)}
-			</section>
-
-			<Separator />
+				<TabsContent value="rsvps">
+					{upcomingRsvps.length > 0 ? (
+						<div className="flex flex-col gap-2 py-4">
+							{upcomingRsvps.map((r) => (
+								<Link
+									key={r.id}
+									href={Routes.Main.Events.ViewBySlug(r.event.slug)}
+									className="flex items-center justify-between rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
+								>
+									<div className="flex flex-col gap-0.5">
+										<span className="text-sm font-medium text-foreground">
+											{r.event.title}
+										</span>
+										{r.ticketTier ? (
+											<span className="text-xs text-muted-foreground">
+												{r.ticketTier.name}
+											</span>
+										) : null}
+									</div>
+									<span className="text-xs text-muted-foreground">
+										{new Date(r.event.startDate).toLocaleDateString('en-US', {
+											month: 'short',
+											day: 'numeric',
+											year: 'numeric',
+										})}
+									</span>
+								</Link>
+							))}
+						</div>
+					) : (
+						<EmptyTab message="No upcoming RSVPs." />
+					)}
+				</TabsContent>
+			</Tabs>
 
 			{/* Sign Out */}
-			<form action={signOutAction}>
-				<Button
-					type="submit"
-					variant="outline"
-					className="cursor-pointer gap-2"
-				>
-					<LogOut className="size-4" />
-					Sign Out
-				</Button>
-			</form>
+			<div className="border-t border-border pt-6">
+				<form action={signOutAction}>
+					<Button
+						type="submit"
+						variant="outline"
+						className="cursor-pointer gap-2"
+					>
+						<LogOut className="size-4" />
+						Sign Out
+					</Button>
+				</form>
+			</div>
 		</div>
 	)
 }
@@ -261,11 +301,19 @@ function StatItem({
 }) {
 	return (
 		<div className="flex flex-col items-center gap-1">
-			<div className="flex items-center gap-1 text-text-primary">
+			<div className="flex items-center gap-1 text-foreground">
 				{icon}
 				<span className="font-semibold text-lg">{value}</span>
 			</div>
-			<span className="text-xs text-text-tertiary">{label}</span>
+			<span className="text-xs text-muted-foreground">{label}</span>
+		</div>
+	)
+}
+
+function EmptyTab({ message }: { message: string }) {
+	return (
+		<div className="flex items-center justify-center py-12">
+			<p className="text-sm text-muted-foreground">{message}</p>
 		</div>
 	)
 }

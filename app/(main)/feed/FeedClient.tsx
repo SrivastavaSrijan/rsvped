@@ -28,8 +28,8 @@ export function FeedClient() {
 	if (!data || data.data.length === 0) {
 		return (
 			<div className="flex flex-col items-center gap-4 py-16">
-				<Users className="size-12 text-text-tertiary" />
-				<p className="text-center text-sm text-text-tertiary">
+				<Users className="size-12 text-muted-foreground" />
+				<p className="text-center text-sm text-muted-foreground">
 					No activity from your friends yet.
 					<br />
 					Add friends to see their activity here.
@@ -43,7 +43,7 @@ export function FeedClient() {
 			{data.data.map((activity) => (
 				<div
 					key={activity.id}
-					className="flex items-center gap-3 rounded-lg bg-bg-secondary px-4 py-3"
+					className="flex items-center gap-3 rounded-lg bg-secondary px-4 py-3"
 				>
 					<UserHoverCard userId={activity.user.id}>
 						{activity.user.username ? (
@@ -65,13 +65,13 @@ export function FeedClient() {
 						)}
 					</UserHoverCard>
 					<div className="flex flex-1 flex-col gap-0.5">
-						<p className="text-sm text-text-primary">
+						<p className="text-sm text-foreground">
 							<span className="font-medium">{activity.user.name}</span>{' '}
-							<span className="text-text-secondary">
+							<span className="text-muted-foreground">
 								{ActivityTypeLabels[activity.type].toLowerCase()}
 							</span>
 						</p>
-						<p className="text-xs text-text-tertiary">
+						<p className="text-xs text-muted-foreground">
 							{new Date(activity.createdAt).toLocaleDateString('en-US', {
 								month: 'short',
 								day: 'numeric',
@@ -79,7 +79,7 @@ export function FeedClient() {
 							})}
 						</p>
 					</div>
-					<Activity className="size-4 text-text-tertiary" />
+					<Activity className="size-4 text-muted-foreground" />
 				</div>
 			))}
 		</div>

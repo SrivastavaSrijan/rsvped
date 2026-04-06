@@ -63,7 +63,7 @@ interface EventCardProps {
 
 ### Tailwind v4 Tokens
 - All colors, spacing, radii, fonts defined in `app/theme.css` via `@theme` block
-- Use only mapped utilities: `bg-brand`, `text-text-primary`, `border-border-primary`
+- Use only mapped utilities: `bg-brand`, `text-foreground`, `text-muted-foreground`, `border-border`
 - Never use `var(...)` in className or arbitrary values like `h-[123px]`
 - No `tailwind.config.ts` — v4 configures via CSS
 

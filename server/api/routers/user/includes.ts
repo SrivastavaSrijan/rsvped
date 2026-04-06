@@ -11,8 +11,23 @@ export const userProfileEnhancedInclude = {
 		take: 5,
 		where: { isPublished: true, deletedAt: null },
 		include: eventCoreInclude,
+		orderBy: { startDate: 'desc' as const },
 	},
-	_count: { select: { hostedEvents: true, rsvps: true } },
+	communityMemberships: {
+		take: 10,
+		include: { community: true },
+	},
+	categoryInterests: {
+		include: { category: true },
+	},
+	_count: {
+		select: {
+			hostedEvents: true,
+			rsvps: true,
+			sentFriendRequests: { where: { status: 'ACCEPTED' as const } },
+			receivedFriendRequests: { where: { status: 'ACCEPTED' as const } },
+		},
+	},
 } satisfies Prisma.UserInclude
 
 export const userPublicProfileInclude = {

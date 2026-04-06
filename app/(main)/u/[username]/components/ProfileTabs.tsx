@@ -79,14 +79,14 @@ function ActivityTab({ userId }: { userId: string }) {
 			{data.data.map((activity) => (
 				<div
 					key={activity.id}
-					className="flex items-center gap-3 rounded-lg bg-bg-secondary px-4 py-3"
+					className="flex items-center gap-3 rounded-lg bg-secondary px-4 py-3"
 				>
-					<Activity className="size-4 text-text-tertiary" />
+					<Activity className="size-4 text-muted-foreground" />
 					<div className="flex flex-1 flex-col">
-						<p className="text-sm text-text-primary">
+						<p className="text-sm text-foreground">
 							{ActivityTypeLabels[activity.type]}
 						</p>
-						<p className="text-xs text-text-tertiary">
+						<p className="text-xs text-muted-foreground">
 							{new Date(activity.createdAt).toLocaleDateString('en-US', {
 								month: 'short',
 								day: 'numeric',
@@ -111,21 +111,21 @@ function EventsTab({ user }: { user: PublicProfileUser }) {
 				<Link
 					key={event.id}
 					href={Routes.Main.Events.ViewBySlug(event.slug)}
-					className="flex items-center justify-between rounded-lg bg-bg-secondary px-4 py-3 transition-colors hover:bg-bg-tertiary"
+					className="flex items-center justify-between rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
 				>
 					<div className="flex flex-col gap-0.5">
-						<span className="text-sm font-medium text-text-primary">
+						<span className="text-sm font-medium text-foreground">
 							{event.title}
 						</span>
 						{event.location ? (
-							<span className="text-xs text-text-tertiary">
+							<span className="text-xs text-muted-foreground">
 								{event.location.name}
 							</span>
 						) : null}
 					</div>
 					<div className="flex items-center gap-2">
 						<Badge variant="secondary">{event._count.rsvps} RSVPs</Badge>
-						<span className="text-xs text-text-tertiary">
+						<span className="text-xs text-muted-foreground">
 							{new Date(event.startDate).toLocaleDateString('en-US', {
 								month: 'short',
 								day: 'numeric',
@@ -149,9 +149,9 @@ function CommunitiesTab({ user }: { user: PublicProfileUser }) {
 				<Link
 					key={membership.id}
 					href={Routes.Main.Communities.ViewBySlug(membership.community.slug)}
-					className="flex items-center justify-between rounded-lg bg-bg-secondary px-4 py-3 transition-colors hover:bg-bg-tertiary"
+					className="flex items-center justify-between rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
 				>
-					<span className="text-sm font-medium text-text-primary">
+					<span className="text-sm font-medium text-foreground">
 						{membership.community.name}
 					</span>
 					<Badge variant="outline">{membership.role}</Badge>
@@ -186,7 +186,7 @@ function FriendsTab({ userId }: { userId: string }) {
 								? Routes.Main.Users.ViewByUsername(item.friend.username)
 								: '#'
 						}
-						className="flex items-center gap-3 rounded-lg bg-bg-secondary px-4 py-3 transition-colors hover:bg-bg-tertiary"
+						className="flex items-center gap-3 rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
 					>
 						<AvatarWithFallback
 							src={item.friend.image}
@@ -194,16 +194,16 @@ function FriendsTab({ userId }: { userId: string }) {
 							className="size-10"
 						/>
 						<div className="flex flex-col gap-0.5">
-							<span className="text-sm font-medium text-text-primary">
+							<span className="text-sm font-medium text-foreground">
 								{item.friend.name}
 							</span>
 							{item.friend.username ? (
-								<span className="text-xs text-text-tertiary">
+								<span className="text-xs text-muted-foreground">
 									@{item.friend.username}
 								</span>
 							) : null}
 							{item.friend.profession ? (
-								<span className="text-xs text-text-tertiary">
+								<span className="text-xs text-muted-foreground">
 									{item.friend.profession}
 								</span>
 							) : null}
@@ -222,7 +222,7 @@ function TabLoading() {
 				<div
 					// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
 					key={i}
-					className="h-14 animate-pulse rounded-lg bg-bg-secondary"
+					className="h-14 animate-pulse rounded-lg bg-secondary"
 				/>
 			))}
 		</div>
@@ -232,7 +232,7 @@ function TabLoading() {
 function TabEmpty({ message }: { message: string }) {
 	return (
 		<div className="flex items-center justify-center py-12">
-			<p className="text-sm text-text-tertiary">{message}</p>
+			<p className="text-sm text-muted-foreground">{message}</p>
 		</div>
 	)
 }

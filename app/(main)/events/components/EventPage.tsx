@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid'
 import Link from 'next/link'
 import type { PropsWithChildren } from 'react'
 import { copy } from '@/app/(main)/copy'
+import { UserHoverCard } from '@/components/shared'
 import {
 	AvatarWithFallback,
 	Button,
@@ -85,7 +86,13 @@ export const EventPage = (props: EventPageProps) => {
 						<p className="font-semibold text-sm">Hosted By</p>
 						<hr className="border-muted-foreground/20" />
 						<div className="flex flex-row gap-3 items-center">
-							<AvatarWithFallback src={image} alt={name ?? 'Host'} />
+							{host?.id ? (
+								<UserHoverCard userId={host.id}>
+									<AvatarWithFallback src={image} alt={name ?? 'Host'} />
+								</UserHoverCard>
+							) : (
+								<AvatarWithFallback src={image} alt={name ?? 'Host'} />
+							)}
 							<div className="flex flex-col mt-1">
 								<p className="text-base font-semibold">{name}</p>
 								<p className="text-sm text-muted-foreground">{email}</p>
@@ -99,9 +106,18 @@ export const EventPage = (props: EventPageProps) => {
 							<div className="flex flex-col gap-2 items-start">
 								<div className="-space-x-1 flex">
 									{(rsvps ?? []).map(
-										({ name: guestName, email: guestEmail }) =>
+										({ name: guestName, email: guestEmail, user: guestUser }) =>
 											guestEmail &&
-											guestName && (
+											guestName &&
+											(guestUser?.id ? (
+												<UserHoverCard key={guestEmail} userId={guestUser.id}>
+													<AvatarWithFallback
+														className="size-4 mt-1"
+														src={guestUser.image ?? undefined}
+														name={guestUser.name ?? guestName}
+													/>
+												</UserHoverCard>
+											) : (
 												<Tooltip key={guestEmail}>
 													<TooltipTrigger>
 														<AvatarWithFallback
@@ -111,7 +127,7 @@ export const EventPage = (props: EventPageProps) => {
 													</TooltipTrigger>
 													<TooltipContent>{guestName}</TooltipContent>
 												</Tooltip>
-											)
+											))
 									)}
 								</div>
 								<p className="text-sm text-muted-foreground">

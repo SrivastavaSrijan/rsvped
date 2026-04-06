@@ -51,6 +51,9 @@ export const StirSearch = ({
 	const inputRef = useRef<HTMLInputElement>(null)
 	const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([])
 
+	// Track the last query we pushed to the URL to avoid feedback loops
+	const lastPushedQueryRef = useRef(initialQuery)
+
 	// Debounce query for API calls
 	const [debouncedQuery] = useDebounce(query.trim(), 300)
 
@@ -70,10 +73,11 @@ export const StirSearch = ({
 		}
 	}, [])
 
-	// Sync with URL search params
+	// Sync with URL search params — only for external navigation (e.g. back/forward)
 	useEffect(() => {
 		const urlQuery = searchParams.get('q') ?? ''
-		if (urlQuery) {
+		if (urlQuery !== lastPushedQueryRef.current) {
+			lastPushedQueryRef.current = urlQuery
 			setQuery(urlQuery)
 		}
 	}, [searchParams])
@@ -90,15 +94,17 @@ export const StirSearch = ({
 			}
 		)
 
-	// Live search mode: push as you type (debounced via useDeferredValue)
+	// Live search mode: push as you type (debounced)
 	useEffect(() => {
 		if (mode !== 'live') return
 		const q = debouncedQuery
 		if (q.length > 0) {
+			lastPushedQueryRef.current = q
 			startTransition(() => {
 				router.replace(`${Routes.Main.Stir.Search(q)}`)
 			})
 		} else {
+			lastPushedQueryRef.current = ''
 			startTransition(() => {
 				router.replace(Routes.Main.Stir.Root)
 			})
@@ -134,6 +140,7 @@ export const StirSearch = ({
 		setShowSuggestions(false)
 		saveToHistory(trimmed)
 
+		lastPushedQueryRef.current = trimmed
 		startTransition(() => {
 			router.push(`${Routes.Main.Stir.Search(trimmed)}`)
 		})
@@ -155,6 +162,7 @@ export const StirSearch = ({
 				if (query.trim().length === 0) {
 					// On empty enter, reset to root and clear local state
 					setShowSuggestions(false)
+					lastPushedQueryRef.current = ''
 					startTransition(() => router.push(Routes.Main.Stir.Root))
 					return
 				}
@@ -303,6 +311,7 @@ export const StirSearch = ({
 						onClick={() => {
 							setQuery('')
 							setShowSuggestions(false)
+							lastPushedQueryRef.current = ''
 							startTransition(() => {
 								router.push(Routes.Main.Stir.Root)
 							})

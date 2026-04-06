@@ -17,9 +17,23 @@ export const config = {
 			)
 
 			if (isAuthRoute) {
-				if (isLoggedIn && !pathname.startsWith(Routes.Utility.HoldOn)) {
-					// If the user is logged in and tries to access auth routes, redirect them to the home page
+				// Profile routes require login — don't redirect logged-in users away
+				const isProfileRoute = pathname.startsWith(Routes.Auth.Profile)
+				if (
+					isLoggedIn &&
+					!isProfileRoute &&
+					!pathname.startsWith(Routes.Utility.HoldOn)
+				) {
+					// If the user is logged in and tries to access auth routes (login/register), redirect them to the home page
 					return NextResponse.redirect(new URL(Routes.Home, nextUrl))
+				}
+				// If not logged in and trying to access profile, redirect to login
+				if (!isLoggedIn && isProfileRoute) {
+					const next = pathname + search
+					const encodedNext = encodeURIComponent(next)
+					return NextResponse.redirect(
+						new URL(`${Routes.Auth.SignIn}?next=${encodedNext}`, nextUrl)
+					)
 				}
 				return true
 			}

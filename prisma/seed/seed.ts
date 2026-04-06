@@ -163,6 +163,13 @@ async function main() {
 		})
 
 		await pipeline.runStage('create-friendships', async () => {
+			// On resume, users array may be empty — load from DB
+			if (users.length === 0) {
+				logger.info('Loading users from database for friendship creation')
+				users = await prisma.user.findMany({
+					select: { id: true, locationId: true, industry: true },
+				})
+			}
 			logger.info('Creating friendships based on shared interests')
 			await createFriendships(prisma, users)
 		})

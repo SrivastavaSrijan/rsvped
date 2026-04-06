@@ -75,13 +75,14 @@ Return a JSON object with a "venues" array of venue name strings.`,
 }
 
 export const UserPrompts = {
-	system: `You are generating diverse, realistic user personas for an event platform.
+	system: `You are generating diverse, realistic user personas for a social event platform with friendship and activity features.
 
 CRITICAL RULES:
 - The "location" field MUST be one of the provided location slugs EXACTLY as written.
 - Interests MUST align with the categories and communities available in that location.
 - Use culturally appropriate names for each location.
 - Each persona should feel like a real person with coherent professional background, interests, and networking style.
+- Create CLUSTERS of users with overlapping interests and locations — these users will become friends on the platform.
 - Only respond with valid JSON matching the provided schema.`,
 
 	user: (
@@ -95,7 +96,7 @@ CRITICAL RULES:
 			.map((slug) => `  "${slug}" (${slugToName[slug] ?? slug})`)
 			.join('\n')
 
-		return `Generate exactly ${batchSize} realistic professional personas for an event platform.
+		return `Generate exactly ${batchSize} realistic professional personas for a social event platform with friendships and activity feeds.
 
 LOCATION SLUGS (use EXACTLY one of these for location):
 ${locationList}
@@ -114,6 +115,13 @@ REQUIREMENTS:
 5. Bio should be a single vivid sentence that captures who they are
 6. Spending power should correlate with experience level and profession
 7. Networking style should match their profession and personality
+
+SOCIAL GRAPH REQUIREMENTS (important for friendship seeding):
+- Create 2-3 CLUSTERS of 3-5 users per location who share overlapping interests — these form natural friend groups
+- Within each cluster, users should share at least 2 interests but have different professions (e.g., a designer, developer, and PM who all love "Technology" and "Design")
+- "active" networkers should have 3-5 interests (many connection opportunities), "casual" users 1-2
+- Include a few "bridge" users who span two clusters (e.g., a tech person who also loves arts)
+- Each cluster should feel like people who'd actually meet at the same events
 
 DIVERSITY REQUIREMENTS:
 - Junior through executive experience levels

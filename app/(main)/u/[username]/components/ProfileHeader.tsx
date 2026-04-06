@@ -28,7 +28,7 @@ export async function ProfileHeader({ user }: ProfileHeaderProps) {
 				/>
 				<div className="flex flex-1 flex-col items-center gap-2 lg:items-start">
 					<div className="flex items-center gap-3">
-						<h1 className="font-bold text-2xl text-text-primary">
+						<h1 className="font-bold text-2xl text-foreground">
 							{user.name ?? 'Anonymous'}
 						</h1>
 						{isOwnProfile ? (
@@ -47,11 +47,11 @@ export async function ProfileHeader({ user }: ProfileHeaderProps) {
 					</div>
 
 					{user.username ? (
-						<p className="text-sm text-text-secondary">@{user.username}</p>
+						<p className="text-sm text-muted-foreground">@{user.username}</p>
 					) : null}
 
 					{user.bio ? (
-						<p className="max-w-lg text-sm text-text-secondary">{user.bio}</p>
+						<p className="max-w-lg text-sm text-muted-foreground">{user.bio}</p>
 					) : null}
 
 					<div className="flex flex-wrap items-center gap-2">
@@ -87,7 +87,7 @@ export async function ProfileHeader({ user }: ProfileHeaderProps) {
 			</div>
 
 			{/* Stats row */}
-			<div className="flex justify-center gap-8 border-y border-border-secondary py-4 lg:justify-start">
+			<div className="flex justify-center gap-8 border-y border-border py-4 lg:justify-start">
 				<StatItem
 					icon={<Calendar className="size-4" />}
 					value={user._count.hostedEvents}
@@ -135,11 +135,11 @@ function StatItem({
 }) {
 	return (
 		<div className="flex flex-col items-center gap-1">
-			<div className="flex items-center gap-1 text-text-primary">
+			<div className="flex items-center gap-1 text-foreground">
 				{icon}
 				<span className="font-semibold text-lg">{value}</span>
 			</div>
-			<span className="text-xs text-text-tertiary">{label}</span>
+			<span className="text-xs text-muted-foreground">{label}</span>
 		</div>
 	)
 }
