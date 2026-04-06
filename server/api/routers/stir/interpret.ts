@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { generate, isAvailable } from '@/lib/ai/llm'
 
-// 20 seed categories — sync with prisma/seed/init/categories.csv
+// 20 seed categories — sync with prisma/seed/data/categories.json
 const VALID_CATEGORIES = [
 	'Food & Drinks',
 	'Nightlife & Parties',

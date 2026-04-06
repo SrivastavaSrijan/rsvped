@@ -27,7 +27,7 @@ const commands = {
 	seed: {
 		description: 'Write data to database (supports resume)',
 		script: 'npx tsx prisma/seed/seed.ts',
-		check: () => existsSync('./prisma/.local/seed-data/static/locations.json'),
+		check: () => existsSync('./prisma/seed/data/locations.json'),
 	},
 	all: {
 		description: 'Run full pipeline: generate → process → seed',

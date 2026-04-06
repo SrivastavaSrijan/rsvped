@@ -9,15 +9,7 @@ import type { Category } from './schemas'
  * Load category data from the static categories.json (single source of truth).
  */
 export function loadCategorySlugs(): Category[] {
-	const jsonPath = path.join(
-		__dirname,
-		'..',
-		'..',
-		'.local',
-		'seed-data',
-		'static',
-		'categories.json'
-	)
+	const jsonPath = path.join(__dirname, '..', 'data', 'categories.json')
 	try {
 		const categories = JSON.parse(readFileSync(jsonPath, 'utf8')) as Array<{
 			name: string
@@ -78,7 +70,7 @@ export function loadProcessedBatchData() {
 		})
 
 		const venues = JSON.parse(
-			readFileSync(`${paths.staticDir}/venues.json`, 'utf8')
+			readFileSync(`${paths.cacheDir}/venues.json`, 'utf8')
 		)
 		const communitiesData = JSON.parse(
 			readFileSync(`${processedDir}/${communitiesFile}`, 'utf8')

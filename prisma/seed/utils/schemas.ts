@@ -28,15 +28,7 @@ const timestampSchema = z.string().datetime()
 // =============================================================================
 
 function loadLocationSlugs(): [string, ...string[]] {
-	const jsonPath = path.join(
-		__dirname,
-		'..',
-		'..',
-		'.local',
-		'seed-data',
-		'static',
-		'locations.json'
-	)
+	const jsonPath = path.join(__dirname, '..', 'data', 'locations.json')
 	const locations = JSON.parse(readFileSync(jsonPath, 'utf8')) as Array<{
 		slug: string
 	}>
@@ -55,15 +47,7 @@ export const locationSlugEnum = z.enum(LOCATION_SLUGS)
 
 /** Slug-to-name lookup */
 function loadSlugToNameMap(): Record<string, string> {
-	const jsonPath = path.join(
-		__dirname,
-		'..',
-		'..',
-		'.local',
-		'seed-data',
-		'static',
-		'locations.json'
-	)
+	const jsonPath = path.join(__dirname, '..', 'data', 'locations.json')
 	const locations = JSON.parse(readFileSync(jsonPath, 'utf8')) as Array<{
 		name: string
 		slug: string

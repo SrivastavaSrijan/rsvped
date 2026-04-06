@@ -1,0 +1,102 @@
+[
+	{
+		"name": "Food & Drinks",
+		"slug": "food-drinks",
+		"subcategories": ["brunch", "happy hour", "wine tasting", "food tours", "cooking classes", "cocktail workshops", "craft beer", "coffee culture"]
+	},
+	{
+		"name": "Nightlife & Parties",
+		"slug": "nightlife-parties",
+		"subcategories": ["rooftop parties", "club nights", "themed parties", "bar crawls", "karaoke", "dance parties", "social mixers", "birthday parties"]
+	},
+	{
+		"name": "Music & Concerts",
+		"slug": "music-concerts",
+		"subcategories": ["live music", "indie concerts", "open mic nights", "music festivals", "DJ sets", "acoustic sessions", "band performances", "music venues"]
+	},
+	{
+		"name": "Arts & Culture",
+		"slug": "arts-culture",
+		"subcategories": ["art galleries", "museum visits", "theater shows", "poetry readings", "cultural festivals", "art workshops", "exhibitions", "street art tours"]
+	},
+	{
+		"name": "Sports & Fitness",
+		"slug": "sports-fitness",
+		"subcategories": ["yoga classes", "running groups", "gym workouts", "rock climbing", "cycling", "swimming", "group fitness", "sports leagues"]
+	},
+	{
+		"name": "Gaming & Esports",
+		"slug": "gaming-esports",
+		"subcategories": ["board game nights", "video game tournaments", "escape rooms", "trivia nights", "LAN parties", "retro gaming", "tabletop RPGs", "gaming cafes"]
+	},
+	{
+		"name": "Travel & Adventure",
+		"slug": "travel-adventure",
+		"subcategories": ["weekend trips", "hiking", "city exploration", "adventure sports", "travel planning", "backpacking", "local tours", "road trips"]
+	},
+	{
+		"name": "Tech & Startups",
+		"slug": "tech-startups",
+		"subcategories": ["startup meetups", "tech talks", "hackathons", "product launches", "coding bootcamps", "innovation workshops", "pitch events", "co-working sessions"]
+	},
+	{
+		"name": "Wellness & Self-Care",
+		"slug": "wellness-self-care",
+		"subcategories": ["meditation", "spa days", "mental health", "mindfulness", "therapy groups", "wellness retreats", "self-improvement", "holistic healing"]
+	},
+	{
+		"name": "Photography & Film",
+		"slug": "photography-film",
+		"subcategories": ["photo walks", "film screenings", "camera workshops", "editing classes", "portrait sessions", "documentary nights", "photo exhibitions", "filmmaking"]
+	},
+	{
+		"name": "Books & Writing",
+		"slug": "books-writing",
+		"subcategories": ["book clubs", "author readings", "writing workshops", "poetry slams", "literary events", "storytelling", "journaling circles", "book launches"]
+	},
+	{
+		"name": "Comedy & Entertainment",
+		"slug": "comedy-entertainment",
+		"subcategories": ["stand-up comedy", "improv shows", "comedy clubs", "sketch comedy", "open mics", "comedy workshops", "variety shows", "entertainment venues"]
+	},
+	{
+		"name": "Fashion & Style",
+		"slug": "fashion-style",
+		"subcategories": ["fashion shows", "styling workshops", "thrift shopping", "fashion swaps", "beauty tutorials", "sustainable fashion", "personal styling", "trend discussions"]
+	},
+	{
+		"name": "Networking & Career",
+		"slug": "networking-career",
+		"subcategories": ["professional mixers", "career workshops", "industry meetups", "mentorship", "job fairs", "skill building", "leadership training", "business networking"]
+	},
+	{
+		"name": "Outdoor & Nature",
+		"slug": "outdoor-nature",
+		"subcategories": ["park hangouts", "beach days", "nature walks", "camping", "gardening", "outdoor sports", "environmental activities", "picnics"]
+	},
+	{
+		"name": "Crafts & DIY",
+		"slug": "crafts-diy",
+		"subcategories": ["craft workshops", "pottery classes", "knitting circles", "woodworking", "jewelry making", "painting nights", "upcycling projects", "maker spaces"]
+	},
+	{
+		"name": "Dating & Social",
+		"slug": "dating-social",
+		"subcategories": ["speed dating", "singles events", "social mixers", "blind date events", "relationship workshops", "social clubs", "friendship meetups", "dating apps events"]
+	},
+	{
+		"name": "Learning & Skills",
+		"slug": "learning-skills",
+		"subcategories": ["workshops", "online courses", "skill shares", "language exchange", "professional development", "tutorials", "masterclasses", "educational talks"]
+	},
+	{
+		"name": "Volunteering & Impact",
+		"slug": "volunteering-impact",
+		"subcategories": ["community service", "charity events", "environmental cleanup", "food drives", "social causes", "nonprofit events", "activism", "giving back"]
+	},
+	{
+		"name": "Pets & Animals",
+		"slug": "pets-animals",
+		"subcategories": ["dog parks", "pet adoption", "animal welfare", "pet training", "vet talks", "pet-friendly events", "animal rescue", "pet care workshops"]
+	}
+]

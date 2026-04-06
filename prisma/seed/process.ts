@@ -86,7 +86,7 @@ async function processData() {
 		}
 
 		try {
-			const venuesPath = path.join(paths.staticDir, 'venues.json')
+			const venuesPath = path.join(paths.cacheDir, 'venues.json')
 			logger.debug('Reading venues file', { path: venuesPath })
 			const venuesData = safeReadJSON(venuesPath)
 

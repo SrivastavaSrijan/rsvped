@@ -13,6 +13,7 @@ import {
 	createUsers,
 } from './creators'
 import { seedDemoUser } from './demo'
+import { loadStaticData } from './load-static'
 import {
 	fetchUnsplashImages,
 	loadProcessedBatchData,
@@ -72,6 +73,12 @@ async function main() {
 					isResume: pipeline.shouldSkipWipe,
 				})
 			}
+		})
+
+		// Load static data (locations + categories) into DB
+		await pipeline.runStage('load-static', async () => {
+			logger.info('Loading static data (locations, categories)')
+			await loadStaticData(prisma)
 		})
 
 		// Shared state across stages

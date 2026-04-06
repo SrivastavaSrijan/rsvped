@@ -1,8 +1,9 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: only seed */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { faker } from '@faker-js/faker'
 import type { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 import { snakeCase } from 'es-toolkit/string'
 import { getAvatarURL } from '@/lib/config/routes'
 import type { BatchProcessedData } from '../utils'
@@ -44,11 +45,26 @@ export async function createUsers(
 		usedEmails.add(email)
 		return email
 	}
-	const passwordsPath = path.join(paths.staticDir, 'passwords.json')
-	const prehashed = JSON.parse(readFileSync(passwordsPath, 'utf8')) as {
-		plain: string
-		hash: string
-	}[]
+	const passwordsPath = path.join(paths.cacheDir, 'passwords.json')
+	let prehashed: { plain: string; hash: string }[]
+	if (existsSync(passwordsPath)) {
+		prehashed = JSON.parse(readFileSync(passwordsPath, 'utf8'))
+		logger.info(`Loaded ${prehashed.length} cached password hashes`)
+	} else {
+		logger.info(
+			'No cached passwords found — generating fresh bcrypt hashes (slow, one-time)'
+		)
+		const POOL_SIZE = 80
+		prehashed = []
+		for (let i = 0; i < POOL_SIZE; i++) {
+			const plain = faker.string.alphanumeric(12)
+			const hash = await bcrypt.hash(plain, 12)
+			prehashed.push({ plain, hash })
+		}
+		mkdirSync(path.dirname(passwordsPath), { recursive: true })
+		writeFileSync(passwordsPath, JSON.stringify(prehashed, null, 2))
+		logger.info(`Generated and cached ${POOL_SIZE} password hashes`)
+	}
 
 	// First, prepare LLM batch data users (without hashing passwords yet)
 	let createdFromBatch = 0

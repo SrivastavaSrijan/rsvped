@@ -1,89 +1,82 @@
 /**
- * Load static data (locations + categories) from CSV exports.
- * Run: npx tsx prisma/seed/load-static.ts
+ * Load static data (locations + categories) from committed JSON files.
  *
- * CSV files expected at: prisma/seed/init/locations.csv, prisma/seed/init/categories.csv
+ * Can run standalone:  npx tsx prisma/seed/load-static.ts
+ * Also called from seed.ts as the first pipeline stage.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+const DATA_DIR = path.join(__dirname, 'data')
 
-const INIT_DIR = path.join(__dirname, 'init')
+interface LocationEntry {
+	name: string
+	slug: string
+	country: string
+	continent: string
+	timezone: string
+	iconPath: string
+	coverImage: string | null
+}
 
-async function main() {
-	// Insert locations
-	const locLines = readFileSync(path.join(INIT_DIR, 'locations.csv'), 'utf8')
-		.trim()
-		.split('\n')
+interface CategoryEntry {
+	name: string
+	slug: string
+	subcategories: string[]
+}
+
+export async function loadStaticData(prisma: PrismaClient) {
+	const locations: LocationEntry[] = JSON.parse(
+		readFileSync(path.join(DATA_DIR, 'locations.json'), 'utf8')
+	)
+	const categories: CategoryEntry[] = JSON.parse(
+		readFileSync(path.join(DATA_DIR, 'categories.json'), 'utf8')
+	)
 
 	let locCount = 0
-	for (const line of locLines) {
-		const parts = line.split(',')
-		const [
-			id,
-			name,
-			slug,
-			country,
-			continent,
-			timezone,
-			icon,
-			_createdAt,
-			_updatedAt,
-			...coverParts
-		] = parts
-		const coverImage = coverParts.join(',') || null
+	for (const loc of locations) {
 		await prisma.location.upsert({
-			where: { id },
+			where: { slug: loc.slug },
 			update: {},
 			create: {
-				id,
-				name,
-				slug,
-				country,
-				continent,
-				timezone,
-				iconPath: icon,
-				coverImage,
+				name: loc.name,
+				slug: loc.slug,
+				country: loc.country,
+				continent: loc.continent,
+				timezone: loc.timezone,
+				iconPath: loc.iconPath,
+				coverImage: loc.coverImage,
 			},
 		})
 		locCount++
 	}
-	console.log(`Locations inserted: ${locCount}`)
-
-	// Insert categories
-	const catLines = readFileSync(path.join(INIT_DIR, 'categories.csv'), 'utf8')
-		.trim()
-		.split('\n')
+	console.log(`Locations upserted: ${locCount}`)
 
 	let catCount = 0
-	for (const line of catLines) {
-		const match = line.match(/^([^,]+),([^,]+),([^,]+),(.+)$/)
-		if (!match) {
-			console.log('Skip:', line.slice(0, 50))
-			continue
-		}
-		const [, id, name, slug, rawSubs] = match
-		const subcategories = rawSubs
-			.replace(/[{}"']/g, '')
-			.split(',')
-			.map((s) => s.trim())
-			.filter(Boolean)
-
+	for (const cat of categories) {
 		await prisma.category.upsert({
-			where: { id },
+			where: { slug: cat.slug },
 			update: {},
-			create: { id, name, slug, subcategories },
+			create: {
+				name: cat.name,
+				slug: cat.slug,
+				subcategories: cat.subcategories,
+			},
 		})
 		catCount++
 	}
-	console.log(`Categories inserted: ${catCount}`)
+	console.log(`Categories upserted: ${catCount}`)
 }
 
-main()
-	.then(() => prisma.$disconnect())
-	.catch((e) => {
-		console.error(e)
-		process.exit(1)
-	})
+// Standalone execution
+if (require.main === module) {
+	const { PrismaClient } = require('@prisma/client')
+	const prisma = new PrismaClient()
+	loadStaticData(prisma)
+		.then(() => prisma.$disconnect())
+		.catch((e: unknown) => {
+			console.error(e)
+			process.exit(1)
+		})
+}

@@ -1,0 +1,623 @@
+[
+	{
+		"name": "Chicago",
+		"slug": "chicago",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Chicago",
+		"iconPath": "chicago-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1676694090990-b9e29828fdd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxDaGljYWdvJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjMxfDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Seattle",
+		"slug": "seattle",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Los_Angeles",
+		"iconPath": "seattle-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1549092196-6f877d6b54bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTZWF0dGxlJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjM2fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Miami",
+		"slug": "miami",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/New_York",
+		"iconPath": "miami-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1585189771777-f2d14628fbd4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNaWFtaSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTYzOXww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Philadelphia",
+		"slug": "philly",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/New_York",
+		"iconPath": "philly-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1581909811589-a1317515f20c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxQaGlsYWRlbHBoaWElMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NDR8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Portland",
+		"slug": "portland",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Los_Angeles",
+		"iconPath": "portland-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1645934431438-5b836be32221?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxQb3J0bGFuZCUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY0OXww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Dallas",
+		"slug": "dallas",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Chicago",
+		"iconPath": "dallas-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1614561688138-2135bc7a5c68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxEYWxsYXMlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NTN8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Toronto",
+		"slug": "toronto",
+		"country": "Canada",
+		"continent": "North America",
+		"timezone": "America/Toronto",
+		"iconPath": "toronto-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1602513525551-87b56bf5e9a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxUb3JvbnRvJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjU3fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Calgary",
+		"slug": "calgary",
+		"country": "Canada",
+		"continent": "North America",
+		"timezone": "America/Edmonton",
+		"iconPath": "calgary-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1556847375-474dd8f11506?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxDYWxnYXJ5JTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjYyfDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Honolulu",
+		"slug": "hnl",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "Pacific/Honolulu",
+		"iconPath": "hnl-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1574502757458-57c806e33780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxIb25vbHVsdSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY2Nnww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Paris",
+		"slug": "paris",
+		"country": "France",
+		"continent": "Europe",
+		"timezone": "Europe/Paris",
+		"iconPath": "paris-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1699076702974-7e194a0b6804?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxQYXJpcyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY2OXww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Barcelona",
+		"slug": "bcn",
+		"country": "Spain",
+		"continent": "Europe",
+		"timezone": "Europe/Madrid",
+		"iconPath": "bcn-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1587113271726-5c1aba665440?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCYXJjZWxvbmElMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NzR8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Stockholm",
+		"slug": "stockholm",
+		"country": "Sweden",
+		"continent": "Europe",
+		"timezone": "Europe/Stockholm",
+		"iconPath": "stockholm-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1711721548718-40418562e928?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTdG9ja2hvbG0lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Helsinki",
+		"slug": "helsinki",
+		"country": "Finland",
+		"continent": "Europe",
+		"timezone": "Europe/Helsinki",
+		"iconPath": "helsinki-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1648382076530-94b3eb973ab8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxIZWxzaW5raSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY4NHww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Geneva",
+		"slug": "geneva",
+		"country": "Switzerland",
+		"continent": "Europe",
+		"timezone": "Europe/Zurich",
+		"iconPath": "geneva-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1696448022220-4d357587ddac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxHZW5ldmElMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2ODh8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Prague",
+		"slug": "prague",
+		"country": "Czech Republic",
+		"continent": "Europe",
+		"timezone": "Europe/Prague",
+		"iconPath": "prague-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1583523553895-307cccdb647f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxQcmFndWUlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2OTN8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Tel Aviv",
+		"slug": "telaviv",
+		"country": "Israel",
+		"continent": "Europe",
+		"timezone": "Asia/Jerusalem",
+		"iconPath": "telaviv-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1578829842846-945cc6b68c1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxUZWwlMjBBdml2JTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjk4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Singapore",
+		"slug": "sg",
+		"country": "Singapore",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Singapore",
+		"iconPath": "sg-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1727880676753-9ba90268d3ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTaW5nYXBvcmUlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MDF8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Sydney",
+		"slug": "sydney",
+		"country": "Australia",
+		"continent": "Asia & Pacific",
+		"timezone": "Australia/Sydney",
+		"iconPath": "sydney-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1667992501579-b6d13aedca18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTeWRuZXklMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Bangalore",
+		"slug": "bangalore",
+		"country": "India",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Kolkata",
+		"iconPath": "bangalore-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1572526369666-d09b14e2872c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCYW5nYWxvcmUlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MTB8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Jakarta",
+		"slug": "jakarta",
+		"country": "Indonesia",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Jakarta",
+		"iconPath": "jakarta-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1676536947900-ed3438751ed1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxKYWthcnRhJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNzE1fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "New York City",
+		"slug": "nyc",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/New_York",
+		"iconPath": "nyc-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1578879279270-f1a166ab29f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxOZXclMjBZb3JrJTIwQ2l0eSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTYyN3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Los Angeles",
+		"slug": "la",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Los_Angeles",
+		"iconPath": "la-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1677827635012-d9c18b4dab68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxMb3MlMjBBbmdlbGVzJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjI4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "San Francisco",
+		"slug": "sf",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Los_Angeles",
+		"iconPath": "sf-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1515386078358-daf436633fba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTYW4lMjBGcmFuY2lzY28lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2MzB8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Boston",
+		"slug": "boston",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/New_York",
+		"iconPath": "boston-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1595039761394-823e673a40a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCb3N0b24lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2MzN8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Washington DC",
+		"slug": "dc",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/New_York",
+		"iconPath": "dc-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1656897132922-946c02ef9699?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxXYXNoaW5ndG9uJTIwREMlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Austin",
+		"slug": "austin",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Chicago",
+		"iconPath": "austin-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1576340537066-786ec8c9553a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxBdXN0aW4lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Denver",
+		"slug": "denver",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Denver",
+		"iconPath": "denver-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1445462357936-a1ae5e6706a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxEZW52ZXIlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NDF8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Las Vegas",
+		"slug": "vegas",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Los_Angeles",
+		"iconPath": "vegas-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1458252786639-fb0dfc2e502b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxMYXMlMjBWZWdhcyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY0M3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Phoenix",
+		"slug": "phx",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Phoenix",
+		"iconPath": "phx-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1551609350-d4c86394ddcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxQaG9lbml4JTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjQ2fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "San Diego",
+		"slug": "sd",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Los_Angeles",
+		"iconPath": "sd-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1635810304439-2f31c57d01f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTYW4lMjBEaWVnbyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY0N3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Salt Lake City",
+		"slug": "slc",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Denver",
+		"iconPath": "slc-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1610141369426-bc6044caef17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTYWx0JTIwTGFrZSUyMENpdHklMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NTB8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Atlanta",
+		"slug": "atlanta",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/New_York",
+		"iconPath": "atlanta-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1481478666248-8dcfc798506f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxBdGxhbnRhJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjUyfDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Houston",
+		"slug": "houston",
+		"country": "United States",
+		"continent": "North America",
+		"timezone": "America/Chicago",
+		"iconPath": "houston-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1626764473782-ce194f3f872c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxIb3VzdG9uJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjU1fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Vancouver",
+		"slug": "vancouver",
+		"country": "Canada",
+		"continent": "North America",
+		"timezone": "America/Vancouver",
+		"iconPath": "vancouver-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1553855804-7ad694208f0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxWYW5jb3V2ZXIlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NTl8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Montreal",
+		"slug": "montreal",
+		"country": "Canada",
+		"continent": "North America",
+		"timezone": "America/Montreal",
+		"iconPath": "montreal-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1723921027368-c19d7f757fbd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNb250cmVhbCUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY2MHww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Waterloo",
+		"slug": "waterloo",
+		"country": "Canada",
+		"continent": "North America",
+		"timezone": "America/Toronto",
+		"iconPath": "waterloo-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1485714177951-92190783981a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxXYXRlcmxvbyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY2M3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Ho Chi Minh City",
+		"slug": "hcm",
+		"country": "Vietnam",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Ho_Chi_Minh",
+		"iconPath": "hcm-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1636681097851-0a1baa540bca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxIbyUyMENoaSUyME1pbmglMjBDaXR5JTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNzIwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "São Paulo",
+		"slug": "sp",
+		"country": "Brazil",
+		"continent": "South America",
+		"timezone": "America/Sao_Paulo",
+		"iconPath": "sp-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1612549671702-7c8f4854ed33?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTJUMzJUEzbyUyMFBhdWxvJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNzI0fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Bogotá",
+		"slug": "bogota",
+		"country": "Colombia",
+		"continent": "South America",
+		"timezone": "America/Bogota",
+		"iconPath": "bogota-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1611148261486-4e315d904232?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCb2dvdCVDMyVBMSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcyOXww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Lagos",
+		"slug": "lagos",
+		"country": "Nigeria",
+		"continent": "Africa",
+		"timezone": "Africa/Lagos",
+		"iconPath": "lagos-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1651776127603-b7a723a4cbc5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxMYWdvcyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTczMnww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Mexico City",
+		"slug": "cdmx",
+		"country": "Mexico",
+		"continent": "North America",
+		"timezone": "America/Mexico_City",
+		"iconPath": "cdmx-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1717388835452-c9c8cda0002e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNZXhpY28lMjBDaXR5JTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjY1fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "London",
+		"slug": "london",
+		"country": "United Kingdom",
+		"continent": "Europe",
+		"timezone": "Europe/London",
+		"iconPath": "london-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1490642914619-7955a3fd483c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxMb25kb24lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2Njh8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Berlin",
+		"slug": "berlin",
+		"country": "Germany",
+		"continent": "Europe",
+		"timezone": "Europe/Berlin",
+		"iconPath": "berlin-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1592161461911-fe78a33235a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCZXJsaW4lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NzF8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Amsterdam",
+		"slug": "ams",
+		"country": "Netherlands",
+		"continent": "Europe",
+		"timezone": "Europe/Amsterdam",
+		"iconPath": "ams-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1571657370423-23ee8d7fd497?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxBbXN0ZXJkYW0lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NzN8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Madrid",
+		"slug": "madrid",
+		"country": "Spain",
+		"continent": "Europe",
+		"timezone": "Europe/Madrid",
+		"iconPath": "madrid-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1647692771267-4bcd0d65bdff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNYWRyaWQlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2NzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Milan",
+		"slug": "milan",
+		"country": "Italy",
+		"continent": "Europe",
+		"timezone": "Europe/Rome",
+		"iconPath": "milan-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1651856835287-e7a345e876e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNaWxhbiUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY3N3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Copenhagen",
+		"slug": "cph",
+		"country": "Denmark",
+		"continent": "Europe",
+		"timezone": "Europe/Copenhagen",
+		"iconPath": "cph-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1548186879-9a93eed687ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxDb3BlbmhhZ2VuJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNjgwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Dublin",
+		"slug": "dublin",
+		"country": "Ireland",
+		"continent": "Europe",
+		"timezone": "Europe/Dublin",
+		"iconPath": "dublin-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1508676595553-9a4a25ce65db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxEdWJsaW4lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Brussels",
+		"slug": "brussels",
+		"country": "Belgium",
+		"continent": "Europe",
+		"timezone": "Europe/Brussels",
+		"iconPath": "brussels-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1542360800-fd8395e2f2a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCcnVzc2VscyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY4NXww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Zurich",
+		"slug": "zurich",
+		"country": "Switzerland",
+		"continent": "Europe",
+		"timezone": "Europe/Zurich",
+		"iconPath": "zurich-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1735484841411-d26bd2bffe0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxadXJpY2glMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2ODd8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Lausanne",
+		"slug": "lausanne",
+		"country": "Switzerland",
+		"continent": "Europe",
+		"timezone": "Europe/Zurich",
+		"iconPath": "lausanne-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1559377240-b8e6053b6544?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxMYXVzYW5uZSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY5MHww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Munich",
+		"slug": "munich",
+		"country": "Germany",
+		"continent": "Europe",
+		"timezone": "Europe/Berlin",
+		"iconPath": "munich-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1704709330931-b00878cd6425?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNdW5pY2glMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2OTJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Lisbon",
+		"slug": "lisbon",
+		"country": "Portugal",
+		"continent": "Europe",
+		"timezone": "Europe/Lisbon",
+		"iconPath": "lisbon-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1672933914978-7c2fc61e899d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxMaXNib24lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE2OTV8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Istanbul",
+		"slug": "istanbul",
+		"country": "Turkey",
+		"continent": "Europe",
+		"timezone": "Europe/Istanbul",
+		"iconPath": "istanbul-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1687706222092-b6545828217d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxJc3RhbmJ1bCUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTY5Nnww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Tokyo",
+		"slug": "tokyo",
+		"country": "Japan",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Tokyo",
+		"iconPath": "tokyo-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1496112933996-1aa94ac8a23f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxUb2t5byUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcwMHww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Hong Kong",
+		"slug": "hk",
+		"country": "Hong Kong",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Hong_Kong",
+		"iconPath": "hk-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1527741966618-e802ebe5b193?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxIb25nJTIwS29uZyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcwM3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Seoul",
+		"slug": "seoul",
+		"country": "South Korea",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Seoul",
+		"iconPath": "seoul-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1440190727617-48b9b2c7e24b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxTZW91bCUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcwNHww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Melbourne",
+		"slug": "mel",
+		"country": "Australia",
+		"continent": "Asia & Pacific",
+		"timezone": "Australia/Melbourne",
+		"iconPath": "mel-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1735624291711-32c11c72cc4e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNZWxib3VybmUlMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Mumbai",
+		"slug": "mumbai",
+		"country": "India",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Kolkata",
+		"iconPath": "mumbai-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1573328243071-93a01f865248?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNdW1iYWklMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MDl8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "New Delhi",
+		"slug": "newdelhi",
+		"country": "India",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Kolkata",
+		"iconPath": "newdelhi-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1599230080795-a48439229cb7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxOZXclMjBEZWxoaSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcxMnww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Bangkok",
+		"slug": "bangkok",
+		"country": "Thailand",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Bangkok",
+		"iconPath": "bangkok-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1706008434257-f50d6ec7d107?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCYW5na29rJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNzE0fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Kuala Lumpur",
+		"slug": "kl",
+		"country": "Malaysia",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Kuala_Lumpur",
+		"iconPath": "kl-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1750337858420-04b607da13ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxLdWFsYSUyMEx1bXB1ciUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcxN3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Manila",
+		"slug": "manila",
+		"country": "Philippines",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Manila",
+		"iconPath": "manila-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1602253396430-e805dc528e97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNYW5pbGElMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MTh8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Taipei",
+		"slug": "taipei",
+		"country": "Taiwan",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Taipei",
+		"iconPath": "taipei-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1583560306723-4e50a15636c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxUYWlwZWklMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MjF8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Dubai",
+		"slug": "dubai",
+		"country": "United Arab Emirates",
+		"continent": "Asia & Pacific",
+		"timezone": "Asia/Dubai",
+		"iconPath": "dubai-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1712772120658-0e383b15a5a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxEdWJhaSUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcyM3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Rio de Janeiro",
+		"slug": "rio",
+		"country": "Brazil",
+		"continent": "South America",
+		"timezone": "America/Sao_Paulo",
+		"iconPath": "rio-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1713721010281-b5a32969efcc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxSaW8lMjBkZSUyMEphbmVpcm8lMjBza3lsaW5lJTIwbGFuZHNjYXBlfGVufDF8MHx8fDE3NTQ5ODE3MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Buenos Aires",
+		"slug": "ba",
+		"country": "Argentina",
+		"continent": "South America",
+		"timezone": "America/Argentina/Buenos_Aires",
+		"iconPath": "ba-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1446575314900-feb82d28fa8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxCdWVub3MlMjBBaXJlcyUyMHNreWxpbmUlMjBsYW5kc2NhcGV8ZW58MXwwfHx8MTc1NDk4MTcyN3ww&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Medellín",
+		"slug": "medellin",
+		"country": "Colombia",
+		"continent": "South America",
+		"timezone": "America/Bogota",
+		"iconPath": "medellin-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1440151811653-bfe5b15e7976?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxNZWRlbGwlQzMlQURuJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNzMwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+	},
+	{
+		"name": "Nairobi",
+		"slug": "nairobi",
+		"country": "Kenya",
+		"continent": "Africa",
+		"timezone": "Africa/Nairobi",
+		"iconPath": "nairobi-icon.png",
+		"coverImage": "https://images.unsplash.com/photo-1741991109886-90e70988f27b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMzE4NDN8MHwxfHNlYXJjaHwxfHxOYWlyb2JpJTIwc2t5bGluZSUyMGxhbmRzY2FwZXxlbnwxfDB8fHwxNzU0OTgxNzM0fDA&ixlib=rb-4.1.0&q=80&w=1080"
+	}
+]

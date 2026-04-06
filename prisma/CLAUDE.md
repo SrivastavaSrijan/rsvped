@@ -41,8 +41,10 @@ yarn db:studio        # GUI browser
 ```
 prisma/seed/
 ├── seed.ts           # Entry point — pipeline runner with checkpoint/resume
+├── load-static.ts    # Upsert locations + categories from JSON into DB
 ├── generator.ts      # Multi-pass generator (communities → digest → users)
 ├── workflow.ts       # CLI entry point (generate | process | seed | all)
+├── data/             # Committed static data (locations, categories, venues, passwords)
 ├── creators/         # DB writers — take generated data, insert via Prisma
 ├── generators/       # LLM service (Claude Haiku via Vercel AI SDK) + faker fallback
 ├── prompts/          # Coherence-focused LLM prompts
@@ -52,11 +54,11 @@ prisma/seed/
 ### Rules
 - **Do not modify the seed system** unless explicitly asked — it's complex and works
 - Seed generators use Claude Haiku via Vercel AI SDK (`generateObject` + `@ai-sdk/anthropic`)
-- Location slugs are enforced via `z.enum()` built from `prisma/seed/init/locations.csv`
+- Location slugs are enforced via `z.enum()` built from `prisma/seed/data/locations.json`
 - `SEED_PROFILE` env var selects presets (dev/demo/full/stress); individual vars override
 - Config in `prisma/seed/utils/config.ts` controls `NUM_USERS`, `NUM_COMMUNITIES`, `USE_LLM`
 - Pipeline runner in `seed.ts` supports checkpoint/resume via `pipeline-state.json`
-- The seed pipeline runs `wipeDb()` → create users → create communities → create events → create orders
+- The seed pipeline runs `load-static` → `wipeDb()` → create users → create communities → create events → create orders
 
 ### Image System
 - Cover images for events and communities come from **Unsplash** via `utils/image-fetcher.ts`
@@ -64,7 +66,7 @@ prisma/seed/
 - Requires `UNSPLASH_ACCESS_KEY` env var; falls back to Picsum placeholders if missing
 - Images are fetched once at seed start (up to 400, configurable via `MAX_UNSPLASH_IMAGES`) and randomly assigned to entities
 - **Do not create events in demo.ts** — the image system is complex; instead reassign existing seeded events to the demo user
-- Location images come from `prisma/seed/init/locations.csv`, not Unsplash
+- Location cover images are stored in `prisma/seed/data/locations.json`
 
 ### Testing Seed Logic
 - Seed matching logic (`findInterestedUsers`, `selectIntelligentAttendees`, `selectTierForUser`) is the most complex code in the seed system
