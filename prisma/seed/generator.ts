@@ -22,7 +22,6 @@ import {
 } from './utils'
 import { config } from './utils/config'
 import { loadCategorySlugs } from './utils/data-loaders'
-import { SeedError } from './utils/errors'
 
 // ---------------------------------------------------------------------------
 // Community Digest — compact summaries grouped by location

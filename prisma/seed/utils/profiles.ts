@@ -5,8 +5,6 @@
  * SEED_PROFILE env var selects the profile; individual env vars override.
  */
 
-import { z } from 'zod'
-
 export interface SeedProfile {
 	name: string
 	description: string
