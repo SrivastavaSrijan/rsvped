@@ -8,7 +8,6 @@ import {
 	calculateEventScoreWithMatches,
 	createCommunitySearchWhere,
 	createEventSearchWhere,
-	isRelevantMatch,
 	type SearchScoreParams,
 } from './helpers'
 
@@ -25,54 +24,34 @@ export const stirSearchRouter = createTRPCRouter({
 			const { pagination } = ctx
 			const { skip, take } = pagination
 
-			// Use intelligent search conditions
 			const where = createEventSearchWhere(query)
-
-			// Get a reasonable number of results for filtering
-			// For counting queries (small page size), get a larger sample
-			const isCountingQuery = take <= 5
-			const searchLimit = isCountingQuery
-				? Math.min(1000, 2000) // Large sample for accurate counting
-				: Math.min(take * 10, 500) // Normal search behavior
-
-			const events = await ctx.prisma.event.findMany({
-				where,
-				include: eventCoreInclude,
-				take: searchLimit,
-				orderBy: { startDate: 'desc' },
-			})
-
-			// Apply intelligent scoring and filtering
 			const searchParams: SearchScoreParams = { query, userLocationId }
 
-			const relevantEvents = events
-				.filter(
-					(event) =>
-						isRelevantMatch(event.title, query) ||
-						(event.description && isRelevantMatch(event.description, query))
-				)
-				.map((event) => {
-					const searchResult = calculateEventScoreWithMatches(
-						event,
-						searchParams
-					)
-					return {
-						...event,
-						_searchMetadata: {
-							matches: searchResult.matches,
-							score: searchResult.total,
-							query: query,
-						},
-					}
-				})
-				.sort((a, b) => b._searchMetadata.score - a._searchMetadata.score)
+			const [events, total] = await Promise.all([
+				ctx.prisma.event.findMany({
+					where,
+					include: eventCoreInclude,
+					skip,
+					take,
+					orderBy: { startDate: 'desc' },
+				}),
+				ctx.prisma.event.count({ where }),
+			])
 
-			// Simple pagination
-			const paginatedEvents = relevantEvents.slice(skip, skip + take)
-			const total = relevantEvents.length
+			const data = events.map((event) => {
+				const searchResult = calculateEventScoreWithMatches(event, searchParams)
+				return {
+					...event,
+					_searchMetadata: {
+						matches: searchResult.matches,
+						score: searchResult.total,
+						query,
+					},
+				}
+			})
 
 			return {
-				data: paginatedEvents,
+				data,
 				pagination: pagination.createMetadata(total),
 			}
 		}),
@@ -84,72 +63,54 @@ export const stirSearchRouter = createTRPCRouter({
 			const { pagination } = ctx
 			const { skip, take } = pagination
 
-			// Use intelligent search conditions
 			const where = createCommunitySearchWhere(query)
+			const searchParams: SearchScoreParams = { query }
 
-			// Get a reasonable number of results for filtering
-			// For counting queries (small page size), get a larger sample
-			const isCountingQuery = take <= 5
-			const searchLimit = isCountingQuery
-				? Math.min(1000, 2000) // Large sample for accurate counting
-				: Math.min(take * 10, 500) // Normal search behavior
-
-			const communities = await ctx.prisma.community.findMany({
-				where,
-				select: {
-					...communityCoreSelect,
-					_count: {
-						select: {
-							members: true,
-							events: true,
+			const [communities, total] = await Promise.all([
+				ctx.prisma.community.findMany({
+					where,
+					select: {
+						...communityCoreSelect,
+						_count: {
+							select: {
+								members: true,
+								events: true,
+							},
 						},
-					},
-					events: {
-						select: { startDate: true },
-						where: {
-							startDate: {
-								gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+						events: {
+							select: { startDate: true },
+							where: {
+								startDate: {
+									gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+								},
 							},
 						},
 					},
-				},
-				take: searchLimit,
-				orderBy: { name: 'asc' },
+					skip,
+					take,
+					orderBy: { name: 'asc' },
+				}),
+				ctx.prisma.community.count({ where }),
+			])
+
+			const data = communities.map((community) => {
+				const searchResult = calculateCommunityScoreWithMatches(
+					community,
+					searchParams
+				)
+				return {
+					...community,
+					metadata: { role: null },
+					_searchMetadata: {
+						matches: searchResult.matches,
+						score: searchResult.total,
+						query,
+					},
+				}
 			})
 
-			// Apply intelligent scoring and filtering
-			const searchParams: SearchScoreParams = { query }
-
-			const relevantCommunities = communities
-				.filter(
-					(community) =>
-						isRelevantMatch(community.name, query) ||
-						(community.description &&
-							isRelevantMatch(community.description, query))
-				)
-				.map((community) => {
-					const searchResult = calculateCommunityScoreWithMatches(
-						community,
-						searchParams
-					)
-					return {
-						...community,
-						metadata: { role: null },
-						_searchMetadata: {
-							matches: searchResult.matches,
-							score: searchResult.total,
-							query: query,
-						},
-					}
-				})
-				.sort((a, b) => b._searchMetadata.score - a._searchMetadata.score)
-
-			// Simple pagination
-			const paginatedCommunities = relevantCommunities.slice(skip, skip + take)
-			const total = relevantCommunities.length
-
 			return {
-				data: paginatedCommunities,
+				data,
 				pagination: pagination.createMetadata(total),
 			}
 		}),
