@@ -14,7 +14,7 @@ import { config } from '../utils/config'
  * Enhanced orders and RSVPs system with intelligent category-based matching
  */
 
-interface EventWithCategories {
+export interface EventWithCategories {
 	id: string
 	title: string
 	capacity?: number | null
@@ -26,7 +26,7 @@ interface EventWithCategories {
 	}>
 }
 
-interface UserWithCategories {
+export interface UserWithCategories {
 	id: string
 	name?: string | null
 	email?: string | null
@@ -429,7 +429,7 @@ export async function createEngagementData(
 
 // Helper Functions
 
-function findInterestedUsers(
+export function findInterestedUsers(
 	event: EventWithCategories,
 	users: UserWithCategories[]
 ) {
@@ -484,7 +484,7 @@ function findInterestedUsers(
 		.filter(({ probability }) => probability > 0.1) // Filter out very low interest
 }
 
-function selectIntelligentAttendees(
+export function selectIntelligentAttendees(
 	interestedUsers: any[],
 	targetAttendance: number
 ) {
@@ -537,7 +537,7 @@ function selectIntelligentAttendees(
 	return selected
 }
 
-function selectTierForUser(
+export function selectTierForUser(
 	user: UserWithCategories,
 	eventTiers: any[],
 	faker: any
@@ -583,7 +583,7 @@ function selectTierForUser(
 	}
 }
 
-function determineOrderStatus(
+export function determineOrderStatus(
 	user: UserWithCategories,
 	priceCents: number,
 	faker: any

@@ -1,248 +1,193 @@
 # RSVP'd
 
-A Lu.ma-inspired event platform built with the modern Next.js 15 stack.
+An AI-forward event management platform built with Next.js 15, tRPC, Prisma, and the Vercel AI SDK. Inspired by Lu.ma — with agentic AI event discovery that searches your database through typed tools.
 
-## ✨ Project Goals
+## Architecture
 
-- Mirror core Lu.ma functionality (public event listings, RSVP/tickets, organiser dashboard, analytics) with a calm, rounded aesthetic
-- Guarantee type-safety from database → API → UI
-- Keep the codebase token-driven (Tailwind v4 theme) and component-centric (ShadCN UI)
+```mermaid
+graph TB
+    subgraph Client
+        UI[React 19 + Tailwind v4]
+        WA[WritingAssistant<br/>useCompletion streaming]
+        AD[AI Discovery<br/>useChat + tools]
+    end
 
-## 📚 Tech Stack
+    subgraph "Next.js 15 App Router"
+        RSC[Server Components]
+        SA[Server Actions]
+        RH[Route Handlers<br/>streaming AI]
+        MW[Middleware<br/>auth + timing]
+    end
 
-| Layer        | Technology                               | Version     |
-|--------------|------------------------------------------|-------------|
-| **Runtime**  | Node.js                                  | ≥ 20 LTS    |
-| **Framework**| Next.js (App Router + React RSC)        | 15.4.1      |
-| **Styling**  | Tailwind CSS (tokens via `@theme`)      | v4.1.11     |
-| **UI Kit**   | ShadCN UI + Radix primitives            | Latest      |
-| **Database** | Prisma → PostgreSQL                      | 6.11.1      |
-| **API**      | tRPC + TanStack Query + superjson        | 11.4.3      |
-| **Auth**     | NextAuth v5 (beta)                       | 5.0.0-beta.29 |
-| **Lint**     | Biome (eslint + prettier replacement)   | 2.1.1       |
-| **CI/CD**    | Vercel Platform                          | -           |
+    subgraph "Data Layer"
+        TRPC[tRPC 11<br/>typed routers]
+        PRISMA[Prisma 6<br/>PostgreSQL]
+    end
 
-> **Note**: All library versions are pinned in `package.json`.
+    subgraph "AI Layer"
+        SDK[Vercel AI SDK v6]
+        CLAUDE[Claude Sonnet 4]
+        TOOLS[DB Tools<br/>searchEvents<br/>getEventDetails<br/>getCommunityEvents]
+    end
 
-## 🗂 Repository Structure
+    subgraph "Infrastructure"
+        SENTRY[Sentry<br/>error tracking]
+        CRON[Vercel Cron<br/>demo reset 24h]
+        CI[GitHub Actions<br/>lint + test + e2e]
+    end
+
+    UI --> RSC
+    UI --> SA
+    WA --> RH
+    AD --> RH
+    RSC --> TRPC
+    SA --> TRPC
+    TRPC --> PRISMA
+    RH --> SDK
+    SDK --> CLAUDE
+    SDK --> TOOLS
+    TOOLS --> PRISMA
+    MW --> RSC
+```
+
+## AI Architecture
+
+The AI layer demonstrates three patterns using the Vercel AI SDK:
+
+### 1. Structured Output (`generateObject`)
+Server actions use `generateObject` with Zod schemas for type-safe AI responses. No manual JSON parsing — the SDK validates against the schema automatically.
+
+```
+Server Action → generateObject(schema) → Claude → typed response
+```
+
+### 2. Streaming Text (`streamText` + `useCompletion`)
+The WritingAssistant streams text enhancements via a Route Handler. Text appears progressively instead of after a loading spinner.
+
+```
+WritingAssistant → POST /api/ai/enhance → streamText → progressive UI
+```
+
+### 3. Agentic Tool Use (`streamText` + tools + `useChat`)
+The centerpiece: AI Event Discovery. The model calls typed database tools, reasons about results, and streams recommendations.
+
+```
+User query → POST /api/ai/discover → Claude calls tools:
+  → searchEvents({ query, city?, category? }) → Prisma → results
+  → getEventDetails({ eventId }) → Prisma → details
+  → getCommunityEvents({ communityId }) → Prisma → events
+Claude synthesizes → streaming response with event data
+```
+
+**Guardrails:** `stepCountIs(5)` max steps, 20 req/hr rate limit per user, graceful fallback on error, abort signal support.
+
+## Tech Stack
+
+| Layer | Technology | Version |
+|---|---|---|
+| Framework | Next.js (App Router, RSC) | 15.4 |
+| Language | TypeScript (strict) | 5.x |
+| UI | React 19 + ShadCN + Radix | 19.x |
+| Styling | Tailwind CSS v4 (`@theme` tokens) | 4.1 |
+| Database | Prisma → PostgreSQL | 6.11 |
+| API | tRPC + TanStack Query | 11.x |
+| AI | Vercel AI SDK + Claude (Anthropic) | 6.x |
+| Auth | NextAuth v5 (Google OAuth + Credentials) | 5.0-beta |
+| Testing | Vitest + Playwright | 4.x / 1.x |
+| Error Tracking | Sentry | latest |
+| CI/CD | GitHub Actions + Vercel | - |
+| Linting | Biome | 2.1 |
+
+## Considered and Rejected
+
+| Option | Decision | Rationale |
+|---|---|---|
+| **Python for AI** | Rejected | Vercel AI SDK covers tool use, streaming, structured output in TypeScript. Python adds deployment complexity for zero benefit in this stack. |
+| **Generic chatbot** | Rejected | Built domain-specific event discovery instead. The AI calls YOUR database through YOUR typed tools — more impressive than a wrapper around a chat API. |
+| **Database sessions** | Rejected | JWT strategy is faster (no DB lookup per request). PrismaAdapter syncs OAuth accounts separately. |
+| **100% test coverage** | Rejected | Behavior tests over coverage metrics. "HIGH spending users never get FREE tier" > "95% line coverage". |
+| **Separate backend** | Rejected | Next.js Route Handlers + tRPC cover API needs. No Express/Fastify layer needed. |
+
+## Getting Started
+
+### Prerequisites
+- Node.js >= 20
+- Docker (for PostgreSQL)
+- Yarn
+
+### Setup
+
+```bash
+# Clone and install
+yarn install
+
+# Start database
+docker compose up -d
+
+# Configure environment
+cp .env.example .env
+# Set: DATABASE_URL, AUTH_SECRET, AUTH_GOOGLE_ID/SECRET, ANTHROPIC_API_KEY
+
+# Setup database
+yarn db:push          # Push schema
+yarn db:seed          # Seed with LLM-generated data (600 users, 420 communities)
+
+# Start dev server
+yarn dev
+```
+
+### Commands
+
+| Command | Description |
+|---|---|
+| `yarn dev` | Dev server (Turbopack) |
+| `yarn build` | Production build |
+| `yarn lint` | Biome lint + format (auto-fix) |
+| `yarn type-check` | TypeScript strict check |
+| `yarn test` | Run Vitest unit tests |
+| `yarn test:coverage` | Tests with coverage report |
+| `yarn db:push` | Push schema to DB |
+| `yarn db:migrate` | Create + apply migration |
+| `yarn db:seed` | Run 3-stage seed pipeline |
+| `yarn db:studio` | Prisma Studio GUI |
+
+### Demo User
+
+Click "Try the Demo" on the login page to sign in as a pre-populated demo user with RSVPs, community memberships, and hosted events. Data resets every 24 hours via Vercel Cron.
+
+## Project Structure
 
 ```
 app/
-├── (auth)/                    # Authentication flows (login, register, profile)
-├── (dev)/                     # Component playground (/dev/components-preview)  
-├── (main)/                    # Authenticated user flows
-├── (static)/                  # Marketing & legal pages (RSC-only)
-├── api/auth/                  # NextAuth route handlers
-├── globals.css                # Tailwind imports + minimal resets
-├── theme.css                  # Single @theme block (design tokens)
-├── layout.tsx                 # Root layout with providers
-└── providers.tsx              # Client-side providers (tRPC, auth)
-
-components/
-├── shared/                    # Reusable components (Background, Footer, etc.)
-└── ui/                        # ShadCN wrappers – barrel-exported
-
-lib/
-├── auth/                      # NextAuth configuration & helpers
-├── config/                    # Route maps, constants, app config
-├── hooks/                     # Custom React hooks
-└── trpc/                      # tRPC client setup & provider
+  (auth)/           # Auth flows (login, register, profile)
+  (main)/           # Protected routes (events, communities, stir)
+  (static)/         # Public marketing pages (RSC only)
+  api/ai/           # AI route handlers (enhance, discover)
+  api/cron/         # Vercel Cron endpoints (demo reset)
 
 server/
-├── actions/                   # Server Actions ("use server")
-└── api/
-    ├── routers/              # tRPC routers (event.ts, rsvp.ts, etc.)
-    ├── root.ts               # Main router + createCaller export
-    └── trpc.ts               # Context creation
+  api/routers/      # tRPC routers (event, community, rsvp, etc.)
+  actions/          # Server Actions (auth, AI, events, RSVP)
+  actions/ai/       # AI server actions + prompt templates
+
+components/
+  ui/               # ShadCN components (barrel export)
+  shared/           # Reusable: Footer, WritingAssistant, etc.
+  features/         # Feature-specific: AI Discovery
+
+lib/
+  ai/               # AI SDK provider + helpers
+  auth/             # NextAuth v5 config (JWT enriched with role + isDemo)
+  config/           # Routes, demo user, design tokens
 
 prisma/
-├── schema.prisma             # Database schema
-├── seed.ts                   # Database seeding script
-└── migrations/               # Prisma migration files
+  schema.prisma     # Full schema (User, Event, Community, Order, etc.)
+  seed/             # 3-stage LLM-powered seed pipeline
 ```
 
-## 🚀 Getting Started
+## Testing
 
-### Prerequisites
-
-- Node.js ≥ 20 LTS
-- PostgreSQL database
-- Package manager: `yarn` (recommended), `pnpm`, or `npm`
-
-### Installation
-
-```bash
-# 1. Install dependencies
-yarn install
-
-# 2. Configure environment
-cp .env.example .env
-# Update DATABASE_URL and other required variables
-
-# 3. Setup database
-yarn db:generate        # Generate Prisma client
-yarn db:push            # Push schema to database
-yarn db:seed            # (Optional) Seed with sample data
-
-# 4. Start development server
-yarn dev                # Next.js with Turbopack
-```
-
-### Available Scripts
-
-| Purpose              | Command              | Description                           |
-|----------------------|---------------------|---------------------------------------|
-| **Development**      | `yarn dev`          | Start dev server with Turbopack      |
-| **Build**            | `yarn build`        | Production build                      |
-| **Lint & Format**    | `yarn format`       | Auto-fix with Biome                  |
-| **Database**         | `yarn db:generate`  | Generate Prisma client               |
-|                      | `yarn db:push`      | Push schema changes                   |
-|                      | `yarn db:migrate`   | Run migrations                        |
-|                      | `yarn db:studio`    | Open Prisma Studio                    |
-| **Docker**           | `yarn docker:up`    | Start PostgreSQL container           |
-|                      | `yarn docker:down`  | Stop containers                       |
-| **Deployment**       | `yarn vercel:build` | Build for Vercel deployment           |
-
-> **Note**: All commits must pass `yarn format` (Biome linting).
-
-## 🎨 Design System
-
-### Token-Driven Styling
-
-- **`app/theme.css`**: Contains every design token in a single `@theme { ... }` block
-  - Colors, typography, border radii, spacing, shadows
-  - Properties must be alphabetized
-  - Never add selectors outside the `@theme` block
-
-- **`app/globals.css`**: Minimal file that imports Tailwind + tokens
-  - Only `@layer base` tweaks for global resets
-  - No additional CSS files without PR discussion
-
-### Usage Rules
-
-- **Use mapped Tailwind utilities ONLY** (e.g., `border-border`, `bg-secondary`)
-- **Never use `var(...)` directly** in `className` attributes
-- **No hard-coded values** – create tokens or rethink the design
-- **Responsive design**: Mobile-first with `lg:` breakpoint (1024px+)
-
-## 🔐 Authentication (NextAuth v5)
-
-### Current State
-- NextAuth v5 configured but **no providers set up yet**
-- `auth()` function available but returns `null` until providers added
-- Database has User model ready for auth integration
-
-### Architecture
-- **Server Components**: `const session = await auth()`
-- **Client Components**: `useSession()` from `next-auth/react`
-- **tRPC Context**: Session injected via `ctx.session` & `ctx.user`
-- **Middleware**: Route protection in `middleware.ts`
-
-### Roles
-- `user`, `organizer`, `admin` (typed via Zod)
-- Checked inside tRPC routers with helper functions
-
-## 📡 Data Flow & API Patterns
-
-### Server-Side Data (RSC)
-```typescript
-import { getAPI } from '@/server/api'
-
-const api = await getAPI()
-const events = await api.event.list()
-```
-
-### Client-Side Data (Components)
-```typescript
-import { trpc } from '@/lib/trpc'
-
-function EventList() {
-  const { data } = trpc.event.list.useQuery()
-  return <div>{/* render */}</div>
-}
-```
-
-### Mutations via Server Actions
-```typescript
-// server/actions/events.ts
-'use server'
-import { getAPI } from '@/server/api'
-
-export async function createEvent(prevState: any, formData: FormData) {
-  const api = await getAPI()
-  // Validation + tRPC call + error handling
-  return api.event.create(validatedData)
-}
-```
-
-### Critical Rules
-- **NO direct `fetch('/api/...')` calls** – use tRPC patterns only
-- **All mutations** must go through Server Actions
-- **Database access** only via tRPC routers (never direct Prisma outside)
-
-## 🗃 Database Schema
-
-### Core Models
-- **User**: Authentication & profile data
-- **Event**: Event details, location, timing
-- **Community**: Event organization groups
-- **TicketTier**: Pricing tiers for events  
-- **Order & OrderItem**: Purchase tracking
-- **Payment & Refund**: Financial transactions
-- **RSVP tracking**: Attendance management
-
-### Key Relationships
-- Users can organize events and join communities
-- Events belong to communities and have multiple ticket tiers
-- Orders contain multiple items and link to payments
-- Comprehensive audit trail for all transactions
-
-## 📝 Development Guidelines
-
-### Code Style
-- **TypeScript**: Strict mode, no `any` types
-- **Imports**: Absolute paths via `@/` aliases (never `../../..`)
-- **Components**: Single default export per file
-- **Server Actions**: Follow the established pattern with proper error handling
-
-### Commit Messages
-```
-feat(scope): imperative summary
-
-- (feat) Add new functionality
-- (fix) Bug fixes  
-- (refactor) Code improvements
-- (chore) Maintenance tasks
-```
-
-### File Naming
-- **Components**: `PascalCase.tsx`
-- **Utilities**: `camelCase.ts`
-- **UI Primitives**: `kebab-case.tsx` (in `components/ui/`)
-
-## 🗣 Content & Localization
-
-### Copy Management
-Each page can have a `copy.ts` file alongside `page.tsx`:
-
-```typescript
-export const copy = {
-  hero: {
-    title: 'Plan memorable events faster',
-    subtitle: 'Ticketing & RSVPs in minutes.'
-  }
-} ;
-```
-
-This pattern enables easy i18n expansion (`copy.es.ts`, `copy.fr.ts`) while keeping text close to components.
-
-## 🛡 Golden Rules
-
-1. **Type-safe, token-driven, ShadCN-based** – if not, stop and rethink
-2. **If a value isn't a design token** – create one or reconsider the design
-3. **All server logic goes through tRPC routers** – UI never touches the database directly
-4. **Pass `yarn format` before every commit** – no exceptions
-
----
-
-**Happy shipping!** ✨
+- **Unit tests** (Vitest): Seed matching logic — 13 tests covering `findInterestedUsers`, `selectTierForUser`, `selectIntelligentAttendees`
+- **Integration tests** (Vitest + Prisma): Event and community query validation
+- **E2E tests** (Playwright): Homepage, login, discover page smoke tests
+- **CI**: GitHub Actions runs lint, type-check, Vitest, Playwright on every PR

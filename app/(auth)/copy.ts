@@ -6,6 +6,7 @@ export const copy = {
 		signIn: 'Sign In',
 		register: 'Register',
 		google: 'Sign In With Google',
+		demo: 'Try the Demo',
 	},
 	placeholders: {
 		email: 'Email Address',

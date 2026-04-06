@@ -13,6 +13,7 @@ import {
 	createTicketTiers,
 	createUsers,
 } from './creators'
+import { seedDemoUser } from './demo'
 // Import utilities and creators
 import {
 	fetchUnsplashImages,
@@ -114,6 +115,10 @@ async function main() {
 
 		logger.info('Backfilling daily stats')
 		await backfillDailyStats(prisma, events)
+
+		logger.info('Creating demo user')
+		await seedDemoUser(prisma)
+		logger.success('Demo user created')
 
 		logger.timeEnd('Complete seed operation')
 		logger.stats(

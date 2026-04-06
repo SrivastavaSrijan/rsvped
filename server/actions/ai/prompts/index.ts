@@ -3,6 +3,9 @@
  *
  * Main system prompts for enhancements, plus domain-specific prompt builders
  * that follow the Routes pattern for parent components to use.
+ *
+ * Note: "Return as JSON" instructions are removed because the AI SDK's
+ * generateObject handles structured output automatically via Zod schemas.
  */
 
 export const Prompts = {
@@ -12,51 +15,35 @@ export const Prompts = {
 	Enhancements: {
 		proofread: (text: string, context?: Record<string, unknown>) =>
 			`Proofread and fix grammar, spelling, punctuation, and clarity issues in this text: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the corrected version.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		rewrite: (text: string, context?: Record<string, unknown>) =>
 			`Rewrite this text to improve clarity, engagement, and quality: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the improved version.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		friendly: (text: string, context?: Record<string, unknown>) =>
 			`Make this text more friendly, welcoming, and approachable: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the friendly version.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		professional: (text: string, context?: Record<string, unknown>) =>
 			`Make this text more professional, polished, and business-appropriate: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the professional version.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		concise: (text: string, context?: Record<string, unknown>) =>
 			`Make this text more concise while preserving all important information: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the concise version.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		keypoints: (text: string, context?: Record<string, unknown>) =>
 			`Convert this text into clear, well-organized bullet points: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the bullet points.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		summary: (text: string, context?: Record<string, unknown>) =>
 			`Create a concise summary that captures the main points: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the summary.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		table: (text: string, context?: Record<string, unknown>) =>
-			`Organize this information into a clear table format: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the table in markdown format.`,
+			`Organize this information into a clear table format in markdown: "${text}"
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 
 		custom: (
 			text: string,
@@ -66,9 +53,7 @@ Return as JSON with "text" field containing the table in markdown format.`,
 			`Apply this change: "${customPrompt}"
 
 Original text: "${text}"
-${context ? `Context: ${JSON.stringify(context)}` : ''}
-
-Return as JSON with "text" field containing the modified text.`,
+${context ? `Context: ${JSON.stringify(context)}` : ''}`,
 	},
 
 	/**
@@ -76,13 +61,12 @@ Return as JSON with "text" field containing the modified text.`,
 	 */
 	System: {
 		suggestions: (domain: string) =>
-			`You are an AI assistant helping users with ${domain} in RSVP'd - an event management and community platform. 
-			
-Users create events, manage RSVPs, and build communities around shared interests. 
-Generate specific, actionable suggestions based on the user's request. 
+			`You are an AI assistant helping users with ${domain} in RSVP'd - an event management and community platform.
 
-Return structured JSON with a "suggestions" array containing 3-5 suggestion objects.
-Each suggestion must have:
+Users create events, manage RSVPs, and build communities around shared interests.
+Generate specific, actionable suggestions based on the user's request.
+
+Provide 3-5 suggestions. Each suggestion must have:
 - "text": The actual suggestion content (max 500 characters)
 - "disposition": A distinct style indicator (capitalize first letter + relevant emoji)
 
@@ -104,9 +88,9 @@ Ensure each suggestion has a DIFFERENT disposition. Never repeat dispositions in
 
 		enhancement: (domain: string) =>
 			`You are an AI writing assistant helping users improve their ${domain} content in RSVP'd - an event management and community platform.
-			
+
 Users write event descriptions, community posts, and other content to engage their audience.
-Return enhanced text as JSON with a "text" field containing the improved content.`,
+Return the improved text in the "text" field.`,
 	},
 }
 

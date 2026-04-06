@@ -29,6 +29,8 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
+  role          UserRole  @default(USER)
+  isDemo        Boolean   @default(false)
   accounts      Account[]
   sessions      Session[]
 
@@ -186,6 +188,11 @@ enum SubscriptionStatus {
 enum BillingInterval {
   MONTHLY
   YEARLY
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 // Persona enums

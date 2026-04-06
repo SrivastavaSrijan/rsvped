@@ -54,6 +54,14 @@ prisma/seed/
 - Config in `prisma/seed/utils/config.ts` controls `NUM_USERS`, `NUM_COMMUNITIES`, `USE_LLM`
 - The seed pipeline runs `wipeDb()` → create users → create communities → create events → create orders
 
+### Image System
+- Cover images for events and communities come from **Unsplash** via `utils/image-fetcher.ts`
+- Uses a curated collection (`UNSPLASH_COLLECTION_ID`, default: `j7hIPPKdCOU`) for visual coherence
+- Requires `UNSPLASH_ACCESS_KEY` env var; falls back to Picsum placeholders if missing
+- Images are fetched once at seed start (up to 400, configurable via `MAX_UNSPLASH_IMAGES`) and randomly assigned to entities
+- **Do not create events in demo.ts** — the image system is complex; instead reassign existing seeded events to the demo user
+- Location images come from `prisma/seed/init/locations.csv`, not Unsplash
+
 ### Testing Seed Logic
 - Seed matching logic (`findInterestedUsers`, `selectIntelligentAttendees`, `selectTierForUser`) is the most complex code in the seed system
 - Tests for these go in `__tests__/seed/` — focus on behavior: "HIGH spending users never get FREE tier"

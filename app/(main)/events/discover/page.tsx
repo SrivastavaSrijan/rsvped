@@ -1,6 +1,7 @@
+// biome-ignore-all lint/suspicious/noArrayIndexKey: static skeleton placeholders never reorder
 import { Edit3 } from 'lucide-react'
-import { nanoid } from 'nanoid'
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
@@ -17,6 +18,16 @@ import { CookieNames, Routes } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
+
+const AIDiscover = dynamic(
+	() =>
+		import('@/components/features/ai-discover/AIDiscover').then(
+			(m) => m.AIDiscover
+		),
+	{
+		loading: () => <Skeleton className="h-10 w-full rounded-lg" />,
+	}
+)
 
 export const metadata: Metadata = {
 	title: "Discover Events  · RSVP'd",
@@ -113,8 +124,8 @@ async function resolveUserLocation() {
 // Skeleton Components
 const EventsSkeleton = () => (
 	<div className="grid lg:grid-cols-6 grid-cols-4 gap-4">
-		{Array.from({ length: 6 }, () => (
-			<div key={nanoid()} className="flex flex-col gap-2">
+		{Array.from({ length: 6 }, (_, i) => (
+			<div key={i} className="flex flex-col gap-2">
 				<Skeleton className="aspect-video w-full rounded-lg" />
 				<Skeleton className="h-4 w-3/4" />
 				<Skeleton className="h-3 w-1/2" />
@@ -125,8 +136,8 @@ const EventsSkeleton = () => (
 
 const CommunitiesSkeleton = () => (
 	<div className="grid lg:grid-cols-3 grid-cols-2 gap-4">
-		{Array.from({ length: 6 }, () => (
-			<div key={nanoid()} className="flex flex-col gap-2">
+		{Array.from({ length: 6 }, (_, i) => (
+			<div key={i} className="flex flex-col gap-2">
 				<Skeleton className="aspect-square w-full rounded-lg" />
 				<Skeleton className="h-4 w-3/4" />
 				<Skeleton className="h-3 w-1/2" />
@@ -137,8 +148,8 @@ const CommunitiesSkeleton = () => (
 
 const CategoriesSkeleton = () => (
 	<div className="grid lg:grid-cols-3 grid-cols-2 gap-4">
-		{Array.from({ length: 6 }, () => (
-			<div key={nanoid()} className="flex flex-col gap-2">
+		{Array.from({ length: 6 }, (_, i) => (
+			<div key={i} className="flex flex-col gap-2">
 				<Skeleton className="aspect-square w-full rounded-lg" />
 				<Skeleton className="h-4 w-3/4" />
 				<Skeleton className="h-3 w-1/2" />
@@ -151,8 +162,8 @@ const LocationsSkeleton = () => (
 	<div className="flex flex-col gap-4">
 		<Skeleton className="h-10 w-full" />
 		<div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-			{Array.from({ length: 8 }, () => (
-				<Skeleton key={nanoid()} className="h-8 w-full" />
+			{Array.from({ length: 8 }, (_, i) => (
+				<Skeleton key={i} className="h-8 w-full" />
 			))}
 		</div>
 	</div>
@@ -160,8 +171,8 @@ const LocationsSkeleton = () => (
 
 const RecommendationsSkeleton = () => (
 	<div className="grid lg:grid-cols-6 grid-cols-4 gap-4">
-		{Array.from({ length: 6 }, () => (
-			<div key={nanoid()} className="flex flex-col gap-2">
+		{Array.from({ length: 6 }, (_, i) => (
+			<div key={i} className="flex flex-col gap-2">
 				<Skeleton className="aspect-video w-full rounded-lg" />
 				<Skeleton className="h-4 w-3/4" />
 				<Skeleton className="h-3 w-1/2" />
@@ -333,6 +344,11 @@ export default async function DiscoverEvents() {
 					{copy.discover.description}
 				</p>
 			</div>
+
+			{/* AI-powered event search */}
+			<AIDiscover />
+
+			<hr />
 
 			<div className="flex flex-col gap-4 lg:gap-6">
 				{/* Add hr only if recommendations exist */}
