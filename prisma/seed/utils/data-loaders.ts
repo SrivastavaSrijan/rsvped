@@ -6,22 +6,28 @@ import { paths } from './config'
 import type { Category } from './schemas'
 
 /**
- * Load category data from the categories CSV for prompt generation.
+ * Load category data from the static categories.json (single source of truth).
  */
 export function loadCategorySlugs(): Category[] {
-	const csvPath = path.join(__dirname, '..', 'init', 'categories.csv')
+	const jsonPath = path.join(
+		__dirname,
+		'..',
+		'..',
+		'.local',
+		'seed-data',
+		'static',
+		'categories.json'
+	)
 	try {
-		const lines = readFileSync(csvPath, 'utf8').trim().split('\n')
-		return lines
-			.map((line) => {
-				const match = line.match(/^([^,]+),([^,]+),([^,]+),(.+)$/)
-				if (!match) return null
-				const [, , name, slug] = match
-				return { name, slug } as Category
-			})
-			.filter((c): c is Category => c !== null)
+		const categories = JSON.parse(readFileSync(jsonPath, 'utf8')) as Array<{
+			name: string
+			slug: string
+		}>
+		return categories
+			.map((c) => ({ name: c.name, slug: c.slug }) as Category)
+			.filter((c) => c.name && c.slug)
 	} catch {
-		logger.warn('Failed to load categories from CSV, using fallback')
+		logger.warn('Failed to load categories from JSON, using fallback')
 		return [
 			{ name: 'Tech & Startups', slug: 'tech-startups' },
 			{ name: 'Arts & Culture', slug: 'arts-culture' },

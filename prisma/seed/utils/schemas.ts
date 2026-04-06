@@ -24,37 +24,53 @@ const slugSchema = z
 const timestampSchema = z.string().datetime()
 
 // =============================================================================
-// Location slug enum — built dynamically from locations.csv
+// Location slug enum — built from static locations.json (single source of truth)
 // =============================================================================
 
 function loadLocationSlugs(): [string, ...string[]] {
-	const csvPath = path.join(__dirname, '..', 'init', 'locations.csv')
-	const lines = readFileSync(csvPath, 'utf8').trim().split('\n')
-	const slugs = lines.map((line) => line.split(',')[2]).filter(Boolean)
+	const jsonPath = path.join(
+		__dirname,
+		'..',
+		'..',
+		'.local',
+		'seed-data',
+		'static',
+		'locations.json'
+	)
+	const locations = JSON.parse(readFileSync(jsonPath, 'utf8')) as Array<{
+		slug: string
+	}>
+	const slugs = locations.map((l) => l.slug).filter(Boolean)
 	if (slugs.length === 0) {
-		throw new Error('No location slugs found in locations.csv')
+		throw new Error('No location slugs found in locations.json')
 	}
 	return slugs as [string, ...string[]]
 }
 
-/** All valid location slugs from locations.csv */
+/** All valid location slugs */
 export const LOCATION_SLUGS = loadLocationSlugs()
 
 /** Zod enum of valid location slugs */
 export const locationSlugEnum = z.enum(LOCATION_SLUGS)
 
-/** Build a slug-to-name lookup from the CSV */
+/** Slug-to-name lookup */
 function loadSlugToNameMap(): Record<string, string> {
-	const csvPath = path.join(__dirname, '..', 'init', 'locations.csv')
-	const lines = readFileSync(csvPath, 'utf8').trim().split('\n')
+	const jsonPath = path.join(
+		__dirname,
+		'..',
+		'..',
+		'.local',
+		'seed-data',
+		'static',
+		'locations.json'
+	)
+	const locations = JSON.parse(readFileSync(jsonPath, 'utf8')) as Array<{
+		name: string
+		slug: string
+	}>
 	const map: Record<string, string> = {}
-	for (const line of lines) {
-		const parts = line.split(',')
-		const name = parts[1]
-		const slug = parts[2]
-		if (slug && name) {
-			map[slug] = name
-		}
+	for (const loc of locations) {
+		if (loc.slug && loc.name) map[loc.slug] = loc.name
 	}
 	return map
 }

@@ -67,72 +67,76 @@ async function generateCommunities(
 	const batches = Math.ceil(targetCount / batchSize)
 	const allCommunities: LLMCommunity[] = []
 	const categoryNames = categories.map((c) => c.name)
+	const concurrency = 10
 
-	for (let i = 0; i < batches; i++) {
-		const currentBatchSize = Math.min(
-			batchSize,
-			targetCount - allCommunities.length
-		)
-		if (currentBatchSize <= 0) break
-
-		logger.info(`Community batch ${i + 1}/${batches}`, {
-			size: currentBatchSize,
-			totalSoFar: allCommunities.length,
-		})
-
-		// Select diverse locations for this batch
+	// Build all batch configs upfront
+	const batchConfigs = Array.from({ length: batches }, (_, i) => {
+		const currentBatchSize = Math.min(batchSize, targetCount - i * batchSize)
 		const batchLocationSlugs = faker.helpers.arrayElements(
 			[...LOCATION_SLUGS],
 			Math.min(currentBatchSize * 2, LOCATION_SLUGS.length)
 		)
-
-		// Cycle through categories for diversity
 		const startIdx = (i * batchSize) % categoryNames.length
-		const batchCategories: string[] = []
-		for (let j = 0; j < currentBatchSize; j++) {
-			batchCategories.push(categoryNames[(startIdx + j) % categoryNames.length])
+		const batchCategories = Array.from(
+			{ length: currentBatchSize },
+			(_, j) => categoryNames[(startIdx + j) % categoryNames.length]
+		)
+		return { index: i, currentBatchSize, batchLocationSlugs, batchCategories }
+	}).filter((b) => b.currentBatchSize > 0)
+
+	// Process in concurrent chunks
+	for (let chunk = 0; chunk < batchConfigs.length; chunk += concurrency) {
+		const slice = batchConfigs.slice(chunk, chunk + concurrency)
+		logger.info(
+			`Community batches ${chunk + 1}-${chunk + slice.length}/${batches} (${concurrency} concurrent)`
+		)
+
+		const results = await Promise.allSettled(
+			slice.map(
+				async ({
+					index,
+					currentBatchSize,
+					batchLocationSlugs,
+					batchCategories,
+				}) => {
+					const prompt = CommunityPrompts.user(
+						currentBatchSize,
+						batchLocationSlugs,
+						batchCategories,
+						LOCATION_SLUG_TO_NAME
+					)
+					const result = await llm.generate(
+						prompt,
+						CommunityPrompts.system,
+						LLMCommunityBatchSchema,
+						`community-batch-${index + 1}`
+					)
+					return (result as { communities: LLMCommunity[] }).communities ?? []
+				}
+			)
+		)
+
+		let budgetExhausted = false
+		for (const r of results) {
+			if (r.status === 'fulfilled') {
+				allCommunities.push(...r.value)
+			} else {
+				const msg =
+					r.reason instanceof Error ? r.reason.message : String(r.reason)
+				if (msg.includes('budget exhausted')) {
+					budgetExhausted = true
+				} else {
+					logger.error('Community batch failed', { error: msg })
+				}
+			}
 		}
 
-		try {
-			const prompt = CommunityPrompts.user(
-				currentBatchSize,
-				batchLocationSlugs,
-				batchCategories,
-				LOCATION_SLUG_TO_NAME
-			)
+		logger.info(`Chunk done`, {
+			total: allCommunities.length,
+			costSoFar: `$${getTotalCostUsd().toFixed(4)}`,
+		})
 
-			const result = await llm.generate(
-				prompt,
-				CommunityPrompts.system,
-				LLMCommunityBatchSchema,
-				`community-batch-${i + 1}`
-			)
-
-			const batchCommunities =
-				(result as { communities: LLMCommunity[] }).communities ?? []
-			allCommunities.push(...batchCommunities)
-
-			logger.info(`Community batch ${i + 1} done`, {
-				generated: batchCommunities.length,
-				total: allCommunities.length,
-				costSoFar: `$${getTotalCostUsd().toFixed(4)}`,
-			})
-
-			// Rate limiting between batches
-			if (i < batches - 1) {
-				await new Promise((resolve) => setTimeout(resolve, 500))
-			}
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error)
-			if (message.includes('budget exhausted')) {
-				logger.warn('Budget exhausted during community generation', {
-					generated: allCommunities.length,
-				})
-				break
-			}
-			logger.error(`Community batch ${i + 1} failed`, { error: message })
-			// Continue with next batch
-		}
+		if (budgetExhausted || allCommunities.length >= targetCount) break
 	}
 
 	// Deduplicate by name + location
@@ -172,7 +176,7 @@ async function generateUsers(
 	)
 
 	const allUsers: LLMUserPersona[] = []
-	let batchIndex = 0
+	const batchIndex = 0
 
 	// Generate users for locations with communities first (more context)
 	const sortedLocations = [
@@ -180,61 +184,67 @@ async function generateUsers(
 		...allLocations.filter((s) => !locationsWithCommunities.includes(s)),
 	]
 
-	for (const slug of sortedLocations) {
+	// Build batch configs for all locations
+	const userBatchConfigs = sortedLocations
+		.map((slug) => {
+			const batchSize = Math.min(usersPerLocation, 15)
+			const locationDigest = digest[slug]
+				? digest[slug]
+				: `No communities yet in ${LOCATION_SLUG_TO_NAME[slug] ?? slug} — generate users with general interests.`
+			return { slug, batchSize, locationDigest }
+		})
+		.filter((b) => b.batchSize > 0)
+
+	const concurrency = 10
+
+	for (let chunk = 0; chunk < userBatchConfigs.length; chunk += concurrency) {
 		if (allUsers.length >= targetCount) break
 
-		const remaining = targetCount - allUsers.length
-		const batchSize = Math.min(usersPerLocation, remaining, 15)
-		if (batchSize <= 0) break
-
-		batchIndex++
+		const slice = userBatchConfigs.slice(chunk, chunk + concurrency)
 		logger.info(
-			`User batch ${batchIndex} for ${LOCATION_SLUG_TO_NAME[slug] ?? slug}`,
-			{ size: batchSize, totalSoFar: allUsers.length }
+			`User batches ${chunk + 1}-${chunk + slice.length}/${userBatchConfigs.length} (${concurrency} concurrent)`
 		)
 
-		// Build location-specific community digest
-		const locationDigest = digest[slug]
-			? digest[slug]
-			: `No communities yet in ${LOCATION_SLUG_TO_NAME[slug] ?? slug} — generate users with general interests.`
-
-		try {
-			const prompt = UserPrompts.user(
-				batchSize,
-				[slug],
-				categoryNames,
-				LOCATION_SLUG_TO_NAME,
-				locationDigest
-			)
-
-			const result = await llm.generate(
-				prompt,
-				UserPrompts.system,
-				LLMUserBatchSchema,
-				`user-batch-${slug}`
-			)
-
-			const batchUsers = (result as { users: LLMUserPersona[] }).users ?? []
-			allUsers.push(...batchUsers)
-
-			logger.info(`User batch for ${slug} done`, {
-				generated: batchUsers.length,
-				total: allUsers.length,
-				costSoFar: `$${getTotalCostUsd().toFixed(4)}`,
+		const results = await Promise.allSettled(
+			slice.map(async ({ slug, batchSize, locationDigest }) => {
+				const prompt = UserPrompts.user(
+					batchSize,
+					[slug],
+					categoryNames,
+					LOCATION_SLUG_TO_NAME,
+					locationDigest
+				)
+				const result = await llm.generate(
+					prompt,
+					UserPrompts.system,
+					LLMUserBatchSchema,
+					`user-batch-${slug}`
+				)
+				return (result as { users: LLMUserPersona[] }).users ?? []
 			})
+		)
 
-			// Rate limiting
-			await new Promise((resolve) => setTimeout(resolve, 300))
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error)
-			if (message.includes('budget exhausted')) {
-				logger.warn('Budget exhausted during user generation', {
-					generated: allUsers.length,
-				})
-				break
+		let budgetExhausted = false
+		for (const r of results) {
+			if (r.status === 'fulfilled') {
+				allUsers.push(...r.value)
+			} else {
+				const msg =
+					r.reason instanceof Error ? r.reason.message : String(r.reason)
+				if (msg.includes('budget exhausted')) {
+					budgetExhausted = true
+				} else {
+					logger.error('User batch failed', { error: msg })
+				}
 			}
-			logger.error(`User batch for ${slug} failed`, { error: message })
 		}
+
+		logger.info('User chunk done', {
+			total: allUsers.length,
+			costSoFar: `$${getTotalCostUsd().toFixed(4)}`,
+		})
+
+		if (budgetExhausted) break
 	}
 
 	// Deduplicate
