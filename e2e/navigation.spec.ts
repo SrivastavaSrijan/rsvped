@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test'
 
 test('clicking Explore Events navigates to discover page', async ({ page }) => {
 	await page.goto('/')
-	const exploreLink = page.getByRole('link', { name: /explore events/i }).first()
+	const exploreLink = page
+		.getByRole('link', { name: /explore events/i })
+		.first()
 	await exploreLink.click()
 	await expect(page).toHaveURL(/\/events\/discover/)
 })
