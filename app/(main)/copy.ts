@@ -42,7 +42,8 @@ export const copy = {
 	},
 	stir: {
 		title: "Let's Stir Things Up!",
-		description: 'Search for events and communities, or try asking naturally.',
+		description:
+			'Discover events and communities — search by keyword or ask naturally.',
 		chipExamples: [
 			'tech meetups this weekend',
 			'free events near me',

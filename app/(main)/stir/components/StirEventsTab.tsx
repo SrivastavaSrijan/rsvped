@@ -6,17 +6,16 @@ import type { RouterOutput } from '@/server/api'
 import { getAPI } from '@/server/api'
 
 interface StirEventsTabProps {
+	coreEvents: RouterOutput['stir']['search']['events']['data']
+	pagination: RouterOutput['stir']['search']['events']['pagination']
 	query: string
-	page: number
-	size: number
 }
 
-export async function StirEventsTab({ query, page, size }: StirEventsTabProps) {
-	const api = await getAPI()
-	const result = await api.stir.search.events({ query, page, size })
-	const coreEvents = result.data
-	const pagination = result.pagination
-
+export async function StirEventsTab({
+	coreEvents,
+	pagination,
+	query,
+}: StirEventsTabProps) {
 	if (coreEvents.length === 0) {
 		return (
 			<div className="flex flex-col gap-4">

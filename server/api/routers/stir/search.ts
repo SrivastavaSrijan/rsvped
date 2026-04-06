@@ -131,28 +131,35 @@ export const stirSearchRouter = createTRPCRouter({
 							Math.max(keywordTotal, data.length)
 						),
 						aiEnhanced,
+						interpretation,
 					}
 				}
 			}
 
-			// Keyword-only fallback
+			// Keyword-only fallback — sort by relevance score
 			const searchParams: SearchScoreParams = { query, userLocationId }
-			const data = keywordEvents.map((event) => {
-				const searchResult = calculateEventScoreWithMatches(event, searchParams)
-				return {
-					...event,
-					_searchMetadata: {
-						matches: searchResult.matches,
-						score: searchResult.total,
-						query,
-					},
-				}
-			})
+			const data = keywordEvents
+				.map((event) => {
+					const searchResult = calculateEventScoreWithMatches(
+						event,
+						searchParams
+					)
+					return {
+						...event,
+						_searchMetadata: {
+							matches: searchResult.matches,
+							score: searchResult.total,
+							query,
+						},
+					}
+				})
+				.sort((a, b) => b._searchMetadata.score - a._searchMetadata.score)
 
 			return {
 				data,
 				pagination: pagination.createMetadata(keywordTotal),
 				aiEnhanced,
+				interpretation,
 			}
 		}),
 
@@ -285,31 +292,35 @@ export const stirSearchRouter = createTRPCRouter({
 							Math.max(keywordTotal, data.length)
 						),
 						aiEnhanced,
+						interpretation,
 					}
 				}
 			}
 
 			const searchParams: SearchScoreParams = { query }
-			const data = keywordCommunities.map((community) => {
-				const searchResult = calculateCommunityScoreWithMatches(
-					community,
-					searchParams
-				)
-				return {
-					...community,
-					metadata: { role: null },
-					_searchMetadata: {
-						matches: searchResult.matches,
-						score: searchResult.total,
-						query,
-					},
-				}
-			})
+			const data = keywordCommunities
+				.map((community) => {
+					const searchResult = calculateCommunityScoreWithMatches(
+						community,
+						searchParams
+					)
+					return {
+						...community,
+						metadata: { role: null },
+						_searchMetadata: {
+							matches: searchResult.matches,
+							score: searchResult.total,
+							query,
+						},
+					}
+				})
+				.sort((a, b) => b._searchMetadata.score - a._searchMetadata.score)
 
 			return {
 				data,
 				pagination: pagination.createMetadata(keywordTotal),
 				aiEnhanced,
+				interpretation,
 			}
 		}),
 })

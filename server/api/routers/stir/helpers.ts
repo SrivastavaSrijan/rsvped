@@ -1,4 +1,289 @@
 import type { Prisma } from '@prisma/client'
+import { buildDateWhere, parseTemporalHints } from './temporal'
+
+// Stop words: common English words + event-domain noise + temporal qualifiers
+// Temporal qualifiers are handled separately by parseTemporalHints
+const SEARCH_STOP_WORDS = new Set([
+	// English function words
+	'a',
+	'an',
+	'the',
+	'and',
+	'or',
+	'but',
+	'in',
+	'on',
+	'at',
+	'to',
+	'for',
+	'of',
+	'with',
+	'by',
+	'from',
+	'as',
+	'is',
+	'was',
+	'are',
+	'be',
+	'been',
+	'being',
+	'have',
+	'has',
+	'had',
+	'do',
+	'does',
+	'did',
+	'will',
+	'would',
+	'could',
+	'should',
+	'may',
+	'might',
+	'can',
+	'shall',
+	'not',
+	'no',
+	'so',
+	'if',
+	'then',
+	'than',
+	'that',
+	'this',
+	'these',
+	'those',
+	'it',
+	'its',
+	'my',
+	'your',
+	'our',
+	'their',
+	'his',
+	'her',
+	'me',
+	'us',
+	'them',
+	'him',
+	'who',
+	'what',
+	'which',
+	'where',
+	'when',
+	'how',
+	'all',
+	'each',
+	'every',
+	'any',
+	'some',
+	'few',
+	'more',
+	'most',
+	'just',
+	'very',
+	'really',
+	'about',
+	'also',
+	'like',
+	// Event-domain noise (common but not meaningful as search terms)
+	'event',
+	'events',
+	'near',
+	'nearby',
+	'around',
+	'find',
+	'show',
+	'looking',
+	'search',
+	'best',
+	'good',
+	'great',
+	'new',
+	'upcoming',
+	'popular',
+	'trending',
+	'happening',
+	'going',
+	// Temporal qualifiers (handled by parseTemporalHints)
+	'today',
+	'tonight',
+	'tomorrow',
+	'week',
+	'weekend',
+	'month',
+	'next',
+	'last',
+	'this',
+	'morning',
+	'afternoon',
+	'evening',
+])
+
+// Static category keyword map — maps search terms to category names
+// Sync with prisma/seed/data/categories.json
+const CATEGORY_KEYWORD_MAP: Record<string, string[]> = {
+	'Food & Drinks': [
+		'food',
+		'drink',
+		'dining',
+		'restaurant',
+		'culinary',
+		'cocktail',
+		'wine',
+		'beer',
+		'brunch',
+		'cooking',
+	],
+	'Nightlife & Parties': ['nightlife', 'party', 'club', 'dj', 'rave', 'dance'],
+	'Music & Concerts': [
+		'music',
+		'concert',
+		'band',
+		'jazz',
+		'rock',
+		'electronic',
+		'acoustic',
+	],
+	'Arts & Culture': [
+		'art',
+		'gallery',
+		'museum',
+		'painting',
+		'sculpture',
+		'exhibit',
+		'culture',
+		'theater',
+		'theatre',
+	],
+	'Sports & Fitness': [
+		'sport',
+		'fitness',
+		'gym',
+		'run',
+		'marathon',
+		'basketball',
+		'soccer',
+		'football',
+		'tennis',
+		'cycling',
+	],
+	'Gaming & Esports': ['gaming', 'esport', 'game', 'tournament', 'lan'],
+	'Travel & Adventure': [
+		'travel',
+		'adventure',
+		'hiking',
+		'camping',
+		'trek',
+		'explore',
+		'backpack',
+	],
+	'Tech & Startups': [
+		'tech',
+		'startup',
+		'coding',
+		'programming',
+		'developer',
+		'software',
+		'ai',
+		'hackathon',
+		'data',
+		'web3',
+		'crypto',
+	],
+	'Wellness & Self-Care': [
+		'wellness',
+		'yoga',
+		'meditation',
+		'mindfulness',
+		'spa',
+		'retreat',
+	],
+	'Photography & Film': [
+		'photo',
+		'photography',
+		'film',
+		'cinema',
+		'movie',
+		'video',
+		'documentary',
+		'camera',
+	],
+	'Books & Writing': [
+		'book',
+		'writing',
+		'author',
+		'poetry',
+		'literary',
+		'reading',
+		'novel',
+	],
+	'Comedy & Entertainment': ['comedy', 'standup', 'improv', 'entertainment'],
+	'Fashion & Style': [
+		'fashion',
+		'style',
+		'clothing',
+		'design',
+		'runway',
+		'boutique',
+	],
+	'Networking & Career': [
+		'networking',
+		'career',
+		'professional',
+		'hiring',
+		'job',
+		'mentorship',
+	],
+	'Outdoor & Nature': [
+		'outdoor',
+		'nature',
+		'park',
+		'garden',
+		'trail',
+		'beach',
+		'lake',
+	],
+	'Crafts & DIY': ['craft', 'diy', 'handmade', 'maker', 'pottery', 'knitting'],
+	'Dating & Social': ['dating', 'social', 'singles', 'mixer', 'speed dating'],
+	'Learning & Skills': [
+		'learn',
+		'class',
+		'course',
+		'tutorial',
+		'skill',
+		'education',
+		'seminar',
+	],
+	'Volunteering & Impact': [
+		'volunteer',
+		'charity',
+		'nonprofit',
+		'impact',
+		'donate',
+	],
+	'Pets & Animals': ['pet', 'dog', 'cat', 'animal', 'puppy', 'adoption'],
+}
+
+/**
+ * Extract significant search words from a query (stop words removed).
+ */
+export function extractSignificantWords(query: string): string[] {
+	return query
+		.toLowerCase()
+		.split(/\s+/)
+		.filter((w) => w.length >= 2 && !SEARCH_STOP_WORDS.has(w))
+}
+
+/**
+ * Detect matching categories from search keywords.
+ */
+export function detectCategories(words: string[]): string[] {
+	const matches: string[] = []
+	for (const [category, keywords] of Object.entries(CATEGORY_KEYWORD_MAP)) {
+		if (words.some((word) => keywords.includes(word))) {
+			matches.push(category)
+		}
+	}
+	return matches
+}
 
 export interface SearchScoreParams {
 	query: string
@@ -467,102 +752,118 @@ export function calculateCommunityScore(
 }
 
 /**
- * Create intelligent search where conditions for events
+ * Create search WHERE for events with stop words, AND semantics,
+ * category detection, and temporal heuristics.
  */
 export function createEventSearchWhere(query: string): Prisma.EventWhereInput {
-	const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean)
+	const significantWords = extractSignificantWords(query)
 
-	// Create word boundary patterns for better matching
-	const wordBoundaryConditions: Prisma.EventWhereInput[] = []
-
-	for (const word of queryWords) {
-		wordBoundaryConditions.push({
+	// If all words were stop words, use full phrase fallback
+	if (significantWords.length === 0) {
+		return {
+			isPublished: true,
+			deletedAt: null,
 			OR: [
-				// Exact word match in title
-				{ title: { contains: ` ${word} `, mode: 'insensitive' as const } },
-				{ title: { startsWith: `${word} `, mode: 'insensitive' as const } },
-				{ title: { endsWith: ` ${word}`, mode: 'insensitive' as const } },
-				{ title: { equals: word, mode: 'insensitive' as const } },
+				{ title: { contains: query, mode: 'insensitive' as const } },
+				{ description: { contains: query, mode: 'insensitive' as const } },
+			],
+		}
+	}
 
-				// Same for description
+	// AND conditions: all significant words must appear in title or description
+	const wordConditions: Prisma.EventWhereInput[] = significantWords.map(
+		(word) => ({
+			OR: [
+				{ title: { contains: word, mode: 'insensitive' as const } },
+				{ description: { contains: word, mode: 'insensitive' as const } },
+			],
+		})
+	)
+
+	// Detect categories from keywords
+	const categories = detectCategories(significantWords)
+
+	// Detect temporal hints from the original query (before stop word removal)
+	const dateRange = parseTemporalHints(query)
+
+	// Build the primary AND conditions
+	const andConditions: Prisma.EventWhereInput[] = [...wordConditions]
+
+	// Add date filtering if temporal hints detected
+	if (dateRange) {
+		andConditions.push(buildDateWhere(dateRange))
+	}
+
+	// Build the OR branches (tiered)
+	const orBranches: Prisma.EventWhereInput[] = []
+
+	if (categories.length > 0) {
+		// Tier 0 (best): keywords + category + date range
+		orBranches.push({
+			AND: [
+				...andConditions,
 				{
-					description: { contains: ` ${word} `, mode: 'insensitive' as const },
+					categories: {
+						some: {
+							category: {
+								name: { in: categories, mode: 'insensitive' as const },
+							},
+						},
+					},
 				},
-				{
-					description: { startsWith: `${word} `, mode: 'insensitive' as const },
-				},
-				{ description: { endsWith: ` ${word}`, mode: 'insensitive' as const } },
 			],
 		})
 	}
 
-	// Fallback to original contains for broader coverage
-	const fallbackConditions: Prisma.EventWhereInput = {
-		OR: [
-			{ title: { contains: query, mode: 'insensitive' as const } },
-			{ description: { contains: query, mode: 'insensitive' as const } },
-		],
-	}
+	// Tier 1: AND — all significant words must match (+ date if detected)
+	orBranches.push({ AND: andConditions })
+
+	// Tier 2 (fallback): full phrase match in title or description
+	orBranches.push(
+		{ title: { contains: query, mode: 'insensitive' as const } },
+		{ description: { contains: query, mode: 'insensitive' as const } }
+	)
 
 	return {
 		isPublished: true,
 		deletedAt: null,
-		OR: [
-			// Include word boundary matches for short queries
-			...(queryWords.length <= 3 ? wordBoundaryConditions : []),
-			// Always include fallback
-			fallbackConditions,
-		],
+		OR: orBranches,
 	}
 }
 
 /**
- * Create intelligent search where conditions for communities
+ * Create search WHERE for communities with stop words and AND semantics.
  */
 export function createCommunitySearchWhere(
 	query: string
 ): Prisma.CommunityWhereInput {
-	const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean)
+	const significantWords = extractSignificantWords(query)
 
-	// Create word boundary patterns for better matching
-	const wordBoundaryConditions: Prisma.CommunityWhereInput[] = []
-
-	for (const word of queryWords) {
-		wordBoundaryConditions.push({
+	if (significantWords.length === 0) {
+		return {
+			isPublic: true,
 			OR: [
-				// Exact word match for name
-				{ name: { contains: ` ${word} `, mode: 'insensitive' as const } },
-				{ name: { startsWith: `${word} `, mode: 'insensitive' as const } },
-				{ name: { endsWith: ` ${word}`, mode: 'insensitive' as const } },
-				{ name: { equals: word, mode: 'insensitive' as const } },
+				{ name: { contains: query, mode: 'insensitive' as const } },
+				{ description: { contains: query, mode: 'insensitive' as const } },
+			],
+		}
+	}
 
-				// Same for description
-				{
-					description: { contains: ` ${word} `, mode: 'insensitive' as const },
-				},
-				{
-					description: { startsWith: `${word} `, mode: 'insensitive' as const },
-				},
-				{ description: { endsWith: ` ${word}`, mode: 'insensitive' as const } },
+	const wordConditions: Prisma.CommunityWhereInput[] = significantWords.map(
+		(word) => ({
+			OR: [
+				{ name: { contains: word, mode: 'insensitive' as const } },
+				{ description: { contains: word, mode: 'insensitive' as const } },
 			],
 		})
-	}
-
-	// Fallback to original contains
-	const fallbackConditions: Prisma.CommunityWhereInput = {
-		OR: [
-			{ name: { contains: query, mode: 'insensitive' as const } },
-			{ description: { contains: query, mode: 'insensitive' as const } },
-		],
-	}
+	)
 
 	return {
 		isPublic: true,
 		OR: [
-			// Include word boundary matches for short queries
-			...(queryWords.length <= 3 ? wordBoundaryConditions : []),
-			// Always include fallback
-			fallbackConditions,
+			{ AND: wordConditions },
+			{ name: { contains: query, mode: 'insensitive' as const } },
+			{ description: { contains: query, mode: 'insensitive' as const } },
 		],
 	}
 }

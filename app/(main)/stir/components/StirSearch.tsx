@@ -288,7 +288,6 @@ export const StirSearch = ({
 					onFocus={handleFocus}
 					onBlur={handleBlur}
 					placeholder={placeholder}
-					disabled={isPending}
 					className="w-full bg-transparent border-0 text-white placeholder:text-white/50 pl-12 pr-4 py-4 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
 					aria-label="Search events and communities"
 					aria-expanded={showSuggestions}

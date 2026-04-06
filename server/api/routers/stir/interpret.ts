@@ -88,7 +88,7 @@ Rules:
 				InterpretedQuerySchema,
 				'search-interpret'
 			),
-			new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+			new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
 		])
 		return result
 	} catch {

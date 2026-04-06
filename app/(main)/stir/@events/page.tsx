@@ -105,11 +105,16 @@ export default async function EventsSlotPage({
 
 	return (
 		<div className="flex flex-col gap-4">
-			{aiSummary ? <StirAISummaryCard summary={aiSummary} /> : null}
+			{aiSummary || result.interpretation ? (
+				<StirAISummaryCard
+					summary={aiSummary}
+					interpretation={result.interpretation}
+				/>
+			) : null}
 			<StirEventsTab
+				coreEvents={result.data}
+				pagination={result.pagination}
 				query={q}
-				page={Number.isFinite(page) && page > 0 ? page : 1}
-				size={size}
 			/>
 		</div>
 	)

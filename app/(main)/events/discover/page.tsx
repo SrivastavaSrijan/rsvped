@@ -1,7 +1,6 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: static skeleton placeholders never reorder
 import { Edit3 } from 'lucide-react'
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
@@ -18,16 +17,6 @@ import { CookieNames, Routes } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
 import type { LocationFormData } from '@/server/actions'
 import { getAPI } from '@/server/api'
-
-const AIDiscover = dynamic(
-	() =>
-		import('@/components/features/ai-discover/AIDiscover').then(
-			(m) => m.AIDiscover
-		),
-	{
-		loading: () => <Skeleton className="h-10 w-full rounded-lg" />,
-	}
-)
 
 export const metadata: Metadata = {
 	title: "Discover Events  · RSVP'd",
@@ -344,11 +333,6 @@ export default async function DiscoverEvents() {
 					{copy.discover.description}
 				</p>
 			</div>
-
-			{/* AI-powered event search */}
-			<AIDiscover />
-
-			<hr />
 
 			<div className="flex flex-col gap-4 lg:gap-6">
 				{/* Add hr only if recommendations exist */}
