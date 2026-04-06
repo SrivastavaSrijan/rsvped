@@ -40,6 +40,22 @@ export async function createUsers(
 	)
 
 	const usedEmails = new Set<string>()
+	const usedUsernames = new Set<string>()
+	const genUsername = (first: string, last: string) => {
+		let base = snakeCase(`${first}_${last}`)
+			.toLowerCase()
+			.replace(/[^a-z0-9_]/g, '')
+			.slice(0, 27)
+		if (base.length < 3) base = `user_${base}`
+		let username = base
+		let i = 1
+		while (usedUsernames.has(username)) {
+			username = `${base}${i}`
+			i++
+		}
+		usedUsernames.add(username)
+		return username
+	}
 	const genEmail = (base: string) => {
 		let email = base.toLowerCase()
 		let i = 1
@@ -93,6 +109,7 @@ export async function createUsers(
 
 		users.push({
 			name,
+			username: genUsername(first, last),
 			email,
 			image: getAvatarURL(name),
 			password: hash,
@@ -147,6 +164,7 @@ export async function createUsers(
 		// Store user data without hashed password
 		users.push({
 			name,
+			username: genUsername(first, last),
 			email,
 			password: hash,
 			image: getAvatarURL(name),
@@ -169,6 +187,7 @@ export async function createUsers(
 			where: { email: u.email },
 			update: {
 				name: u.name,
+				username: u.username,
 				image: u.image,
 				location: u.location,
 				profession: u.profession,

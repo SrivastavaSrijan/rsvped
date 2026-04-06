@@ -49,6 +49,43 @@ export enum LocationUpdateActionErrorCode {
 	VALIDATION_ERROR = 'VALIDATION_ERROR',
 }
 
+export enum ProfileUpdateErrorCodes {
+	UNAUTHORIZED = 'UNAUTHORIZED',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	USERNAME_TAKEN = 'USERNAME_TAKEN',
+	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
+}
+
+export type ProfileFormData = {
+	name: string
+	username: string
+	bio: string
+	profession: string
+	industry: string
+	experienceLevel: string
+	networkingStyle: string
+	locationId: string
+}
+
+export type ProfileUpdateActionResponse = ServerActionResponse<
+	{ username: string | null },
+	ProfileUpdateErrorCodes,
+	ProfileFormData
+>
+
+export enum FriendshipActionErrorCodes {
+	UNAUTHORIZED = 'UNAUTHORIZED',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	ALREADY_EXISTS = 'ALREADY_EXISTS',
+	NOT_FOUND = 'NOT_FOUND',
+	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
+}
+
+export type FriendshipActionResponse = ServerActionResponse<
+	unknown,
+	FriendshipActionErrorCodes
+>
+
 export type LocationFormData = {
 	locationId: string
 }

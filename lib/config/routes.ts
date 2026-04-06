@@ -8,6 +8,7 @@ export const Routes = {
 		SignIn: '/login',
 		SignUp: '/register',
 		Profile: '/profile',
+		EditProfile: '/profile/edit',
 	},
 	Static: {
 		Terms: '/terms-of-service',
@@ -88,6 +89,13 @@ export const Routes = {
 				return `${this.Root}?q=${q}`
 			},
 		},
+		Users: {
+			Root: '/u',
+			ViewByUsername(username: string) {
+				return `${this.Root}/${username}`
+			},
+		},
+		Feed: '/feed',
 	},
 }
 
@@ -100,12 +108,15 @@ export const RouteDefs = {
 		Routes.Main.Communities.Home,
 		Routes.Main.Stir.Root,
 		Routes.Auth.Profile,
+		Routes.Auth.EditProfile,
+		Routes.Main.Feed as string,
 	],
 	Public: [
 		Routes.Main.Events.Discover,
 		Routes.Main.Events.ViewBySlug('[slug]'),
 		Routes.Main.Events.ViewBySlugRegister('[slug]'),
 		Routes.Main.Communities.SubscribeTo('[slug]'),
+		Routes.Main.Users.ViewByUsername('[username]'),
 	],
 }
 

@@ -34,6 +34,7 @@ export function createAuthenticatedCaller(userId: string) {
 				email: 'test@example.com',
 				role: 'USER',
 				isDemo: false,
+				username: 'test_user',
 			},
 			expires: new Date(Date.now() + 86400000).toISOString(),
 		},

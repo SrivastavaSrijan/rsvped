@@ -87,6 +87,11 @@ export {
 	FormMessage,
 	useFormField,
 } from './form'
+export {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from './hover-card'
 export { Image } from './image'
 export { Input, type InputProps, inputVariants } from './input'
 export { InputWithError } from './input-with-error'

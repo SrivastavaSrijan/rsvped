@@ -2,8 +2,10 @@ import {
 	AIErrorCodes,
 	AuthErrorCodes,
 	EventErrorCodes,
+	FriendshipActionErrorCodes,
 	LocationUpdateActionErrorCode,
 	MembershipErrorCodes,
+	ProfileUpdateErrorCodes,
 	RsvpErrorCodes,
 } from './types'
 
@@ -76,4 +78,33 @@ export const AIActionErrorCodeMap = {
 	[AIErrorCodes.INVALID_TYPE]: 'Invalid enhancement type.',
 	[AIErrorCodes.GENERATION_FAILED]:
 		'Failed to generate content. Please try again.',
+}
+
+export const ProfileActionErrorCodeMap: Record<
+	ProfileUpdateErrorCodes,
+	string
+> = {
+	[ProfileUpdateErrorCodes.UNAUTHORIZED]:
+		'You must be logged in to update your profile.',
+	[ProfileUpdateErrorCodes.VALIDATION_ERROR]:
+		'Please fix the errors in the form.',
+	[ProfileUpdateErrorCodes.USERNAME_TAKEN]:
+		'This username is already taken. Please choose another.',
+	[ProfileUpdateErrorCodes.UNEXPECTED_ERROR]:
+		'An unexpected error occurred. Please try again.',
+}
+
+export const FriendshipActionErrorCodeMap: Record<
+	FriendshipActionErrorCodes,
+	string
+> = {
+	[FriendshipActionErrorCodes.UNAUTHORIZED]:
+		'You must be logged in to manage friendships.',
+	[FriendshipActionErrorCodes.VALIDATION_ERROR]:
+		'Invalid request. Please try again.',
+	[FriendshipActionErrorCodes.ALREADY_EXISTS]:
+		'A friend request already exists.',
+	[FriendshipActionErrorCodes.NOT_FOUND]: 'Friend request not found.',
+	[FriendshipActionErrorCodes.UNEXPECTED_ERROR]:
+		'An unexpected error occurred. Please try again.',
 }

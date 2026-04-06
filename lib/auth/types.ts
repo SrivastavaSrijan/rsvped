@@ -7,6 +7,7 @@ declare module 'next-auth' {
 			id: string
 			role: UserRole
 			isDemo: boolean
+			username: string | null
 		} & DefaultSession['user']
 	}
 
@@ -14,5 +15,6 @@ declare module 'next-auth' {
 		id: string
 		role: UserRole
 		isDemo: boolean
+		username: string | null
 	}
 }
