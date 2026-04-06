@@ -32,11 +32,6 @@ function checkRateLimit(userId: string): boolean {
 }
 
 export async function POST(request: Request) {
-	const contentType = request.headers.get('content-type')
-	if (!contentType?.includes('application/json')) {
-		return Response.json({ error: 'Invalid content type' }, { status: 415 })
-	}
-
 	if (!isAvailable()) {
 		return Response.json({ error: 'AI not configured' }, { status: 503 })
 	}
