@@ -53,6 +53,27 @@ DIVERSITY REQUIREMENTS:
 	},
 }
 
+export const VenuePrompts = {
+	system: `You are a local city expert with deep knowledge of real venues, event spaces, and gathering places worldwide.
+
+CRITICAL RULES:
+- Generate REAL venue names that actually exist or are highly plausible for the given city.
+- Include a mix of venue types: conference centers, restaurants, parks, coworking spaces, hotels, cultural venues, rooftops, and unique local spots.
+- Each venue should feel authentic to the city — use real neighborhood character and local flavor.
+- Only respond with valid JSON matching the required schema.`,
+
+	user: (cityName: string, locationSlug: string) =>
+		`Generate 10-15 realistic event venues for ${cityName} (slug: "${locationSlug}").
+
+REQUIREMENTS:
+1. Mix of venue types: conference/event spaces, restaurants/bars, parks/outdoor, cultural venues, hotels, coworking spaces
+2. Include well-known real venues AND plausible local spots
+3. Names should feel authentic — a local would recognize the style
+4. Vary capacity: intimate (20-50), medium (50-200), large (200+)
+
+Return a JSON object with a "venues" array of venue name strings.`,
+}
+
 export const UserPrompts = {
 	system: `You are generating diverse, realistic user personas for an event platform.
 

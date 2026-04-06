@@ -10,7 +10,7 @@
  */
 
 import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 
 const commands = {
 	generate: {
@@ -21,8 +21,11 @@ const commands = {
 	process: {
 		description: 'Process and distribute data for seeding',
 		script: 'npx tsx prisma/seed/process.ts',
-		check: () =>
-			existsSync('./prisma/.local/seed-data/batches/communities-batch-1.json'),
+		check: () => {
+			const dir = './prisma/.local/seed-data/batches'
+			if (!existsSync(dir)) return false
+			return readdirSync(dir).some((f) => f.startsWith('communities-batch-'))
+		},
 	},
 	seed: {
 		description: 'Write data to database (supports resume)',

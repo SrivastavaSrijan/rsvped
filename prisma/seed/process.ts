@@ -88,14 +88,22 @@ async function processData() {
 		try {
 			const venuesPath = path.join(paths.cacheDir, 'venues.json')
 			logger.debug('Reading venues file', { path: venuesPath })
-			const venuesData = safeReadJSON(venuesPath)
 
+			if (!existsSync(venuesPath)) {
+				throw new Error(
+					`Venues file not found at ${venuesPath}. Run 'yarn workflow generate' first — it generates venues via LLM.`
+				)
+			}
+
+			const venuesData = safeReadJSON(venuesPath)
 			if (!venuesData) {
 				throw new Error('Venues file returned null data')
 			}
 
 			venues = validateBatchFile(venuesData, venuesStaticSchema, 'venues.json')
-			logger.debug('Venues loaded successfully', { count: venues.length })
+			logger.debug('Venues loaded successfully', {
+				cities: Object.keys(venues).length,
+			})
 		} catch (error) {
 			logger.error('Failed to load venues.json', error)
 			throw error

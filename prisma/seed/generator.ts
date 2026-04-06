@@ -1,15 +1,34 @@
 /**
- * Multi-Pass Data Generator
+ * Multi-Pass Data Generator (Batch API)
  *
- * Sequential generation pipeline:
- * Pass 1: Communities (batches of 3) with location + category enum constraints
- * Digest: Group communities by location into compact summaries
- * Pass 2: Users per-location batch with community digest in prompt
+ * Submits all generation requests via the Claude Batch API for:
+ * - 50% cost savings over real-time API
+ * - Zero rate limit pressure
+ * - Reliable bulk processing
+ *
+ * Pipeline:
+ *   Pass 1: Communities (single batch, ~140 requests)
+ *   Digest: Group communities by location
+ *   Pass 2: Users (single batch, ~69 requests)
+ *   Pass 3: Venues (single batch, ~69 requests)
  */
 
+import {
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs'
 import { faker } from '@faker-js/faker'
-import { getTotalCostUsd, llm } from './generators/llm'
-import { CommunityPrompts, UserPrompts } from './prompts/llm'
+import { z } from 'zod'
+import {
+	type BatchRequest,
+	getBatchTotalCost,
+	resetBatchCost,
+	submitBatch,
+} from './generators/batch'
+import { CommunityPrompts, UserPrompts, VenuePrompts } from './prompts/llm'
 import {
 	type Category,
 	type LLMCommunity,
@@ -20,7 +39,7 @@ import {
 	LOCATION_SLUGS,
 	logger,
 } from './utils'
-import { config } from './utils/config'
+import { config, paths } from './utils/config'
 import { loadCategorySlugs } from './utils/data-loaders'
 
 // ---------------------------------------------------------------------------
@@ -51,26 +70,27 @@ function buildCommunityDigest(
 }
 
 // ---------------------------------------------------------------------------
-// Pass 1: Community Generation
+// Venue Schema
+// ---------------------------------------------------------------------------
+
+const VenueBatchSchema = z.object({
+	venues: z.array(z.string().min(1)).min(5).max(20),
+})
+
+// ---------------------------------------------------------------------------
+// Pass 1: Community Generation (Batch API)
 // ---------------------------------------------------------------------------
 
 async function generateCommunities(
 	targetCount: number,
 	categories: Category[]
 ): Promise<LLMCommunity[]> {
-	if (!config.USE_LLM || !llm.isAvailable()) {
-		logger.warn('LLM unavailable, skipping community generation')
-		return []
-	}
-
 	const batchSize = 3
 	const batches = Math.ceil(targetCount / batchSize)
-	const allCommunities: LLMCommunity[] = []
 	const categoryNames = categories.map((c) => c.name)
-	const concurrency = 10
 
-	// Build all batch configs upfront
-	const batchConfigs = Array.from({ length: batches }, (_, i) => {
+	// Build all batch requests upfront
+	const requests: BatchRequest[] = Array.from({ length: batches }, (_, i) => {
 		const currentBatchSize = Math.min(batchSize, targetCount - i * batchSize)
 		const batchLocationSlugs = faker.helpers.arrayElements(
 			[...LOCATION_SLUGS],
@@ -81,62 +101,36 @@ async function generateCommunities(
 			{ length: currentBatchSize },
 			(_, j) => categoryNames[(startIdx + j) % categoryNames.length]
 		)
-		return { index: i, currentBatchSize, batchLocationSlugs, batchCategories }
-	}).filter((b) => b.currentBatchSize > 0)
 
-	// Process in concurrent chunks
-	for (let chunk = 0; chunk < batchConfigs.length; chunk += concurrency) {
-		const slice = batchConfigs.slice(chunk, chunk + concurrency)
-		logger.info(
-			`Community batches ${chunk + 1}-${chunk + slice.length}/${batches} (${concurrency} concurrent)`
-		)
-
-		const results = await Promise.allSettled(
-			slice.map(
-				async ({
-					index,
-					currentBatchSize,
-					batchLocationSlugs,
-					batchCategories,
-				}) => {
-					const prompt = CommunityPrompts.user(
-						currentBatchSize,
-						batchLocationSlugs,
-						batchCategories,
-						LOCATION_SLUG_TO_NAME
-					)
-					const result = await llm.generate(
-						prompt,
-						CommunityPrompts.system,
-						LLMCommunityBatchSchema,
-						`community-batch-${index + 1}`
-					)
-					return (result as { communities: LLMCommunity[] }).communities ?? []
-				}
-			)
-		)
-
-		let budgetExhausted = false
-		for (const r of results) {
-			if (r.status === 'fulfilled') {
-				allCommunities.push(...r.value)
-			} else {
-				const msg =
-					r.reason instanceof Error ? r.reason.message : String(r.reason)
-				if (msg.includes('budget exhausted')) {
-					budgetExhausted = true
-				} else {
-					logger.error('Community batch failed', { error: msg })
-				}
-			}
+		return {
+			customId: `communities-batch-${i + 1}`,
+			system: CommunityPrompts.system,
+			prompt: CommunityPrompts.user(
+				currentBatchSize,
+				batchLocationSlugs,
+				batchCategories,
+				LOCATION_SLUG_TO_NAME
+			),
 		}
+	}).filter((_, i) => Math.min(batchSize, targetCount - i * batchSize) > 0)
 
-		logger.info(`Chunk done`, {
-			total: allCommunities.length,
-			costSoFar: `$${getTotalCostUsd().toFixed(4)}`,
-		})
+	const results = await submitBatch(
+		requests,
+		LLMCommunityBatchSchema,
+		'communities'
+	)
 
-		if (budgetExhausted || allCommunities.length >= targetCount) break
+	// Save batch results in the format process.ts expects
+	mkdirSync(paths.batchesDir, { recursive: true })
+	const allCommunities: LLMCommunity[] = []
+	for (const r of results) {
+		if (r.data) {
+			allCommunities.push(...r.data.communities)
+			writeFileSync(
+				`${paths.batchesDir}/${r.customId}.json`,
+				JSON.stringify({ communities: r.data.communities }, null, 2)
+			)
+		}
 	}
 
 	// Deduplicate by name + location
@@ -151,7 +145,7 @@ async function generateCommunities(
 }
 
 // ---------------------------------------------------------------------------
-// Pass 2: User Generation (location-grouped, community-aware)
+// Pass 2: User Generation (Batch API, location-grouped)
 // ---------------------------------------------------------------------------
 
 async function generateUsers(
@@ -159,15 +153,9 @@ async function generateUsers(
 	communities: LLMCommunity[],
 	categories: Category[]
 ): Promise<LLMUserPersona[]> {
-	if (!config.USE_LLM || !llm.isAvailable()) {
-		logger.warn('LLM unavailable, skipping user generation')
-		return []
-	}
-
 	const digest = buildCommunityDigest(communities)
 	const categoryNames = categories.map((c) => c.name)
 
-	// Group generation by location for coherence
 	const locationsWithCommunities = Object.keys(digest)
 	const allLocations = [...LOCATION_SLUGS]
 	const usersPerLocation = Math.max(
@@ -175,76 +163,43 @@ async function generateUsers(
 		Math.ceil(targetCount / allLocations.length)
 	)
 
-	const allUsers: LLMUserPersona[] = []
-	const batchIndex = 0
-
-	// Generate users for locations with communities first (more context)
+	// Prioritize locations with communities
 	const sortedLocations = [
 		...locationsWithCommunities,
 		...allLocations.filter((s) => !locationsWithCommunities.includes(s)),
 	]
 
-	// Build batch configs for all locations
-	const userBatchConfigs = sortedLocations
-		.map((slug) => {
-			const batchSize = Math.min(usersPerLocation, 15)
-			const locationDigest = digest[slug]
-				? digest[slug]
-				: `No communities yet in ${LOCATION_SLUG_TO_NAME[slug] ?? slug} — generate users with general interests.`
-			return { slug, batchSize, locationDigest }
-		})
-		.filter((b) => b.batchSize > 0)
+	const requests: BatchRequest[] = sortedLocations.map((slug) => {
+		const batchSize = Math.min(usersPerLocation, 15)
+		const locationDigest = digest[slug]
+			? digest[slug]
+			: `No communities yet in ${LOCATION_SLUG_TO_NAME[slug] ?? slug} — generate users with general interests.`
 
-	const concurrency = 10
-
-	for (let chunk = 0; chunk < userBatchConfigs.length; chunk += concurrency) {
-		if (allUsers.length >= targetCount) break
-
-		const slice = userBatchConfigs.slice(chunk, chunk + concurrency)
-		logger.info(
-			`User batches ${chunk + 1}-${chunk + slice.length}/${userBatchConfigs.length} (${concurrency} concurrent)`
-		)
-
-		const results = await Promise.allSettled(
-			slice.map(async ({ slug, batchSize, locationDigest }) => {
-				const prompt = UserPrompts.user(
-					batchSize,
-					[slug],
-					categoryNames,
-					LOCATION_SLUG_TO_NAME,
-					locationDigest
-				)
-				const result = await llm.generate(
-					prompt,
-					UserPrompts.system,
-					LLMUserBatchSchema,
-					`user-batch-${slug}`
-				)
-				return (result as { users: LLMUserPersona[] }).users ?? []
-			})
-		)
-
-		let budgetExhausted = false
-		for (const r of results) {
-			if (r.status === 'fulfilled') {
-				allUsers.push(...r.value)
-			} else {
-				const msg =
-					r.reason instanceof Error ? r.reason.message : String(r.reason)
-				if (msg.includes('budget exhausted')) {
-					budgetExhausted = true
-				} else {
-					logger.error('User batch failed', { error: msg })
-				}
-			}
+		return {
+			customId: `users-batch-${slug}`,
+			system: UserPrompts.system,
+			prompt: UserPrompts.user(
+				batchSize,
+				[slug],
+				categoryNames,
+				LOCATION_SLUG_TO_NAME,
+				locationDigest
+			),
 		}
+	})
 
-		logger.info('User chunk done', {
-			total: allUsers.length,
-			costSoFar: `$${getTotalCostUsd().toFixed(4)}`,
-		})
+	const results = await submitBatch(requests, LLMUserBatchSchema, 'users')
 
-		if (budgetExhausted) break
+	// Save batch results in the format process.ts expects
+	const allUsers: LLMUserPersona[] = []
+	for (const r of results) {
+		if (r.data) {
+			allUsers.push(...r.data.users)
+			writeFileSync(
+				`${paths.batchesDir}/${r.customId}.json`,
+				JSON.stringify({ users: r.data.users }, null, 2)
+			)
+		}
 	}
 
 	// Deduplicate
@@ -259,68 +214,127 @@ async function generateUsers(
 }
 
 // ---------------------------------------------------------------------------
+// Pass 3: Venue Generation (Batch API)
+// ---------------------------------------------------------------------------
+
+async function generateVenues(): Promise<Record<string, string[]>> {
+	const requests: BatchRequest[] = LOCATION_SLUGS.map((slug) => {
+		const cityName = LOCATION_SLUG_TO_NAME[slug] ?? slug
+		return {
+			customId: `venue-${slug}`,
+			system: VenuePrompts.system,
+			prompt: VenuePrompts.user(cityName, slug),
+		}
+	})
+
+	const results = await submitBatch(requests, VenueBatchSchema, 'venues')
+
+	const venues: Record<string, string[]> = {}
+	for (const r of results) {
+		if (r.data) {
+			const slug = r.customId.replace('venue-', '')
+			const cityName = LOCATION_SLUG_TO_NAME[slug] ?? slug
+			venues[cityName] = r.data.venues
+		}
+	}
+
+	// Save to cache for process.ts to pick up
+	mkdirSync(paths.cacheDir, { recursive: true })
+	writeFileSync(
+		`${paths.cacheDir}/venues.json`,
+		JSON.stringify(venues, null, 2)
+	)
+	logger.info(`Saved ${Object.keys(venues).length} city venues to cache`)
+
+	return venues
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 export class DataGenerator {
-	/**
-	 * Multi-pass generation: communities first, then users with community context.
-	 */
 	async generateAll(): Promise<{
 		communities: LLMCommunity[]
 		users: LLMUserPersona[]
+		venues: Record<string, string[]>
 	}> {
-		logger.info('Starting multi-pass data generation', {
+		logger.info('Starting batch data generation', {
 			communities: config.NUM_COMMUNITIES,
 			users: config.NUM_USERS,
 			useLLM: config.USE_LLM,
 			budget: `$${config.SEED_BUDGET_USD}`,
 		})
 
+		if (!config.USE_LLM || !process.env.ANTHROPIC_API_KEY) {
+			logger.warn('LLM disabled or no API key — skipping generation')
+			return { communities: [], users: [], venues: {} }
+		}
+
+		resetBatchCost()
+
+		// Clear stale batch files from previous runs to prevent mixing
+		if (existsSync(paths.batchesDir)) {
+			const stale = readdirSync(paths.batchesDir).filter((f) =>
+				f.endsWith('.json')
+			)
+			for (const f of stale) rmSync(`${paths.batchesDir}/${f}`)
+			if (stale.length > 0) {
+				logger.info(`Cleared ${stale.length} stale batch files`)
+			}
+		}
+
 		const categories = loadCategorySlugs()
 
 		// Pass 1: Communities
-		logger.info('=== Pass 1: Community Generation ===')
+		logger.info('=== Pass 1: Community Generation (Batch API) ===')
 		const communities = await generateCommunities(
 			config.NUM_COMMUNITIES,
 			categories
 		)
 		logger.info('Pass 1 complete', {
 			communities: communities.length,
-			cost: `$${getTotalCostUsd().toFixed(4)}`,
+			cost: `$${getBatchTotalCost().toFixed(4)}`,
 		})
 
 		// Pass 2: Users (with community digest context)
-		logger.info('=== Pass 2: User Generation ===')
+		logger.info('=== Pass 2: User Generation (Batch API) ===')
 		const users = await generateUsers(config.NUM_USERS, communities, categories)
 		logger.info('Pass 2 complete', {
 			users: users.length,
-			totalCost: `$${getTotalCostUsd().toFixed(4)}`,
+			cost: `$${getBatchTotalCost().toFixed(4)}`,
 		})
 
-		logger.info('Multi-pass generation complete', {
+		// Pass 3: Venues
+		logger.info('=== Pass 3: Venue Generation (Batch API) ===')
+		const venues = await generateVenues()
+		logger.info('Pass 3 complete', {
+			cities: Object.keys(venues).length,
+			totalCost: `$${getBatchTotalCost().toFixed(4)}`,
+		})
+
+		logger.info('All passes complete', {
 			communities: communities.length,
 			users: users.length,
-			totalCost: `$${getTotalCostUsd().toFixed(4)}`,
+			venues: Object.keys(venues).length,
+			totalCost: `$${getBatchTotalCost().toFixed(4)}`,
 		})
 
-		return { communities, users }
+		return { communities, users, venues }
 	}
 
-	/**
-	 * Generate only communities
-	 */
 	async generateCommunities() {
 		const categories = loadCategorySlugs()
 		return generateCommunities(config.NUM_COMMUNITIES, categories)
 	}
 
-	/**
-	 * Generate only users (requires existing communities for context)
-	 */
 	async generateUsers(communities: LLMCommunity[], count?: number) {
 		const categories = loadCategorySlugs()
 		return generateUsers(count ?? config.NUM_USERS, communities, categories)
+	}
+
+	async generateVenues() {
+		return generateVenues()
 	}
 }
 
