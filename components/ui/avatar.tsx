@@ -73,4 +73,4 @@ function AvatarWithFallback({
 	)
 }
 
-export { Avatar, AvatarImage, AvatarFallback, AvatarWithFallback }
+export { Avatar, AvatarFallback, AvatarImage, AvatarWithFallback }

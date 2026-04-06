@@ -1,54 +1,103 @@
 /**
  * LLM Prompts
  *
- * Centralized prompt templates for LLM data generation.
+ * Coherence-focused prompt templates for multi-pass LLM data generation.
+ * Pass 1: communities (with location slug + category constraints)
+ * Pass 2: users (with community digest for coherent matching)
  */
 
 export const CommunityPrompts = {
-	system: `You are an expert event organizer who understands different community types across the world.
-Only respond with a valid JSON object matching the required schema.
-Create realistic, diverse communities with appropriate events, pricing, and membership structures.
-Each community should feel distinct and authentic to its location and focus area.
-Do not use generic placeholder names like "Tech Hub" or "Creative Space".`,
+	system: `You are an expert community organizer and event planner with deep knowledge of cities worldwide.
 
-	user: (batchSize: number, locationNames: string[], categories: string[]) =>
-		`Generate exactly ${batchSize} DIVERSE and REALISTIC communities for an event management platform.
+CRITICAL RULES:
+- The "homeLocation" field MUST be one of the provided location slugs EXACTLY as written.
+- The "categories" field MUST include at least one of the provided category names.
+- Each community must feel authentic to its city — use real neighborhood names, local cultural references, and venue styles appropriate to that location.
+- Do NOT use generic names like "Tech Hub" or "Creative Space". Be specific and evocative.
+- Create communities that real people would actually join.
+- Events should have realistic venue names for their specific cities.
+- Only respond with valid JSON matching the required schema.`,
+
+	user: (
+		batchSize: number,
+		locationSlugs: string[],
+		categoryNames: string[],
+		slugToName: Record<string, string>
+	) => {
+		const locationList = locationSlugs
+			.map((slug) => `  "${slug}" (${slugToName[slug] ?? slug})`)
+			.join('\n')
+
+		return `Generate exactly ${batchSize} DIVERSE and REALISTIC communities for an event management platform.
+
+LOCATION SLUGS (use EXACTLY one of these for homeLocation):
+${locationList}
+
+CATEGORIES (each community must relate to at least one):
+${categoryNames.join(', ')}
 
 REQUIREMENTS:
-1. Each community MUST have a unique name and focus area
-2. Each community must be based in one of these locations: ${locationNames.join(', ')}
-3. Each community should focus on one of these categories: ${categories.join(', ')}
-4. Create 2-5 events for each community that make sense for their location and focus area
-5. Events should have realistic venue names for their cities
-6. Include realistic ticket pricing and membership tiers appropriate for the community type
-7. Ensure descriptions are detailed but concise (2-3 sentences)
-8. The categories array should include the main category plus relevant subcategories
+1. Each community MUST have a unique name — no two communities should share similar names
+2. homeLocation MUST be one of the exact slugs listed above (e.g., "nyc", "sf", "london")
+3. Categories array must include the main category and 1-2 relevant subcategories
+4. Create 2-4 events per community with realistic venue names for that city
+5. Events should have realistic ticket pricing appropriate for the city and community type
+6. Descriptions should be 2-3 vivid sentences that convey the community's personality
+7. Membership tiers should make sense for the community type (free meetups vs. premium networks)
 
-CREATE DIVERSE COMMUNITY TYPES LIKE:
-- Professional networks for specific industries
-- Hobby and interest groups (art, music, coding, gaming)
-- Educational communities (workshops, courses)
-- Cultural/language exchange groups
-- Networking groups for specific demographics
-- Industry associations and professional development
-
-The response should be a valid JSON object following the provided schema.`,
+DIVERSITY REQUIREMENTS:
+- Mix professional networks, hobby groups, educational communities, cultural exchanges, and social clubs
+- Vary membership styles (open, invite-only, application-based) based on community type
+- Include both free/casual and premium/exclusive communities
+- Make event types varied: workshops, meetups, conferences, social gatherings, hackathons`
+	},
 }
 
 export const UserPrompts = {
-	system: `You are generating diverse, realistic user personas for an event platform. 
-Only respond with a valid JSON object matching the provided schema.`,
+	system: `You are generating diverse, realistic user personas for an event platform.
 
-	user: (batchSize: number, locationNames: string[], categories: string[]) =>
-		`Generate exactly ${batchSize} realistic professional personas for an event platform.
+CRITICAL RULES:
+- The "location" field MUST be one of the provided location slugs EXACTLY as written.
+- Interests MUST align with the categories and communities available in that location.
+- Use culturally appropriate names for each location.
+- Each persona should feel like a real person with coherent professional background, interests, and networking style.
+- Only respond with valid JSON matching the provided schema.`,
+
+	user: (
+		batchSize: number,
+		locationSlugs: string[],
+		categoryNames: string[],
+		slugToName: Record<string, string>,
+		communityDigest: string
+	) => {
+		const locationList = locationSlugs
+			.map((slug) => `  "${slug}" (${slugToName[slug] ?? slug})`)
+			.join('\n')
+
+		return `Generate exactly ${batchSize} realistic professional personas for an event platform.
+
+LOCATION SLUGS (use EXACTLY one of these for location):
+${locationList}
+
+CATEGORIES:
+${categoryNames.join(', ')}
+
+COMMUNITIES AVAILABLE IN THESE LOCATIONS:
+${communityDigest}
 
 REQUIREMENTS:
-1. Each person MUST have their location selected from this list: ${locationNames.join(', ')}
-2. Each person should have interests related to these categories: ${categories.join(', ')}
-3. Create DIVERSE profiles across industries, experiences (junior/mid/senior/executive), and networking styles
-4. Use realistic first and last names for the specified locations
-5. Keep bio to a single concise sentence
-6. Make sure interests align with the provided categories
+1. Each person's location MUST be one of the exact slugs listed above
+2. Interests should align with communities available in their location
+3. Use culturally appropriate first and last names for each location
+4. Create DIVERSE profiles across industries, experience levels, and networking styles
+5. Bio should be a single vivid sentence that captures who they are
+6. Spending power should correlate with experience level and profession
+7. Networking style should match their profession and personality
 
-Return a JSON object with a "users" array following the provided schema.`,
+DIVERSITY REQUIREMENTS:
+- Junior through executive experience levels
+- Mix of active networkers, selective attendees, and casual participants
+- Various industries: tech, finance, creative, healthcare, education, etc.
+- Include both local residents and transplants to each city`
+	},
 }
