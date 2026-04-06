@@ -63,11 +63,27 @@ export const Image = ({
 		computedSizes = typeof sizes === 'string' ? sizes : undefined
 	}
 
+	// For images with known dimensions (not fill), skip the loading skeleton
+	// to avoid the triple flash: skeleton → opacity-0 → opacity-100
+	if (!fill) {
+		return (
+			<div className={cn('relative', wrapperClassName)} style={wrapperStyle}>
+				<NextImage
+					{...props}
+					src={imageSrc}
+					alt={alt}
+					sizes={computedSizes}
+					className={className}
+				/>
+			</div>
+		)
+	}
+
 	return (
 		<div className={cn('relative', wrapperClassName)} style={wrapperStyle}>
-			{isLoading && (
+			{isLoading ? (
 				<Skeleton className={cn('absolute inset-0 h-full w-full', className)} />
-			)}
+			) : null}
 			<NextImage
 				{...props}
 				src={imageSrc}

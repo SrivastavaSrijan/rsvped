@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Footer, ModalLoading } from '@/components/shared'
-import { Navbar, PageWrapper } from './components'
+import { Navbar, NavbarSkeleton, PageWrapper } from './components'
 
 export default async function MainLayout({
 	children,
@@ -12,7 +12,9 @@ export default async function MainLayout({
 	return (
 		<>
 			<Suspense fallback={<ModalLoading />}>{form}</Suspense>
-			<Navbar />
+			<Suspense fallback={<NavbarSkeleton />}>
+				<Navbar />
+			</Suspense>
 			<PageWrapper>
 				<main className="flex flex-1 items-center justify-center">
 					{children}
