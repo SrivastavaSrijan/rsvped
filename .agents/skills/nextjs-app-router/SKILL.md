@@ -114,8 +114,7 @@ Routes.Main.Events.Create               // dynamic getter
 Routes.Main.Events.ViewBySlug(slug)     // '/events/{slug}/view'
 Routes.Main.Events.ManageBySlug(slug)   // '/events/{slug}/manage'
 Routes.Main.Communities.ViewBySlug(slug) // '/communities/{slug}/view'
-Routes.Main.Communities.Discover         // '/communities/discover'
-Routes.Static.About                     // '/about'
+Routes.Static.Terms                     // '/terms'
 Routes.Static.Privacy                   // '/privacy'
 ```
 

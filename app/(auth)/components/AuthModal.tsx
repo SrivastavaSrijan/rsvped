@@ -1,6 +1,7 @@
 'use client'
-import { AlertCircle, Loader2, LogInIcon, Mail } from 'lucide-react'
+import { AlertCircle, Loader2, LogInIcon, Mail, Play } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
+import { useTransition } from 'react'
 import { Background, Form } from '@/components/shared'
 import {
 	Alert,
@@ -23,6 +24,7 @@ import {
 	type AuthActionResponse,
 	type AuthFormData,
 	authAction,
+	signInAsDemo,
 	signInWithGoogle,
 } from '@/server/actions'
 import type { AuthErrorCodes } from '@/server/actions/types'
@@ -38,6 +40,21 @@ interface AuthModalProps {
 	prefill?: Partial<AuthFormData>
 }
 
+function QueryError({ queryError }: { queryError: string | null }) {
+	if (!queryError) return null
+	return (
+		<Alert variant="destructive">
+			<AlertCircle className="size-4" />
+			<AlertTitle>Something went wrong!</AlertTitle>
+			{queryError in AuthActionErrorCodeMap && (
+				<AlertDescription>
+					{AuthActionErrorCodeMap[queryError as AuthErrorCodes]}
+				</AlertDescription>
+			)}
+		</Alert>
+	)
+}
+
 export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 	const {
 		state,
@@ -50,24 +67,10 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 		errorCodeMap: AuthActionErrorCodeMap,
 		displayMode: 'inline',
 	})
+	const [isDemoPending, startDemoTransition] = useTransition()
 	const searchParams = useSearchParams()
 
 	const queryError = searchParams.get('error')
-
-	const QueryError = () => {
-		if (!queryError) return null
-		return (
-			<Alert variant="destructive">
-				<AlertCircle className="size-4" />
-				<AlertTitle>Something went wrong!</AlertTitle>
-				{queryError in AuthActionErrorCodeMap && (
-					<AlertDescription>
-						{AuthActionErrorCodeMap[queryError as AuthErrorCodes]}
-					</AlertDescription>
-				)}
-			</Alert>
-		)
-	}
 
 	return (
 		<Dialog open>
@@ -82,7 +85,7 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 					</div>
 					<DialogTitle>{copy.welcome}</DialogTitle>
 					<DialogDescription>{copy.description}</DialogDescription>
-					{loginError || <QueryError />}
+					{loginError || <QueryError queryError={queryError} />}
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
 					<Form action={formAction} className="flex flex-col gap-3 lg:gap-3">
@@ -144,6 +147,25 @@ export const AuthModal = ({ mode, prefill }: AuthModalProps) => {
 					>
 						<Image src="/google.svg" alt="Google Icon" width={12} height={12} />
 						{copy.buttonText.google}
+					</Button>
+
+					<Button
+						type="button"
+						variant="secondary"
+						className="flex w-full items-center justify-center gap-1.5"
+						disabled={isDemoPending}
+						onClick={() =>
+							startDemoTransition(async () => {
+								await signInAsDemo()
+							})
+						}
+					>
+						{isDemoPending ? (
+							<Loader2 className="size-3 animate-spin" />
+						) : (
+							<Play className="size-3" />
+						)}
+						{copy.buttonText.demo}
 					</Button>
 				</div>
 			</DialogContent>

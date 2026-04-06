@@ -1,5 +1,6 @@
 'use client'
 
+import { useCompletion } from '@ai-sdk/react'
 import { Loader2, Send, Sparkle, Sparkles, Undo2, Wand2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 
@@ -11,11 +12,7 @@ import {
 	Textarea,
 } from '@/components/ui'
 import { useAutosizeTextArea } from '@/lib/hooks'
-import {
-	AIActionErrorCodeMap,
-	enhanceText,
-	generateSuggestions,
-} from '@/server/actions'
+import { AIActionErrorCodeMap, generateSuggestions } from '@/server/actions'
 import { FORMAT_OPTIONS, MAIN_ACTIONS, TONE_OPTIONS } from './constants'
 import { GridActionButton } from './GridActionButton'
 import { SuggestionsSection } from './SuggestionsSection'
@@ -52,6 +49,21 @@ export const WritingAssistant = ({
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 	const { adjustHeight } = useAutosizeTextArea(textareaRef, { padding: 4 })
 
+	// Streaming enhancement via Route Handler
+	const { complete } = useCompletion({
+		api: '/api/ai/enhance',
+		onFinish: (_prompt: string, completion: string) => {
+			setValue(completion)
+			setCustomPrompt('')
+			setLoading(null)
+		},
+		onError: () => {
+			setError('Enhancement failed. Please try again.')
+			setLoading(null)
+		},
+		streamProtocol: 'text',
+	})
+
 	const handleEnhance = async (type: EnhancementType, prompt?: string) => {
 		if (!text.trim()) return
 
@@ -59,25 +71,15 @@ export const WritingAssistant = ({
 		setLoading(type)
 		setError(null)
 
-		try {
-			// Pass context for enhancements too
-			const result = await enhanceText(text, type, context, prompt)
-
-			if (result.success && result.data?.text) {
-				setValue(result.data.text)
-				setCustomPrompt('')
-			} else if (result.error) {
-				const errorMessage =
-					AIActionErrorCodeMap[
-						result.error as keyof typeof AIActionErrorCodeMap
-					] || 'Enhancement failed'
-				setError(errorMessage)
-			}
-		} catch {
-			setError('Something went wrong. Please try again.')
-		} finally {
-			setLoading(null)
-		}
+		// Stream the enhancement — text updates progressively via setValue
+		complete('', {
+			body: {
+				text,
+				type,
+				context,
+				customPrompt: prompt,
+			},
+		})
 	}
 
 	const handleGenerateSuggestions = async () => {

@@ -31,11 +31,18 @@ export const Hero = () => {
 					<p className="px-2 text-lg text-muted-foreground leading-relaxed lg:text-xl">
 						{copy.hero.description}
 					</p>
-					<Link href={Routes.Main.Events.Create}>
-						<Button size="lg" className="lg:text-lg">
-							{copy.hero.cta}
-						</Button>
-					</Link>
+					<div className="flex flex-col gap-2 sm:flex-row">
+						<Link href={Routes.Main.Events.Discover}>
+							<Button size="lg" className="lg:text-lg">
+								{copy.hero.ctaExplore}
+							</Button>
+						</Link>
+						<Link href={Routes.Auth.SignIn}>
+							<Button size="lg" variant="outline" className="lg:text-lg">
+								{copy.hero.ctaDemo}
+							</Button>
+						</Link>
+					</div>
 				</div>
 
 				{/* Image Column */}

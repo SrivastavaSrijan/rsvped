@@ -3,6 +3,7 @@ import {
 	NetworkingStyle,
 	SpendingPower,
 	UserCohort,
+	UserRole,
 } from '@prisma/client'
 import * as z from 'zod'
 import {
@@ -39,6 +40,8 @@ export const UserModel = z.object({
 	emailVerified: z.date().nullish(),
 	image: z.string().nullish(),
 	password: z.string().nullish(),
+	role: z.nativeEnum(UserRole),
+	isDemo: z.boolean(),
 	profession: z.string().nullish(),
 	industry: z.string().nullish(),
 	experienceLevel: z.nativeEnum(ExperienceLevel).nullish(),

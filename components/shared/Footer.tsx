@@ -20,22 +20,22 @@ export const Footer = () => {
 
 						<div className="flex items-center space-x-4 lg:space-x-6">
 							<Link
-								href={Routes.Static.WhatsNew}
-								className="text-muted-foreground text-sm lg:text-sm"
-							>
-								{copy.footer.whatsNew}
-							</Link>
-							<Link
 								href={Routes.Main.Events.Discover}
 								className="text-muted-foreground text-sm lg:text-sm"
 							>
 								{copy.footer.discover}
 							</Link>
 							<Link
-								href={Routes.Static.Pricing}
+								href={Routes.Static.Terms}
 								className="text-muted-foreground text-sm lg:text-sm"
 							>
-								{copy.footer.pricing}
+								{copy.footer.terms}
+							</Link>
+							<Link
+								href={Routes.Static.Privacy}
+								className="text-muted-foreground text-sm lg:text-sm"
+							>
+								{copy.footer.privacy}
 							</Link>
 						</div>
 					</div>

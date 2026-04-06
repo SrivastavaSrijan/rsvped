@@ -1,6 +1,11 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"buildCommand": "npm run vercel:build",
-	"installCommand": "yarn"
-	
+	"installCommand": "yarn",
+	"crons": [
+		{
+			"path": "/api/cron/reset-demo",
+			"schedule": "0 0 * * *"
+		}
+	]
 }
