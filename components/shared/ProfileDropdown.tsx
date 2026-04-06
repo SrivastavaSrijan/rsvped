@@ -45,19 +45,21 @@ export const ProfileDropdown = ({ session }: ProfileDropdownProps) => {
 						{username ? `@${username}` : email}
 					</p>
 				</div>
-				<Link href={Routes.Main.Events.Home} passHref>
-					<DropdownMenuItem>{copy.events}</DropdownMenuItem>
-				</Link>
-				<Link href={Routes.Main.Feed as string} passHref>
-					<DropdownMenuItem>{copy.feed}</DropdownMenuItem>
-				</Link>
-				<Link href={Routes.Auth.Profile} passHref>
-					<DropdownMenuItem>{copy.profile}</DropdownMenuItem>
-				</Link>
+				<DropdownMenuItem asChild>
+					<Link href={Routes.Main.Events.Home}>{copy.events}</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href={Routes.Main.Feed as string}>{copy.feed}</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href={Routes.Auth.Profile}>{copy.profile}</Link>
+				</DropdownMenuItem>
 				{username ? (
-					<Link href={Routes.Main.Users.ViewByUsername(username)} passHref>
-						<DropdownMenuItem>{copy.publicProfile}</DropdownMenuItem>
-					</Link>
+					<DropdownMenuItem asChild>
+						<Link href={Routes.Main.Users.ViewByUsername(username)}>
+							{copy.publicProfile}
+						</Link>
+					</DropdownMenuItem>
 				) : null}
 				<DropdownMenuItem onClick={() => signOutAction()}>
 					{copy.signOut}

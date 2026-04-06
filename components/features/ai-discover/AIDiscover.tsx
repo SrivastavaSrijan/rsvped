@@ -187,7 +187,7 @@ function EventResultCard({ event }: { event: EventResult }) {
 	return (
 		<Link
 			href={Routes.Main.Events.ViewBySlug(event.slug)}
-			className="flex items-center gap-3 rounded-lg border border-border-primary p-2 transition-colors hover:bg-muted/50"
+			className="flex items-center gap-3 rounded-lg border border-border p-2 transition-colors hover:bg-muted/50"
 		>
 			<div className="shrink-0">
 				{event.coverImage ? (

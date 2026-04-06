@@ -76,21 +76,21 @@ function HoverCardBody({ data }: { data: HoverCardData }) {
 					className="size-12 text-lg"
 				/>
 				<div className="flex flex-col gap-0.5">
-					<p className="text-sm font-semibold text-text-primary">{data.name}</p>
+					<p className="text-sm font-semibold text-foreground">{data.name}</p>
 					{data.username ? (
-						<p className="text-xs text-text-secondary">@{data.username}</p>
+						<p className="text-xs text-muted-foreground">@{data.username}</p>
 					) : null}
 					{data.profession ? (
-						<p className="text-xs text-text-tertiary">{data.profession}</p>
+						<p className="text-xs text-muted-foreground">{data.profession}</p>
 					) : null}
 				</div>
 			</div>
 
 			{data.bio ? (
-				<p className="text-xs text-text-secondary line-clamp-2">{data.bio}</p>
+				<p className="text-xs text-muted-foreground line-clamp-2">{data.bio}</p>
 			) : null}
 
-			<div className="flex items-center gap-3 text-xs text-text-tertiary">
+			<div className="flex items-center gap-3 text-xs text-muted-foreground">
 				{data.location ? (
 					<span className="flex items-center gap-1">
 						<MapPin className="size-3" />

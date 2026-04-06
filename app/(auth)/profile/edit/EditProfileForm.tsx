@@ -85,7 +85,7 @@ export function EditProfileForm({ profile, locations }: EditProfileFormProps) {
 						pattern="^[a-z0-9_]{3,30}$"
 						title="3-30 characters, lowercase letters, numbers, or underscores"
 					/>
-					<p className="text-xs text-text-tertiary">
+					<p className="text-xs text-muted-foreground">
 						3-30 characters. Lowercase letters, numbers, and underscores only.
 					</p>
 				</div>
@@ -200,7 +200,7 @@ export function EditProfileForm({ profile, locations }: EditProfileFormProps) {
 				</Button>
 				<Link
 					href={Routes.Auth.Profile}
-					className="text-sm text-text-secondary hover:underline"
+					className="text-sm text-muted-foreground hover:underline"
 				>
 					Cancel
 				</Link>

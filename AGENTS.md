@@ -75,7 +75,7 @@ prisma/
 - Arrow functions for components/hooks. `function` keyword for server actions only.
 
 ### Styling (Tailwind v4)
-- Use mapped Tailwind utilities only: `bg-brand`, `text-text-primary`, `border-border`
+- Use mapped Tailwind utilities only: `bg-brand`, `text-foreground`, `text-muted-foreground`, `border-border`
 - Never `var(...)` in className, arbitrary values (`h-[123px]`), or inline styles
 - `flex` + `gap` for spacing — avoid `mb-4`, `mt-2`
 - Icons: `size-*` (Lucide React), not `h-*`/`w-*`

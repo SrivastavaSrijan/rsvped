@@ -23,8 +23,8 @@ export default async function EditProfilePage() {
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-6 px-4 py-12">
 			<div className="flex flex-col gap-1">
-				<h1 className="font-bold text-2xl text-text-primary">Edit Profile</h1>
-				<p className="text-sm text-text-secondary">
+				<h1 className="font-bold text-2xl text-foreground">Edit Profile</h1>
+				<p className="text-sm text-muted-foreground">
 					Update your profile information visible to other users.
 				</p>
 			</div>
