@@ -2,21 +2,19 @@
  * Load static data (locations + categories) from CSV exports.
  * Run: npx tsx prisma/seed/load-static.ts
  *
- * CSV files expected at:
- *   /Users/srijansrivastava/Documents/locations.csv
- *   /Users/srijansrivastava/Documents/categories.csv
+ * CSV files expected at: prisma/seed/init/locations.csv, prisma/seed/init/categories.csv
  */
 import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+const INIT_DIR = path.join(__dirname, 'init')
+
 async function main() {
 	// Insert locations
-	const locLines = readFileSync(
-		'/Users/srijansrivastava/Documents/locations.csv',
-		'utf8'
-	)
+	const locLines = readFileSync(path.join(INIT_DIR, 'locations.csv'), 'utf8')
 		.trim()
 		.split('\n')
 
@@ -55,10 +53,7 @@ async function main() {
 	console.log(`Locations inserted: ${locCount}`)
 
 	// Insert categories
-	const catLines = readFileSync(
-		'/Users/srijansrivastava/Documents/categories.csv',
-		'utf8'
-	)
+	const catLines = readFileSync(path.join(INIT_DIR, 'categories.csv'), 'utf8')
 		.trim()
 		.split('\n')
 

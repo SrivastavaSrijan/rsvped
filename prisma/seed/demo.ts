@@ -27,45 +27,56 @@ export async function resetDemoUser(prisma: PrismaClient) {
 
 	const userId = existing.id
 
-	// Delete in dependency order
-	await prisma.$transaction([
-		prisma.eventView.deleteMany({ where: { userId } }),
-		prisma.eventMessage.deleteMany({ where: { userId } }),
-		prisma.eventReferral.deleteMany({ where: { userId } }),
-		prisma.eventCollaborator.deleteMany({ where: { userId } }),
-		prisma.userCategory.deleteMany({ where: { userId } }),
-		prisma.communityMembership.deleteMany({ where: { userId } }),
-		// Delete payments on orders that belong to demo user's RSVPs
-		prisma.payment.deleteMany({
-			where: { order: { rsvps: { some: { userId } } } },
-		}),
-		prisma.orderItem.deleteMany({
-			where: { order: { rsvps: { some: { userId } } } },
-		}),
-		prisma.order.deleteMany({
-			where: { rsvps: { some: { userId } } },
-		}),
-		prisma.rsvp.deleteMany({ where: { userId } }),
-		// Delete events hosted by demo user (cascade their dependents)
-		prisma.eventDailyStat.deleteMany({
-			where: { event: { hostId: userId } },
-		}),
-		prisma.eventCategory.deleteMany({
-			where: { event: { hostId: userId } },
-		}),
-		prisma.registrationQuestion.deleteMany({
-			where: { event: { hostId: userId } },
-		}),
-		prisma.promoCode.deleteMany({
-			where: { event: { hostId: userId } },
-		}),
-		prisma.ticketTier.deleteMany({
-			where: { event: { hostId: userId } },
-		}),
-		prisma.event.deleteMany({ where: { hostId: userId } }),
-		// Finally delete the user (cascades Account, Session)
-		prisma.user.delete({ where: { id: userId } }),
-	])
+	// Delete user-level relations
+	await prisma.eventView.deleteMany({ where: { userId } })
+	await prisma.eventMessage.deleteMany({ where: { userId } })
+	await prisma.eventReferral.deleteMany({ where: { userId } })
+	await prisma.eventCollaborator.deleteMany({ where: { userId } })
+	await prisma.userCategory.deleteMany({ where: { userId } })
+	await prisma.communityMembership.deleteMany({ where: { userId } })
+
+	// Delete RSVPs and their orders/payments
+	const userRsvps = await prisma.rsvp.findMany({
+		where: { userId },
+		select: { id: true, orderId: true },
+	})
+	const orderIds = userRsvps.map((r) => r.orderId).filter(Boolean) as string[]
+
+	if (orderIds.length > 0) {
+		await prisma.payment.deleteMany({ where: { orderId: { in: orderIds } } })
+		await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } })
+	}
+	await prisma.rsvp.deleteMany({ where: { userId } })
+	if (orderIds.length > 0) {
+		await prisma.order.deleteMany({ where: { id: { in: orderIds } } })
+	}
+
+	// Delete events hosted by demo user and their dependents
+	const hostedEventIds = (
+		await prisma.event.findMany({
+			where: { hostId: userId },
+			select: { id: true },
+		})
+	).map((e) => e.id)
+
+	if (hostedEventIds.length > 0) {
+		const eventFilter = { eventId: { in: hostedEventIds } }
+		await prisma.eventDailyStat.deleteMany({ where: eventFilter })
+		await prisma.eventCategory.deleteMany({ where: eventFilter })
+		await prisma.registrationAnswer.deleteMany({
+			where: { question: eventFilter },
+		})
+		await prisma.registrationQuestion.deleteMany({ where: eventFilter })
+		await prisma.eventFeedback.deleteMany({ where: eventFilter })
+		await prisma.checkIn.deleteMany({ where: { rsvp: eventFilter } })
+		await prisma.rsvp.deleteMany({ where: eventFilter })
+		await prisma.promoCode.deleteMany({ where: eventFilter })
+		await prisma.ticketTier.deleteMany({ where: eventFilter })
+		await prisma.event.deleteMany({ where: { id: { in: hostedEventIds } } })
+	}
+
+	// Finally delete the user (cascades Account, Session)
+	await prisma.user.delete({ where: { id: userId } })
 }
 
 /**
