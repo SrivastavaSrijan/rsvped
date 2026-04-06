@@ -42,8 +42,13 @@ export const copy = {
 	},
 	stir: {
 		title: "Let's Stir Things Up!",
-		description:
-			'Start here to find interesting events, communties and people to connect with!',
+		description: 'Search for events and communities, or try asking naturally.',
+		chipExamples: [
+			'tech meetups this weekend',
+			'free events near me',
+			'art workshops',
+			'music events tonight',
+		],
 	},
 	location: {
 		view: {

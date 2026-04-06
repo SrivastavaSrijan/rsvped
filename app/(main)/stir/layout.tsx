@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { StirSearch } from '@/app/(main)/stir/components'
 import { StirSlotSwitch } from '@/app/(main)/stir/components/StirSlotSwitch'
+import { StirSuggestionChips } from '@/app/(main)/stir/components/StirSuggestionChips'
 import { StirTabsHeader } from '@/app/(main)/stir/components/StirTabsHeader'
 import { copy } from '../copy'
 
@@ -26,6 +27,8 @@ export default async function StirLayout({
 			</div>
 
 			<StirSearch mode="live" />
+
+			<StirSuggestionChips />
 
 			<StirTabsHeader />
 

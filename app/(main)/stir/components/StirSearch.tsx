@@ -35,7 +35,7 @@ const MAX_HISTORY_ITEMS = 5
 
 export const StirSearch = ({
 	initialQuery = '',
-	placeholder = 'Find events, communities, and more...',
+	placeholder = "Search events or try 'tech meetups this weekend'...",
 	mode = 'autocomplete',
 }: StirSearchProps) => {
 	const [query, setQuery] = useState(initialQuery)
