@@ -2,17 +2,12 @@ import { createApi } from 'unsplash-js'
 import { z } from 'zod'
 import { createTRPCRouter, publicProcedure } from '@/server/api/trpc'
 
-// Lazy initialization — avoids crashing at module load when env var is missing (e.g. in tests)
 let unsplashInstance: ReturnType<typeof createApi> | null = null
 
-function getUnsplash() {
+function getUnsplash(): ReturnType<typeof createApi> | null {
 	if (!unsplashInstance) {
 		const key = process.env.UNSPLASH_ACCESS_KEY
-		if (!key) {
-			throw new Error(
-				'UNSPLASH_ACCESS_KEY is not defined in the environment variables.'
-			)
-		}
+		if (!key) return null
 		unsplashInstance = createApi({ accessKey: key })
 	}
 	return unsplashInstance
@@ -20,6 +15,13 @@ function getUnsplash() {
 
 function getCollectionIds() {
 	return process.env.UNSPLASH_COLLECTION_IDS?.split(',') ?? []
+}
+
+const FALLBACK_IMAGE = {
+	url: 'https://picsum.photos/seed/rsvped/800/600',
+	alt: 'An abstract background image',
+	user: { name: 'Placeholder', link: 'https://picsum.photos' },
+	color: '#1a1a2e',
 }
 
 export const imageRouter = createTRPCRouter({
@@ -40,24 +42,24 @@ export const imageRouter = createTRPCRouter({
 			})
 		)
 		.query(async () => {
-			const result = await getUnsplash().photos.getRandom({
+			const unsplash = getUnsplash()
+			if (!unsplash) return FALLBACK_IMAGE
+
+			const result = await unsplash.photos.getRandom({
 				collectionIds: getCollectionIds(),
 				count: 1,
 			})
 
 			if (result.errors) {
 				console.error('Unsplash API error:', result.errors[0])
-				throw new Error('Failed to fetch image from Unsplash.')
+				return FALLBACK_IMAGE
 			}
 
-			// The API returns an array even for a count of 1
 			const photo = Array.isArray(result.response)
 				? result.response[0]
 				: result.response
 
-			if (!photo) {
-				throw new Error('No photo returned from Unsplash.')
-			}
+			if (!photo) return FALLBACK_IMAGE
 
 			return {
 				url: photo.urls.regular,

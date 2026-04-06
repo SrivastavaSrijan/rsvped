@@ -53,6 +53,8 @@ async function performSignIn(
 	{ name, image }: { name: string | null; image: string | null },
 	next?: string | null
 ): Promise<AuthActionResponse> {
+	let signInError: AuthError | null = null
+
 	try {
 		await signIn('credentials', {
 			email: credentials.email,
@@ -60,16 +62,19 @@ async function performSignIn(
 			redirect: false,
 		})
 	} catch (error) {
-		console.error(error)
 		if (error instanceof AuthError && error.type === 'CredentialsSignin') {
-			return {
-				success: false,
-				fieldErrors: {
-					password: [
-						AuthActionErrorCodeMap[AuthErrorCodes.INVALID_CREDENTIALS],
-					],
-				},
-			}
+			signInError = error
+		} else {
+			throw error // Re-throw redirect errors and unexpected errors
+		}
+	}
+
+	if (signInError) {
+		return {
+			success: false,
+			fieldErrors: {
+				password: [AuthActionErrorCodeMap[AuthErrorCodes.INVALID_CREDENTIALS]],
+			},
 		}
 	}
 
