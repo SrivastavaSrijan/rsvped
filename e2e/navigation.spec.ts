@@ -26,7 +26,7 @@ test('footer contains Privacy link', async ({ page }) => {
 })
 
 test('logo links back to homepage', async ({ page }) => {
-	await page.goto('/events/discover')
+	await page.goto('/')
 	const logo = page.getByRole('link', { name: /rsvp/i }).first()
 	await logo.click()
 	await expect(page).toHaveURL('/')

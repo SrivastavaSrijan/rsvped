@@ -10,8 +10,8 @@ export const Routes = {
 		Profile: '/profile',
 	},
 	Static: {
-		Terms: '/terms',
-		Privacy: '/privacy',
+		Terms: '/terms-of-service',
+		Privacy: '/privacy-policy',
 	},
 	Main: {
 		Communities: {

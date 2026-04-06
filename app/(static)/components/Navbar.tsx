@@ -17,13 +17,7 @@ export const Navbar = async () => {
 					className="object-cover opacity-50 transition-opacity hover:opacity-100"
 				>
 					{/* Logo placeholder */}
-					<Image
-						src="/logo.svg"
-						alt="Background pattern"
-						width={24}
-						height={24}
-						priority
-					/>
+					<Image src="/logo.svg" alt="RSVP'd" width={24} height={24} priority />
 				</Link>
 
 				<div className="flex items-center space-x-2 lg:space-x-4">
