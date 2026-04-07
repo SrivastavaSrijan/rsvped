@@ -2,7 +2,7 @@
 
 import { MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState, useTransition } from 'react'
 import {
 	AvatarWithFallback,
 	HoverCard,
@@ -11,45 +11,21 @@ import {
 	Skeleton,
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
-import { trpc } from '@/lib/trpc'
+import { getUserHoverCardAction } from '@/server/actions'
+
+interface UserHoverCardData {
+	id: string
+	name: string | null
+	image: string | null
+	username?: string | null
+}
 
 interface UserHoverCardProps {
-	userId: string
+	user: UserHoverCardData
 	children: ReactNode
 }
 
-export function UserHoverCard({ userId, children }: UserHoverCardProps) {
-	const utils = trpc.useUtils()
-	const { data, isLoading } = trpc.user.profile.hoverCard.useQuery(
-		{ userId },
-		{ enabled: false }
-	)
-
-	return (
-		<HoverCard openDelay={300} closeDelay={100}>
-			<HoverCardTrigger asChild>
-				<button
-					type="button"
-					className="inline-flex cursor-pointer"
-					onMouseEnter={() => {
-						utils.user.profile.hoverCard.prefetch({ userId })
-					}}
-				>
-					{children}
-				</button>
-			</HoverCardTrigger>
-			<HoverCardContent className="w-72" side="top" align="start">
-				{isLoading || !data ? (
-					<HoverCardSkeleton />
-				) : (
-					<HoverCardBody data={data} />
-				)}
-			</HoverCardContent>
-		</HoverCard>
-	)
-}
-
-interface HoverCardData {
+interface FullHoverCardData {
 	id: string
 	name: string | null
 	username: string | null
@@ -63,7 +39,43 @@ interface HoverCardData {
 	}
 }
 
-function HoverCardBody({ data }: { data: HoverCardData }) {
+export const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
+	const [fullData, setFullData] = useState<FullHoverCardData | null>(null)
+	const [isPending, startTransition] = useTransition()
+
+	const handleMouseEnter = () => {
+		if (fullData || isPending) return
+		startTransition(async () => {
+			const data = await getUserHoverCardAction(user.id)
+			if (data) {
+				setFullData(data as FullHoverCardData)
+			}
+		})
+	}
+
+	return (
+		<HoverCard openDelay={300} closeDelay={100}>
+			<HoverCardTrigger asChild>
+				<button
+					type="button"
+					className="inline-flex cursor-pointer"
+					onMouseEnter={handleMouseEnter}
+				>
+					{children}
+				</button>
+			</HoverCardTrigger>
+			<HoverCardContent className="w-72" side="top" align="start">
+				{isPending || !fullData ? (
+					<HoverCardSkeleton user={user} />
+				) : (
+					<HoverCardBody data={fullData} />
+				)}
+			</HoverCardContent>
+		</HoverCard>
+	)
+}
+
+const HoverCardBody = ({ data }: { data: FullHoverCardData }) => {
 	const friendCount =
 		data._count.sentFriendRequests + data._count.receivedFriendRequests
 
@@ -115,13 +127,19 @@ function HoverCardBody({ data }: { data: HoverCardData }) {
 	)
 }
 
-function HoverCardSkeleton() {
+const HoverCardSkeleton = ({ user }: { user: UserHoverCardData }) => {
 	return (
 		<div className="flex flex-col gap-3">
 			<div className="flex items-start gap-3">
-				<Skeleton className="size-12 rounded-full" />
+				<AvatarWithFallback
+					src={user.image}
+					name={user.name ?? undefined}
+					className="size-12 text-lg"
+				/>
 				<div className="flex flex-col gap-1">
-					<Skeleton className="h-4 w-24" />
+					<p className="text-sm font-semibold text-foreground">
+						{user.name ?? <Skeleton className="h-4 w-24" />}
+					</p>
 					<Skeleton className="h-3 w-16" />
 				</div>
 			</div>

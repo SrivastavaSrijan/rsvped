@@ -69,12 +69,14 @@ const handleClick = () => { /* ... */ };
 
 ### Avoid useEffect for State
 
-Use `useEffect` only for DOM interactions after render (e.g., focus, scroll).
+Use `useEffect` only for external system synchronization (DOM measurement, browser APIs, third-party widgets, WebSockets).
 
 **Never use useEffect for:**
-- Setting state based on props/state changes
-- Data fetching (use tRPC hooks instead)
+- Setting state based on props/state changes (compute during render)
+- Data fetching (use `getAPI()` in RSCs)
 - Calculations (do in render)
+- Reacting to prop/state changes (restructure data flow)
+- "On mount" initialization (use lazy state initializer)
 
 ```tsx
 // Bad -- useEffect for derived state
@@ -85,6 +87,39 @@ const selection = items.find(item => item.id === selectedId) ?? null;
 ```
 
 See `./using-useEffects` skill for detailed guidance.
+
+### No Gratuitous useRef
+
+`useRef` is for DOM element references and mutable values that don't trigger re-renders (e.g., third-party instance handles). Do not reach for `useRef` to work around dependency arrays, track "previous" values, or cache computed results.
+
+Valid `useRef` uses:
+
+| Valid | Example |
+|-------|---------|
+| DOM element reference | `inputRef` for focus management |
+| Third-party instance handle | Chart library instance |
+| Mutable session tracking | WebSocket session state |
+
+**Never use useRef for:**
+- Storing "previous" values to diff against (restructure data flow)
+- Avoiding dependency array issues (fix the dependency)
+- Caching computed values (React Compiler handles memoization)
+- Tracking state to prevent feedback loops (simplify the state model)
+
+```tsx
+// Bad -- ref as escape hatch from complex state
+const lastPushedRef = useRef(initialValue);
+useEffect(() => {
+  if (currentValue !== lastPushedRef.current) {
+    lastPushedRef.current = currentValue;
+    setLocalState(currentValue);
+  }
+}, [currentValue]);
+
+// Good -- simplify the state model
+// Let the URL be the source of truth, derive state from it
+const query = searchParams.get("q") ?? "";
+```
 
 ---
 
@@ -119,22 +154,47 @@ This keeps component types in sync with API changes automatically.
 
 ## Data Fetching
 
-Use tRPC hooks instead of SWR or raw fetch.
+All data fetching goes through `getAPI()` in React Server Components. Client components receive data as props — they never fetch directly.
 
 ```tsx
+// Bad -- client-side tRPC hooks
+const { data: events } = trpc.event.list.useQuery();
+const { data: event } = trpc.event.getById.useQuery({ id: eventId });
+
 // Bad -- raw fetch or SWR
 const { data } = useSWR("/api/events", fetcher);
 
-// Good -- tRPC query
-const { data: events } = trpc.event.list.useQuery();
+// Good -- fetch in RSC with getAPI(), pass as props
+// In page.tsx (RSC):
+import { getAPI } from "@/server/api";
 
-// Good -- tRPC query with input
-const { data: event } = trpc.event.getById.useQuery({ id: eventId });
+export default async function EventsPage() {
+  const api = await getAPI();
+  const events = await api.event.list({ page: 1, size: 10 });
+  return <EventsList events={events} />;
+}
 
-// Good -- tRPC mutation
-const utils = trpc.useUtils();
-const { mutate: rsvp } = trpc.rsvp.create.useMutation({
-  onSuccess: () => utils.event.getById.invalidate({ id: eventId }),
+// In EventsList.tsx (client component):
+"use client";
+interface EventsListProps {
+  events: RouterOutput["event"]["list"];
+}
+export const EventsList = ({ events }: EventsListProps) => {
+  // render from props — no fetching here
+};
+```
+
+For mutations, use server actions with `useActionStateWithError`, not `trpc.useMutation()`.
+
+```tsx
+// Bad -- client-side mutation
+const { mutate: rsvp } = trpc.rsvp.create.useMutation();
+
+// Good -- server action
+const { formAction, isPending } = useActionStateWithError({
+  action: rsvpAction,
+  initialState: null,
+  errorCodeMap: RsvpActionErrorCodeMap,
 });
 ```
 
@@ -152,10 +212,10 @@ If a reusable component exists that fits your needs, use it instead of creating 
   Click me
 </button>
 
-// Good -- use the shared Button component
-import { Button } from "@/components/shared/Button";
+// Good -- use the shared Button component from the barrel
+import { Button } from "@/components/ui";
 
-<Button variant="primary" onClick={onClick}>
+<Button variant="default" onClick={onClick}>
   Click me
 </Button>
 ```

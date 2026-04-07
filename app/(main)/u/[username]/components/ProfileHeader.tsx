@@ -4,14 +4,21 @@ import { AvatarWithFallback, Badge, buttonVariants } from '@/components/ui'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
 import { cn } from '@/lib/utils'
+import type { RouterOutput } from '@/server/api'
 import { FriendButton } from './FriendButton'
 import type { PublicProfileUser } from './types'
 
+type FriendshipStatus = RouterOutput['friendship']['status']
+
 interface ProfileHeaderProps {
 	user: PublicProfileUser
+	friendshipStatus: FriendshipStatus
 }
 
-export async function ProfileHeader({ user }: ProfileHeaderProps) {
+export async function ProfileHeader({
+	user,
+	friendshipStatus,
+}: ProfileHeaderProps) {
 	const session = await auth()
 	const isOwnProfile = session?.user?.id === user.id
 	const friendCount =
@@ -42,7 +49,7 @@ export async function ProfileHeader({ user }: ProfileHeaderProps) {
 								Edit Profile
 							</Link>
 						) : (
-							<FriendButton targetUserId={user.id} />
+							<FriendButton targetUserId={user.id} status={friendshipStatus} />
 						)}
 					</div>
 

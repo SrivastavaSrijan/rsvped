@@ -34,10 +34,20 @@ export default async function PublicProfilePage({ params }: ProfilePageProps) {
 		notFound()
 	}
 
+	const [activityData, friendsData, friendshipStatus] = await Promise.all([
+		api.activity.forUser({ userId: user.id, page: 1, size: 20 }),
+		api.friendship.list({ userId: user.id, page: 1, size: 20 }),
+		api.friendship.status({ targetUserId: user.id }),
+	])
+
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-8 px-4 py-12">
-			<ProfileHeader user={user} />
-			<ProfileTabs userId={user.id} user={user} />
+			<ProfileHeader user={user} friendshipStatus={friendshipStatus} />
+			<ProfileTabs
+				user={user}
+				activityData={activityData}
+				friendsData={friendsData}
+			/>
 		</div>
 	)
 }

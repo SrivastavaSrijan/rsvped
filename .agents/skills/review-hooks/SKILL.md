@@ -30,7 +30,7 @@ useEffect(() => {
     .then((data) => setUser(data));
 }, [id]);
 
-// Good -- use AbortController
+// Good -- use AbortController if you truly need an effect
 useEffect(() => {
   const controller = new AbortController();
 
@@ -44,8 +44,11 @@ useEffect(() => {
   return () => controller.abort();
 }, [id]);
 
-// Better -- use tRPC (project standard)
-const { data: user } = trpc.user.getById.useQuery({ id });
+// Best -- fetch server-side with getAPI() and pass as props
+// In page.tsx (RSC):
+const api = await getAPI();
+const user = await api.user.profile.byId({ id });
+return <UserProfile user={user} />;
 ```
 
 ### Infinite Loop Risk
@@ -108,6 +111,26 @@ interface FormState {
 
 const [form, dispatch] = useReducer(formReducer, initialFormState);
 ```
+
+### Gratuitous useRef
+
+Flag `useRef` used for anything other than DOM element references, third-party instance handles, or mutable session tracking (e.g., WebSocket state). Using refs to store "previous" values, avoid dependency array issues, cache computed values, or track state to prevent feedback loops is an anti-pattern — it means the state model needs simplifying.
+
+```tsx
+// Bad -- ref as escape hatch from complex state
+const lastPushedRef = useRef(initialValue);
+useEffect(() => {
+  if (currentValue !== lastPushedRef.current) {
+    lastPushedRef.current = currentValue;
+    doSomething(currentValue);
+  }
+}, [currentValue]);
+
+// Good -- simplify the state model, let URL or props be the source of truth
+const query = searchParams.get("q") ?? "";
+```
+
+Multiple refs tracking related state (e.g., 3+ refs for URL sync, last-pushed value, suggestion list) is a strong signal the component needs restructuring.
 
 ### Fake Hooks (use* Without Hooks)
 

@@ -145,7 +145,7 @@ export function EventCard(props: EventCardProps) {
 					({ user: collaborator }) =>
 						collaborator?.image &&
 						collaborator?.name && (
-							<UserHoverCard key={collaborator.id} userId={collaborator.id}>
+							<UserHoverCard key={collaborator.id} user={collaborator}>
 								<AvatarWithFallback
 									className="size-4"
 									src={collaborator.image}
@@ -155,7 +155,7 @@ export function EventCard(props: EventCardProps) {
 						)
 				)}
 				{host?.name && (
-					<UserHoverCard userId={host.id}>
+					<UserHoverCard user={host}>
 						<AvatarWithFallback
 							src={host?.image}
 							name={host?.name}
@@ -180,8 +180,8 @@ export function EventCard(props: EventCardProps) {
 						{rsvps.map(
 							({ user: guestUser, name: guestName }) =>
 								(guestUser?.name || guestName) &&
-								(guestUser?.id ? (
-									<UserHoverCard key={guestUser.id} userId={guestUser.id}>
+								(guestUser ? (
+									<UserHoverCard key={guestUser.id} user={guestUser}>
 										<AvatarWithFallback
 											className="size-4"
 											src={guestUser.image ?? undefined}

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
+import { getAPI } from '@/server/api'
 import { FeedClient } from './FeedClient'
 
 export default async function FeedPage() {
@@ -8,6 +9,9 @@ export default async function FeedPage() {
 	if (!session?.user) {
 		redirect(Routes.Auth.SignIn)
 	}
+
+	const api = await getAPI()
+	const feedData = await api.activity.feed({ page: 1, size: 30 })
 
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-6 px-4 py-12">
@@ -17,7 +21,7 @@ export default async function FeedPage() {
 					See what your friends have been up to.
 				</p>
 			</div>
-			<FeedClient />
+			<FeedClient data={feedData} />
 		</div>
 	)
 }

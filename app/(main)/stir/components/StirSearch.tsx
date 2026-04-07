@@ -6,14 +6,13 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { useDebounce } from 'use-debounce'
 import { Badge, Button, Input } from '@/components/ui'
 import { Routes } from '@/lib/config/routes'
-import { trpc } from '@/lib/trpc'
 import { cn } from '@/lib/utils'
+import { getAutocompleteAction } from '@/server/actions'
 
 type StirSearchMode = 'autocomplete' | 'live'
 
 interface StirSearchProps {
 	initialQuery?: string
-	onSearch?: (query: string) => void
 	placeholder?: string
 	mode?: StirSearchMode
 }
@@ -25,13 +24,13 @@ interface SearchSuggestion {
 	slug: string
 }
 
+const SEARCH_HISTORY_KEY = 'stir.search.history'
+const MAX_HISTORY_ITEMS = 5
+
 interface RecentSearchChip {
 	query: string
 	timestamp: Date
 }
-
-const SEARCH_HISTORY_KEY = 'stir.search.history'
-const MAX_HISTORY_ITEMS = 5
 
 export const StirSearch = ({
 	initialQuery = '',
@@ -43,6 +42,8 @@ export const StirSearch = ({
 	const [showSuggestions, setShowSuggestions] = useState(false)
 	const [activeIndex, setActiveIndex] = useState(-1)
 	const [history, setHistory] = useState<RecentSearchChip[]>([])
+	const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
+	const [suggestionsLoading, setSuggestionsLoading] = useState(false)
 
 	const router = useRouter()
 	const searchParams = useSearchParams()
@@ -51,81 +52,89 @@ export const StirSearch = ({
 	const inputRef = useRef<HTMLInputElement>(null)
 	const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([])
 
-	// Track the last query we pushed to the URL to avoid feedback loops
-	const lastPushedQueryRef = useRef(initialQuery)
-
-	// Debounce query for API calls
 	const [debouncedQuery] = useDebounce(query.trim(), 300)
 
-	// Load search history on mount (client-side only)
+	const autocompleteEnabled = mode === 'autocomplete'
+
+	// Load search history on mount
 	useEffect(() => {
 		try {
 			const raw = localStorage.getItem(SEARCH_HISTORY_KEY)
 			if (raw) {
 				const parsed = JSON.parse(raw) as RecentSearchChip[]
-				const validHistory = parsed
-					.filter((item) => item.query && item.timestamp)
-					.slice(0, MAX_HISTORY_ITEMS)
-				setHistory(validHistory)
+				setHistory(
+					parsed
+						.filter((item) => item.query && item.timestamp)
+						.slice(0, MAX_HISTORY_ITEMS)
+				)
 			}
 		} catch {
 			// Ignore localStorage errors
 		}
 	}, [])
 
-	// Sync with URL search params — only for external navigation (e.g. back/forward)
+	// Sync query from URL for back/forward navigation
+	const urlQuery = searchParams.get('q') ?? ''
 	useEffect(() => {
-		const urlQuery = searchParams.get('q') ?? ''
-		if (urlQuery !== lastPushedQueryRef.current) {
-			lastPushedQueryRef.current = urlQuery
-			setQuery(urlQuery)
+		setQuery(urlQuery)
+	}, [urlQuery])
+
+	// Fetch autocomplete suggestions via server action
+	useEffect(() => {
+		if (!autocompleteEnabled || debouncedQuery.length <= 2) {
+			setSuggestions([])
+			return
 		}
-	}, [searchParams])
-
-	const autocompleteEnabled = mode === 'autocomplete'
-
-	// Get autocomplete suggestions
-	const { data: suggestions = [], isLoading: suggestionsLoading } =
-		trpc.stir.autocomplete.useQuery(
-			{ query: debouncedQuery, limit: 8 },
-			{
-				enabled: autocompleteEnabled && debouncedQuery.length > 2,
-				staleTime: 30000,
+		let cancelled = false
+		const fetchSuggestions = async () => {
+			setSuggestionsLoading(true)
+			const results = await getAutocompleteAction(debouncedQuery, 8)
+			if (!cancelled) {
+				setSuggestions(results)
+				setSuggestionsLoading(false)
 			}
-		)
+		}
+		fetchSuggestions()
+		return () => {
+			cancelled = true
+		}
+	}, [debouncedQuery, autocompleteEnabled])
 
-	// Live search mode: push as you type (debounced)
+	// Live search mode: push URL as you type (debounced)
 	useEffect(() => {
 		if (mode !== 'live') return
-		const q = debouncedQuery
-		if (q.length > 0) {
-			lastPushedQueryRef.current = q
+		if (debouncedQuery.length > 0) {
 			startTransition(() => {
-				router.replace(`${Routes.Main.Stir.Search(q)}`)
+				router.replace(`${Routes.Main.Stir.Search(debouncedQuery)}`)
 			})
 		} else {
-			lastPushedQueryRef.current = ''
 			startTransition(() => {
 				router.replace(Routes.Main.Stir.Root)
 			})
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [debouncedQuery, mode, router.replace])
+	}, [debouncedQuery, mode, router])
+
+	// Scroll active suggestion into view
+	useEffect(() => {
+		if (activeIndex >= 0 && suggestionRefs.current[activeIndex]) {
+			suggestionRefs.current[activeIndex]?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			})
+		}
+	}, [activeIndex])
 
 	const saveToHistory = (searchQuery: string) => {
 		if (!searchQuery.trim()) return
-
 		try {
 			const newItem: RecentSearchChip = {
 				query: searchQuery.trim(),
 				timestamp: new Date(),
 			}
-
 			const updated = [
 				newItem,
 				...history.filter((h) => h.query !== newItem.query),
 			].slice(0, MAX_HISTORY_ITEMS)
-
 			setHistory(updated)
 			localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updated))
 		} catch {
@@ -136,11 +145,8 @@ export const StirSearch = ({
 	const executeSearch = (searchQuery: string) => {
 		const trimmed = searchQuery.trim()
 		if (!trimmed) return
-
 		setShowSuggestions(false)
 		saveToHistory(trimmed)
-
-		lastPushedQueryRef.current = trimmed
 		startTransition(() => {
 			router.push(`${Routes.Main.Stir.Search(trimmed)}`)
 		})
@@ -160,9 +166,7 @@ export const StirSearch = ({
 			case 'Enter':
 				e.preventDefault()
 				if (query.trim().length === 0) {
-					// On empty enter, reset to root and clear local state
 					setShowSuggestions(false)
-					lastPushedQueryRef.current = ''
 					startTransition(() => router.push(Routes.Main.Stir.Root))
 					return
 				}
@@ -172,21 +176,18 @@ export const StirSearch = ({
 					executeSearch(query)
 				}
 				break
-
 			case 'ArrowDown':
 				e.preventDefault()
 				setActiveIndex((prev) =>
 					prev < visibleSuggestions.length - 1 ? prev + 1 : 0
 				)
 				break
-
 			case 'ArrowUp':
 				e.preventDefault()
 				setActiveIndex((prev) =>
 					prev > 0 ? prev - 1 : visibleSuggestions.length - 1
 				)
 				break
-
 			case 'Escape':
 				setShowSuggestions(false)
 				setActiveIndex(-1)
@@ -196,7 +197,6 @@ export const StirSearch = ({
 	}
 
 	const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-		// Direct navigation to entity pages when clicking a suggestion
 		setShowSuggestions(false)
 		if (suggestion.type === 'event') {
 			startTransition(() => {
@@ -217,7 +217,6 @@ export const StirSearch = ({
 	const removeHistoryItem = (queryToRemove: string) => {
 		const updated = history.filter((h) => h.query !== queryToRemove)
 		setHistory(updated)
-
 		try {
 			if (updated.length === 0) {
 				localStorage.removeItem(SEARCH_HISTORY_KEY)
@@ -247,32 +246,19 @@ export const StirSearch = ({
 
 	const handleBlur = () => {
 		setIsFocused(false)
-		// Delay hiding suggestions to allow clicks
 		setTimeout(() => {
 			setShowSuggestions(false)
 			setActiveIndex(-1)
 		}, 200)
 	}
 
-	// Scroll active suggestion into view
-	useEffect(() => {
-		if (activeIndex >= 0 && suggestionRefs.current[activeIndex]) {
-			suggestionRefs.current[activeIndex]?.scrollIntoView({
-				behavior: 'smooth',
-				block: 'nearest',
-			})
-		}
-	}, [activeIndex])
-
 	const showRecentSearches =
 		!showSuggestions && history.length > 0 && isFocused && query.length === 0
 
 	return (
 		<div className="relative w-full">
-			{/* Gradient border effect */}
 			<div className="absolute -inset-0.5 bg-gradient-to-r from-cranberry-40 via-purple-40 to-blue-40 rounded-2xl blur opacity-30 animate-pulse" />
 
-			{/* Search input container */}
 			<div className="relative overflow-hidden rounded-2xl bg-black/10 backdrop-blur-sm">
 				<div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
 					{suggestionsLoading || isPending ? (
@@ -303,15 +289,13 @@ export const StirSearch = ({
 					role="combobox"
 				/>
 
-				{/* Clear button */}
-				{query && (
+				{query ? (
 					<button
 						type="button"
 						className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
 						onClick={() => {
 							setQuery('')
 							setShowSuggestions(false)
-							lastPushedQueryRef.current = ''
 							startTransition(() => {
 								router.push(Routes.Main.Stir.Root)
 							})
@@ -319,11 +303,10 @@ export const StirSearch = ({
 					>
 						<X className="size-4" />
 					</button>
-				)}
+				) : null}
 			</div>
 
-			{/* Recent searches */}
-			{showRecentSearches && (
+			{showRecentSearches ? (
 				<div className="absolute z-50 mt-2 w-full bg-card rounded-lg border border-border shadow-sm">
 					<div className="p-3">
 						<div className="flex items-center justify-between mb-3">
@@ -372,10 +355,9 @@ export const StirSearch = ({
 						</div>
 					</div>
 				</div>
-			)}
+			) : null}
 
-			{/* Autocomplete suggestions */}
-			{autocompleteEnabled && showSuggestions && suggestions.length > 0 && (
+			{autocompleteEnabled && showSuggestions && suggestions.length > 0 ? (
 				<div className="absolute z-50 mt-2 w-full bg-card rounded-lg border border-border shadow-lg overflow-hidden">
 					<div className="max-h-80 overflow-y-auto">
 						{suggestions.map((suggestion, index) => (
@@ -414,7 +396,7 @@ export const StirSearch = ({
 						))}
 					</div>
 				</div>
-			)}
+			) : null}
 		</div>
 	)
 }

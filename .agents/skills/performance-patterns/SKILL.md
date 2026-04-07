@@ -190,16 +190,26 @@ Good candidates for `startTransition`:
 
 ### Avoid Unnecessary Re-renders from Object/Array Literals
 
+React Compiler handles memoization automatically. Do not reach for `useMemo` or `useCallback` — they add complexity for zero benefit.
+
 ```tsx
-// Don't - new object on every render causes child to re-render
-<EventList filters={{ status: "published" }} />
-
-// Do - stable reference
+// Don't — manual memoization hooks
 const filters = useMemo(() => ({ status: "published" }), []);
-<EventList filters={filters} />
-
-// Do - for callbacks
 const handleClick = useCallback(() => { ... }, [deps]);
+
+// Do — define constants outside the component for truly static values
+const DEFAULT_FILTERS = { status: "published" } as const;
+
+export const EventsPage = () => {
+  return <EventList filters={DEFAULT_FILTERS} />;
+};
+
+// Do — for dynamic values, just compute inline (React Compiler optimizes this)
+export const EventsPage = ({ status }: { status: string }) => {
+  const filters = { status };
+  const handleClick = () => onClick(status);
+  return <EventList filters={filters} onClick={handleClick} />;
+};
 ```
 
 ## References

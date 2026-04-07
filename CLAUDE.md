@@ -49,6 +49,7 @@ prisma/
 Use these skills when working on frontend code:
 
 - `react-patterns` — Component structure, JSX, conditional rendering
+- `async-patterns` — RSC streaming, server actions, no .then(), no client fetches
 - `using-useEffects` — When to use (and not use) useEffect
 - `review-hooks` — Hooks anti-patterns audit
 - `tailwind-styling` — Token-only styling, cn(), v4 gotchas

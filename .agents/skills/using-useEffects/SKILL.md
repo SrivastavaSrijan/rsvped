@@ -14,8 +14,9 @@ Source: https://react.dev/learn/you-might-not-need-an-effect
 - **Transform data during rendering**: Don't use Effects to transform data for rendering
 - **Handle user events in event handlers**: Don't use Effects to handle user events
 - **Use Effects for external systems**: Effects are for synchronizing with external systems (network, DOM, non-React widgets)
-- **Use tRPC for data fetching**: In this codebase, use `trpc.*.useQuery()` for queries and Server Actions via `useActionStateWithError` for mutations instead of raw Effects
-- **Use RSC where possible**: For server-side data, use `getAPI()` in React Server Components
+- **Use getAPI() for data fetching**: In this codebase, fetch data server-side with `getAPI()` in RSCs and pass as props — never use `trpc.*.useQuery()` client-side hooks
+- **Use Server Actions for mutations**: Via `useActionStateWithError`, not `trpc.*.useMutation()`
+- **No .then()**: Always use `async/await`. For user-initiated fetches, use `useTransition` + server actions — see `async-patterns` skill
 
 ## When You Don't Need Effects
 
@@ -212,23 +213,6 @@ const Form = () => {
 };
 ```
 
-#### Do (tRPC mutation)
-
-```tsx
-const Form = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-
-  const { mutateAsync } = trpc.user.register.useMutation();
-
-  // Good: Event-specific logic is in the event handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await mutateAsync({ firstName, lastName });
-  };
-};
-```
-
 #### Do (Server Action with useActionStateWithError)
 
 ```tsx
@@ -360,15 +344,15 @@ Use Effects when you need to synchronize with something outside of React:
 
 ### Fetching Data
 
-In this codebase, use tRPC for data fetching:
+In this codebase, all data fetching goes through `getAPI()` in React Server Components:
 
-- **Client components**: `trpc.*.useQuery()` for queries
-- **Server components**: `getAPI()` for server-side data fetching
-- **Mutations**: Server Actions via `useActionStateWithError`, or `trpc.*.useMutation()`
+- **Server components (pages, layouts)**: `const api = await getAPI(); const data = await api.domain.action(input);`
+- **Client components**: Receive data as props from parent RSCs — never fetch directly
+- **Mutations**: Server Actions via `useActionStateWithError`
 
-See the tRPC routers at `@/server/api/routers/` for available endpoints.
+Never use `trpc.*.useQuery()` or `trpc.*.useMutation()` client-side hooks. See the tRPC routers at `@/server/api/routers/` for available endpoints.
 
-If you must use an Effect for data fetching, implement cleanup to avoid race conditions:
+If you must use an Effect for data fetching (e.g., external non-tRPC API), implement cleanup to avoid race conditions:
 
 ```tsx
 const SearchResults = ({ query }: { query: string }) => {
@@ -423,6 +407,6 @@ const useOnlineStatus = () => {
 | Send POST / mutations | No | Server Actions or `trpc.*.useMutation()` |
 | Chain state updates | No | Single event handler |
 | Notify parent of state changes | No | Call in event handler |
-| Fetch data | Prefer tRPC | `trpc.*.useQuery()` or RSC `getAPI()` |
+| Fetch data | No | RSC `getAPI()`, pass as props to client components |
 | Sync with external system | Yes | Effect with cleanup |
 | Subscribe to external store | Yes | `useSyncExternalStore` or Effect |

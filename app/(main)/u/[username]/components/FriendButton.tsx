@@ -4,32 +4,23 @@ import { Check, Clock, UserMinus, UserPlus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { Button } from '@/components/ui'
-import { trpc } from '@/lib/trpc'
 import {
 	removeFriendAction,
 	respondFriendRequestAction,
 	sendFriendRequestAction,
 } from '@/server/actions'
+import type { RouterOutput } from '@/server/api'
+
+type FriendshipStatus = RouterOutput['friendship']['status']
 
 interface FriendButtonProps {
 	targetUserId: string
+	status: FriendshipStatus
 }
 
-export function FriendButton({ targetUserId }: FriendButtonProps) {
-	const { data, isLoading } = trpc.friendship.status.useQuery({
-		targetUserId,
-	})
+export const FriendButton = ({ targetUserId, status }: FriendButtonProps) => {
 	const [isPending, startTransition] = useTransition()
 	const router = useRouter()
-
-	if (isLoading || !data) {
-		return (
-			<Button variant="outline" size="sm" disabled>
-				<UserPlus className="size-4" />
-				Loading...
-			</Button>
-		)
-	}
 
 	const handleSend = () => {
 		startTransition(async () => {
@@ -39,7 +30,7 @@ export function FriendButton({ targetUserId }: FriendButtonProps) {
 	}
 
 	const handleAccept = () => {
-		const id = data.friendshipId
+		const id = status.friendshipId
 		if (!id) return
 		startTransition(async () => {
 			await respondFriendRequestAction(id, 'accept')
@@ -48,7 +39,7 @@ export function FriendButton({ targetUserId }: FriendButtonProps) {
 	}
 
 	const handleRemove = () => {
-		const id = data.friendshipId
+		const id = status.friendshipId
 		if (!id) return
 		startTransition(async () => {
 			await removeFriendAction(id)
@@ -56,7 +47,7 @@ export function FriendButton({ targetUserId }: FriendButtonProps) {
 		})
 	}
 
-	switch (data.status) {
+	switch (status.status) {
 		case 'none':
 			return (
 				<Button
