@@ -1,6 +1,7 @@
 import { Averia_Serif_Libre, Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
+import { DemoBannerServer } from '@/components/shared'
 import { baseMetadata, siteSchema } from '@/lib/config'
 import Providers from './providers'
 
@@ -28,6 +29,7 @@ export default function RootLayout({
 				className={`${inter.variable} ${averia.variable} font-sans antialiased`}
 			>
 				<Providers>
+					<DemoBannerServer />
 					{children}
 					<Toaster />
 				</Providers>

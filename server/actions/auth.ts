@@ -8,6 +8,7 @@ import { signIn, signOut } from '@/lib/auth'
 import { comparePasswords } from '@/lib/auth/password'
 import { CookieNames, DemoUser, getAvatarURL, Routes } from '@/lib/config'
 import { setEncryptedCookie } from '@/lib/cookies'
+import { prisma } from '@/lib/prisma'
 import { getAPI } from '@/server/api'
 import { loginSchema, registrationSchema } from './auth.schemas'
 import { AuthActionErrorCodeMap } from './constants'
@@ -217,12 +218,20 @@ export async function signInAsDemo(): Promise<void> {
 		)
 	}
 
+	// Fetch demo user's city for the hold-on description
+	const demoUserData = await prisma.user.findUnique({
+		where: { email: DemoUser.email },
+		select: { location: { select: { name: true } } },
+	})
+	const cityName = demoUserData?.location?.name ?? 'your city'
+
 	await setEncryptedCookie(CookieNames.RedirectTimeoutProps, {
-		title: `Welcome, ${DemoUser.name}!`,
-		description: "You're exploring RSVP'd as a demo user.",
+		title: `You're exploring as ${DemoUser.name}`,
+		description: `A ${DemoUser.bio.toLowerCase()} Based in ${cityName}. Browse events, join communities, and connect with people — everything resets at midnight UTC.`,
+		illustration: getAvatarURL(DemoUser.name),
 	})
 
 	redirect(
-		`${Routes.Utility.HoldOn}?next=${encodeURIComponent(DefaultNextRoute)}`
+		`${Routes.Utility.HoldOn}?next=${encodeURIComponent(DefaultNextRoute)}&dismissable=false`
 	)
 }
