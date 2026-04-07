@@ -43,7 +43,7 @@ export const GetCategoriesToolUI = makeAssistantToolUI<
 		}
 
 		return (
-			<div className="flex flex-col gap-2">
+			<div className="flex w-full min-w-0 flex-col gap-2 overflow-hidden">
 				<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 					<CheckCircle2 className="size-3 text-green-600" />
 					{result.length} categor{result.length !== 1 ? 'ies' : 'y'} available

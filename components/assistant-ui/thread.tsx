@@ -48,8 +48,8 @@ const fadeIn = {
 
 export const Thread: FC = () => {
 	return (
-		<ThreadPrimitive.Root className="flex h-full flex-col">
-			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto overflow-x-hidden scroll-smooth px-3 py-4 lg:px-6 lg:py-6">
+		<ThreadPrimitive.Root className="flex h-full flex-col overflow-hidden">
+			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto scroll-smooth px-3 py-4 lg:px-6 lg:py-6">
 				<ThreadPrimitive.Empty>
 					<ThreadEmpty />
 				</ThreadPrimitive.Empty>
@@ -276,9 +276,9 @@ const AssistantMessage: FC = () => {
 			initial="hidden"
 			animate="visible"
 			variants={messageVariants}
-			className="w-full"
+			className="w-full max-w-full"
 		>
-			<MessagePrimitive.Root className="aui-assistant-message flex w-full min-w-0 flex-col items-start gap-2">
+			<MessagePrimitive.Root className="aui-assistant-message flex w-full max-w-full flex-col items-start gap-2 overflow-hidden">
 				<ThinkingIndicator />
 				<MessagePrimitive.Content
 					components={{
