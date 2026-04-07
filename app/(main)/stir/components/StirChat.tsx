@@ -17,12 +17,28 @@ export const StirChat = () => {
 	useEffect(() => {
 		document.body.style.overflow = 'hidden'
 		document.documentElement.style.overflow = 'hidden'
+
+		const container = document.querySelector(
+			'[data-stir-container]'
+		) as HTMLElement | null
+		const nav = document.querySelector('nav')
 		const footer = document.querySelector('footer')
-		if (footer) footer.style.display = 'none'
+
+		const updateHeight = () => {
+			if (!container) return
+			const navH = nav?.offsetHeight ?? 0
+			const footerH = footer?.offsetHeight ?? 0
+			container.style.height = `calc(100dvh - ${navH + footerH}px)`
+		}
+
+		updateHeight()
+		window.addEventListener('resize', updateHeight)
+
 		return () => {
 			document.body.style.overflow = ''
 			document.documentElement.style.overflow = ''
-			if (footer) footer.style.display = ''
+			if (container) container.style.height = ''
+			window.removeEventListener('resize', updateHeight)
 		}
 	}, [])
 
