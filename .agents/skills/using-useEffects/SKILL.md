@@ -16,6 +16,7 @@ Source: https://react.dev/learn/you-might-not-need-an-effect
 - **Use Effects for external systems**: Effects are for synchronizing with external systems (network, DOM, non-React widgets)
 - **Use getAPI() for data fetching**: In this codebase, fetch data server-side with `getAPI()` in RSCs and pass as props — never use `trpc.*.useQuery()` client-side hooks
 - **Use Server Actions for mutations**: Via `useActionStateWithError`, not `trpc.*.useMutation()`
+- **No .then()**: Always use `async/await`. For user-initiated fetches, use `useTransition` + server actions — see `async-patterns` skill
 
 ## When You Don't Need Effects
 

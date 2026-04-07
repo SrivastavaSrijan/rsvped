@@ -2,7 +2,7 @@
 
 import { MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useState, useTransition } from 'react'
 import {
 	AvatarWithFallback,
 	HoverCard,
@@ -41,16 +41,15 @@ interface FullHoverCardData {
 
 export const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
 	const [fullData, setFullData] = useState<FullHoverCardData | null>(null)
-	const [loading, setLoading] = useState(false)
+	const [isPending, startTransition] = useTransition()
 
 	const handleMouseEnter = () => {
-		if (fullData || loading) return
-		setLoading(true)
-		getUserHoverCardAction(user.id).then((data) => {
+		if (fullData || isPending) return
+		startTransition(async () => {
+			const data = await getUserHoverCardAction(user.id)
 			if (data) {
 				setFullData(data as FullHoverCardData)
 			}
-			setLoading(false)
 		})
 	}
 
@@ -66,7 +65,7 @@ export const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
 				</button>
 			</HoverCardTrigger>
 			<HoverCardContent className="w-72" side="top" align="start">
-				{loading || !fullData ? (
+				{isPending || !fullData ? (
 					<HoverCardSkeleton user={user} />
 				) : (
 					<HoverCardBody data={fullData} />

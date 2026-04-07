@@ -86,13 +86,15 @@ export const StirSearch = ({
 			return
 		}
 		let cancelled = false
-		setSuggestionsLoading(true)
-		getAutocompleteAction(debouncedQuery, 8).then((results) => {
+		const fetchSuggestions = async () => {
+			setSuggestionsLoading(true)
+			const results = await getAutocompleteAction(debouncedQuery, 8)
 			if (!cancelled) {
 				setSuggestions(results)
 				setSuggestionsLoading(false)
 			}
-		})
+		}
+		fetchSuggestions()
 		return () => {
 			cancelled = true
 		}
