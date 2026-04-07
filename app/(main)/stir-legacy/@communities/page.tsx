@@ -1,6 +1,6 @@
 import { CommunityDiscoverCard } from '@/app/(main)/events/components/CommunityDiscoverCard'
 import { ResponsiveGridCarousel } from '@/app/(main)/events/components/ResponsiveGridCarousel'
-import { StirCommunitiesTab } from '@/app/(main)/stir/components'
+import { StirCommunitiesTab } from '@/app/(main)/stir-legacy/components'
 import { getAPI } from '@/server/api'
 
 interface CommunitiesSlotPageProps {

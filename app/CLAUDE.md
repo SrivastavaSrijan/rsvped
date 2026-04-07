@@ -75,14 +75,15 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
 
 ## Layouts
 
-- `app/layout.tsx` — Root layout with `<Providers>` wrapper (tRPC + progress bar)
+- `app/layout.tsx` — Root layout with `<Providers>` wrapper (progress bar)
 - Route group layouts (`(main)/layout.tsx`, `(static)/layout.tsx`) — group-specific chrome (nav, footer)
 - Layouts are server components by default
 
 ## Middleware
 
-- `middleware.ts` at project root — runs NextAuth, sets `x-pathname` header
-- Matcher excludes: api/auth, static assets, images
+- `middleware.ts` at project root — runs NextAuth auth checks
+- Matcher is narrow: only protected routes + auth routes (login, register, profile)
+- Public routes (discover, view, communities, stir, user profiles) skip middleware entirely
 - Auth-protected routes defined in `RouteDefs.Protected`
 
 ## Copy Pattern

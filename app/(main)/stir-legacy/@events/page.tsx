@@ -1,7 +1,7 @@
 import { EventDiscoverCard } from '@/app/(main)/events/components/EventDiscoverCard'
 import { ResponsiveGridCarousel } from '@/app/(main)/events/components/ResponsiveGridCarousel'
-import { StirEventsTab } from '@/app/(main)/stir/components'
-import { StirAISummaryCard } from '@/app/(main)/stir/components/StirAISummaryCard'
+import { StirEventsTab } from '@/app/(main)/stir-legacy/components'
+import { StirAISummaryCard } from '@/app/(main)/stir-legacy/components/StirAISummaryCard'
 import { generatePlainText, isAvailable } from '@/lib/ai/llm'
 import { getAPI } from '@/server/api'
 
