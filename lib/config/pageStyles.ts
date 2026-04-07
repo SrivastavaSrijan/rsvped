@@ -42,6 +42,10 @@ const styleMap: Record<string, PageStyle> = {
 	[Routes.Main.Events.ManageBySlug(':slug')]: {
 		pseudoElement: getRandomGradient,
 	},
+	[Routes.Main.Categories.ViewBySlug(':slug')]: {
+		pseudoElement: getRandomGradient,
+		key: 'slug',
+	},
 }
 /**
  * Finds the appropriate styles for a given route by matching the pathname

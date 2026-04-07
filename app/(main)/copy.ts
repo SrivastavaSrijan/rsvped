@@ -51,6 +51,11 @@ export const copy = {
 			'music events tonight',
 		],
 	},
+	category: {
+		view: {
+			subtitle: 'Browse events in this category',
+		},
+	},
 	location: {
 		view: {
 			description(name: string, country: string, continent: string) {

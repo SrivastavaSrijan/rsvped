@@ -12,6 +12,7 @@ import {
 	ResponsiveGridCarousel,
 } from '@/app/(main)/events/components'
 import { LocationsDiscover } from '@/app/(main)/locations/components'
+import { AnimatedSection } from '@/components/shared'
 import { Button, Skeleton } from '@/components/ui'
 import { CookieNames, Routes } from '@/lib/config'
 import { getEncryptedCookie } from '@/lib/cookies'
@@ -323,16 +324,16 @@ export default async function DiscoverEvents() {
 
 	return (
 		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
-			<div className="flex flex-col gap-2 lg:gap-3">
+			<AnimatedSection className="flex flex-col gap-2 lg:gap-3">
 				<h1 className="font-bold text-2xl lg:px-0 lg:text-4xl">
 					{copy.discover.title}
 				</h1>
 				<p className="text-muted-foreground text-sm lg:text-base">
 					{copy.discover.description}
 				</p>
-			</div>
+			</AnimatedSection>
 
-			<div className="flex flex-col gap-4 lg:gap-6">
+			<AnimatedSection className="flex flex-col gap-4 lg:gap-6">
 				{/* Add hr only if recommendations exist */}
 				<div className="flex w-full flex-row justify-between gap-4">
 					<div className="flex flex-col gap-2 lg:gap-2">
@@ -351,7 +352,7 @@ export default async function DiscoverEvents() {
 				<Suspense fallback={<EventsSkeleton />}>
 					<NearbyEvents locationId={locationId} />
 				</Suspense>
-			</div>
+			</AnimatedSection>
 
 			<hr />
 
@@ -362,7 +363,7 @@ export default async function DiscoverEvents() {
 
 			<hr />
 
-			<div className="flex flex-col gap-4 lg:gap-6">
+			<AnimatedSection className="flex flex-col gap-4 lg:gap-6">
 				<div className="flex w-full flex-row justify-between gap-4">
 					<div className="flex flex-col">
 						<h2 className="text-xl font-semibold">
@@ -373,11 +374,11 @@ export default async function DiscoverEvents() {
 				<Suspense fallback={<CommunitiesSkeleton />}>
 					<NearbyCommunities locationId={locationId} />
 				</Suspense>
-			</div>
+			</AnimatedSection>
 
 			<hr />
 
-			<div className="flex flex-col gap-4 lg:gap-6">
+			<AnimatedSection className="flex flex-col gap-4 lg:gap-6">
 				<div className="flex w-full flex-row justify-between gap-4">
 					<div className="flex flex-col">
 						<h2 className="text-xl font-semibold">{copy.discover.category}</h2>
@@ -386,11 +387,11 @@ export default async function DiscoverEvents() {
 				<Suspense fallback={<CategoriesSkeleton />}>
 					<NearbyCategories locationId={locationId} />
 				</Suspense>
-			</div>
+			</AnimatedSection>
 
 			<hr />
 
-			<div className="flex flex-col gap-2 lg:gap-3">
+			<AnimatedSection className="flex flex-col gap-2 lg:gap-3">
 				<div className="flex w-full flex-row justify-between gap-4">
 					<div className="flex flex-col">
 						<h2 className="text-xl font-semibold">{copy.discover.location}</h2>
@@ -399,7 +400,7 @@ export default async function DiscoverEvents() {
 				<Suspense fallback={<LocationsSkeleton />}>
 					<LocationsList defaultContinent={location.continent} />
 				</Suspense>
-			</div>
+			</AnimatedSection>
 		</div>
 	)
 }
