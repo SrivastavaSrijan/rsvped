@@ -2,12 +2,12 @@
 
 import { MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useState, useTransition } from 'react'
+import { type ReactNode, useEffect, useRef, useState, useTransition } from 'react'
 import {
 	AvatarWithFallback,
-	HoverCard,
-	HoverCardContent,
-	HoverCardTrigger,
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
 	Skeleton,
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
@@ -42,8 +42,12 @@ interface FullHoverCardData {
 export const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
 	const [fullData, setFullData] = useState<FullHoverCardData | null>(null)
 	const [isPending, startTransition] = useTransition()
+	const [open, setOpen] = useState(false)
+	const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
+	const closeTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
+	const triggerRef = useRef<HTMLButtonElement>(null)
 
-	const handleMouseEnter = () => {
+	const fetchData = () => {
 		if (fullData || isPending) return
 		startTransition(async () => {
 			const data = await getUserHoverCardAction(user.id)
@@ -53,25 +57,60 @@ export const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
 		})
 	}
 
+	const handleMouseEnter = () => {
+		if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+		fetchData()
+		hoverTimeoutRef.current = setTimeout(() => setOpen(true), 300)
+	}
+
+	const handleMouseLeave = () => {
+		if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+		closeTimeoutRef.current = setTimeout(() => setOpen(false), 100)
+	}
+
+	const handleClick = () => {
+		fetchData()
+		setOpen((prev: boolean) => !prev)
+	}
+
+	useEffect(() => {
+		return () => {
+			if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+			if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+		}
+	}, [])
+
 	return (
-		<HoverCard openDelay={300} closeDelay={100}>
-			<HoverCardTrigger asChild>
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
 				<button
+					ref={triggerRef}
 					type="button"
 					className="inline-flex cursor-pointer"
 					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave}
+					onClick={handleClick}
 				>
 					{children}
 				</button>
-			</HoverCardTrigger>
-			<HoverCardContent className="w-72" side="top" align="start">
+			</PopoverTrigger>
+			<PopoverContent
+				className="w-72"
+				side="top"
+				align="start"
+				onMouseEnter={() => {
+					if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+				}}
+				onMouseLeave={handleMouseLeave}
+				onOpenAutoFocus={(e: Event) => e.preventDefault()}
+			>
 				{isPending || !fullData ? (
 					<HoverCardSkeleton user={user} />
 				) : (
 					<HoverCardBody data={fullData} />
 				)}
-			</HoverCardContent>
-		</HoverCard>
+			</PopoverContent>
+		</Popover>
 	)
 }
 

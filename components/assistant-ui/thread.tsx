@@ -49,7 +49,7 @@ const fadeIn = {
 export const Thread: FC = () => {
 	return (
 		<ThreadPrimitive.Root className="flex h-full flex-col">
-			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto scroll-smooth px-4 py-6 lg:px-6">
+			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto overflow-x-hidden scroll-smooth px-2 py-4 lg:px-6 lg:py-6">
 				<ThreadPrimitive.Empty>
 					<ThreadEmpty />
 				</ThreadPrimitive.Empty>
@@ -134,7 +134,7 @@ const ThreadEmpty: FC = () => {
 						>
 							<button
 								type="button"
-								className="flex w-full items-center gap-2.5 rounded-xl border border-border/60 bg-background/50 px-3 py-2.5 text-left backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 cursor-pointer"
+								className="flex w-full items-center gap-2 rounded-xl border border-border/60 bg-background/50 px-2.5 py-2 text-left backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 cursor-pointer lg:gap-2.5 lg:px-3 lg:py-2.5"
 							>
 								<card.icon className="size-4 shrink-0 text-muted-foreground" />
 								<span className="text-sm">{card.label}</span>
@@ -149,7 +149,7 @@ const ThreadEmpty: FC = () => {
 
 const ComposerArea: FC = () => {
 	return (
-		<div className="flex flex-col gap-2 border-t border-border/40 bg-background/60 px-4 pb-4 pt-3 backdrop-blur-sm lg:px-6">
+		<div className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-background/60 px-2 pb-2 pt-2 backdrop-blur-sm lg:px-6 lg:pb-4 lg:pt-3">
 			<AnimatePresence>
 				<ThreadPrimitive.If empty={false} running={false}>
 					<motion.div
@@ -187,7 +187,7 @@ const ComposerArea: FC = () => {
 
 const Composer: FC = () => {
 	return (
-		<ComposerPrimitive.Root className="flex gap-2 rounded-2xl border border-border/40 bg-background/80 px-4 py-3 shadow-sm backdrop-blur-sm transition-colors focus-within:border-border items-center">
+		<ComposerPrimitive.Root className="flex items-center gap-2 rounded-2xl border border-border/40 bg-background/80 px-3 py-2.5 shadow-sm backdrop-blur-sm transition-colors focus-within:border-border lg:px-4 lg:py-3">
 			<ComposerPrimitive.Input
 				autoFocus
 				placeholder="Ask about events, communities, or what's trending..."
@@ -229,8 +229,8 @@ const UserMessage: FC = () => {
 			variants={messageVariants}
 			className="w-full"
 		>
-			<MessagePrimitive.Root className="flex w-full flex-col items-end gap-1">
-				<div className="max-w-[85%] rounded-2xl bg-brand px-4 py-2.5 text-sm leading-relaxed text-white lg:max-w-[70%]">
+			<MessagePrimitive.Root className="flex w-full min-w-0 flex-col items-end gap-1">
+				<div className="max-w-[85%] rounded-2xl bg-brand px-3 py-2.5 text-sm leading-relaxed text-white lg:max-w-[70%] lg:px-4">
 					<MessagePrimitive.Content />
 				</div>
 				<UserActionBar />
@@ -281,7 +281,7 @@ const AssistantMessage: FC = () => {
 			variants={messageVariants}
 			className="w-full"
 		>
-			<MessagePrimitive.Root className="aui-assistant-message flex w-full flex-col items-start gap-2">
+			<MessagePrimitive.Root className="aui-assistant-message flex w-full min-w-0 flex-col items-start gap-2 overflow-hidden">
 				<ThinkingIndicator />
 				<MessagePrimitive.Content
 					components={{
@@ -341,9 +341,9 @@ const AssistantActionBar: FC = () => {
 
 const MarkdownText: FC = () => {
 	return (
-		<div className="order-first text-sm leading-relaxed text-foreground">
+		<div className="order-first min-w-0 text-sm leading-relaxed text-foreground">
 			<MarkdownTextPrimitive
-				className="aui-markdown prose prose-sm max-w-none text-foreground prose-a:text-brand prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-headings:text-foreground prose-li:my-0"
+				className="aui-markdown prose prose-sm max-w-none break-words text-foreground prose-a:text-brand prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-headings:text-foreground prose-li:my-0"
 				smooth
 			/>
 		</div>
