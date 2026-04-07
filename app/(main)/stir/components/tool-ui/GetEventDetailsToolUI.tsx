@@ -106,7 +106,7 @@ export const GetEventDetailsToolUI = makeAssistantToolUI<
 				<Card className="gap-0 overflow-hidden py-0 transition-colors group-hover:border-brand/30">
 					<CardContent className="flex flex-col gap-2.5 p-3 lg:gap-3 lg:p-4">
 						<div className="flex flex-col gap-1">
-							<p className="font-semibold text-base group-hover:text-brand">
+							<p className="truncate font-semibold text-sm group-hover:text-brand">
 								{result.title}
 							</p>
 							{result.host ? (

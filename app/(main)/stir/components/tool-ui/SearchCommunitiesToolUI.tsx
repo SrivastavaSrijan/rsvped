@@ -104,7 +104,7 @@ const CommunityResultCard = ({
 						{community.name.charAt(0).toUpperCase()}
 					</div>
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
-						<p className="truncate font-medium text-sm group-hover:text-brand">
+						<p className="truncate font-medium text-xs group-hover:text-brand lg:text-sm">
 							{community.name}
 						</p>
 						{community.description ? (

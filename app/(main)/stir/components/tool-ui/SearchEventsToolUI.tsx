@@ -93,7 +93,7 @@ const EventResultCard = ({ event }: { event: ToolEventResult }) => {
 						</span>
 					</div>
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
-						<p className="truncate font-medium text-sm group-hover:text-brand">
+						<p className="truncate font-medium text-xs group-hover:text-brand lg:text-sm">
 							{event.title}
 						</p>
 						<div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted-foreground">

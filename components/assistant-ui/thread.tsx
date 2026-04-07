@@ -153,7 +153,7 @@ const ComposerArea: FC = () => {
 			<AnimatePresence>
 				<ThreadPrimitive.If empty={false} running={false}>
 					<motion.div
-						className="flex flex-wrap gap-2"
+						className="flex gap-2 overflow-x-auto"
 						initial={{ opacity: 0, y: 4 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.2 }}
@@ -168,7 +168,7 @@ const ComposerArea: FC = () => {
 							>
 								<button
 									type="button"
-									className="rounded-full border border-border/60 bg-background/50 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 hover:text-foreground"
+									className="shrink-0 whitespace-nowrap rounded-full border border-border/60 bg-background/50 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 hover:text-foreground"
 								>
 									{suggestion}
 								</button>
@@ -178,9 +178,6 @@ const ComposerArea: FC = () => {
 				</ThreadPrimitive.If>
 			</AnimatePresence>
 			<Composer />
-			<p className="text-center text-xs text-muted-foreground/60">
-				Stir searches your event database. Results may not be exhaustive.
-			</p>
 		</div>
 	)
 }
@@ -190,7 +187,7 @@ const Composer: FC = () => {
 		<ComposerPrimitive.Root className="flex items-center gap-2 rounded-2xl border border-border/40 bg-background/80 px-3 py-2.5 shadow-sm backdrop-blur-sm transition-colors focus-within:border-border lg:px-4 lg:py-3">
 			<ComposerPrimitive.Input
 				autoFocus
-				placeholder="Ask about events, communities, or what's trending..."
+				placeholder="Ask anything"
 				className="min-h-6 flex-1 resize-none bg-transparent text-sm  outline-none placeholder:text-muted-foreground/60 leading-relaxed"
 				submitOnEnter
 			/>
