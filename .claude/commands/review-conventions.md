@@ -19,9 +19,10 @@ If $ARGUMENTS is a file path, read that file. If "--staged", review git staged c
 
 ### Data Flow
 - [ ] RouterOutput types for component props (not custom interfaces)
-- [ ] tRPC hooks for client data fetching
-- [ ] getAPI() for server-side fetching
-- [ ] Server Actions for mutations (not direct API calls)
+- [ ] getAPI() for ALL data fetching (in RSCs, server actions)
+- [ ] No trpc.*.useQuery() or trpc.*.useMutation() client-side hooks
+- [ ] Client components receive data as props from RSC parents
+- [ ] Server Actions for mutations via useActionStateWithError
 
 ### Styling
 - [ ] Tailwind tokens only (no var(), no arbitrary values, no inline styles)
