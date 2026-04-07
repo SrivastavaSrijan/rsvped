@@ -5,11 +5,15 @@ import type { ToolEventResult } from '../types'
 
 export const searchEvents = tool({
 	description:
-		'Search for events by keyword, category, date range, or city. Returns matching published events sorted by relevance.',
+		'Search for events by keyword, category, date range, or city. Results are sorted by popularity (RSVP count). For broad queries like "trending" or "popular", pass an empty string as query to get the most popular events.',
 	inputSchema: z.object({
 		query: z
 			.string()
-			.describe('Search query for event titles and descriptions'),
+			.optional()
+			.default('')
+			.describe(
+				'Search keywords for event titles/descriptions. Use empty string "" for broad/popular/trending queries. Optional — omit or pass "" when filtering by category/city/date only.'
+			),
 		category: z
 			.string()
 			.optional()
@@ -37,9 +41,64 @@ export const searchEvents = tool({
 	}),
 	execute: async ({ query, category, city, dateAfter, dateBefore, limit }) => {
 		try {
-			// If query is a wildcard or very short, skip text filtering and just return popular events
+			// Words that express intent but won't match event titles/descriptions
+			const conceptualWords = new Set([
+				'trending',
+				'popular',
+				'best',
+				'top',
+				'recommended',
+				'interesting',
+				'cool',
+				'fun',
+				'good',
+				'great',
+				'nice',
+				'awesome',
+				'hot',
+				'new',
+				'latest',
+				'upcoming',
+				'happening',
+				'nearby',
+				'local',
+				'all',
+				'any',
+				'everything',
+				'events',
+				'event',
+				'find',
+				'show',
+				'me',
+				'or',
+				'and',
+				'the',
+				'in',
+				'for',
+				'a',
+				'an',
+				'some',
+				'what',
+				'which',
+				'are',
+				'is',
+				'there',
+				'right',
+				'now',
+			])
+
+			// Strip conceptual words and check if anything meaningful remains
+			const meaningfulQuery = query
+				.split(/\s+/)
+				.filter((w) => !conceptualWords.has(w.toLowerCase()))
+				.join(' ')
+				.trim()
+
 			const isGenericQuery =
-				!query || query === '*' || query === '**' || query.trim().length < 2
+				!meaningfulQuery ||
+				meaningfulQuery === '*' ||
+				meaningfulQuery === '**' ||
+				meaningfulQuery.length < 2
 
 			const events = await prisma.event.findMany({
 				where: {
@@ -49,12 +108,20 @@ export const searchEvents = tool({
 						isGenericQuery
 							? {}
 							: {
-									OR: [
-										{ title: { contains: query, mode: 'insensitive' } },
+									OR: meaningfulQuery.split(/\s+/).flatMap((word) => [
 										{
-											description: { contains: query, mode: 'insensitive' },
+											title: {
+												contains: word,
+												mode: 'insensitive' as const,
+											},
 										},
-									],
+										{
+											description: {
+												contains: word,
+												mode: 'insensitive' as const,
+											},
+										},
+									]),
 								},
 						city
 							? { location: { name: { contains: city, mode: 'insensitive' } } }

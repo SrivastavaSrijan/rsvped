@@ -8,12 +8,14 @@ import Providers from './providers'
 const inter = Inter({
 	subsets: ['latin'],
 	variable: '--font-inter',
+	display: 'swap',
 })
 
 const averia = Averia_Serif_Libre({
 	subsets: ['latin'],
 	weight: ['400', '700'],
 	variable: '--font-averia',
+	display: 'swap',
 })
 
 export const metadata = baseMetadata

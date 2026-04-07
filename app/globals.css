@@ -11,6 +11,11 @@
 		-webkit-appearance: none;
 		margin: 0;
 	}
+
+	button {
+		@apply cursor-pointer;
+	}
+
 	/* Lu.ma Dark Theme Overrides */
 	.dark {
 		/* Dark theme base colors */
@@ -94,4 +99,13 @@
 			var(--color-orange-40) 100%
 		);
 	}
+}
+
+/* Assistant message: render text above tool cards */
+.aui-assistant-message {
+	display: flex;
+	flex-direction: column;
+}
+.aui-assistant-message .order-first {
+	order: -1;
 }

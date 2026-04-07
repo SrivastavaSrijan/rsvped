@@ -2,6 +2,9 @@ import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui'
 import { FeaturedCommunities, FeaturedEvents, Hero } from './components'
 
+// Revalidate homepage every 30 minutes — featured content is CDN-cached
+export const revalidate = 1800
+
 export default function Home() {
 	return (
 		<div className="flex w-full flex-col gap-12 pb-12 lg:gap-16 lg:pb-16">

@@ -17,16 +17,6 @@ vi.mock('@/lib/auth', () => ({
 	handlers: {},
 }))
 
-// Mock @sentry/nextjs — not needed in tests
-vi.mock('@sentry/nextjs', () => ({
-	init: vi.fn(),
-	trpcMiddleware: () =>
-		vi.fn(({ next }: { next: () => unknown }) => next()),
-	captureException: vi.fn(),
-	withServerActionInstrumentation: vi.fn(
-		(_name: string, fn: () => unknown) => fn()
-	),
-}))
 
 afterEach(() => {
 	// Reset any global state between tests

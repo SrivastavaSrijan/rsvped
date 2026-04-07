@@ -101,21 +101,23 @@ export const Routes = {
 
 export const RouteDefs = {
 	Protected: [
-		Routes.Main.Events.Root,
 		Routes.Main.Events.Create,
-		Routes.Main.Events.Home,
 		Routes.Main.Events.EditBySlug('[slug]'),
-		Routes.Main.Communities.Home,
-		Routes.Main.Stir.Root,
+		Routes.Main.Events.ManageBySlug('[slug]'),
 		Routes.Auth.Profile,
 		Routes.Auth.EditProfile,
 		Routes.Main.Feed as string,
 	],
 	Public: [
+		Routes.Main.Events.Root,
+		Routes.Main.Events.Home,
 		Routes.Main.Events.Discover,
 		Routes.Main.Events.ViewBySlug('[slug]'),
 		Routes.Main.Events.ViewBySlugRegister('[slug]'),
+		Routes.Main.Communities.Home,
+		Routes.Main.Communities.ViewBySlug('[slug]'),
 		Routes.Main.Communities.SubscribeTo('[slug]'),
+		Routes.Main.Stir.Root,
 		Routes.Main.Users.ViewByUsername('[username]'),
 	],
 }

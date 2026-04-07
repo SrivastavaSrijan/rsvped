@@ -5,7 +5,6 @@ import {
 	getStirSystemPrompt,
 	STIR_ANON_CONTEXT,
 	STIR_MAX_STEPS,
-	STIR_USER_CONTEXT_PREFIX,
 } from './constants'
 import { logConversationComplete, logStepComplete, logToolCall } from './logger'
 import {
@@ -84,9 +83,61 @@ async function buildSystemPrompt(
 		}
 	}
 
-	// Add user context
+	// Add user context with profile data
 	if (userId) {
-		parts.push(`${STIR_USER_CONTEXT_PREFIX}${userId}. The user is logged in.`)
+		const user = await prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				name: true,
+				interests: true,
+				profession: true,
+				industry: true,
+				location: { select: { name: true } },
+				categoryInterests: {
+					select: { category: { select: { name: true } } },
+					take: 10,
+				},
+				rsvps: {
+					where: { status: 'CONFIRMED' },
+					select: {
+						event: {
+							select: {
+								title: true,
+								categories: {
+									select: { category: { select: { name: true } } },
+								},
+							},
+						},
+					},
+					orderBy: { createdAt: 'desc' },
+					take: 5,
+				},
+			},
+		})
+
+		const userLines: string[] = ['## User Profile']
+		if (user) {
+			if (user.name) userLines.push(`Name: ${user.name}`)
+			if (user.location?.name) userLines.push(`Location: ${user.location.name}`)
+			if (user.profession) userLines.push(`Profession: ${user.profession}`)
+			if (user.industry) userLines.push(`Industry: ${user.industry}`)
+			if (user.interests.length > 0)
+				userLines.push(`Interests: ${user.interests.join(', ')}`)
+			if (user.categoryInterests.length > 0) {
+				const cats = user.categoryInterests
+					.map((c) => c.category.name)
+					.join(', ')
+				userLines.push(`Preferred categories: ${cats}`)
+			}
+			if (user.rsvps.length > 0) {
+				const recentEvents = user.rsvps.map((r) => r.event.title).join(', ')
+				userLines.push(`Recent RSVPs: ${recentEvents}`)
+			}
+		}
+		userLines.push(
+			'Use this profile to personalize recommendations. Do NOT ask the user for information you already have.'
+		)
+		parts.push(userLines.join('\n'))
 	} else {
 		parts.push(STIR_ANON_CONTEXT)
 	}

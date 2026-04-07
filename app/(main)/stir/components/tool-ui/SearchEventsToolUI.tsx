@@ -48,7 +48,7 @@ export const SearchEventsToolUI = makeAssistantToolUI<
 		if (result.length === 0) {
 			return (
 				<div className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-					No events found for &ldquo;{args.query}&rdquo;
+					No matching events found
 				</div>
 			)
 		}

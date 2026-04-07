@@ -31,7 +31,7 @@ graph TB
     end
 
     subgraph "Infrastructure"
-        SENTRY[Sentry<br/>error tracking]
+        VERCEL[Vercel<br/>logs + analytics]
         CRON[Vercel Cron<br/>demo reset 24h]
         CI[GitHub Actions<br/>lint + test + e2e]
     end
@@ -90,11 +90,11 @@ Claude synthesizes → streaming response with event data
 | UI | React 19 + ShadCN + Radix | 19.x |
 | Styling | Tailwind CSS v4 (`@theme` tokens) | 4.1 |
 | Database | Prisma → PostgreSQL | 6.11 |
-| API | tRPC + TanStack Query | 11.x |
+| API | tRPC (server-side callers) | 11.x |
 | AI | Vercel AI SDK + Claude (Anthropic) | 6.x |
 | Auth | NextAuth v5 (Google OAuth + Credentials) | 5.0-beta |
 | Testing | Vitest + Playwright | 4.x / 1.x |
-| Error Tracking | Sentry | latest |
+| Observability | Vercel Logs + Analytics | built-in |
 | CI/CD | GitHub Actions + Vercel | - |
 | Linting | Biome | 2.1 |
 

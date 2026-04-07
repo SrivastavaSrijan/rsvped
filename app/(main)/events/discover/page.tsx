@@ -71,7 +71,11 @@ const PageConfig = {
  * Redirects to an error page if no location can be determined.
  */
 async function resolveUserLocation() {
-	const api = await getAPI()
+	const [api, cookieData] = await Promise.all([
+		getAPI(),
+		getEncryptedCookie<Partial<LocationFormData>>(CookieNames.PrefillLocation),
+	])
+
 	const user = await api.user.profile.enhanced()
 
 	// 1. Use authenticated user's location if available
@@ -80,11 +84,7 @@ async function resolveUserLocation() {
 	}
 
 	// 2. Try to find location from cookie for guests
-	const { locationId: savedLocationId } =
-		(await getEncryptedCookie<Partial<LocationFormData>>(
-			CookieNames.PrefillLocation
-		)) ?? {}
-
+	const savedLocationId = cookieData?.locationId
 	if (savedLocationId) {
 		try {
 			const location = await api.location.get.byId({
@@ -95,8 +95,6 @@ async function resolveUserLocation() {
 			}
 		} catch (error) {
 			console.error('Error fetching location by ID from cookie:', error)
-			// Could log this error. Cookie might contain an old/invalid ID.
-			// Proceed to fallback.
 		}
 	}
 
