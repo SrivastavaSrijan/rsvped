@@ -20,6 +20,7 @@ const GetEventsInput = z
 			.object({
 				locationId: z.string().optional().nullable(),
 				communityId: z.string().optional().nullable(),
+				categoryId: z.string().optional().nullable(),
 				deletedAt: z.date().nullish().default(null),
 				isPublished: z.boolean().optional().default(true),
 			})
@@ -81,6 +82,11 @@ const eventListBaseProcedure = protectedPaginatedProcedure
 			...(orConditions.length && { OR: orConditions }),
 			communityId: input?.where?.communityId ?? undefined,
 			locationId: input?.where?.locationId ?? undefined,
+			...(input?.where?.categoryId && {
+				categories: {
+					some: { categoryId: input.where.categoryId },
+				},
+			}),
 			isPublished: true,
 			deletedAt: null,
 			...(startDate && { startDate }),

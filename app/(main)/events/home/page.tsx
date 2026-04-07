@@ -4,6 +4,7 @@ import {
 	buildEventListQuery,
 	ProgressiveEventsList,
 } from '@/app/(main)/events/components'
+import { AnimatedSection } from '@/components/shared'
 import { type EventListSearchParams, getAPI } from '@/server/api'
 
 export const metadata: Metadata = {
@@ -26,8 +27,8 @@ export default async function EventsHome({
 	const coreEvents = await api.event.list.core(params)
 
 	return (
-		<div className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
+		<AnimatedSection className="mx-auto flex w-full max-w-page flex-col gap-4 px-3 py-6 lg:gap-8 lg:px-8 lg:py-8">
 			<ProgressiveEventsList coreEvents={coreEvents} params={params} />
-		</div>
+		</AnimatedSection>
 	)
 }

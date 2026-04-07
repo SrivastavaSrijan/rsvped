@@ -9,7 +9,7 @@ export const categoryGetRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			const category = await ctx.prisma.category.findUnique({
 				where: { slug: input.slug },
-				select: { id: true, name: true, slug: true },
+				select: { id: true, name: true, slug: true, subcategories: true },
 			})
 			if (!category) {
 				throw TRPCErrors.categoryNotFound()
