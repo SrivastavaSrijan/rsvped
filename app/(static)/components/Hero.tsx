@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import { Button, Image } from '@/components/ui'
+import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
 import { AssetMap } from '@/lib/config/assets'
 import { copy } from '../copy'
+import { DemoButton } from './DemoButton'
 
-export const Hero = () => {
+export const Hero = async () => {
+	const session = await auth()
+	const isLoggedIn = !!session?.user
+
 	return (
 		<section className="container mx-auto w-full max-w-extra-wide-page">
 			<div className="grid grid-cols-1 items-center gap-8 py-4 lg:grid-cols-3 lg:gap-16 lg:py-12">
@@ -37,11 +42,15 @@ export const Hero = () => {
 								{copy.hero.ctaExplore}
 							</Button>
 						</Link>
-						<Link href={Routes.Auth.SignIn}>
-							<Button size="lg" variant="outline" className="lg:text-lg">
-								{copy.hero.ctaDemo}
-							</Button>
-						</Link>
+						{isLoggedIn ? (
+							<Link href={Routes.Main.Events.Home}>
+								<Button size="lg" variant="outline" className="lg:text-lg">
+									Go to Events
+								</Button>
+							</Link>
+						) : (
+							<DemoButton label={copy.hero.ctaDemo} />
+						)}
 					</div>
 				</div>
 
