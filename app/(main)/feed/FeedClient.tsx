@@ -1,31 +1,18 @@
-'use client'
-
 import { Activity, Users } from 'lucide-react'
 import Link from 'next/link'
-import { UserHoverCard } from '@/components/shared'
-import { AvatarWithFallback, Skeleton } from '@/components/ui'
+import { AvatarWithFallback } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { ActivityTypeLabels } from '@/lib/constants/labels'
-import { trpc } from '@/lib/trpc'
+import type { RouterOutput } from '@/server/api'
 
-export function FeedClient() {
-	const { data, isLoading } = trpc.activity.feed.useQuery({
-		page: 1,
-		size: 30,
-	})
+type FeedData = RouterOutput['activity']['feed']
 
-	if (isLoading) {
-		return (
-			<div className="flex flex-col gap-3">
-				{Array.from({ length: 5 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-					<Skeleton key={i} className="h-16 w-full rounded-lg" />
-				))}
-			</div>
-		)
-	}
+interface FeedClientProps {
+	data: FeedData
+}
 
-	if (!data || data.data.length === 0) {
+export const FeedClient = ({ data }: FeedClientProps) => {
+	if (data.data.length === 0) {
 		return (
 			<div className="flex flex-col items-center gap-4 py-16">
 				<Users className="size-12 text-muted-foreground" />
@@ -45,25 +32,23 @@ export function FeedClient() {
 					key={activity.id}
 					className="flex items-center gap-3 rounded-lg bg-secondary px-4 py-3"
 				>
-					<UserHoverCard userId={activity.user.id}>
-						{activity.user.username ? (
-							<Link
-								href={Routes.Main.Users.ViewByUsername(activity.user.username)}
-							>
-								<AvatarWithFallback
-									src={activity.user.image}
-									name={activity.user.name ?? undefined}
-									className="size-8"
-								/>
-							</Link>
-						) : (
+					{activity.user.username ? (
+						<Link
+							href={Routes.Main.Users.ViewByUsername(activity.user.username)}
+						>
 							<AvatarWithFallback
 								src={activity.user.image}
 								name={activity.user.name ?? undefined}
 								className="size-8"
 							/>
-						)}
-					</UserHoverCard>
+						</Link>
+					) : (
+						<AvatarWithFallback
+							src={activity.user.image}
+							name={activity.user.name ?? undefined}
+							className="size-8"
+						/>
+					)}
 					<div className="flex flex-1 flex-col gap-0.5">
 						<p className="text-sm text-foreground">
 							<span className="font-medium">{activity.user.name}</span>{' '}

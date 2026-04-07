@@ -86,8 +86,8 @@ export const EventPage = (props: EventPageProps) => {
 						<p className="font-semibold text-sm">Hosted By</p>
 						<hr className="border-muted-foreground/20" />
 						<div className="flex flex-row gap-3 items-center">
-							{host?.id ? (
-								<UserHoverCard userId={host.id}>
+							{host ? (
+								<UserHoverCard user={host}>
 									<AvatarWithFallback src={image} alt={name ?? 'Host'} />
 								</UserHoverCard>
 							) : (
@@ -109,8 +109,8 @@ export const EventPage = (props: EventPageProps) => {
 										({ name: guestName, email: guestEmail, user: guestUser }) =>
 											guestEmail &&
 											guestName &&
-											(guestUser?.id ? (
-												<UserHoverCard key={guestEmail} userId={guestUser.id}>
+											(guestUser ? (
+												<UserHoverCard key={guestEmail} user={guestUser}>
 													<AvatarWithFallback
 														className="size-4 mt-1"
 														src={guestUser.image ?? undefined}

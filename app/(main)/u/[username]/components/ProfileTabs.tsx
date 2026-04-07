@@ -2,7 +2,6 @@
 
 import { Activity, Calendar, Users, UsersRound } from 'lucide-react'
 import Link from 'next/link'
-import { UserHoverCard } from '@/components/shared'
 import {
 	AvatarWithFallback,
 	Badge,
@@ -13,15 +12,23 @@ import {
 } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import { ActivityTypeLabels } from '@/lib/constants/labels'
-import { trpc } from '@/lib/trpc'
+import type { RouterOutput } from '@/server/api'
 import type { PublicProfileUser } from './types'
 
+type ActivityData = RouterOutput['activity']['forUser']
+type FriendsData = RouterOutput['friendship']['list']
+
 interface ProfileTabsProps {
-	userId: string
 	user: PublicProfileUser
+	activityData: ActivityData
+	friendsData: FriendsData
 }
 
-export function ProfileTabs({ userId, user }: ProfileTabsProps) {
+export const ProfileTabs = ({
+	user,
+	activityData,
+	friendsData,
+}: ProfileTabsProps) => {
 	return (
 		<Tabs defaultValue="activity">
 			<TabsList className="w-full justify-start">
@@ -44,7 +51,7 @@ export function ProfileTabs({ userId, user }: ProfileTabsProps) {
 			</TabsList>
 
 			<TabsContent value="activity">
-				<ActivityTab userId={userId} />
+				<ActivityTab data={activityData} />
 			</TabsContent>
 			<TabsContent value="events">
 				<EventsTab user={user} />
@@ -53,24 +60,14 @@ export function ProfileTabs({ userId, user }: ProfileTabsProps) {
 				<CommunitiesTab user={user} />
 			</TabsContent>
 			<TabsContent value="friends">
-				<FriendsTab userId={userId} />
+				<FriendsTab data={friendsData} />
 			</TabsContent>
 		</Tabs>
 	)
 }
 
-function ActivityTab({ userId }: { userId: string }) {
-	const { data, isLoading } = trpc.activity.forUser.useQuery({
-		userId,
-		page: 1,
-		size: 20,
-	})
-
-	if (isLoading) {
-		return <TabLoading />
-	}
-
-	if (!data || data.data.length === 0) {
+const ActivityTab = ({ data }: { data: ActivityData }) => {
+	if (data.data.length === 0) {
 		return <TabEmpty message="No activity yet." />
 	}
 
@@ -100,7 +97,7 @@ function ActivityTab({ userId }: { userId: string }) {
 	)
 }
 
-function EventsTab({ user }: { user: PublicProfileUser }) {
+const EventsTab = ({ user }: { user: PublicProfileUser }) => {
 	if (user.hostedEvents.length === 0) {
 		return <TabEmpty message="No events hosted yet." />
 	}
@@ -138,7 +135,7 @@ function EventsTab({ user }: { user: PublicProfileUser }) {
 	)
 }
 
-function CommunitiesTab({ user }: { user: PublicProfileUser }) {
+const CommunitiesTab = ({ user }: { user: PublicProfileUser }) => {
 	if (user.communityMemberships.length === 0) {
 		return <TabEmpty message="Not a member of any communities yet." />
 	}
@@ -161,75 +158,50 @@ function CommunitiesTab({ user }: { user: PublicProfileUser }) {
 	)
 }
 
-function FriendsTab({ userId }: { userId: string }) {
-	const { data, isLoading } = trpc.friendship.list.useQuery({
-		userId,
-		page: 1,
-		size: 20,
-	})
-
-	if (isLoading) {
-		return <TabLoading />
-	}
-
-	if (!data || data.data.length === 0) {
+const FriendsTab = ({ data }: { data: FriendsData }) => {
+	if (data.data.length === 0) {
 		return <TabEmpty message="No friends yet." />
 	}
 
 	return (
 		<div className="grid grid-cols-1 gap-3 py-4 lg:grid-cols-2">
 			{data.data.map((item) => (
-				<UserHoverCard key={item.id} userId={item.friend.id}>
-					<Link
-						href={
-							item.friend.username
-								? Routes.Main.Users.ViewByUsername(item.friend.username)
-								: '#'
-						}
-						className="flex items-center gap-3 rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
-					>
-						<AvatarWithFallback
-							src={item.friend.image}
-							name={item.friend.name ?? undefined}
-							className="size-10"
-						/>
-						<div className="flex flex-col gap-0.5">
-							<span className="text-sm font-medium text-foreground">
-								{item.friend.name}
+				<Link
+					key={item.id}
+					href={
+						item.friend.username
+							? Routes.Main.Users.ViewByUsername(item.friend.username)
+							: '#'
+					}
+					className="flex items-center gap-3 rounded-lg bg-secondary px-4 py-3 transition-colors hover:bg-muted"
+				>
+					<AvatarWithFallback
+						src={item.friend.image}
+						name={item.friend.name ?? undefined}
+						className="size-10"
+					/>
+					<div className="flex flex-col gap-0.5">
+						<span className="text-sm font-medium text-foreground">
+							{item.friend.name}
+						</span>
+						{item.friend.username ? (
+							<span className="text-xs text-muted-foreground">
+								@{item.friend.username}
 							</span>
-							{item.friend.username ? (
-								<span className="text-xs text-muted-foreground">
-									@{item.friend.username}
-								</span>
-							) : null}
-							{item.friend.profession ? (
-								<span className="text-xs text-muted-foreground">
-									{item.friend.profession}
-								</span>
-							) : null}
-						</div>
-					</Link>
-				</UserHoverCard>
+						) : null}
+						{item.friend.profession ? (
+							<span className="text-xs text-muted-foreground">
+								{item.friend.profession}
+							</span>
+						) : null}
+					</div>
+				</Link>
 			))}
 		</div>
 	)
 }
 
-function TabLoading() {
-	return (
-		<div className="flex flex-col gap-2 py-4">
-			{Array.from({ length: 3 }).map((_, i) => (
-				<div
-					// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-					key={i}
-					className="h-14 animate-pulse rounded-lg bg-secondary"
-				/>
-			))}
-		</div>
-	)
-}
-
-function TabEmpty({ message }: { message: string }) {
+const TabEmpty = ({ message }: { message: string }) => {
 	return (
 		<div className="flex items-center justify-center py-12">
 			<p className="text-sm text-muted-foreground">{message}</p>

@@ -3,10 +3,9 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui'
-import { trpc } from '@/lib/trpc'
 import { SearchType } from '@/server/api/routers/stir/types'
 
-export function StirTabsHeader() {
+export const StirTabsHeader = () => {
 	const router = useRouter()
 	const pathname = usePathname()
 	const params = useSearchParams()
@@ -14,18 +13,6 @@ export function StirTabsHeader() {
 
 	const type = (params.get('type') as SearchType) ?? SearchType.EVENTS
 	const q = params.get('q') ?? ''
-
-	const { data: eventsResult } = trpc.stir.search.events.useQuery(
-		{ query: q, page: 1, size: 1 },
-		{ enabled: q.trim().length > 0 }
-	)
-	const { data: communitiesResult } = trpc.stir.search.communities.useQuery(
-		{ query: q, page: 1, size: 1 },
-		{ enabled: q.trim().length > 0 }
-	)
-
-	const eventsCount = eventsResult?.pagination.total ?? 0
-	const communitiesCount = communitiesResult?.pagination.total ?? 0
 
 	const setType = (next: SearchType) => {
 		const sp = new URLSearchParams(params)
@@ -42,14 +29,14 @@ export function StirTabsHeader() {
 					value={SearchType.EVENTS}
 					onClick={() => setType(SearchType.EVENTS)}
 				>
-					{q ? `Events (${eventsCount})` : 'Trending Events'}
+					{q ? 'Events' : 'Trending Events'}
 				</TabsTrigger>
 				<TabsTrigger
 					disabled={isPending}
 					value={SearchType.COMMUNITIES}
 					onClick={() => setType(SearchType.COMMUNITIES)}
 				>
-					{q ? `Communities (${communitiesCount})` : 'Trending Communities'}
+					{q ? 'Communities' : 'Trending Communities'}
 				</TabsTrigger>
 			</TabsList>
 		</Tabs>
