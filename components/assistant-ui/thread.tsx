@@ -49,7 +49,7 @@ const fadeIn = {
 export const Thread: FC = () => {
 	return (
 		<ThreadPrimitive.Root className="flex h-full flex-col">
-			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto overflow-x-hidden scroll-smooth px-2 py-4 lg:px-6 lg:py-6">
+			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto overflow-x-hidden scroll-smooth px-3 py-4 lg:px-6 lg:py-6">
 				<ThreadPrimitive.Empty>
 					<ThreadEmpty />
 				</ThreadPrimitive.Empty>
@@ -149,7 +149,7 @@ const ThreadEmpty: FC = () => {
 
 const ComposerArea: FC = () => {
 	return (
-		<div className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-background/60 px-2 pb-2 pt-2 backdrop-blur-sm lg:px-6 lg:pb-4 lg:pt-3">
+		<div className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-background/60 px-3 pb-2 pt-2 backdrop-blur-sm lg:px-6 lg:pb-4 lg:pt-3">
 			<AnimatePresence>
 				<ThreadPrimitive.If empty={false} running={false}>
 					<motion.div
@@ -281,7 +281,7 @@ const AssistantMessage: FC = () => {
 			variants={messageVariants}
 			className="w-full"
 		>
-			<MessagePrimitive.Root className="aui-assistant-message flex w-full min-w-0 flex-col items-start gap-2 overflow-hidden">
+			<MessagePrimitive.Root className="aui-assistant-message flex w-full min-w-0 flex-col items-start gap-2">
 				<ThinkingIndicator />
 				<MessagePrimitive.Content
 					components={{

@@ -82,31 +82,33 @@ const EventResultCard = ({ event }: { event: ToolEventResult }) => {
 
 	return (
 		<Link href={`/events/${event.slug}/view`} className="group block">
-			<Card className="gap-0 py-0 transition-colors group-hover:border-brand/30 group-hover:bg-muted/50">
-				<CardContent className="flex items-start gap-3 p-3">
-					<div className="flex size-10 shrink-0 flex-col items-center justify-center rounded-md bg-brand/10 text-brand">
+			<Card className="gap-0 overflow-hidden py-0 transition-colors group-hover:border-brand/30 group-hover:bg-muted/50">
+				<CardContent className="flex items-start gap-2.5 p-2.5 lg:gap-3 lg:p-3">
+					<div className="flex size-9 shrink-0 flex-col items-center justify-center rounded-md bg-brand/10 text-brand lg:size-10">
 						<span className="text-[10px] font-medium uppercase leading-none">
 							{month}
 						</span>
-						<span className="font-bold text-sm leading-tight">{day}</span>
+						<span className="font-bold text-xs leading-tight lg:text-sm">
+							{day}
+						</span>
 					</div>
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
 						<p className="truncate font-medium text-sm group-hover:text-brand">
 							{event.title}
 						</p>
-						<div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-							<span className="flex items-center gap-1">
-								<MapPin className="size-3" />
-								{event.location}
+						<div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted-foreground">
+							<span className="flex items-center gap-1 truncate">
+								<MapPin className="size-3 shrink-0" />
+								<span className="truncate">{event.location}</span>
 							</span>
 							<span className="flex items-center gap-1">
-								<Users className="size-3" />
+								<Users className="size-3 shrink-0" />
 								{event.rsvpCount} RSVP{event.rsvpCount !== 1 ? 's' : ''}
 							</span>
 						</div>
 						{event.categories.length > 0 ? (
 							<div className="flex flex-wrap gap-1">
-								{event.categories.slice(0, 3).map((cat) => (
+								{event.categories.slice(0, 2).map((cat) => (
 									<Badge
 										key={cat}
 										variant="outline"
@@ -115,6 +117,14 @@ const EventResultCard = ({ event }: { event: ToolEventResult }) => {
 										{cat}
 									</Badge>
 								))}
+								{event.categories.length > 2 ? (
+									<Badge
+										variant="outline"
+										className="px-1.5 py-0 text-[10px]"
+									>
+										+{event.categories.length - 2}
+									</Badge>
+								) : null}
 							</div>
 						) : null}
 					</div>
@@ -134,8 +144,8 @@ const SearchEventsSkeleton = ({ query }: { query?: string }) => {
 			<div className="grid gap-2">
 				{['a', 'b', 'c'].map((id) => (
 					<Card key={`skeleton-${id}`} className="gap-0 py-0">
-						<CardContent className="flex items-start gap-3 p-3">
-							<Skeleton className="size-10 shrink-0 rounded-md" />
+						<CardContent className="flex items-start gap-2.5 p-2.5 lg:gap-3 lg:p-3">
+							<Skeleton className="size-9 shrink-0 rounded-md lg:size-10" />
 							<div className="flex flex-1 flex-col gap-1.5">
 								<Skeleton className="h-4 w-3/4" />
 								<Skeleton className="h-3 w-1/2" />
