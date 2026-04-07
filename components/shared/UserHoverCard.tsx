@@ -2,7 +2,13 @@
 
 import { MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useEffect, useRef, useState, useTransition } from 'react'
+import {
+	type ReactNode,
+	useEffect,
+	useRef,
+	useState,
+	useTransition,
+} from 'react'
 import {
 	AvatarWithFallback,
 	Popover,

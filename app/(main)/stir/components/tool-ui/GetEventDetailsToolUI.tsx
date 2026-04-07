@@ -102,7 +102,10 @@ export const GetEventDetailsToolUI = makeAssistantToolUI<
 		const timeStr = `${start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
 
 		return (
-			<Link href={`/events/${result.slug}/view`} className="group block w-full min-w-0 overflow-hidden">
+			<Link
+				href={`/events/${result.slug}/view`}
+				className="group block w-full min-w-0 overflow-hidden"
+			>
 				<Card className="gap-0 overflow-hidden py-0 transition-colors group-hover:border-brand/30">
 					<CardContent className="flex flex-col gap-2.5 p-3 lg:gap-3 lg:p-4">
 						<div className="flex flex-col gap-1">

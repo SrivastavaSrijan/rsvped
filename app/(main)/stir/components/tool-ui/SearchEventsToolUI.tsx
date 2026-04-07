@@ -118,10 +118,7 @@ const EventResultCard = ({ event }: { event: ToolEventResult }) => {
 									</Badge>
 								))}
 								{event.categories.length > 2 ? (
-									<Badge
-										variant="outline"
-										className="px-1.5 py-0 text-[10px]"
-									>
+									<Badge variant="outline" className="px-1.5 py-0 text-[10px]">
 										+{event.categories.length - 2}
 									</Badge>
 								) : null}
