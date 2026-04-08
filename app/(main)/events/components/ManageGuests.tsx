@@ -14,7 +14,6 @@ import { useTransition } from 'react'
 import {
 	Badge,
 	Button,
-	Card,
 	Input,
 	Table,
 	TableBody,
@@ -105,15 +104,15 @@ export const ManageGuests = ({
 
 	if (guests.length === 0 && !currentStatus && !currentSearch) {
 		return (
-			<Card className="flex flex-col items-center justify-center gap-3 p-8 text-center">
-				<User className="size-8 text-muted-foreground" />
+			<div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-faint-white p-8 text-center">
+				<User className="size-6 text-muted-foreground" />
 				<div className="flex flex-col gap-1">
 					<p className="font-medium text-sm">No guests yet</p>
 					<p className="text-muted-foreground text-xs">
 						Share your event to get RSVPs
 					</p>
 				</div>
-			</Card>
+			</div>
 		)
 	}
 
@@ -146,7 +145,7 @@ export const ManageGuests = ({
 			</div>
 
 			{/* Guest Table */}
-			<Card className="overflow-hidden">
+			<div className="overflow-hidden rounded-xl bg-faint-white">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -216,7 +215,7 @@ export const ManageGuests = ({
 						})}
 					</TableBody>
 				</Table>
-			</Card>
+			</div>
 
 			{/* Pagination */}
 			{pagination.totalPages > 1 ? (

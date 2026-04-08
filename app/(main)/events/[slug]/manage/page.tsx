@@ -10,7 +10,6 @@ import {
 } from '@/app/(main)/events/components'
 import {
 	Button,
-	Card,
 	Skeleton,
 	Tabs,
 	TabsContent,
@@ -90,11 +89,11 @@ const TeamTab = async ({ slug }: { slug: string }) => {
 }
 
 const TabSkeleton = () => (
-	<Card className="flex flex-col gap-3 p-6">
+	<div className="flex flex-col gap-3 rounded-xl bg-faint-white p-6">
 		<Skeleton className="h-4 w-48" />
 		<Skeleton className="h-4 w-32" />
 		<Skeleton className="h-32 w-full" />
-	</Card>
+	</div>
 )
 
 export default async function ManageEvent({
