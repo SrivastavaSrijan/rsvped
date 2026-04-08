@@ -14,7 +14,7 @@ export default async function TeamSlot({
 
 	const { slug } = await params
 	const api = await getAPI()
-	const event = await api.event.get.enhanced({ slug })
+	const event = await api.event.get.team({ slug })
 
 	return (
 		<ManageTeam host={event.host} collaborators={event.eventCollaborators} />

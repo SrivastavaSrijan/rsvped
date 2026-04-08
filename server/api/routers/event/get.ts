@@ -9,6 +9,7 @@ import {
 	eventCoreInclude,
 	eventEditInclude,
 	eventEnhancedInclude,
+	eventTeamInclude,
 } from './includes'
 
 const GetEventInput = z.object({ slug: z.string() })
@@ -80,6 +81,19 @@ export const eventGetRouter = createTRPCRouter({
 			}
 
 			return { ...event, metadata }
+		}),
+
+	team: protectedProcedure
+		.input(GetEventInput)
+		.query(async ({ ctx, input }) => {
+			const event = await ctx.prisma.event.findUnique({
+				where: { slug: input.slug, deletedAt: null },
+				include: eventTeamInclude,
+			})
+			if (!event) {
+				throw TRPCErrors.eventNotFound()
+			}
+			return event
 		}),
 
 	edit: protectedProcedure

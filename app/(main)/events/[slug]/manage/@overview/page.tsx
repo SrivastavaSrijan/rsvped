@@ -1,5 +1,5 @@
 import { ProgressiveManageEventCard } from '@/app/(main)/events/components'
-import { getAPI } from '@/server/api'
+import { getCoreEvent } from '../get-core-event'
 
 export default async function OverviewSlot({
 	params,
@@ -13,8 +13,7 @@ export default async function OverviewSlot({
 	if (tab !== 'overview') return null
 
 	const { slug } = await params
-	const api = await getAPI()
-	const coreEvent = await api.event.get.core({ slug })
+	const coreEvent = await getCoreEvent(slug)
 
 	return <ProgressiveManageEventCard coreEvent={coreEvent} />
 }

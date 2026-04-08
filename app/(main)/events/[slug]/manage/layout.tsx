@@ -2,10 +2,17 @@ import { ArrowUpLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { Suspense } from 'react'
+import {
+	ManageGuestsSkeleton,
+	ManageInsightsSkeleton,
+	ManageOverviewSkeleton,
+	ManageTeamSkeleton,
+} from '@/app/(main)/events/components/ManageSkeletons'
 import { ManageTabs } from '@/app/(main)/events/components/ManageTabs'
 import { Button } from '@/components/ui'
 import { Routes } from '@/lib/config'
-import { getAPI } from '@/server/api'
+import { getCoreEvent } from './get-core-event'
 
 export const generateMetadata = async ({
 	params,
@@ -13,8 +20,7 @@ export const generateMetadata = async ({
 	params: Promise<{ slug: string }>
 }) => {
 	const { slug } = await params
-	const api = await getAPI()
-	const event = await api.event.get.core({ slug })
+	const event = await getCoreEvent(slug)
 	return {
 		title: `${event.title} · RSVP'd`,
 		description: `View details for the event: ${event.title}`,
@@ -40,10 +46,9 @@ export default async function ManageLayout({
 }: ManageLayoutProps) {
 	const { slug } = await params
 
-	const api = await getAPI()
 	let eventTitle: string
 	try {
-		const coreEvent = await api.event.get.core({ slug })
+		const coreEvent = await getCoreEvent(slug)
 		if (!coreEvent) return notFound()
 		eventTitle = coreEvent.title
 	} catch {
@@ -66,10 +71,20 @@ export default async function ManageLayout({
 					<h1 className="font-bold text-2xl lg:text-3xl">{eventTitle}</h1>
 				</div>
 				<ManageTabs
-					overview={overview}
-					guests={guests}
-					insights={insights}
-					team={team}
+					overview={
+						<Suspense fallback={<ManageOverviewSkeleton />}>
+							{overview}
+						</Suspense>
+					}
+					guests={
+						<Suspense fallback={<ManageGuestsSkeleton />}>{guests}</Suspense>
+					}
+					insights={
+						<Suspense fallback={<ManageInsightsSkeleton />}>
+							{insights}
+						</Suspense>
+					}
+					team={<Suspense fallback={<ManageTeamSkeleton />}>{team}</Suspense>}
 					basePath={`/events/${slug}/manage`}
 				/>
 			</div>
