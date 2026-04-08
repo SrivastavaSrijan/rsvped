@@ -1,7 +1,8 @@
 # Forge State — event-manage-phase2
 
-- **Status**: PLAN_CREATED
+- **Status**: DONE
 - **Created**: 2025-01-XX
+- **PR**: https://github.com/SrivastavaSrijan/rsvped/pull/43
 - **Branch**: `feature/event-manage-phase2`
 - **Parent**: `event-manage-overhaul` (PR #40, shipped)
 - **Features**: Analytics time-series charts, Feedback dashboard, Event messages
