@@ -1,6 +1,7 @@
 import { tool } from 'ai'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { AGENT_CONFIG } from '../constants'
 import type { ToolEventResult } from '../types'
 
 export const searchEvents = tool({
@@ -36,7 +37,7 @@ export const searchEvents = tool({
 		limit: z
 			.number()
 			.optional()
-			.default(10)
+			.default(AGENT_CONFIG.defaultSearchLimit)
 			.describe('Max results to return (default 10)'),
 	}),
 	execute: async ({ query, category, city, dateAfter, dateBefore, limit }) => {
@@ -162,7 +163,8 @@ export const searchEvents = tool({
 					id: e.id,
 					title: e.title,
 					slug: e.slug,
-					description: e.description?.slice(0, 200) ?? null,
+					description:
+						e.description?.slice(0, AGENT_CONFIG.maxDescriptionLength) ?? null,
 					startDate: e.startDate.toISOString(),
 					endDate: e.endDate.toISOString(),
 					location: e.location?.name ?? 'Online',

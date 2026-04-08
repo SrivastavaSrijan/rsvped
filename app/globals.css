@@ -180,3 +180,77 @@ body[data-stir-active="true"] [data-stir-composer] {
 .aui-assistant-message .order-first {
 	order: -1;
 }
+
+/* Assistant markdown/html typography styles */
+.aui-markdown {
+	@apply text-sm leading-relaxed text-foreground;
+}
+
+.aui-markdown h1,
+.aui-markdown h2,
+.aui-markdown h3,
+.aui-markdown h4 {
+	@apply font-semibold text-foreground;
+}
+
+.aui-markdown h1 {
+	@apply text-xl;
+}
+
+.aui-markdown h2 {
+	@apply text-lg;
+}
+
+.aui-markdown h3,
+.aui-markdown h4 {
+	@apply text-base;
+}
+
+.aui-markdown p,
+.aui-markdown ul,
+.aui-markdown ol,
+.aui-markdown blockquote,
+.aui-markdown pre,
+.aui-markdown table {
+	@apply my-2;
+}
+
+.aui-markdown ul {
+	@apply list-disc pl-5;
+}
+
+.aui-markdown ol {
+	@apply list-decimal pl-5;
+}
+
+.aui-markdown li {
+	@apply my-0.5;
+}
+
+.aui-markdown a {
+	@apply text-brand underline underline-offset-2;
+}
+
+.aui-markdown strong {
+	@apply font-semibold text-foreground;
+}
+
+.aui-markdown em {
+	@apply italic;
+}
+
+.aui-markdown code {
+	@apply rounded bg-muted px-1 py-0.5 font-mono text-xs;
+}
+
+.aui-markdown pre {
+	@apply overflow-x-auto rounded-lg border border-border bg-muted p-3;
+}
+
+.aui-markdown pre code {
+	@apply bg-transparent p-0;
+}
+
+.aui-markdown blockquote {
+	@apply border-l-2 border-border pl-3 text-muted-foreground;
+}

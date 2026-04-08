@@ -5,12 +5,14 @@ import {
 	ComposerPrimitive,
 	MessagePrimitive,
 	ThreadPrimitive,
-	useMessage,
+	useAuiState,
+	useMessagePartText,
 } from '@assistant-ui/react'
-import { MarkdownTextPrimitive } from '@assistant-ui/react-markdown'
 import {
+	AlertTriangle,
 	ArrowUp,
 	Calendar,
+	Check,
 	Compass,
 	Copy,
 	Pencil,
@@ -21,8 +23,11 @@ import {
 	TrendingUp,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import type { FC } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
+import { useStirChatContext } from '@/components/shared/StirChatProvider'
 import { Button } from '@/components/ui'
+import { TOOL_DISPLAY_NAMES } from '@/lib/ai/agent/constants'
+import { getSuggestionsAction } from '@/server/actions/stir'
 
 const messageVariants = {
 	hidden: { opacity: 0, y: 8 },
@@ -92,11 +97,61 @@ const SUGGESTION_CARDS = [
 	},
 ]
 
-const FOLLOW_UP_SUGGESTIONS = [
-	'Tell me more about the first one',
-	'Any free events?',
-	'Show me something else',
-]
+const useDynamicSuggestions = () => {
+	const isRunning = useAuiState((s) => s.thread.isRunning)
+	const messages = useAuiState((s) => s.thread.messages)
+	const { pageContext } = useStirChatContext()
+	const [suggestions, setSuggestions] = useState<string[]>([])
+	const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+
+	// Derive stable text from last assistant message — serves as both effect trigger and data
+	const lastAssistantText =
+		messages
+			.findLast((m) => m.role === 'assistant')
+			?.content.filter(
+				(part): part is { type: 'text'; text: string } => part.type === 'text'
+			)
+			.map((part) => part.text)
+			.join(' ')
+			.trim() ?? ''
+
+	// Stabilize pageContext — ref for async call-time reading, key for dep triggering
+	const pageContextKey = `${pageContext.page}:${pageContext.eventSlug ?? ''}:${pageContext.communitySlug ?? ''}:${pageContext.username ?? ''}`
+	const pageContextRef = useRef(pageContext)
+	pageContextRef.current = pageContext
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: pageContextKey triggers re-fetch when page context changes — ref provides the actual value at call-time
+	useEffect(() => {
+		if (isRunning || !lastAssistantText) {
+			setSuggestions([])
+			return
+		}
+
+		let cancelled = false
+		const fetchSuggestions = async () => {
+			setIsLoadingSuggestions(true)
+			const result = await getSuggestionsAction(
+				lastAssistantText,
+				pageContextRef.current
+			)
+			if (!cancelled) {
+				setSuggestions(result)
+				setIsLoadingSuggestions(false)
+			}
+		}
+		fetchSuggestions()
+		return () => {
+			cancelled = true
+			setIsLoadingSuggestions(false)
+		}
+	}, [isRunning, lastAssistantText, pageContextKey])
+
+	return {
+		suggestions,
+		isLoadingSuggestions,
+		isRunning,
+	}
+}
 
 const ThreadEmpty: FC = () => {
 	return (
@@ -151,41 +206,93 @@ const ThreadEmpty: FC = () => {
 }
 
 const ComposerArea: FC = () => {
+	const { suggestions, isLoadingSuggestions, isRunning } =
+		useDynamicSuggestions()
+	const showSuggestionSkeleton = !isRunning && isLoadingSuggestions
+
 	return (
 		<div
 			data-stir-composer
 			className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-background/60 px-3 pb-2 pt-2 backdrop-blur-sm lg:px-6 lg:pb-4 lg:pt-3"
 		>
-			<AnimatePresence>
-				<ThreadPrimitive.If empty={false} running={false}>
-					<motion.div
-						data-stir-suggestion-row
-						className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3 -mb-2"
-						initial={{ opacity: 0, y: 4 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.2 }}
-					>
-						{FOLLOW_UP_SUGGESTIONS.map((suggestion) => (
-							<ThreadPrimitive.Suggestion
-								key={suggestion}
-								prompt={suggestion}
-								method="replace"
-								autoSend
-								asChild
-							>
-								<button
-									type="button"
-									className="w-fit shrink-0 whitespace-nowrap rounded-full border border-border/60 bg-background/50 px-3.5 py-2 text-[13px] text-muted-foreground backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 hover:text-foreground"
+			<ThreadPrimitive.If empty={false}>
+				<AnimatePresence mode="wait">
+					{showSuggestionSkeleton ? (
+						<motion.div
+							key="skeleton"
+							data-stir-suggestion-row
+							className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3 -mb-2"
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.15 }}
+						>
+							<SuggestionSkeleton />
+						</motion.div>
+					) : suggestions.length > 0 ? (
+						<motion.div
+							key="chips"
+							data-stir-suggestion-row
+							className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3 -mb-2"
+							initial={{ opacity: 0, y: 4 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.2 }}
+						>
+							{suggestions.map((suggestion) => (
+								<ThreadPrimitive.Suggestion
+									key={suggestion}
+									prompt={suggestion}
+									method="replace"
+									autoSend
+									asChild
 								>
-									{suggestion}
-								</button>
-							</ThreadPrimitive.Suggestion>
-						))}
-					</motion.div>
-				</ThreadPrimitive.If>
-			</AnimatePresence>
+									<button
+										type="button"
+										className="w-fit shrink-0 whitespace-nowrap rounded-full border border-border/60 bg-background/50 px-3.5 py-2 text-[13px] text-muted-foreground backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 hover:text-foreground"
+									>
+										{suggestion}
+									</button>
+								</ThreadPrimitive.Suggestion>
+							))}
+						</motion.div>
+					) : null}
+				</AnimatePresence>
+			</ThreadPrimitive.If>
 			<Composer />
 		</div>
+	)
+}
+
+const SuggestionSkeleton: FC = () => {
+	return (
+		<>
+			{[0, 1, 2].map((index) => (
+				<motion.div
+					key={index}
+					className="relative h-8 shrink-0 overflow-hidden rounded-full border border-border/50 bg-muted/60"
+					style={{ width: 112 + index * 26 }}
+					animate={{ opacity: [0.45, 0.85, 0.45] }}
+					transition={{
+						duration: 1.1,
+						repeat: Number.POSITIVE_INFINITY,
+						delay: index * 0.12,
+					}}
+				>
+					<motion.div
+						className="absolute inset-y-0 w-10 bg-linear-to-r from-transparent via-background/70 to-transparent"
+						animate={{ x: [-52, 190] }}
+						transition={{
+							duration: 1.2,
+							repeat: Number.POSITIVE_INFINITY,
+							delay: index * 0.08,
+							ease: 'linear',
+						}}
+					/>
+				</motion.div>
+			))}
+			<span className="sr-only">Loading follow-up suggestions</span>
+		</>
 	)
 }
 
@@ -227,7 +334,7 @@ const Composer: FC = () => {
 const UserMessage: FC = () => {
 	return (
 		<motion.div
-			initial="hidden"
+			initial={false}
 			animate="visible"
 			variants={messageVariants}
 			className="w-full"
@@ -279,16 +386,17 @@ const EditComposer: FC = () => {
 const AssistantMessage: FC = () => {
 	return (
 		<motion.div
-			initial="hidden"
+			initial={false}
 			animate="visible"
 			variants={messageVariants}
 			className="w-full max-w-full"
 		>
 			<MessagePrimitive.Root className="aui-assistant-message flex w-full max-w-full flex-col items-start gap-2 overflow-hidden">
 				<ThinkingIndicator />
+				<ErrorIndicator />
 				<MessagePrimitive.Content
 					components={{
-						Text: MarkdownText,
+						Text: HtmlText,
 						tools: {
 							by_name: {},
 							Fallback: ToolFallback,
@@ -301,12 +409,69 @@ const AssistantMessage: FC = () => {
 	)
 }
 
-const ThinkingIndicator: FC = () => {
-	const message = useMessage()
-	const isRunning = message.status?.type === 'running'
-	const hasContent = message.content && message.content.length > 0
+const ErrorIndicator: FC = () => {
+	const status = useAuiState((s) => s.message.status)
+	const isError = status?.type === 'incomplete' && status.reason === 'error'
 
-	if (!isRunning || hasContent) return null
+	if (!isError) return null
+
+	return (
+		<motion.div
+			className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+			initial={{ opacity: 0, y: 4 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.2 }}
+		>
+			<AlertTriangle className="size-4 shrink-0" />
+			<span>Something went wrong. Try sending your message again.</span>
+		</motion.div>
+	)
+}
+
+const ThinkingIndicator: FC = () => {
+	const status = useAuiState((s) => s.message.status)
+	const content = useAuiState((s) => s.message.content)
+	const isRunning = status?.type === 'running'
+	const hasTextContent = content.some(
+		(part) => part.type === 'text' && part.text.trim().length > 0
+	)
+	const hasToolParts = content.some((part) => part.type.startsWith('tool-'))
+
+	if (!isRunning || hasTextContent) return null
+
+	if (hasToolParts) {
+		return (
+			<motion.div
+				className="flex items-center gap-2 py-1.5"
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.2 }}
+			>
+				<div className="size-3 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
+				<div className="relative h-3.5 w-27.5 overflow-hidden rounded-full bg-muted/80">
+					<motion.div
+						className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/20"
+						animate={{ width: [72, 132, 96] }}
+						transition={{
+							duration: 1.4,
+							repeat: Number.POSITIVE_INFINITY,
+							ease: 'easeInOut',
+						}}
+					/>
+					<motion.div
+						className="absolute inset-y-0 w-12 bg-linear-to-r from-transparent via-background/70 to-transparent"
+						animate={{ x: [-48, 160] }}
+						transition={{
+							duration: 1.2,
+							repeat: Number.POSITIVE_INFINITY,
+							ease: 'linear',
+						}}
+					/>
+				</div>
+				<span className="sr-only">Finalizing response</span>
+			</motion.div>
+		)
+	}
 
 	return (
 		<motion.div
@@ -342,18 +507,24 @@ const AssistantActionBar: FC = () => {
 	)
 }
 
-const MarkdownText: FC = () => {
+const HtmlText: FC = () => {
+	const { text } = useMessagePartText()
 	return (
-		<div className="order-first min-w-0 text-sm leading-relaxed text-foreground">
-			<MarkdownTextPrimitive
-				className="aui-markdown prose prose-sm max-w-none break-words text-foreground prose-a:text-brand prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-headings:text-foreground prose-li:my-0"
-				smooth
-			/>
-		</div>
+		<div
+			className="aui-markdown order-first min-w-0 max-w-none wrap-break-word text-sm leading-relaxed text-foreground"
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: AI model outputs HTML directly — trusted server-generated content
+			dangerouslySetInnerHTML={{ __html: text }}
+		/>
 	)
 }
 
-const ToolFallback: FC = () => {
+const ToolFallback: FC<{
+	toolName: string
+	status: { readonly type: string }
+}> = ({ toolName, status }) => {
+	const isComplete = status.type === 'complete'
+	const displayName = TOOL_DISPLAY_NAMES[toolName] ?? `Running ${toolName}`
+
 	return (
 		<motion.div
 			className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
@@ -361,8 +532,12 @@ const ToolFallback: FC = () => {
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.2 }}
 		>
-			<div className="size-3 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
-			Thinking...
+			{isComplete ? (
+				<Check className="size-3 text-brand" />
+			) : (
+				<div className="size-3 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
+			)}
+			{displayName}
 		</motion.div>
 	)
 }

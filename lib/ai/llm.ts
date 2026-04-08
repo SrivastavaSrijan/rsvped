@@ -6,8 +6,10 @@
  */
 
 import { createAnthropic } from '@ai-sdk/anthropic'
-import { generateObject, generateText } from 'ai'
+import { generateText, Output } from 'ai'
 import type { z } from 'zod'
+import type { ModelTier } from './agent/constants'
+import { MODEL_OPTIONS } from './agent/constants'
 
 /**
  * Application-specific error for LLM operations
@@ -24,7 +26,7 @@ export class LLMError extends Error {
 	}
 }
 
-const MODEL_ID = 'claude-sonnet-4-20250514'
+export type { ModelTier }
 
 function getProvider() {
 	const apiKey = process.env.ANTHROPIC_API_KEY
@@ -34,13 +36,14 @@ function getProvider() {
 
 /**
  * Generate structured output from LLM using a Zod schema.
- * The AI SDK handles JSON parsing and validation automatically.
+ * Uses generateText with Output.object for structured output.
  */
 export async function generate<T>(
 	prompt: string,
 	systemPrompt: string,
 	schema: z.ZodSchema<T>,
-	operation: string
+	operation: string,
+	tier: ModelTier = 'quality'
 ): Promise<T> {
 	const provider = getProvider()
 	if (!provider) {
@@ -48,19 +51,23 @@ export async function generate<T>(
 	}
 
 	try {
-		const { object } = await generateObject({
-			model: provider(MODEL_ID),
-			schema,
+		const { output: object } = await generateText({
+			model: provider(MODEL_OPTIONS[tier].id),
+			output: Output.object({ schema }),
 			system: systemPrompt,
 			prompt,
 		})
+		if (object === undefined) {
+			throw new Error('No structured output generated')
+		}
 		return object
 	} catch (error) {
+		const cause = error instanceof Error ? error : new Error(String(error))
 		throw new LLMError(
-			`LLM generation failed: ${(error as Error).message}`,
+			`LLM generation failed: ${cause.message}`,
 			operation,
 			true,
-			error as Error
+			cause
 		)
 	}
 }
@@ -71,7 +78,8 @@ export async function generate<T>(
 export async function generatePlainText(
 	prompt: string,
 	systemPrompt: string,
-	operation: string
+	operation: string,
+	tier: ModelTier = 'quality'
 ): Promise<string> {
 	const provider = getProvider()
 	if (!provider) {
@@ -80,17 +88,18 @@ export async function generatePlainText(
 
 	try {
 		const { text } = await generateText({
-			model: provider(MODEL_ID),
+			model: provider(MODEL_OPTIONS[tier].id),
 			system: systemPrompt,
 			prompt,
 		})
 		return text
 	} catch (error) {
+		const cause = error instanceof Error ? error : new Error(String(error))
 		throw new LLMError(
-			`LLM generation failed: ${(error as Error).message}`,
+			`LLM generation failed: ${cause.message}`,
 			operation,
 			true,
-			error as Error
+			cause
 		)
 	}
 }
@@ -103,12 +112,12 @@ export function isAvailable(): boolean {
 }
 
 /**
- * Get the Anthropic provider instance (for route handlers that need streaming).
+ * Get the Anthropic model instance for streaming.
  */
-export function getModel() {
+export function getModel(tier: ModelTier = 'quality') {
 	const provider = getProvider()
 	if (!provider) {
 		throw new LLMError('Anthropic API key not configured', 'getModel')
 	}
-	return provider(MODEL_ID)
+	return provider(MODEL_OPTIONS[tier].id)
 }
