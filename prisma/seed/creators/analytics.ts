@@ -21,17 +21,12 @@ export async function createEventReferrals(
 
 				for (const referrer of referrers) {
 					const referralCode = `${event.slug}-${faker.string.alphanumeric({ length: 6, casing: 'upper' })}`
-					const clicksCount = faker.number.int({ min: 0, max: 50 })
 
 					referralRows.push({
 						eventId: event.id,
-						referrerId: (referrer as any).id,
+						userId: (referrer as any).id,
 						code: referralCode,
-						url: `${faker.internet.domainName()}/events/${event.slug}?ref=${referralCode}`,
-						clickCount: clicksCount,
-						conversionCount: Math.floor(
-							clicksCount * faker.number.float({ min: 0.1, max: 0.4 })
-						),
+						uses: faker.number.int({ min: 0, max: 20 }),
 						createdAt: faker.date.recent({ days: 60 }),
 					})
 				}
@@ -60,30 +55,20 @@ export async function createEventMessages(
 
 	try {
 		const messageRows: any[] = []
+		const replyRows: any[] = []
 
 		for (const event of events) {
-			// Some events have messages/announcements
+			// Some events have messages/discussion
 			if (faker.datatype.boolean({ probability: 0.4 })) {
-				const messageCount = faker.number.int({ min: 1, max: 3 })
+				const messageCount = faker.number.int({ min: 1, max: 4 })
 
 				for (let i = 0; i < messageCount; i++) {
-					const messageTypes = ['ANNOUNCEMENT', 'UPDATE', 'REMINDER']
-
 					messageRows.push({
 						eventId: event.id,
-						senderId: event.hostId, // Messages typically from host
-						subject: faker.lorem.sentence(),
-						content: faker.lorem.paragraphs(2),
-						type: faker.helpers.arrayElement(messageTypes),
-						audienceType: faker.helpers.arrayElement([
-							'ALL_ATTENDEES',
-							'CONFIRMED_ONLY',
-							'WAITLIST_ONLY',
-						]),
-						scheduledFor: null, // Immediate send
-						sentAt: faker.date.recent({ days: 30 }),
-						openCount: faker.number.int({ min: 0, max: 100 }),
-						clickCount: faker.number.int({ min: 0, max: 20 }),
+						userId: event.hostId,
+						content: faker.lorem.paragraphs({ min: 1, max: 3 }),
+						parentId: null,
+						createdAt: faker.date.recent({ days: 30 }),
 					})
 				}
 			}
@@ -91,10 +76,40 @@ export async function createEventMessages(
 
 		if (messageRows.length > 0) {
 			await createMany(prisma.eventMessage, messageRows)
+
+			// Create replies for some top-level messages
+			const topMessages = await prisma.eventMessage.findMany({
+				where: { parentId: null },
+				select: { id: true, eventId: true, userId: true },
+			})
+
+			for (const msg of topMessages) {
+				if (faker.datatype.boolean({ probability: 0.4 })) {
+					const replyCount = faker.number.int({ min: 1, max: 3 })
+					for (let r = 0; r < replyCount; r++) {
+						replyRows.push({
+							eventId: msg.eventId,
+							userId: msg.userId,
+							content: faker.lorem.paragraph(),
+							parentId: msg.id,
+							createdAt: faker.date.recent({ days: 15 }),
+						})
+					}
+				}
+			}
+
+			if (replyRows.length > 0) {
+				await createMany(prisma.eventMessage, replyRows)
+			}
 		}
 
-		operation.complete({ messages: messageRows.length })
-		logger.info(`Created ${messageRows.length} event messages`)
+		operation.complete({
+			messages: messageRows.length,
+			replies: replyRows.length,
+		})
+		logger.info(
+			`Created ${messageRows.length} event messages with ${replyRows.length} replies`
+		)
 	} catch (error) {
 		operation.fail(error)
 		throw error
