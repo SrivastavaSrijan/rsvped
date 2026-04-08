@@ -1,4 +1,9 @@
-import { convertToModelMessages, stepCountIs, streamText } from 'ai'
+import {
+	convertToModelMessages,
+	smoothStream,
+	stepCountIs,
+	streamText,
+} from 'ai'
 import { getModel } from '@/lib/ai'
 import { prisma } from '@/lib/prisma'
 import { classifyIntent } from './classifier'
@@ -230,6 +235,7 @@ export async function createStirStream({
 		messages: await convertToModelMessages(messages),
 		tools: activeTools,
 		stopWhen: stepCountIs(STIR_MAX_STEPS),
+		experimental_transform: smoothStream(),
 		onStepFinish: ({ usage, toolResults }) => {
 			// Log individual tool calls with timing
 			if (toolResults) {

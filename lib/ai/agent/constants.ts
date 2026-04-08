@@ -1,4 +1,4 @@
-export const STIR_MAX_STEPS = 5
+export const STIR_MAX_STEPS = 10
 
 export const getStirSystemPrompt = () => {
 	const now = new Date()
