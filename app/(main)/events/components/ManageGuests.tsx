@@ -1,26 +1,13 @@
 'use client'
 import type { RsvpStatus } from '@prisma/client'
-import {
-	Check,
-	ChevronLeft,
-	ChevronRight,
-	Mail,
-	Search,
-	TicketCheck,
-	User,
-} from 'lucide-react'
+import { Check, Mail, Search, TicketCheck, User } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
+import { GenericPagination } from '@/app/(main)/components'
 import {
+	AvatarWithFallback,
 	Badge,
-	Button,
 	Input,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
 	Tabs,
 	TabsList,
 	TabsTrigger,
@@ -68,43 +55,37 @@ export const ManageGuests = ({
 	const pathname = usePathname()
 	const [isPending, startTransition] = useTransition()
 
-	const handleStatusFilter = (status: string) => {
+	const updateParams = (updates: Record<string, string | null>) => {
 		startTransition(() => {
 			const params = new URLSearchParams(searchParams)
-			if (status === 'ALL') {
-				params.delete('guestStatus')
-			} else {
-				params.set('guestStatus', status)
+			for (const [key, value] of Object.entries(updates)) {
+				if (value === null) {
+					params.delete(key)
+				} else {
+					params.set(key, value)
+				}
 			}
-			params.delete('guestPage')
 			router.push(`${pathname}?${params.toString()}`)
+		})
+	}
+
+	const handleStatusFilter = (status: string) => {
+		updateParams({
+			guestStatus: status === 'ALL' ? null : status,
+			page: null,
 		})
 	}
 
 	const handleSearch = (value: string) => {
-		startTransition(() => {
-			const params = new URLSearchParams(searchParams)
-			if (value) {
-				params.set('guestSearch', value)
-			} else {
-				params.delete('guestSearch')
-			}
-			params.delete('guestPage')
-			router.push(`${pathname}?${params.toString()}`)
-		})
-	}
-
-	const handlePageChange = (page: number) => {
-		startTransition(() => {
-			const params = new URLSearchParams(searchParams)
-			params.set('guestPage', page.toString())
-			router.push(`${pathname}?${params.toString()}`)
+		updateParams({
+			guestSearch: value || null,
+			page: null,
 		})
 	}
 
 	if (guests.length === 0 && !currentStatus && !currentSearch) {
 		return (
-			<div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-faint-white p-8 text-center">
+			<div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-faint-white p-12 text-center">
 				<User className="size-6 text-muted-foreground" />
 				<div className="flex flex-col gap-1">
 					<p className="font-medium text-sm">No guests yet</p>
@@ -144,106 +125,64 @@ export const ManageGuests = ({
 				</div>
 			</div>
 
-			{/* Guest Table */}
-			<div className="overflow-hidden rounded-xl bg-faint-white">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Guest</TableHead>
-							<TableHead className="hidden lg:table-cell">Ticket</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead className="hidden lg:table-cell">Payment</TableHead>
-							<TableHead className="hidden lg:table-cell">Checked In</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{guests.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={5}
-									className="py-8 text-center text-muted-foreground"
-								>
-									No guests match your filters
-								</TableCell>
-							</TableRow>
-						) : null}
-						{guests.map((guest) => {
-							const statusCfg = statusBadgeConfig[guest.status]
-							return (
-								<TableRow key={guest.id}>
-									<TableCell>
-										<div className="flex flex-col gap-0.5">
-											<span className="font-medium text-sm">{guest.name}</span>
-											<span className="flex items-center gap-1 text-muted-foreground text-xs">
-												<Mail className="size-3" />
-												{guest.email}
-											</span>
-										</div>
-									</TableCell>
-									<TableCell className="hidden lg:table-cell">
-										{guest.ticketTier ? (
-											<div className="flex items-center gap-1 text-sm">
-												<TicketCheck className="size-3" />
-												{guest.ticketTier.name}
-											</div>
-										) : (
-											<span className="text-muted-foreground text-xs">
-												Free
-											</span>
-										)}
-									</TableCell>
-									<TableCell>
-										<Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
-									</TableCell>
-									<TableCell className="hidden lg:table-cell">
-										<span className="text-sm capitalize">
-											{guest.paymentState.toLowerCase()}
-										</span>
-									</TableCell>
-									<TableCell className="hidden lg:table-cell">
-										{guest.checkIn ? (
-											<div className="flex items-center gap-1 text-success text-sm">
-												<Check className="size-3" />
-												Yes
-											</div>
-										) : (
-											<span className="text-muted-foreground text-xs">No</span>
-										)}
-									</TableCell>
-								</TableRow>
-							)
-						})}
-					</TableBody>
-				</Table>
+			{/* Guest count */}
+			<p className="text-muted-foreground text-xs">
+				{pagination.total} guest{pagination.total !== 1 ? 's' : ''}
+			</p>
+
+			{/* Guest List */}
+			<div className="flex flex-col gap-2">
+				{guests.length === 0 ? (
+					<div className="rounded-xl bg-faint-white p-8 text-center text-muted-foreground text-sm">
+						No guests match your filters
+					</div>
+				) : null}
+				{guests.map((guest) => {
+					const statusCfg = statusBadgeConfig[guest.status]
+					return (
+						<div
+							key={guest.id}
+							className="flex items-center gap-3 rounded-xl bg-faint-white p-3 lg:p-4"
+						>
+							<AvatarWithFallback
+								src={guest.user?.image}
+								name={guest.name ?? guest.email}
+								className="size-9"
+							/>
+							<div className="flex min-w-0 flex-1 flex-col gap-0.5">
+								<span className="truncate font-medium text-sm">
+									{guest.name ?? 'Guest'}
+								</span>
+								<span className="flex items-center gap-1 truncate text-muted-foreground text-xs">
+									<Mail className="size-3 shrink-0" />
+									{guest.email}
+								</span>
+							</div>
+							<div className="flex shrink-0 items-center gap-2">
+								{guest.ticketTier ? (
+									<span className="hidden items-center gap-1 text-muted-foreground text-xs lg:flex">
+										<TicketCheck className="size-3" />
+										{guest.ticketTier.name}
+									</span>
+								) : null}
+								{guest.checkIn ? (
+									<Badge
+										variant="outline"
+										className="hidden gap-1 text-success lg:flex"
+									>
+										<Check className="size-3" />
+										Checked in
+									</Badge>
+								) : null}
+								<Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
+							</div>
+						</div>
+					)
+				})}
 			</div>
 
 			{/* Pagination */}
-			{pagination.totalPages > 1 ? (
-				<div className="flex items-center justify-between">
-					<span className="text-muted-foreground text-xs">
-						Page {pagination.page} of {pagination.totalPages} (
-						{pagination.total} guests)
-					</span>
-					<div className="flex gap-1">
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={!pagination.hasPrevious}
-							onClick={() => handlePageChange(pagination.page - 1)}
-						>
-							<ChevronLeft className="size-4" />
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={!pagination.hasMore}
-							onClick={() => handlePageChange(pagination.page + 1)}
-						>
-							<ChevronRight className="size-4" />
-						</Button>
-					</div>
-				</div>
-			) : null}
+			<GenericPagination {...pagination} />
 		</div>
 	)
 }

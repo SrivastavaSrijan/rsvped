@@ -77,7 +77,7 @@ export function ManageEventCard(props: ManageEventCardProps) {
 			{/* Hero: Image + Core Info */}
 			<div className="grid grid-cols-12 gap-4 lg:gap-5">
 				{/* Cover Image */}
-				<div className="col-span-full lg:col-span-5">
+				<div className="col-span-full flex flex-col gap-3 lg:col-span-5">
 					<div className="relative aspect-square w-full overflow-hidden rounded-xl">
 						{coverImage ? (
 							<Image
@@ -118,6 +118,27 @@ export function ManageEventCard(props: ManageEventCardProps) {
 								className="rounded-br-xl rounded-tl-lg bg-black/40 backdrop-blur-sm"
 							/>
 						</div>
+					</div>
+
+					{/* Tags below image */}
+					<div className="flex flex-wrap items-center gap-1.5">
+						<Badge variant="outline" className="gap-1">
+							<VisibilityIcon className="size-3" />
+							{visibilityCfg.label}
+						</Badge>
+						{community !== null ? (
+							<Link href={Routes.Main.Communities.ViewBySlug(community.slug)}>
+								<Badge variant="secondary" className="gap-1">
+									<UsersIcon className="size-3" />
+									{community.name}
+								</Badge>
+							</Link>
+						) : null}
+						{categories.map((ec) => (
+							<Badge key={ec.category.id} variant="outline">
+								{ec.category.name}
+							</Badge>
+						))}
 					</div>
 				</div>
 
@@ -174,27 +195,6 @@ export function ManageEventCard(props: ManageEventCardProps) {
 							</div>
 						) : null}
 					</div>
-
-					{/* Visibility & Tags */}
-					<div className="flex flex-wrap items-center gap-1.5">
-						<Badge variant="outline" className="gap-1">
-							<VisibilityIcon className="size-3" />
-							{visibilityCfg.label}
-						</Badge>
-						{community !== null ? (
-							<Link href={Routes.Main.Communities.ViewBySlug(community.slug)}>
-								<Badge variant="secondary" className="gap-1">
-									<UsersIcon className="size-3" />
-									{community.name}
-								</Badge>
-							</Link>
-						) : null}
-						{categories.map((ec) => (
-							<Badge key={ec.category.id} variant="outline">
-								{ec.category.name}
-							</Badge>
-						))}
-					</div>
 				</div>
 			</div>
 
@@ -209,28 +209,28 @@ export function ManageEventCard(props: ManageEventCardProps) {
 				</div>
 			) : null}
 
-			{/* Actions Row */}
-			<div className="flex flex-col gap-2 lg:flex-row lg:gap-3">
-				<ShareActions title={title} slug={slug} />
-				<div className="flex flex-1 gap-2">
-					<Button variant="secondary" className="flex-1 gap-2" asChild>
-						<Link href={Routes.Main.Events.EditBySlug(slug)}>
-							<Edit className="size-3" />
-							Edit
-						</Link>
-					</Button>
-					<Button variant="secondary" className="flex-1 gap-2">
-						<Camera className="size-3" />
-						Photo
-					</Button>
-					<Button variant="secondary" className="flex-1 gap-2" asChild>
-						<Link href={Routes.Main.Events.ViewBySlug(slug)}>
-							<Eye className="size-3" />
-							View
-						</Link>
-					</Button>
-				</div>
+			{/* Action Buttons */}
+			<div className="flex flex-1 gap-2">
+				<Button variant="secondary" className="flex-1 gap-2" asChild>
+					<Link href={Routes.Main.Events.EditBySlug(slug)}>
+						<Edit className="size-3" />
+						Edit Event
+					</Link>
+				</Button>
+				<Button variant="secondary" className="flex-1 gap-2">
+					<Camera className="size-3" />
+					Change Photo
+				</Button>
+				<Button variant="secondary" className="flex-1 gap-2" asChild>
+					<Link href={Routes.Main.Events.ViewBySlug(slug)}>
+						<Eye className="size-3" />
+						View Public Page
+					</Link>
+				</Button>
 			</div>
+
+			{/* Share */}
+			<ShareActions title={title} slug={slug} />
 		</div>
 	)
 }
