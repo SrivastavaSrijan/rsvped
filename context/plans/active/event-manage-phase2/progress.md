@@ -11,8 +11,8 @@
 
 ## Steps
 
-- [ ] Step 1: Infrastructure — Install recharts + fix broken seeds
-  test: pending | files: package.json, prisma/seed/creators/analytics.ts | ~15m est
+- [x] Step 1: Infrastructure — Install recharts + fix broken seeds
+  test: green (type-check) | files: package.json, yarn.lock, prisma/seed/creators/analytics.ts | commit: f9a02f2
 - [ ] Step 2: tRPC procedures — Add dailyStats, feedback, messages getters
   test: pending | files: server/api/routers/event/get.ts | ~15m est
 - [ ] Step 3: Analytics chart — Recharts area chart in Insights tab

@@ -11,9 +11,11 @@ export { EventsPagination } from './EventsPagination'
 export { FilteredEventsList } from './FilteredEventsList'
 export { ManageAnalyticsChart } from './ManageAnalyticsChart'
 export { ManageEventCard } from './ManageEventCard'
+export { ManageFeedback } from './ManageFeedback'
 export { ManageGuests } from './ManageGuests'
 export { ManageInsights } from './ManageInsights'
 export {
+	ManageFeedbackSkeleton,
 	ManageGuestsSkeleton,
 	ManageInsightsSkeleton,
 	ManageOverviewSkeleton,

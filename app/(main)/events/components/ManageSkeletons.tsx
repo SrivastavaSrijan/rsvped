@@ -146,3 +146,48 @@ export const ManageTeamSkeleton = () => (
 		</div>
 	</div>
 )
+
+/** Feedback tab — matches ManageFeedback summary + comments */
+export const ManageFeedbackSkeleton = () => (
+	<div className="flex flex-col gap-4 lg:gap-5">
+		{/* Summary */}
+		<div className="flex flex-col gap-4 rounded-xl bg-faint-white p-4 lg:flex-row lg:gap-8 lg:p-5">
+			<div className="flex flex-col items-center gap-1">
+				<Skeleton className="h-10 w-14" />
+				<Skeleton className="h-4 w-20" />
+				<Skeleton className="h-3 w-16" />
+			</div>
+			<div className="flex flex-1 flex-col gap-1.5">
+				{['r5', 'r4', 'r3', 'r2', 'r1'].map((id) => (
+					<div key={id} className="flex items-center gap-2">
+						<Skeleton className="h-2 w-3" />
+						<Skeleton className="h-2 flex-1 rounded-full" />
+						<Skeleton className="h-2 w-6" />
+					</div>
+				))}
+			</div>
+		</div>
+		{/* Comments */}
+		<div className="flex flex-col gap-3">
+			<Skeleton className="h-4 w-20" />
+			<div className="flex flex-col gap-2">
+				{['f1', 'f2', 'f3'].map((id) => (
+					<div
+						key={id}
+						className="flex gap-3 rounded-xl bg-faint-white p-3 lg:p-4"
+					>
+						<Skeleton className="size-8 rounded-full" />
+						<div className="flex flex-1 flex-col gap-1">
+							<div className="flex items-center gap-2">
+								<Skeleton className="h-4 w-24" />
+								<Skeleton className="h-3 w-16" />
+							</div>
+							<Skeleton className="h-3 w-full" />
+							<Skeleton className="h-3 w-2/3" />
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+)
