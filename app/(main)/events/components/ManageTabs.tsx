@@ -11,6 +11,8 @@ interface ManageTabsProps {
 	guests: ReactNode
 	insights: ReactNode
 	team: ReactNode
+	feedback: ReactNode
+	messages: ReactNode
 	basePath: string
 }
 
@@ -19,6 +21,8 @@ const tabs = [
 	{ value: 'guests', label: 'Guests' },
 	{ value: 'insights', label: 'Insights' },
 	{ value: 'team', label: 'Team' },
+	{ value: 'feedback', label: 'Feedback' },
+	{ value: 'messages', label: 'Messages' },
 ] as const
 
 export const ManageTabs = ({
@@ -26,6 +30,8 @@ export const ManageTabs = ({
 	guests,
 	insights,
 	team,
+	feedback,
+	messages,
 	basePath,
 }: ManageTabsProps) => {
 	const router = useRouter()
@@ -61,6 +67,8 @@ export const ManageTabs = ({
 				<TabsContent value="guests">{guests}</TabsContent>
 				<TabsContent value="insights">{insights}</TabsContent>
 				<TabsContent value="team">{team}</TabsContent>
+				<TabsContent value="feedback">{feedback}</TabsContent>
+				<TabsContent value="messages">{messages}</TabsContent>
 			</div>
 		</Tabs>
 	)
