@@ -1,19 +1,46 @@
-import { convertToModelMessages, stepCountIs, streamText } from 'ai'
+import {
+	convertToModelMessages,
+	smoothStream,
+	stepCountIs,
+	streamText,
+} from 'ai'
 import { getModel } from '@/lib/ai'
 import { prisma } from '@/lib/prisma'
+import { classifyIntent } from './classifier'
 import {
+	AGENT_CONFIG,
 	getStirSystemPrompt,
+	INTENT_TOOL_MAP,
 	STIR_ANON_CONTEXT,
-	STIR_MAX_STEPS,
 } from './constants'
 import { logConversationComplete, logStepComplete, logToolCall } from './logger'
 import {
 	getCategories,
 	getEventDetails,
+	getFriendsAttending,
+	getSimilarEvents,
+	getTrending,
+	getUserCommunities,
+	getUserProfile,
+	getUserRsvps,
 	searchCommunities,
 	searchEvents,
 } from './tools'
 import type { StirStreamOptions } from './types'
+
+/** All available tools keyed by name */
+const ALL_TOOLS = {
+	searchEvents,
+	searchCommunities,
+	getEventDetails,
+	getCategories,
+	getUserProfile,
+	getUserRsvps,
+	getUserCommunities,
+	getFriendsAttending,
+	getTrending,
+	getSimilarEvents,
+} as const
 
 /**
  * Build enriched system prompt with page context and user info.
@@ -64,7 +91,7 @@ async function buildSystemPrompt(
 				)
 				if (community.description) {
 					contextLines.push(
-						`Description: ${community.description.slice(0, 200)}`
+						`Description: ${community.description.slice(0, AGENT_CONFIG.maxDescriptionLength)}`
 					)
 				}
 			}
@@ -95,7 +122,7 @@ async function buildSystemPrompt(
 				location: { select: { name: true } },
 				categoryInterests: {
 					select: { category: { select: { name: true } } },
-					take: 10,
+					take: AGENT_CONFIG.maxCategoryInterests,
 				},
 				rsvps: {
 					where: { status: 'CONFIRMED' },
@@ -110,7 +137,7 @@ async function buildSystemPrompt(
 						},
 					},
 					orderBy: { createdAt: 'desc' },
-					take: 5,
+					take: AGENT_CONFIG.maxRecentRsvps,
 				},
 			},
 		})
@@ -153,7 +180,54 @@ export async function createStirStream({
 	pageContext,
 	userId,
 }: StirStreamOptions) {
-	const system = await buildSystemPrompt(pageContext, userId)
+	let system: string
+	try {
+		system = await buildSystemPrompt(pageContext, userId)
+	} catch (error) {
+		console.error('[stir-agent] System prompt build failed:', error)
+		// Fall back to base prompt without enrichment
+		system = getStirSystemPrompt()
+	}
+
+	// Extract the latest user message for intent classification
+	const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
+	const queryText =
+		lastUserMessage?.parts
+			?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+			.map((p) => p.text)
+			.join(' ') ?? ''
+
+	// Classify intent to scope active tools
+	const classification = await classifyIntent(queryText, pageContext)
+	const activeToolNames =
+		INTENT_TOOL_MAP[classification.intent] ?? Object.keys(ALL_TOOLS)
+
+	// Filter out user-context tools for anonymous users
+	const filteredToolNames = userId
+		? activeToolNames
+		: activeToolNames.filter(
+				(name) =>
+					![
+						'getUserProfile',
+						'getUserRsvps',
+						'getUserCommunities',
+						'getFriendsAttending',
+					].includes(name)
+			)
+
+	// Build scoped tools object
+	const toolNames = Object.keys(ALL_TOOLS)
+	const activeTools = Object.fromEntries(
+		filteredToolNames
+			.filter((name): name is keyof typeof ALL_TOOLS =>
+				toolNames.includes(name)
+			)
+			.map((name) => [name, ALL_TOOLS[name]])
+	)
+
+	// Append intent info to system prompt
+	system += `\n\n## Intent Classification\nUser intent: ${classification.intent} (${classification.reasoning}). Focus your response accordingly.`
+
 	const conversationStart = Date.now()
 	let stepIndex = 0
 	let totalTokens = 0
@@ -162,35 +236,28 @@ export async function createStirStream({
 		model: getModel(),
 		system,
 		messages: await convertToModelMessages(messages),
-		tools: {
-			searchEvents,
-			searchCommunities,
-			getEventDetails,
-			getCategories,
-		},
-		stopWhen: stepCountIs(STIR_MAX_STEPS),
+		tools: activeTools,
+		stopWhen: stepCountIs(AGENT_CONFIG.maxSteps),
+		experimental_transform: smoothStream(),
 		onStepFinish: ({ usage, toolResults }) => {
 			// Log individual tool calls with timing
 			if (toolResults) {
 				for (const toolResult of toolResults) {
-					const resultData = (toolResult as Record<string, unknown>)
-						.result as unknown
-					const toolArgs = (toolResult as Record<string, unknown>).args as
-						| Record<string, unknown>
-						| undefined
+					const resultData = toolResult.output
 					const resultCount = Array.isArray(resultData)
 						? resultData.length
 						: undefined
 					const error =
 						resultData &&
 						typeof resultData === 'object' &&
+						!Array.isArray(resultData) &&
 						'error' in resultData
 							? String((resultData as Record<string, unknown>).error)
 							: undefined
 
 					logToolCall({
 						toolName: toolResult.toolName,
-						args: toolArgs ?? {},
+						args: (toolResult.input as Record<string, unknown>) ?? {},
 						durationMs: 0,
 						resultCount,
 						error,

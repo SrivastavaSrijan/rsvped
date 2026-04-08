@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { Footer, ModalLoading } from '@/components/shared'
+import { StirFAB } from '@/components/shared/StirFAB'
 import { Navbar, NavbarSkeleton, PageWrapper } from './components'
 
 export default async function MainLayout({
@@ -21,6 +22,7 @@ export default async function MainLayout({
 				</main>
 				<Footer />
 			</PageWrapper>
+			<StirFAB />
 		</>
 	)
 }
