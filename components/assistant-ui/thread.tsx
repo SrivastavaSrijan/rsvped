@@ -9,6 +9,7 @@ import {
 } from '@assistant-ui/react'
 import { MarkdownTextPrimitive } from '@assistant-ui/react-markdown'
 import {
+	AlertTriangle,
 	ArrowUp,
 	Calendar,
 	Compass,
@@ -283,6 +284,7 @@ const AssistantMessage: FC = () => {
 		>
 			<MessagePrimitive.Root className="aui-assistant-message flex w-full flex-col items-start gap-2">
 				<ThinkingIndicator />
+				<ErrorIndicator />
 				<MessagePrimitive.Content
 					components={{
 						Text: MarkdownText,
@@ -294,6 +296,26 @@ const AssistantMessage: FC = () => {
 				/>
 				<AssistantActionBar />
 			</MessagePrimitive.Root>
+		</motion.div>
+	)
+}
+
+const ErrorIndicator: FC = () => {
+	const message = useMessage()
+	const isError =
+		message.status?.type === 'incomplete' && message.status.reason === 'error'
+
+	if (!isError) return null
+
+	return (
+		<motion.div
+			className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+			initial={{ opacity: 0, y: 4 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.2 }}
+		>
+			<AlertTriangle className="size-4 shrink-0" />
+			<span>Something went wrong. Try sending your message again.</span>
 		</motion.div>
 	)
 }

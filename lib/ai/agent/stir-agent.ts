@@ -153,7 +153,15 @@ export async function createStirStream({
 	pageContext,
 	userId,
 }: StirStreamOptions) {
-	const system = await buildSystemPrompt(pageContext, userId)
+	let system: string
+	try {
+		system = await buildSystemPrompt(pageContext, userId)
+	} catch (error) {
+		console.error('[stir-agent] System prompt build failed:', error)
+		// Fall back to base prompt without enrichment
+		system = getStirSystemPrompt()
+	}
+
 	const conversationStart = Date.now()
 	let stepIndex = 0
 	let totalTokens = 0

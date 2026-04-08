@@ -74,5 +74,31 @@ export async function POST(request: Request) {
 		return Response.json({ error: 'Missing messages array' }, { status: 400 })
 	}
 
-	return createStirStream({ messages, pageContext, userId })
+	// Validate last message isn't excessively long
+	const lastMessage = messages.at(-1)
+	const lastMessageText =
+		lastMessage?.parts
+			?.filter((p: { type: string }) => p.type === 'text')
+			.map((p: { type: string; text?: string }) => p.text ?? '')
+			.join('') ?? ''
+	if (lastMessageText.length > 4000) {
+		return Response.json(
+			{
+				error: 'Message too long. Please keep messages under 4000 characters.',
+			},
+			{ status: 400 }
+		)
+	}
+
+	try {
+		return await createStirStream({ messages, pageContext, userId })
+	} catch (error) {
+		console.error('[stir-route] Stream creation failed:', error)
+		const message =
+			error instanceof Error ? error.message : 'Unknown error occurred'
+		return Response.json(
+			{ error: `Failed to generate response: ${message}` },
+			{ status: 500 }
+		)
+	}
 }
