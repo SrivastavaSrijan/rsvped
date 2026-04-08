@@ -1,4 +1,5 @@
 import { Background, Footer } from '@/components/shared'
+import { StirFAB } from '@/components/shared/StirFAB'
 import { Navbar } from './components'
 
 export default function StaticLayout({
@@ -16,6 +17,7 @@ export default function StaticLayout({
 					<Footer />
 				</div>
 			</div>
+			<StirFAB />
 		</div>
 	)
 }
