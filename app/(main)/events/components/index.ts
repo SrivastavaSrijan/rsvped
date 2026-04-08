@@ -9,12 +9,17 @@ export { EventPage } from './EventPage'
 export { EventRegisterModal } from './EventRegisterModal'
 export { EventsPagination } from './EventsPagination'
 export { FilteredEventsList } from './FilteredEventsList'
+export { ManageAnalyticsChart } from './ManageAnalyticsChart'
 export { ManageEventCard } from './ManageEventCard'
+export { ManageFeedback } from './ManageFeedback'
 export { ManageGuests } from './ManageGuests'
 export { ManageInsights } from './ManageInsights'
+export { ManageMessages } from './ManageMessages'
 export {
+	ManageFeedbackSkeleton,
 	ManageGuestsSkeleton,
 	ManageInsightsSkeleton,
+	ManageMessagesSkeleton,
 	ManageOverviewSkeleton,
 	ManageTeamSkeleton,
 } from './ManageSkeletons'

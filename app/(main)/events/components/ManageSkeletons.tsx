@@ -85,23 +85,29 @@ export const ManageGuestsSkeleton = () => (
 	</div>
 )
 
-/** Insights tab — matches ManageInsights 3×2 metric grid */
+/** Insights tab — matches ManageInsights 3×2 metric grid + chart */
 export const ManageInsightsSkeleton = () => (
-	<div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
-		{['views', 'rsvps', 'paid', 'checkins', 'conversion', 'checkin-rate'].map(
-			(id) => (
-				<div
-					key={id}
-					className="flex flex-col gap-3 rounded-xl bg-faint-white p-4 lg:p-5"
-				>
-					<Skeleton className="size-8 rounded-lg" />
-					<div className="flex flex-col gap-1">
-						<Skeleton className="h-7 w-16" />
-						<Skeleton className="h-3 w-24" />
+	<div className="flex flex-col gap-4 lg:gap-5">
+		<div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
+			{['views', 'rsvps', 'paid', 'checkins', 'conversion', 'checkin-rate'].map(
+				(id) => (
+					<div
+						key={id}
+						className="flex flex-col gap-3 rounded-xl bg-faint-white p-4 lg:p-5"
+					>
+						<Skeleton className="size-8 rounded-lg" />
+						<div className="flex flex-col gap-1">
+							<Skeleton className="h-7 w-16" />
+							<Skeleton className="h-3 w-24" />
+						</div>
 					</div>
-				</div>
-			)
-		)}
+				)
+			)}
+		</div>
+		<div className="flex flex-col gap-3 rounded-xl bg-faint-white p-4 lg:p-5">
+			<Skeleton className="h-4 w-28" />
+			<Skeleton className="h-64 w-full rounded-lg" />
+		</div>
 	</div>
 )
 
@@ -138,5 +144,82 @@ export const ManageTeamSkeleton = () => (
 				</div>
 			))}
 		</div>
+	</div>
+)
+
+/** Feedback tab — matches ManageFeedback summary + comments */
+export const ManageFeedbackSkeleton = () => (
+	<div className="flex flex-col gap-4 lg:gap-5">
+		{/* Summary */}
+		<div className="flex flex-col gap-4 rounded-xl bg-faint-white p-4 lg:flex-row lg:gap-8 lg:p-5">
+			<div className="flex flex-col items-center gap-1">
+				<Skeleton className="h-10 w-14" />
+				<Skeleton className="h-4 w-20" />
+				<Skeleton className="h-3 w-16" />
+			</div>
+			<div className="flex flex-1 flex-col gap-1.5">
+				{['r5', 'r4', 'r3', 'r2', 'r1'].map((id) => (
+					<div key={id} className="flex items-center gap-2">
+						<Skeleton className="h-2 w-3" />
+						<Skeleton className="h-2 flex-1 rounded-full" />
+						<Skeleton className="h-2 w-6" />
+					</div>
+				))}
+			</div>
+		</div>
+		{/* Comments */}
+		<div className="flex flex-col gap-3">
+			<Skeleton className="h-4 w-20" />
+			<div className="flex flex-col gap-2">
+				{['f1', 'f2', 'f3'].map((id) => (
+					<div
+						key={id}
+						className="flex gap-3 rounded-xl bg-faint-white p-3 lg:p-4"
+					>
+						<Skeleton className="size-8 rounded-full" />
+						<div className="flex flex-1 flex-col gap-1">
+							<div className="flex items-center gap-2">
+								<Skeleton className="h-4 w-24" />
+								<Skeleton className="h-3 w-16" />
+							</div>
+							<Skeleton className="h-3 w-full" />
+							<Skeleton className="h-3 w-2/3" />
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+)
+
+/** Messages tab — matches ManageMessages threaded list */
+export const ManageMessagesSkeleton = () => (
+	<div className="flex flex-col gap-3">
+		{['m1', 'm2', 'm3'].map((id) => (
+			<div
+				key={id}
+				className="flex flex-col gap-3 rounded-xl bg-faint-white p-3 lg:p-4"
+			>
+				<div className="flex gap-3">
+					<Skeleton className="size-8 rounded-full" />
+					<div className="flex flex-1 flex-col gap-1">
+						<div className="flex items-center gap-2">
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-3 w-16" />
+						</div>
+						<Skeleton className="h-3 w-full" />
+						<Skeleton className="h-3 w-3/4" />
+					</div>
+				</div>
+				{/* Reply skeleton */}
+				<div className="ml-11 flex gap-3 border-l-2 border-border pl-2">
+					<Skeleton className="size-6 rounded-full" />
+					<div className="flex flex-1 flex-col gap-1">
+						<Skeleton className="h-3 w-20" />
+						<Skeleton className="h-3 w-2/3" />
+					</div>
+				</div>
+			</div>
+		))}
 	</div>
 )

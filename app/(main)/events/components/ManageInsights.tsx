@@ -1,10 +1,18 @@
 import { CreditCard, Eye, LogIn, TrendingUp, Users } from 'lucide-react'
+import { ManageAnalyticsChart } from './ManageAnalyticsChart'
+
+interface DailyStat {
+	date: Date
+	views: number
+	rsvps: number
+}
 
 interface ManageInsightsProps {
 	rsvpCount: number
 	viewCount: number
 	checkInCount: number
 	paidRsvpCount: number
+	dailyStats?: DailyStat[]
 }
 
 interface MetricCardProps {
@@ -33,6 +41,7 @@ export const ManageInsights = ({
 	viewCount,
 	checkInCount,
 	paidRsvpCount,
+	dailyStats,
 }: ManageInsightsProps) => {
 	const conversionRate =
 		viewCount > 0 ? ((rsvpCount / viewCount) * 100).toFixed(1) : '0'
@@ -56,43 +65,48 @@ export const ManageInsights = ({
 	}
 
 	return (
-		<div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
-			<MetricCard
-				label="Total Views"
-				value={viewCount}
-				icon={Eye}
-				accent="bg-pale-blue"
-			/>
-			<MetricCard
-				label="RSVPs"
-				value={rsvpCount}
-				icon={Users}
-				accent="bg-pale-green"
-			/>
-			<MetricCard
-				label="Paid RSVPs"
-				value={paidRsvpCount}
-				icon={CreditCard}
-				accent="bg-pale-purple"
-			/>
-			<MetricCard
-				label="Check-ins"
-				value={checkInCount}
-				icon={LogIn}
-				accent="bg-pale-orange"
-			/>
-			<MetricCard
-				label="Conversion Rate"
-				value={`${conversionRate}%`}
-				icon={TrendingUp}
-				accent="bg-pale-cranberry"
-			/>
-			<MetricCard
-				label="Check-in Rate"
-				value={`${checkInRate}%`}
-				icon={TrendingUp}
-				accent="bg-pale-yellow"
-			/>
+		<div className="flex flex-col gap-4 lg:gap-5">
+			<div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
+				<MetricCard
+					label="Total Views"
+					value={viewCount}
+					icon={Eye}
+					accent="bg-pale-blue"
+				/>
+				<MetricCard
+					label="RSVPs"
+					value={rsvpCount}
+					icon={Users}
+					accent="bg-pale-green"
+				/>
+				<MetricCard
+					label="Paid RSVPs"
+					value={paidRsvpCount}
+					icon={CreditCard}
+					accent="bg-pale-purple"
+				/>
+				<MetricCard
+					label="Check-ins"
+					value={checkInCount}
+					icon={LogIn}
+					accent="bg-pale-orange"
+				/>
+				<MetricCard
+					label="Conversion Rate"
+					value={`${conversionRate}%`}
+					icon={TrendingUp}
+					accent="bg-pale-cranberry"
+				/>
+				<MetricCard
+					label="Check-in Rate"
+					value={`${checkInRate}%`}
+					icon={TrendingUp}
+					accent="bg-pale-yellow"
+				/>
+			</div>
+			{dailyStats && dailyStats.length > 0 ? (
+				<ManageAnalyticsChart dailyStats={dailyStats} />
+			) : null}
 		</div>
 	)
 }

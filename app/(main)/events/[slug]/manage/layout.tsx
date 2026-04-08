@@ -4,8 +4,10 @@ import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Suspense } from 'react'
 import {
+	ManageFeedbackSkeleton,
 	ManageGuestsSkeleton,
 	ManageInsightsSkeleton,
+	ManageMessagesSkeleton,
 	ManageOverviewSkeleton,
 	ManageTeamSkeleton,
 } from '@/app/(main)/events/components/ManageSkeletons'
@@ -33,6 +35,8 @@ interface ManageLayoutProps {
 	guests: ReactNode
 	insights: ReactNode
 	team: ReactNode
+	feedback: ReactNode
+	messages: ReactNode
 	params: Promise<{ slug: string }>
 }
 
@@ -42,6 +46,8 @@ export default async function ManageLayout({
 	guests,
 	insights,
 	team,
+	feedback,
+	messages,
 	params,
 }: ManageLayoutProps) {
 	const { slug } = await params
@@ -85,6 +91,16 @@ export default async function ManageLayout({
 						</Suspense>
 					}
 					team={<Suspense fallback={<ManageTeamSkeleton />}>{team}</Suspense>}
+					feedback={
+						<Suspense fallback={<ManageFeedbackSkeleton />}>
+							{feedback}
+						</Suspense>
+					}
+					messages={
+						<Suspense fallback={<ManageMessagesSkeleton />}>
+							{messages}
+						</Suspense>
+					}
 					basePath={`/events/${slug}/manage`}
 				/>
 			</div>

@@ -177,6 +177,131 @@ export const eventGetRouter = createTRPCRouter({
 			return analytics
 		}),
 
+	dailyStats: protectedProcedure
+		.input(GetEventInput)
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) {
+				throw TRPCErrors.unauthorized()
+			}
+			const event = await ctx.prisma.event.findUnique({
+				where: { slug: input.slug, deletedAt: null },
+				select: {
+					id: true,
+					hostId: true,
+					eventCollaborators: {
+						where: { userId: user.id },
+						select: { userId: true },
+					},
+				},
+			})
+			if (!event) {
+				throw TRPCErrors.eventNotFound()
+			}
+			const isHost = event.hostId === user.id
+			const isCollaborator = event.eventCollaborators.length > 0
+			if (!isHost && !isCollaborator) {
+				throw TRPCErrors.forbidden()
+			}
+			return ctx.prisma.eventDailyStat.findMany({
+				where: { eventId: event.id },
+				orderBy: { date: 'asc' },
+				select: {
+					date: true,
+					views: true,
+					uniqueViews: true,
+					rsvps: true,
+					paidRsvps: true,
+				},
+			})
+		}),
+
+	feedback: protectedProcedure
+		.input(GetEventInput)
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) {
+				throw TRPCErrors.unauthorized()
+			}
+			const event = await ctx.prisma.event.findUnique({
+				where: { slug: input.slug, deletedAt: null },
+				select: {
+					id: true,
+					hostId: true,
+					eventCollaborators: {
+						where: { userId: user.id },
+						select: { userId: true },
+					},
+				},
+			})
+			if (!event) {
+				throw TRPCErrors.eventNotFound()
+			}
+			const isHost = event.hostId === user.id
+			const isCollaborator = event.eventCollaborators.length > 0
+			if (!isHost && !isCollaborator) {
+				throw TRPCErrors.forbidden()
+			}
+			return ctx.prisma.eventFeedback.findMany({
+				where: { eventId: event.id },
+				orderBy: { createdAt: 'desc' },
+				include: {
+					rsvp: {
+						include: {
+							user: {
+								select: { id: true, name: true, image: true },
+							},
+						},
+					},
+				},
+			})
+		}),
+
+	messages: protectedProcedure
+		.input(GetEventInput)
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) {
+				throw TRPCErrors.unauthorized()
+			}
+			const event = await ctx.prisma.event.findUnique({
+				where: { slug: input.slug, deletedAt: null },
+				select: {
+					id: true,
+					hostId: true,
+					eventCollaborators: {
+						where: { userId: user.id },
+						select: { userId: true },
+					},
+				},
+			})
+			if (!event) {
+				throw TRPCErrors.eventNotFound()
+			}
+			const isHost = event.hostId === user.id
+			const isCollaborator = event.eventCollaborators.length > 0
+			if (!isHost && !isCollaborator) {
+				throw TRPCErrors.forbidden()
+			}
+			return ctx.prisma.eventMessage.findMany({
+				where: { eventId: event.id, parentId: null },
+				orderBy: { createdAt: 'desc' },
+				include: {
+					user: {
+						select: { id: true, name: true, image: true },
+					},
+					replies: {
+						orderBy: { createdAt: 'asc' },
+						include: {
+							user: {
+								select: { id: true, name: true, image: true },
+							},
+						},
+					},
+				},
+			})
+		}),
+
 	register: protectedProcedure
 		.input(GetEventInput)
 		.query(async ({ ctx, input }) => {

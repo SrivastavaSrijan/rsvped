@@ -14,7 +14,10 @@ export default async function InsightsSlot({
 
 	const { slug } = await params
 	const api = await getAPI()
-	const analytics = await api.event.get.analytics({ slug })
+	const [analytics, dailyStats] = await Promise.all([
+		api.event.get.analytics({ slug }),
+		api.event.get.dailyStats({ slug }),
+	])
 
 	return (
 		<ManageInsights
@@ -22,6 +25,7 @@ export default async function InsightsSlot({
 			viewCount={analytics.viewCount}
 			checkInCount={analytics.checkInCount}
 			paidRsvpCount={analytics.paidRsvpCount}
+			dailyStats={dailyStats}
 		/>
 	)
 }
