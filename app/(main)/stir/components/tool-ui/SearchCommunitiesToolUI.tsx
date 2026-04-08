@@ -8,9 +8,11 @@ import {
 	Users,
 	XCircle,
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { Card, CardContent, Skeleton } from '@/components/ui'
 import type { ToolCommunityResult } from '@/lib/ai/agent'
+import { toolCardVariants, toolListVariants } from './motion'
 
 type SearchCommunitiesArgs = {
 	query: string
@@ -81,11 +83,28 @@ export const SearchCommunitiesToolUI = makeAssistantToolUI<
 					<CheckCircle2 className="size-3 text-green-600" />
 					Found {result.length} communit{result.length !== 1 ? 'ies' : 'y'}
 				</div>
-				<div className="grid gap-2">
-					{result.map((community) => (
-						<CommunityResultCard key={community.id} community={community} />
-					))}
-				</div>
+				<motion.div
+					className="grid gap-2"
+					variants={toolListVariants}
+					initial="hidden"
+					animate="visible"
+				>
+					<AnimatePresence initial={false}>
+						{result.map((community, index) => (
+							<motion.div
+								key={community.id}
+								custom={index}
+								variants={toolCardVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
+								layout
+							>
+								<CommunityResultCard community={community} />
+							</motion.div>
+						))}
+					</AnimatePresence>
+				</motion.div>
 			</div>
 		)
 	},
@@ -98,27 +117,27 @@ const CommunityResultCard = ({
 }) => {
 	return (
 		<Link href={`/communities/${community.slug}/view`} className="group block">
-			<Card className="gap-0 overflow-hidden py-0 transition-colors group-hover:border-brand/30 group-hover:bg-muted/50">
-				<CardContent className="flex items-start gap-2.5 p-2.5 lg:gap-3 lg:p-3">
+			<Card className="gap-0 overflow-hidden border-border/70 bg-background/65 py-0 shadow-xs backdrop-blur-sm transition-all group-hover:border-brand/30 group-hover:bg-muted/50 group-hover:shadow-sm">
+				<CardContent className="flex items-start gap-2 p-2.5 lg:gap-3 lg:p-3">
 					<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/10 font-bold text-brand text-sm">
 						{community.name.charAt(0).toUpperCase()}
 					</div>
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
-						<p className="truncate font-medium text-xs group-hover:text-brand lg:text-sm">
+						<p className="line-clamp-2 font-medium text-[11px] leading-snug group-hover:text-brand lg:text-sm">
 							{community.name}
 						</p>
 						{community.description ? (
-							<p className="line-clamp-2 text-xs text-muted-foreground">
+							<p className="line-clamp-2 text-[11px] text-muted-foreground lg:text-xs">
 								{community.description}
 							</p>
 						) : null}
-						<div className="flex items-center gap-3 text-xs text-muted-foreground">
-							<span className="flex items-center gap-1">
+						<div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted-foreground lg:text-xs">
+							<span className="flex min-w-0 items-center gap-1">
 								<Users className="size-3" />
 								{community.memberCount} member
 								{community.memberCount !== 1 ? 's' : ''}
 							</span>
-							<span className="flex items-center gap-1">
+							<span className="flex min-w-0 items-center gap-1">
 								<CalendarDays className="size-3" />
 								{community.eventCount} event
 								{community.eventCount !== 1 ? 's' : ''}
