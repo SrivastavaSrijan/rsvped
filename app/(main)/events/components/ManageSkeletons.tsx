@@ -191,3 +191,35 @@ export const ManageFeedbackSkeleton = () => (
 		</div>
 	</div>
 )
+
+/** Messages tab — matches ManageMessages threaded list */
+export const ManageMessagesSkeleton = () => (
+	<div className="flex flex-col gap-3">
+		{['m1', 'm2', 'm3'].map((id) => (
+			<div
+				key={id}
+				className="flex flex-col gap-3 rounded-xl bg-faint-white p-3 lg:p-4"
+			>
+				<div className="flex gap-3">
+					<Skeleton className="size-8 rounded-full" />
+					<div className="flex flex-1 flex-col gap-1">
+						<div className="flex items-center gap-2">
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-3 w-16" />
+						</div>
+						<Skeleton className="h-3 w-full" />
+						<Skeleton className="h-3 w-3/4" />
+					</div>
+				</div>
+				{/* Reply skeleton */}
+				<div className="ml-11 flex gap-3 border-l-2 border-border pl-2">
+					<Skeleton className="size-6 rounded-full" />
+					<div className="flex flex-1 flex-col gap-1">
+						<Skeleton className="h-3 w-20" />
+						<Skeleton className="h-3 w-2/3" />
+					</div>
+				</div>
+			</div>
+		))}
+	</div>
+)
