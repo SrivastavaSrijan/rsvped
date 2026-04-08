@@ -2,6 +2,8 @@ import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const maxDuration = 60
+
 function isValidCronSecret(authHeader: string | null): boolean {
 	const expected = process.env.CRON_SECRET
 	if (!expected || !authHeader) return false
@@ -52,11 +54,15 @@ export async function GET(request: Request) {
 			return NextResponse.json({ ok: true, refreshed: 0 })
 		}
 
-		// Shift each past event forward by 2-10 weeks from now
-		let refreshed = 0
-		for (const event of pastEvents) {
+		// Reserve ~20% of events for "this week" so demo always has near-term data
+		const shortTermCount = Math.max(1, Math.ceil(pastEvents.length * 0.2))
+
+		// Build all update operations
+		const updates = pastEvents.map((event, i) => {
 			const durationMs = event.endDate.getTime() - event.startDate.getTime()
-			const offsetWeeks = 2 + Math.floor(Math.random() * 8)
+			// First `shortTermCount` events land 0-1 weeks out; rest land 2-10 weeks out
+			const offsetWeeks =
+				i < shortTermCount ? Math.random() : 2 + Math.floor(Math.random() * 8)
 			const offsetMs = offsetWeeks * 7 * 24 * 60 * 60 * 1000
 			// Add some hour variance so events don't all land on the same time
 			const hourVariance = Math.floor(Math.random() * 12) * 60 * 60 * 1000
@@ -64,16 +70,23 @@ export async function GET(request: Request) {
 			const newStart = new Date(now.getTime() + offsetMs + hourVariance)
 			const newEnd = new Date(newStart.getTime() + durationMs)
 
-			await prisma.event.update({
+			return prisma.event.update({
 				where: { id: event.id },
 				data: { startDate: newStart, endDate: newEnd },
 			})
-			refreshed++
+		})
+
+		// Execute in batches of 25 to avoid overwhelming the DB
+		const BATCH_SIZE = 25
+		for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+			const batch = updates.slice(i, i + BATCH_SIZE)
+			await prisma.$transaction(batch)
 		}
 
 		return NextResponse.json({
 			ok: true,
-			refreshed,
+			refreshed: updates.length,
+			shortTerm: shortTermCount,
 			totalPastEvents: pastEvents.length,
 		})
 	} catch (error) {

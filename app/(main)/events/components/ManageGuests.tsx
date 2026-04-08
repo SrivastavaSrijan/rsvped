@@ -115,12 +115,12 @@ export const ManageGuests = ({
 					</TabsList>
 				</Tabs>
 				<div className="relative">
-					<Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+					<Search className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foregroun size-3" />
 					<Input
 						placeholder="Search by name or email..."
 						defaultValue={currentSearch ?? ''}
 						onChange={(e) => handleSearch(e.target.value)}
-						className="pl-9 lg:w-64"
+						className="pl-12 lg:w-64"
 					/>
 				</div>
 			</div>

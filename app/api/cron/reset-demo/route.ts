@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { resetDemoUser, seedDemoUser } from '@/prisma/seed/demo'
 
+export const maxDuration = 60
+
 function isValidCronSecret(authHeader: string | null): boolean {
 	const expected = process.env.CRON_SECRET
 	if (!expected || !authHeader) return false
