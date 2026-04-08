@@ -4,6 +4,73 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Lock page scroll when Stir chat is active */
+body[data-stir-active="true"] {
+	--stir-composer-safe-pad-mobile: 0.5rem;
+	--stir-composer-safe-pad-desktop: 1rem;
+	--stir-scroll-anchor-padding: 7rem;
+	overflow: hidden;
+}
+
+/* Hide footer for full-height chat */
+body[data-stir-active="true"] footer {
+	display: none;
+}
+
+/* Stretch stir container instead of centering */
+body[data-stir-active="true"] main {
+	align-items: stretch;
+	justify-content: flex-start;
+}
+
+/* Keep chat content scrollable on iOS while body is scroll-locked */
+body[data-stir-active="true"] [data-stir-scroll-viewport] {
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior-y: contain;
+	overflow-y: auto;
+	scroll-padding-bottom: calc(
+		var(--stir-scroll-anchor-padding) +
+		env(safe-area-inset-bottom)
+	);
+}
+
+body[data-stir-active="true"] [data-stir-suggestion-row] {
+	scrollbar-width: none;
+}
+
+body[data-stir-active="true"] [data-stir-suggestion-row]::-webkit-scrollbar {
+	display: none;
+}
+
+/* Keep composer above iOS home indicator and keyboard safe area */
+body[data-stir-active="true"] [data-stir-composer] {
+	padding-bottom: calc(
+		var(--stir-composer-safe-pad-mobile) +
+		env(safe-area-inset-bottom)
+	);
+}
+
+@media (min-width: 1024px) {
+	body[data-stir-active="true"] [data-stir-composer] {
+		padding-bottom: calc(
+			var(--stir-composer-safe-pad-desktop) +
+			env(safe-area-inset-bottom)
+		);
+	}
+}
+
+:root {
+	--navbar-height: 3.5rem;
+	--footer-height: 4.5rem;
+}
+
+@media (min-width: 1024px) {
+	:root {
+		--navbar-height: 4rem;
+		--footer-height: 5rem;
+	}
+}
+
 @layer base {
 	/* Some reasonable defaults */
 	input[type="number"]::-webkit-inner-spin-button,
@@ -87,6 +154,10 @@
 }
 
 @layer utilities {
+	.min-h-app-screen {
+		min-height: calc(100dvh - var(--navbar-height));
+	}
+
 	.text-gradient-radial {
 		background-image: radial-gradient(
 			circle at 0 0,

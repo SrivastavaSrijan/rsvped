@@ -9,6 +9,7 @@ import {
 	eventCoreInclude,
 	eventEditInclude,
 	eventEnhancedInclude,
+	eventTeamInclude,
 } from './includes'
 
 const GetEventInput = z.object({ slug: z.string() })
@@ -82,6 +83,38 @@ export const eventGetRouter = createTRPCRouter({
 			return { ...event, metadata }
 		}),
 
+	team: protectedProcedure
+		.input(GetEventInput)
+		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) {
+				throw TRPCErrors.unauthorized()
+			}
+			const event = await ctx.prisma.event.findUnique({
+				where: { slug: input.slug, deletedAt: null },
+				include: {
+					...eventTeamInclude,
+					eventCollaborators: {
+						select: {
+							role: true,
+							user: { select: { id: true, name: true, image: true } },
+						},
+					},
+				},
+			})
+			if (!event) {
+				throw TRPCErrors.eventNotFound()
+			}
+			const isHost = event.host.id === user.id
+			const isCollaborator = event.eventCollaborators.some(
+				(c) => c.user.id === user.id
+			)
+			if (!isHost && !isCollaborator) {
+				throw TRPCErrors.forbidden()
+			}
+			return event
+		}),
+
 	edit: protectedProcedure
 		.input(GetEventInput)
 		.query(async ({ ctx, input }) => {
@@ -112,6 +145,10 @@ export const eventGetRouter = createTRPCRouter({
 	analytics: protectedProcedure
 		.input(GetEventInput)
 		.query(async ({ ctx, input }) => {
+			const user = ctx.session?.user
+			if (!user) {
+				throw TRPCErrors.unauthorized()
+			}
 			const event = await ctx.prisma.event.findUnique({
 				where: { slug: input.slug, deletedAt: null },
 				select: {
@@ -121,12 +158,23 @@ export const eventGetRouter = createTRPCRouter({
 					viewCount: true,
 					checkInCount: true,
 					paidRsvpCount: true,
+					hostId: true,
+					eventCollaborators: {
+						where: { userId: user.id },
+						select: { userId: true },
+					},
 				},
 			})
 			if (!event) {
 				throw TRPCErrors.eventNotFound()
 			}
-			return event
+			const isHost = event.hostId === user.id
+			const isCollaborator = event.eventCollaborators.length > 0
+			if (!isHost && !isCollaborator) {
+				throw TRPCErrors.forbidden()
+			}
+			const { eventCollaborators: _, hostId: __, ...analytics } = event
+			return analytics
 		}),
 
 	register: protectedProcedure

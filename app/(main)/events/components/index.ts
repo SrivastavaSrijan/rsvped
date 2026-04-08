@@ -10,6 +10,16 @@ export { EventRegisterModal } from './EventRegisterModal'
 export { EventsPagination } from './EventsPagination'
 export { FilteredEventsList } from './FilteredEventsList'
 export { ManageEventCard } from './ManageEventCard'
+export { ManageGuests } from './ManageGuests'
+export { ManageInsights } from './ManageInsights'
+export {
+	ManageGuestsSkeleton,
+	ManageInsightsSkeleton,
+	ManageOverviewSkeleton,
+	ManageTeamSkeleton,
+} from './ManageSkeletons'
+export { ManageTabs } from './ManageTabs'
+export { ManageTeam } from './ManageTeam'
 export { NoEvents } from './NoEvents'
 export * from './ProgressiveEventPage'
 export * from './ProgressiveEventsList'

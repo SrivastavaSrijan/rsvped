@@ -86,7 +86,7 @@ async function performSignIn(
 	})
 
 	const nextRoute =
-		next && next.startsWith('/') && !next.startsWith('//')
+		next?.startsWith('/') && !next.startsWith('//')
 			? encodeURIComponent(next)
 			: DefaultNextRoute
 	redirect(`${Routes.Utility.HoldOn}?next=${nextRoute}`)
@@ -187,7 +187,7 @@ export const signInWithGoogle = async (next: string | null) => {
 		description: "Welcome to RSVP'd!",
 	})
 	const nextRoute =
-		next && next.startsWith('/') && !next.startsWith('//')
+		next?.startsWith('/') && !next.startsWith('//')
 			? encodeURIComponent(next)
 			: DefaultNextRoute
 	const redirectTo = `${Routes.Utility.HoldOn}?next=${nextRoute}`

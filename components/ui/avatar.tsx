@@ -61,10 +61,14 @@ function AvatarWithFallback({
 	alt?: string
 }) {
 	const initials = name?.charAt(0).toUpperCase() ?? ''
+	// Use name first, then src for deterministic color seeding (avoids hydration mismatch)
+	const colorSeed = name ?? src ?? ''
 	return (
 		<Avatar
 			className={className}
-			style={{ backgroundColor: getRandomColor({ seed: name, intensity: 30 }) }}
+			style={{
+				backgroundColor: getRandomColor({ seed: colorSeed, intensity: 30 }),
+			}}
 			{...props}
 		>
 			<AvatarImage src={src ?? undefined} alt={name} />

@@ -31,13 +31,13 @@ export async function resetDemoUser(prisma: PrismaClient) {
 
 	const userId = existing.id
 
-	// Delete friendships (both directions — onDelete: Cascade only handles one side)
-	await prisma.friendship.deleteMany({
-		where: { OR: [{ userId }, { friendId: userId }] },
+	// Delete non-friendship activities (preserve friend request history)
+	await prisma.userActivity.deleteMany({
+		where: {
+			userId,
+			type: { notIn: ['SEND_FRIEND_REQUEST', 'ACCEPT_FRIEND_REQUEST'] },
+		},
 	})
-
-	// Delete activities
-	await prisma.userActivity.deleteMany({ where: { userId } })
 
 	// Delete user-level relations
 	await prisma.eventView.deleteMany({ where: { userId } })
@@ -186,6 +186,46 @@ export async function seedDemoUser(prisma: PrismaClient) {
 	endOfWeek.setDate(endOfWeek.getDate() + 7)
 	const endOfMonth = new Date(now)
 	endOfMonth.setDate(endOfMonth.getDate() + 30)
+
+	// --- Ensure enough "this week" events exist for a rich demo ---
+	const thisWeekCount = await prisma.event.count({
+		where: {
+			isPublished: true,
+			deletedAt: null,
+			startDate: { gte: now, lte: endOfWeek },
+		},
+	})
+
+	if (thisWeekCount < 8) {
+		// Pull some events from 1-4 weeks out and shift them into this week
+		const eventsToShift = await prisma.event.findMany({
+			where: {
+				isPublished: true,
+				deletedAt: null,
+				startDate: { gt: endOfWeek, lte: endOfMonth },
+			},
+			orderBy: { startDate: 'asc' },
+			take: 8 - thisWeekCount,
+			select: { id: true, startDate: true, endDate: true },
+		})
+
+		const shiftUpdates = eventsToShift.map((event) => {
+			const durationMs = event.endDate.getTime() - event.startDate.getTime()
+			// Place randomly within the next 7 days
+			const offsetMs = Math.random() * 6 * 24 * 60 * 60 * 1000
+			const hourVariance = Math.floor(Math.random() * 10) * 60 * 60 * 1000
+			const newStart = new Date(now.getTime() + offsetMs + hourVariance)
+			const newEnd = new Date(newStart.getTime() + durationMs)
+			return prisma.event.update({
+				where: { id: event.id },
+				data: { startDate: newStart, endDate: newEnd },
+			})
+		})
+
+		if (shiftUpdates.length > 0) {
+			await prisma.$transaction(shiftUpdates)
+		}
+	}
 
 	// Tier 1: Events today/this week (highest priority)
 	const thisWeekEvents = await prisma.event.findMany({
@@ -354,76 +394,88 @@ export async function seedDemoUser(prisma: PrismaClient) {
 	}
 
 	// --- Friendships: 8-12 friends based on shared interests/location ---
-	const potentialFriends = await prisma.user.findMany({
+	// Skip if demo user already has enough accepted friends (persisted across resets)
+	const existingFriendCount = await prisma.friendship.count({
 		where: {
-			id: { not: demoUser.id },
-			isDemo: { not: true },
-		},
-		select: {
-			id: true,
-			locationId: true,
-			industry: true,
-			categoryInterests: {
-				select: { categoryId: true, interestLevel: true },
-			},
+			OR: [{ userId: demoUser.id }, { friendId: demoUser.id }],
+			status: 'ACCEPTED',
 		},
 	})
 
-	const demoCategoryIds = new Set(categories.map((c) => c.id))
 	type ScoredFriend = { id: string; score: number }
-	const scoredFriends: ScoredFriend[] = potentialFriends.map((friend) => {
-		let score = 0
-		// Same location: +3
-		if (busiestLocation && friend.locationId === busiestLocation.id) {
-			score += 3
-		}
-		// Shared categories: +2 each
-		for (const ci of friend.categoryInterests) {
-			if (demoCategoryIds.has(ci.categoryId)) {
-				score += ci.interestLevel > 5 ? 2 : 1
-			}
-		}
-		// Same industry: +1
-		if (friend.industry === DemoUser.industry) {
-			score += 1
-		}
-		return { id: friend.id, score }
-	})
+	let topFriends: ScoredFriend[] = []
 
-	scoredFriends.sort((a, b) => b.score - a.score)
-	const topFriends = scoredFriends.slice(0, 12).filter((f) => f.score > 0)
-
-	const thirtyDaysAgo = new Date(now)
-	thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-	for (let i = 0; i < topFriends.length; i++) {
-		const friend = topFriends[i]
-		const isAccepted = i < 10 // First 10 accepted, last 2 pending
-		const createdAt = new Date(
-			thirtyDaysAgo.getTime() +
-				Math.random() * (now.getTime() - thirtyDaysAgo.getTime())
-		)
-
-		await prisma.friendship.upsert({
+	if (existingFriendCount < 8) {
+		const potentialFriends = await prisma.user.findMany({
 			where: {
-				userId_friendId: {
-					userId: demoUser.id,
-					friendId: friend.id,
+				id: { not: demoUser.id },
+				isDemo: { not: true },
+			},
+			select: {
+				id: true,
+				locationId: true,
+				industry: true,
+				categoryInterests: {
+					select: { categoryId: true, interestLevel: true },
 				},
 			},
-			update: {},
-			create: {
-				userId: demoUser.id,
-				friendId: friend.id,
-				status: isAccepted ? 'ACCEPTED' : 'PENDING',
-				createdAt,
-				acceptedAt: isAccepted
-					? new Date(
-							createdAt.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000
-						)
-					: null,
-			},
 		})
+
+		const demoCategoryIds = new Set(categories.map((c) => c.id))
+		const scoredFriends: ScoredFriend[] = potentialFriends.map((friend) => {
+			let score = 0
+			// Same location: +3
+			if (busiestLocation && friend.locationId === busiestLocation.id) {
+				score += 3
+			}
+			// Shared categories: +2 each
+			for (const ci of friend.categoryInterests) {
+				if (demoCategoryIds.has(ci.categoryId)) {
+					score += ci.interestLevel > 5 ? 2 : 1
+				}
+			}
+			// Same industry: +1
+			if (friend.industry === DemoUser.industry) {
+				score += 1
+			}
+			return { id: friend.id, score }
+		})
+
+		scoredFriends.sort((a, b) => b.score - a.score)
+		topFriends = scoredFriends.slice(0, 12).filter((f) => f.score > 0)
+
+		const thirtyDaysAgo = new Date(now)
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+		for (let i = 0; i < topFriends.length; i++) {
+			const friend = topFriends[i]
+			const isAccepted = i < 10 // First 10 accepted, last 2 pending
+			const createdAt = new Date(
+				thirtyDaysAgo.getTime() +
+					Math.random() * (now.getTime() - thirtyDaysAgo.getTime())
+			)
+
+			await prisma.friendship.upsert({
+				where: {
+					userId_friendId: {
+						userId: demoUser.id,
+						friendId: friend.id,
+					},
+				},
+				update: {},
+				create: {
+					userId: demoUser.id,
+					friendId: friend.id,
+					status: isAccepted ? 'ACCEPTED' : 'PENDING',
+					createdAt,
+					acceptedAt: isAccepted
+						? new Date(
+								createdAt.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000
+							)
+						: null,
+				},
+			})
+		}
 	}
 
 	// --- Activity records for all demo user actions ---
@@ -473,16 +525,18 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		})
 	}
 
-	// Friendship activities
-	for (let i = 0; i < Math.min(topFriends.length, 10); i++) {
-		const friend = topFriends[i]
-		activities.push({
-			userId: demoUser.id,
-			type: 'SEND_FRIEND_REQUEST',
-			targetId: friend.id,
-			targetType: 'user',
-			createdAt: randomDateInPast(30),
-		})
+	// Friendship activities (only if friends were seeded this run)
+	if (topFriends.length > 0) {
+		for (let i = 0; i < Math.min(topFriends.length, 10); i++) {
+			const friend = topFriends[i]
+			activities.push({
+				userId: demoUser.id,
+				type: 'SEND_FRIEND_REQUEST',
+				targetId: friend.id,
+				targetType: 'user',
+				createdAt: randomDateInPast(30),
+			})
+		}
 	}
 
 	if (activities.length > 0) {
