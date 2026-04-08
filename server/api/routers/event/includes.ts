@@ -29,6 +29,9 @@ export const eventEnhancedInclude = {
 		},
 	},
 	categories: { include: { category: true } },
+	community: {
+		select: { id: true, name: true, slug: true, coverImage: true },
+	},
 } satisfies Prisma.EventInclude
 
 export const eventEditInclude = {
