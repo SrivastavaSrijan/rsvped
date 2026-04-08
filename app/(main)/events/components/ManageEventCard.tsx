@@ -1,6 +1,6 @@
 import { Camera, Edit } from 'lucide-react'
 import Link from 'next/link'
-import { ShareActions, ShareLink } from '@/app/(main)/components'
+import { ShareActions, ShareLink, Stats } from '@/app/(main)/components'
 import { Button, Card, Image } from '@/components/ui'
 import { Routes } from '@/lib/config'
 import type { RouterOutput } from '@/server/api'
@@ -35,13 +35,16 @@ export function ManageEventCard(props: ManageEventCardProps) {
 		locationType,
 		onlineUrl,
 		slug,
+		checkInCount,
+		rsvpCount,
+		viewCount,
 	} = props
 	const _metadata = isEnhancedEventData(props) ? props.metadata : null
 	return (
 		<Card className="w-full p-3 text-white lg:p-6">
 			<div className="grid grid-cols-12 items-start justify-stretch gap-6 lg:flex-row lg:gap-6">
 				<div className="col-span-full flex w-full flex-col justify-between gap-2 lg:col-span-6 lg:w-fit lg:justify-center lg:gap-2">
-					<div className="relative flex h-72 w-full flex-shrink-0 items-center justify-between lg:size-84">
+					<div className="relative flex h-72 w-full shrink-0 items-center justify-between lg:size-84">
 						{coverImage ? (
 							<Image
 								src={coverImage}
@@ -87,11 +90,11 @@ export function ManageEventCard(props: ManageEventCardProps) {
 							className="text-muted-foreground"
 							size="lg"
 						/>
-						{/* <Stats
+						<Stats
 							checkInCount={checkInCount}
 							rsvpCount={rsvpCount || props._count?.rsvps || 0}
 							viewCount={viewCount}
-						/> */}
+						/>
 					</div>
 					<div className="flex w-full flex-col gap-2 lg:gap-2">
 						{/* Action Buttons */}

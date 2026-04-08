@@ -20,15 +20,13 @@ export default async function ViewCategory({
 			return notFound()
 		}
 		return (
-			<div className="flex flex-col w-full">
+			<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
 				<CategoryHeader {...category} />
-				<div className="mx-auto flex w-full max-w-wide-page flex-col gap-4">
-					<div className="flex flex-col px-3 pb-6 lg:gap-8 lg:px-8 gap-4 lg:pb-8">
-						<FilteredEventsList
-							where={{ categoryId: category.id }}
-							{...(await searchParams)}
-						/>
-					</div>
+				<div className="flex flex-col px-3 pb-6 lg:gap-8 lg:px-8 gap-4 lg:pb-8">
+					<FilteredEventsList
+						where={{ categoryId: category.id }}
+						{...(await searchParams)}
+					/>
 				</div>
 			</div>
 		)
