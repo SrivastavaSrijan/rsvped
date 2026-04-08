@@ -1,10 +1,19 @@
 'use client'
 import type { RsvpStatus } from '@prisma/client'
-import { Check, Mail, Search, TicketCheck, User } from 'lucide-react'
+import {
+	Check,
+	ChevronLeft,
+	ChevronRight,
+	Mail,
+	Search,
+	TicketCheck,
+	User,
+} from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
 import {
 	Badge,
+	Button,
 	Card,
 	Input,
 	Table,
@@ -19,7 +28,6 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { PaginationMetadata } from '@/server/api/shared/types'
-import { EventsPagination } from './EventsPagination'
 
 interface RsvpItem {
 	id: string
@@ -83,6 +91,14 @@ export const ManageGuests = ({
 				params.delete('guestSearch')
 			}
 			params.delete('guestPage')
+			router.push(`${pathname}?${params.toString()}`)
+		})
+	}
+
+	const handlePageChange = (page: number) => {
+		startTransition(() => {
+			const params = new URLSearchParams(searchParams)
+			params.set('guestPage', page.toString())
 			router.push(`${pathname}?${params.toString()}`)
 		})
 	}
@@ -204,11 +220,30 @@ export const ManageGuests = ({
 
 			{/* Pagination */}
 			{pagination.totalPages > 1 ? (
-				<EventsPagination
-					currentPage={pagination.page}
-					totalPages={pagination.totalPages}
-					hasMore={pagination.hasMore}
-				/>
+				<div className="flex items-center justify-between">
+					<span className="text-muted-foreground text-xs">
+						Page {pagination.page} of {pagination.totalPages} (
+						{pagination.total} guests)
+					</span>
+					<div className="flex gap-1">
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={!pagination.hasPrevious}
+							onClick={() => handlePageChange(pagination.page - 1)}
+						>
+							<ChevronLeft className="size-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={!pagination.hasMore}
+							onClick={() => handlePageChange(pagination.page + 1)}
+						>
+							<ChevronRight className="size-4" />
+						</Button>
+					</div>
+				</div>
 			) : null}
 		</div>
 	)
