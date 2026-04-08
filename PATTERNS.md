@@ -505,7 +505,7 @@ Finds events sharing the same location or categories as a given event, ordered b
 
 - **`isAvailable()`** — checks for API key, returns `null` if not configured
 - **`LLMError`** — custom error class with operation context and retriability flag
-- **`generateObject()`** — structured output with Zod schema validation
+- **`generate()`** — structured output via `generateText` + `Output.object` with Zod schema
 - **`generatePlainText()`** — free-form text generation for summaries
 - **Timeout safety** — callers use `Promise.race()` with 3s timeout
 
@@ -515,6 +515,118 @@ Used sparingly for high-value operations:
 - Seed data generation (realistic community/event names via Batch API)
 
 **Files**: `lib/ai/llm.ts`, `server/api/routers/stir/interpret.ts`
+
+---
+
+## Stir AI Agent — Conversational Event Discovery
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Client                                                      │
+│                                                              │
+│  StirChatProvider (app/providers.tsx)                         │
+│    ├─ useChatRuntime() → shared AssistantRuntime             │
+│    ├─ localStorage persistence (stir-messages)               │
+│    └─ Consumed by both:                                      │
+│        ├─ StirChat.tsx  (full /stir page)                    │
+│        └─ StirFAB.tsx   (floating overlay on all pages)      │
+│                                                              │
+│  usePageContext() — reads Routes config, injects context      │
+│    ├─ eventSlug from /events/[slug]                          │
+│    ├─ communitySlug from /communities/[slug]                 │
+│    └─ general, feed, stir-home, user-profile                 │
+│                                                              │
+│  Thread.tsx (@assistant-ui/react)                             │
+│    ├─ HtmlText (dangerouslySetInnerHTML — model outputs HTML)│
+│    ├─ ToolFallback (shows tool display name + completion)    │
+│    ├─ Dynamic follow-up suggestions (fetched from Haiku)     │
+│    └─ ErrorIndicator, ThinkingIndicator                      │
+└──────────────────────┬───────────────────────────────────────┘
+                       │ POST /api/ai/stir
+                       ▼
+┌──────────────────────────────────────────────────────────────┐
+│  API Route (app/api/ai/stir/route.ts)                        │
+│    ├─ isAvailable() → 503 if no API key                      │
+│    ├─ auth() → userId                                        │
+│    ├─ Rate limiting (RATE_LIMIT: 20 auth / 5 anon per hour)  │
+│    ├─ Input validation (messages array, AGENT_CONFIG limits)  │
+│    └─ try/catch → 500 with error message                     │
+└──────────────────────┬───────────────────────────────────────┘
+                       ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Agent Core (lib/ai/agent/stir-agent.ts)                     │
+│                                                              │
+│  1. buildSystemPrompt()                                      │
+│     ├─ Base personality + tool instructions (constants.ts)   │
+│     ├─ Page context enrichment (Prisma lookup for event/     │
+│     │   community data if slug provided)                     │
+│     └─ User profile enrichment (interests, categories,       │
+│         recent RSVPs — with try/catch fallback)              │
+│                                                              │
+│  2. classifyIntent() (classifier.ts)                         │
+│     ├─ Short-circuit: single-word → intent map (no LLM)     │
+│     ├─ LLM: generateText + Output.object via Haiku (fast)   │
+│     └─ 3s timeout → fallback to 'general'                   │
+│                                                              │
+│  3. Tool scoping                                             │
+│     ├─ INTENT_TOOL_MAP[intent] → active tool subset          │
+│     └─ Anonymous filter (remove user-context tools)          │
+│                                                              │
+│  4. streamText() via Sonnet (quality)                        │
+│     ├─ smoothStream() transform                              │
+│     ├─ stepCountIs(AGENT_CONFIG.maxSteps)                    │
+│     └─ onStepFinish/onFinish → structured logging            │
+└──────────────────────┬───────────────────────────────────────┘
+                       ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Tools (lib/ai/agent/tools/) — 10 Prisma-backed tools        │
+│                                                              │
+│  Base:             User Context:     Graph Traversal:        │
+│  ├─ searchEvents   ├─ getUserProfile ├─ getFriendsAttending  │
+│  ├─ searchComm.    ├─ getUserRsvps   │   (3-hop via peers)  │
+│  ├─ getEventDet.   └─ getUserComm.   ├─ getTrending         │
+│  └─ getCategories                    │   (community-scoped) │
+│                                      └─ getSimilarEvents    │
+│                                          (category overlap)  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Tiered Model Strategy
+
+| Tier | Model | Use Case | Latency |
+|------|-------|----------|---------|
+| `fast` | Claude Haiku 4.5 | Intent classification, follow-up suggestions | ~300ms |
+| `quality` | Claude Sonnet 4 | Main conversation stream, tool orchestration | ~1-3s |
+
+All model IDs live in `MODEL_OPTIONS` constant — single place to update during migrations.
+
+### Code Organization
+
+| Concern | File | Contents |
+|---------|------|----------|
+| Types + Schemas | `types.ts` | Interfaces, Zod schemas (`intentSchema`, `suggestionsSchema`), `INTENTS` enum |
+| Constants | `constants.ts` | `MODEL_OPTIONS`, `AGENT_CONFIG`, `CLASSIFIER_CONFIG`, `RATE_LIMIT`, system prompts, tool maps |
+| LLM Wrapper | `lib/ai/llm.ts` | `getModel(tier)`, `generate()`, error handling — imports `MODEL_OPTIONS` |
+| Classifier | `classifier.ts` | `classifyIntent()` — imports schema + config from central files |
+| Agent | `stir-agent.ts` | `createStirStream()` — orchestrates prompt → classify → scope → stream |
+| Page Context | `page-context.ts` | `usePageContext()` — uses `Routes` from `@/lib/config` (single source of truth) |
+| Tools | `tools/*.ts` | Prisma queries with inline `inputSchema` (AI SDK convention) |
+
+### Intent Router
+
+| Intent | Trigger Examples | Active Tools |
+|--------|-----------------|--------------|
+| `search` | "tech meetups this weekend" | searchEvents, searchCommunities, getCategories, getEventDetails |
+| `recommend` | "what should I go to?" | searchEvents, getUserProfile, getUserRsvps, getUserCommunities, getTrending, getCategories |
+| `detail` | "tell me about TechCon" | getEventDetails, getFriendsAttending, getSimilarEvents, searchEvents |
+| `compare` | "compare TechCon and DevConf" | getEventDetails, searchEvents, getFriendsAttending, getSimilarEvents |
+| `general` | "how does RSVP'd work?" | searchEvents, searchCommunities, getEventDetails, getCategories |
+
+Short-circuit patterns (`SHORT_CIRCUIT_PATTERNS`) skip the LLM classifier for common single-word queries.
+
+**Files**: `lib/ai/agent/`, `components/assistant-ui/thread.tsx`, `components/shared/StirChatProvider.tsx`, `components/shared/StirFAB.tsx`
 
 ---
 
@@ -617,7 +729,7 @@ Route group layouts add group-specific chrome:
 | **Auth** | Declarative route lists, JWT sessions, middleware enforcement |
 | **Styling** | Token-only CSS, single theme file, ShadCN barrel, no tailwind.config |
 | **Search** | Parallel keyword + NLP, scored merge, graceful LLM degradation |
-| **AI** | Vercel AI SDK wrapper with availability checks, timeout, structured output |
+| **AI** | Tiered models (Haiku fast / Sonnet quality), intent classification, 10 Prisma-backed tools, shared chat provider, structured logging |
 | **Forms** | Reset-prevention wrapper, Zod validation, error code maps |
 | **Copy** | Colocated, typed, hierarchical — no inline strings |
 | **Seeding** | Resumable pipeline, LLM + Faker fallback, Batch API |

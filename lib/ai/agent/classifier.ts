@@ -1,27 +1,12 @@
-import { generateObject } from 'ai'
-import { z } from 'zod'
+import { generateText, Output } from 'ai'
 import { getModel } from '@/lib/ai'
-import { SHORT_CIRCUIT_PATTERNS } from './constants'
+import {
+	CLASSIFIER_CONFIG,
+	CLASSIFIER_SYSTEM_PROMPT,
+	SHORT_CIRCUIT_PATTERNS,
+} from './constants'
 import type { IntentClassification, PageContext } from './types'
-import { INTENTS } from './types'
-
-const CLASSIFIER_TIMEOUT_MS = 3000
-const MAX_QUERY_LENGTH = 500
-
-const intentSchema = z.object({
-	intent: z.enum(INTENTS),
-	reasoning: z.string(),
-})
-
-const CLASSIFIER_SYSTEM_PROMPT = `You are an intent classifier for an event discovery platform.
-Classify the user's query into one of these intents:
-- search: Looking for events by keyword, date, category, location (e.g. "tech meetups this weekend")
-- recommend: Wants personalized suggestions based on interests/history (e.g. "what should I go to?")
-- detail: Asking about a specific event or wants more info (e.g. "tell me about TechCon")
-- compare: Comparing two or more events (e.g. "which is better, TechCon or DevConf?")
-- general: Greetings, help, platform questions, off-topic (e.g. "how does RSVP'd work?")
-
-Respond with the intent and a brief reasoning.`
+import { intentSchema } from './types'
 
 /**
  * Classify user intent from query text.
@@ -45,7 +30,7 @@ export async function classifyIntent(
 		const match = SHORT_CIRCUIT_PATTERNS[words[0]]
 		if (match) {
 			return {
-				intent: match as IntentClassification['intent'],
+				intent: match,
 				reasoning: `Short-circuit: "${words[0]}" matches ${match} pattern`,
 			}
 		}
@@ -53,28 +38,34 @@ export async function classifyIntent(
 
 	// Truncate very long queries before sending to LLM
 	const truncated =
-		trimmed.length > MAX_QUERY_LENGTH
-			? trimmed.slice(0, MAX_QUERY_LENGTH)
+		trimmed.length > CLASSIFIER_CONFIG.maxQueryLength
+			? trimmed.slice(0, CLASSIFIER_CONFIG.maxQueryLength)
 			: trimmed
 
 	// LLM classification with timeout
 	try {
 		const result = await Promise.race([
-			generateObject({
-				model: getModel(),
-				schema: intentSchema,
+			generateText({
+				model: getModel('fast'),
+				output: Output.object({ schema: intentSchema }),
 				system: CLASSIFIER_SYSTEM_PROMPT,
 				prompt: truncated,
 			}),
 			new Promise<never>((_, reject) =>
 				setTimeout(
 					() => reject(new Error('Classification timeout')),
-					CLASSIFIER_TIMEOUT_MS
+					CLASSIFIER_CONFIG.timeoutMs
 				)
 			),
 		])
 
-		return result.object
+		if (result.output === undefined) {
+			return {
+				intent: 'general',
+				reasoning: 'Fallback: no structured output',
+			}
+		}
+		return result.output
 	} catch (error) {
 		console.error('[stir-classifier] Classification failed:', error)
 		return { intent: 'general', reasoning: 'Fallback: classification failed' }

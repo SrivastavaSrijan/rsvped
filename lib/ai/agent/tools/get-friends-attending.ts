@@ -1,6 +1,7 @@
 import { tool } from 'ai'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { AGENT_CONFIG } from '../constants'
 
 export const getFriendsAttending = tool({
 	description:
@@ -52,7 +53,7 @@ export const getFriendsAttending = tool({
 						},
 					},
 				},
-				take: 10,
+				take: AGENT_CONFIG.maxPeersResult,
 			})
 
 			// Get total RSVP count for the event
@@ -63,11 +64,17 @@ export const getFriendsAttending = tool({
 			return {
 				friendCount: peersAttending.length,
 				friends: peersAttending
-					.filter((r) => r.user)
+					.filter(
+						(
+							r
+						): r is typeof r & {
+							user: NonNullable<(typeof peersAttending)[0]['user']>
+						} => r.user !== null
+					)
 					.map((r) => ({
-						name: r.user!.name ?? 'Anonymous',
+						name: r.user.name ?? 'Anonymous',
 						community:
-							r.user!.communityMemberships[0]?.community.name ?? 'Unknown',
+							r.user.communityMemberships[0]?.community.name ?? 'Unknown',
 					})),
 				totalAttending,
 			}

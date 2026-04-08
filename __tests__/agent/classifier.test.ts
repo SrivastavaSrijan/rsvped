@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { classifyIntent } from '@/lib/ai/agent/classifier'
 
-// Mock the AI SDK generateObject
+// Mock the AI SDK generateText
 vi.mock('ai', () => ({
-	generateObject: vi.fn(),
+	generateText: vi.fn(),
+	Output: {
+		object: vi.fn(({ schema }) => ({ schema })),
+	},
 }))
 
 // Mock getModel
@@ -55,10 +58,10 @@ describe('classifyIntent', () => {
 		})
 
 		it('should classify emoji-only input as general (fallback)', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockResolvedValueOnce({
-				object: { intent: 'general', reasoning: 'Emoji input' },
+				output: { intent: 'general', reasoning: 'Emoji input' },
 			} as never)
 
 			const result = await classifyIntent('🎉')
@@ -68,10 +71,10 @@ describe('classifyIntent', () => {
 
 	describe('LLM classification', () => {
 		it('should classify "tech meetups this weekend" via LLM', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockResolvedValueOnce({
-				object: {
+				output: {
 					intent: 'search',
 					reasoning: 'User looking for events by keyword and date',
 				},
@@ -83,10 +86,10 @@ describe('classifyIntent', () => {
 		})
 
 		it('should classify "what should I go to?" as recommend', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockResolvedValueOnce({
-				object: {
+				output: {
 					intent: 'recommend',
 					reasoning: 'User wants personalized suggestions',
 				},
@@ -97,10 +100,10 @@ describe('classifyIntent', () => {
 		})
 
 		it('should classify "tell me about TechCon" as detail', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockResolvedValueOnce({
-				object: {
+				output: {
 					intent: 'detail',
 					reasoning: 'Asking about a specific event',
 				},
@@ -111,10 +114,10 @@ describe('classifyIntent', () => {
 		})
 
 		it('should classify "compare TechCon and DevConf" as compare', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockResolvedValueOnce({
-				object: {
+				output: {
 					intent: 'compare',
 					reasoning: 'User comparing two events',
 				},
@@ -127,13 +130,13 @@ describe('classifyIntent', () => {
 
 	describe('error handling', () => {
 		it('should fall back to general on LLM timeout', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			// Simulate a call that never resolves (timeout will trigger)
 			mockedGenerate.mockImplementationOnce(
 				() =>
 					new Promise((resolve) => {
-						setTimeout(() => resolve({ object: { intent: 'search', reasoning: 'late' } } as never), 5000)
+						setTimeout(() => resolve({ output: { intent: 'search', reasoning: 'late' } } as never), 5000)
 					})
 			)
 
@@ -143,8 +146,8 @@ describe('classifyIntent', () => {
 		})
 
 		it('should fall back to general on LLM error', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockRejectedValueOnce(new Error('API error'))
 
 			const result = await classifyIntent('find me jazz concerts')
@@ -153,17 +156,17 @@ describe('classifyIntent', () => {
 		})
 
 		it('should truncate very long queries before classifying', async () => {
-			const { generateObject } = await import('ai')
-			const mockedGenerate = vi.mocked(generateObject)
+			const { generateText } = await import('ai')
+			const mockedGenerate = vi.mocked(generateText)
 			mockedGenerate.mockResolvedValueOnce({
-				object: { intent: 'search', reasoning: 'Truncated query' },
+				output: { intent: 'search', reasoning: 'Truncated query' },
 			} as never)
 
 			const longQuery = 'a'.repeat(1000)
 			const result = await classifyIntent(longQuery)
 			expect(result.intent).toBe('search')
 
-			// Verify the prompt passed to generateObject was truncated
+			// Verify the prompt passed to generateText was truncated
 			const callArgs = mockedGenerate.mock.calls.at(-1)?.[0] as
 				| { prompt?: string }
 				| undefined

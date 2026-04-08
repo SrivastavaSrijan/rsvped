@@ -511,7 +511,7 @@ const HtmlText: FC = () => {
 	const { text } = useMessagePartText()
 	return (
 		<div
-			className="aui-markdown order-first min-w-0 max-w-none break-words text-sm leading-relaxed text-foreground"
+			className="aui-markdown order-first min-w-0 max-w-none wrap-break-word text-sm leading-relaxed text-foreground"
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: AI model outputs HTML directly — trusted server-generated content
 			dangerouslySetInnerHTML={{ __html: text }}
 		/>

@@ -7,15 +7,15 @@ import {
 	useChatRuntime,
 } from '@assistant-ui/react-ai-sdk'
 import type { UIMessage } from 'ai'
-import { createContext, use, useRef } from 'react'
+import { createContext, use, useMemo, useRef } from 'react'
+import { usePageContext } from '@/lib/ai/agent/page-context'
 
 const STORAGE_KEY = 'stir-messages'
-
-const transport = new AssistantChatTransport({ api: '/api/ai/stir' })
 
 interface StirChatContextValue {
 	runtime: AssistantRuntime
 	clearChat: () => void
+	pageContext: ReturnType<typeof usePageContext>
 }
 
 const StirChatContext = createContext<StirChatContextValue | null>(null)
@@ -24,7 +24,9 @@ const loadMessages = (): UIMessage[] => {
 	if (typeof window === 'undefined') return []
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY)
-		return stored ? (JSON.parse(stored) as UIMessage[]) : []
+		if (!stored) return []
+		const parsed: unknown = JSON.parse(stored)
+		return Array.isArray(parsed) ? (parsed as UIMessage[]) : []
 	} catch {
 		return []
 	}
@@ -44,6 +46,18 @@ export const StirChatProvider = ({
 	children: React.ReactNode
 }) => {
 	const initialMessages = useRef(loadMessages())
+	const pageContext = usePageContext()
+	const pageContextRef = useRef(pageContext)
+	pageContextRef.current = pageContext
+
+	const transport = useMemo(
+		() =>
+			new AssistantChatTransport({
+				api: '/api/ai/stir',
+				body: () => ({ pageContext: pageContextRef.current }),
+			}),
+		[]
+	)
 
 	const runtime = useChatRuntime({
 		transport,
@@ -60,7 +74,7 @@ export const StirChatProvider = ({
 	}
 
 	return (
-		<StirChatContext value={{ runtime, clearChat }}>
+		<StirChatContext value={{ runtime, clearChat, pageContext }}>
 			<AssistantRuntimeProvider runtime={runtime}>
 				{children}
 			</AssistantRuntimeProvider>

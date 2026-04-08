@@ -8,10 +8,10 @@ import { getModel } from '@/lib/ai'
 import { prisma } from '@/lib/prisma'
 import { classifyIntent } from './classifier'
 import {
+	AGENT_CONFIG,
 	getStirSystemPrompt,
 	INTENT_TOOL_MAP,
 	STIR_ANON_CONTEXT,
-	STIR_MAX_STEPS,
 } from './constants'
 import { logConversationComplete, logStepComplete, logToolCall } from './logger'
 import {
@@ -91,7 +91,7 @@ async function buildSystemPrompt(
 				)
 				if (community.description) {
 					contextLines.push(
-						`Description: ${community.description.slice(0, 200)}`
+						`Description: ${community.description.slice(0, AGENT_CONFIG.maxDescriptionLength)}`
 					)
 				}
 			}
@@ -122,7 +122,7 @@ async function buildSystemPrompt(
 				location: { select: { name: true } },
 				categoryInterests: {
 					select: { category: { select: { name: true } } },
-					take: 10,
+					take: AGENT_CONFIG.maxCategoryInterests,
 				},
 				rsvps: {
 					where: { status: 'CONFIRMED' },
@@ -137,7 +137,7 @@ async function buildSystemPrompt(
 						},
 					},
 					orderBy: { createdAt: 'desc' },
-					take: 5,
+					take: AGENT_CONFIG.maxRecentRsvps,
 				},
 			},
 		})
@@ -216,10 +216,13 @@ export async function createStirStream({
 			)
 
 	// Build scoped tools object
+	const toolNames = Object.keys(ALL_TOOLS)
 	const activeTools = Object.fromEntries(
 		filteredToolNames
-			.filter((name) => name in ALL_TOOLS)
-			.map((name) => [name, ALL_TOOLS[name as keyof typeof ALL_TOOLS]])
+			.filter((name): name is keyof typeof ALL_TOOLS =>
+				toolNames.includes(name)
+			)
+			.map((name) => [name, ALL_TOOLS[name]])
 	)
 
 	// Append intent info to system prompt
@@ -234,30 +237,27 @@ export async function createStirStream({
 		system,
 		messages: await convertToModelMessages(messages),
 		tools: activeTools,
-		stopWhen: stepCountIs(STIR_MAX_STEPS),
+		stopWhen: stepCountIs(AGENT_CONFIG.maxSteps),
 		experimental_transform: smoothStream(),
 		onStepFinish: ({ usage, toolResults }) => {
 			// Log individual tool calls with timing
 			if (toolResults) {
 				for (const toolResult of toolResults) {
-					const resultData = (toolResult as Record<string, unknown>)
-						.result as unknown
-					const toolArgs = (toolResult as Record<string, unknown>).args as
-						| Record<string, unknown>
-						| undefined
+					const resultData = toolResult.output
 					const resultCount = Array.isArray(resultData)
 						? resultData.length
 						: undefined
 					const error =
 						resultData &&
 						typeof resultData === 'object' &&
+						!Array.isArray(resultData) &&
 						'error' in resultData
 							? String((resultData as Record<string, unknown>).error)
 							: undefined
 
 					logToolCall({
 						toolName: toolResult.toolName,
-						args: toolArgs ?? {},
+						args: (toolResult.input as Record<string, unknown>) ?? {},
 						durationMs: 0,
 						resultCount,
 						error,
