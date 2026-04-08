@@ -1,4 +1,7 @@
 export { getCategories } from './get-categories'
 export { getEventDetails } from './get-event-details'
+export { getUserCommunities } from './get-user-communities'
+export { getUserProfile } from './get-user-profile'
+export { getUserRsvps } from './get-user-rsvps'
 export { searchCommunities } from './search-communities'
 export { searchEvents } from './search-events'
