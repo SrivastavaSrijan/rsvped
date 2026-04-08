@@ -1,8 +1,10 @@
 import { convertToModelMessages, stepCountIs, streamText } from 'ai'
 import { getModel } from '@/lib/ai'
 import { prisma } from '@/lib/prisma'
+import { classifyIntent } from './classifier'
 import {
 	getStirSystemPrompt,
+	INTENT_TOOL_MAP,
 	STIR_ANON_CONTEXT,
 	STIR_MAX_STEPS,
 } from './constants'
@@ -10,10 +12,30 @@ import { logConversationComplete, logStepComplete, logToolCall } from './logger'
 import {
 	getCategories,
 	getEventDetails,
+	getFriendsAttending,
+	getSimilarEvents,
+	getTrending,
+	getUserCommunities,
+	getUserProfile,
+	getUserRsvps,
 	searchCommunities,
 	searchEvents,
 } from './tools'
 import type { StirStreamOptions } from './types'
+
+/** All available tools keyed by name */
+const ALL_TOOLS = {
+	searchEvents,
+	searchCommunities,
+	getEventDetails,
+	getCategories,
+	getUserProfile,
+	getUserRsvps,
+	getUserCommunities,
+	getFriendsAttending,
+	getTrending,
+	getSimilarEvents,
+} as const
 
 /**
  * Build enriched system prompt with page context and user info.
@@ -162,6 +184,42 @@ export async function createStirStream({
 		system = getStirSystemPrompt()
 	}
 
+	// Extract the latest user message for intent classification
+	const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
+	const queryText =
+		lastUserMessage?.parts
+			?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+			.map((p) => p.text)
+			.join(' ') ?? ''
+
+	// Classify intent to scope active tools
+	const classification = await classifyIntent(queryText, pageContext)
+	const activeToolNames =
+		INTENT_TOOL_MAP[classification.intent] ?? Object.keys(ALL_TOOLS)
+
+	// Filter out user-context tools for anonymous users
+	const filteredToolNames = userId
+		? activeToolNames
+		: activeToolNames.filter(
+				(name) =>
+					![
+						'getUserProfile',
+						'getUserRsvps',
+						'getUserCommunities',
+						'getFriendsAttending',
+					].includes(name)
+			)
+
+	// Build scoped tools object
+	const activeTools = Object.fromEntries(
+		filteredToolNames
+			.filter((name) => name in ALL_TOOLS)
+			.map((name) => [name, ALL_TOOLS[name as keyof typeof ALL_TOOLS]])
+	)
+
+	// Append intent info to system prompt
+	system += `\n\n## Intent Classification\nUser intent: ${classification.intent} (${classification.reasoning}). Focus your response accordingly.`
+
 	const conversationStart = Date.now()
 	let stepIndex = 0
 	let totalTokens = 0
@@ -170,12 +228,7 @@ export async function createStirStream({
 		model: getModel(),
 		system,
 		messages: await convertToModelMessages(messages),
-		tools: {
-			searchEvents,
-			searchCommunities,
-			getEventDetails,
-			getCategories,
-		},
+		tools: activeTools,
 		stopWhen: stepCountIs(STIR_MAX_STEPS),
 		onStepFinish: ({ usage, toolResults }) => {
 			// Log individual tool calls with timing
