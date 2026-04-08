@@ -5,7 +5,8 @@ import { createStirStream } from '@/lib/ai/agent'
 import { AGENT_CONFIG, RATE_LIMIT } from '@/lib/ai/agent/constants'
 import { auth } from '@/lib/auth'
 
-export const maxDuration = AGENT_CONFIG.maxDuration
+// Next.js requires segment config to be static literals (no member expressions)
+export const maxDuration = 30
 
 // In-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
