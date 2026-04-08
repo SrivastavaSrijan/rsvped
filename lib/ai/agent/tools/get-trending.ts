@@ -10,9 +10,7 @@ export const getTrending = tool({
 		userId: z
 			.string()
 			.optional()
-			.describe(
-				"Optional user ID to scope trending to the user's communities"
-			),
+			.describe("Optional user ID to scope trending to the user's communities"),
 	}),
 	execute: async ({ userId }) => {
 		try {

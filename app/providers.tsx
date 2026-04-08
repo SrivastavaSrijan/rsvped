@@ -1,6 +1,7 @@
 'use client'
 
 import { ProgressProvider } from '@bprogress/next/app'
+import { StirChatProvider } from '@/components/shared/StirChatProvider'
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
 	return (
@@ -10,7 +11,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 			delay={1000}
 			options={{ showSpinner: false }}
 		>
-			{children}
+			<StirChatProvider>{children}</StirChatProvider>
 		</ProgressProvider>
 	)
 }
