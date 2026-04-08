@@ -181,7 +181,7 @@ export async function createCommunities(
 	const seenPairs = new Set<string>()
 	const userRemoteCount = new Map<string, number>()
 	const MAX_REMOTE_PER_USER = 5
-	const MAX_LOCAL_PER_USER = 10
+	const _MAX_LOCAL_PER_USER = 10
 
 	// Build per-user location lookup once
 	const userLocationId = new Map<string, string>()

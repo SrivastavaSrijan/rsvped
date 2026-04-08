@@ -1,10 +1,10 @@
 'use client'
 
 export default function GlobalError({
-	error,
+	_error,
 	reset,
 }: {
-	error: Error & { digest?: string }
+	_error: Error & { digest?: string }
 	reset: () => void
 }) {
 	return (
@@ -18,29 +18,26 @@ export default function GlobalError({
 						minHeight: '100vh',
 						display: 'flex',
 						flexDirection: 'column',
-						alignItems: 'center',
 						justifyContent: 'center',
+						alignItems: 'center',
+						fontFamily: 'system-ui, -apple-system, sans-serif',
 					}}
 				>
-					<h2 style={{ color: '#131517', fontSize: '1.5rem', fontWeight: 600 }}>
-						Something went wrong
-					</h2>
-					<p style={{ color: '#737577', marginTop: '0.5rem' }}>
+					<h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
 						An unexpected error occurred.
-					</p>
+					</h1>
 					<button
 						type="button"
-						onClick={reset}
+						onClick={() => reset()}
 						style={{
-							marginTop: '1.5rem',
-							padding: '0.5rem 1.5rem',
-							cursor: 'pointer',
-							backgroundColor: '#f31a7c',
-							color: '#ffffff',
+							padding: '0.5rem 1rem',
+							marginTop: '1rem',
+							backgroundColor: '#000',
+							color: '#fff',
 							border: 'none',
-							borderRadius: '0.5rem',
-							fontSize: '0.875rem',
-							fontWeight: 500,
+							borderRadius: '0.375rem',
+							cursor: 'pointer',
+							fontSize: '1rem',
 						}}
 					>
 						Try again

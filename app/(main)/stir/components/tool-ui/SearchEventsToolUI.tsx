@@ -105,17 +105,17 @@ const EventResultCard = ({ event }: { event: ToolEventResult }) => {
 				<CardContent className="flex flex-col gap-2.5 p-2.5 lg:gap-3 lg:p-3">
 					<div className="flex items-start gap-2.5">
 						<div className="flex size-9 shrink-0 flex-col items-center justify-center rounded-md bg-brand/10 text-brand lg:size-10">
-						<span className="text-[10px] font-medium uppercase leading-none">
-							{month}
-						</span>
-						<span className="font-bold text-xs leading-tight lg:text-sm">
-							{day}
-						</span>
-					</div>
+							<span className="text-[10px] font-medium uppercase leading-none">
+								{month}
+							</span>
+							<span className="font-bold text-xs leading-tight lg:text-sm">
+								{day}
+							</span>
+						</div>
 						<div className="flex min-w-0 flex-1 flex-col gap-1">
 							<p className="line-clamp-2 font-medium text-[11px] leading-snug group-hover:text-brand lg:text-sm">
-							{event.title}
-						</p>
+								{event.title}
+							</p>
 							<div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground lg:text-xs">
 								<span className="flex min-w-0 items-center gap-1">
 									<MapPin className="size-3 shrink-0" />

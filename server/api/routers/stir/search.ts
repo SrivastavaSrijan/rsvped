@@ -10,7 +10,6 @@ import {
 	createEnhancedCommunitySearchWhere,
 	createEnhancedEventSearchWhere,
 	createEventSearchWhere,
-	isRelevantMatch,
 	type SearchScoreParams,
 } from './helpers'
 import { interpretSearchQuery } from './interpret'
