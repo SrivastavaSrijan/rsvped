@@ -49,3 +49,18 @@ export interface ToolCategoryResult {
 	slug: string
 	eventCount: number
 }
+
+/** Intent classification result from the router */
+export const INTENTS = [
+	'search',
+	'recommend',
+	'detail',
+	'compare',
+	'general',
+] as const
+export type Intent = (typeof INTENTS)[number]
+
+export interface IntentClassification {
+	intent: Intent
+	reasoning: string
+}

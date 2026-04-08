@@ -69,4 +69,61 @@ export const TOOL_DISPLAY_NAMES: Record<string, string> = {
 	searchCommunities: 'Searching communities',
 	getEventDetails: 'Fetching event details',
 	getCategories: 'Loading categories',
+	getUserProfile: 'Loading your profile',
+	getUserRsvps: 'Checking your RSVPs',
+	getUserCommunities: 'Checking your communities',
+	getFriendsAttending: 'Checking who you know',
+	getTrending: 'Finding trending events',
+	getSimilarEvents: 'Finding similar events',
+}
+
+/** Maps intent → tool names that should be active for that intent. */
+export const INTENT_TOOL_MAP: Record<string, string[]> = {
+	search: [
+		'searchEvents',
+		'searchCommunities',
+		'getCategories',
+		'getEventDetails',
+	],
+	recommend: [
+		'searchEvents',
+		'getUserProfile',
+		'getUserRsvps',
+		'getUserCommunities',
+		'getTrending',
+		'getCategories',
+	],
+	detail: [
+		'getEventDetails',
+		'getFriendsAttending',
+		'getSimilarEvents',
+		'searchEvents',
+	],
+	compare: [
+		'getEventDetails',
+		'searchEvents',
+		'getFriendsAttending',
+		'getSimilarEvents',
+	],
+	general: [
+		'searchEvents',
+		'searchCommunities',
+		'getEventDetails',
+		'getCategories',
+	],
+}
+
+/** Short-circuit patterns: keyword → intent (avoids LLM call). */
+export const SHORT_CIRCUIT_PATTERNS: Record<string, string> = {
+	trending: 'search',
+	popular: 'search',
+	new: 'search',
+	latest: 'search',
+	upcoming: 'search',
+	help: 'general',
+	hi: 'general',
+	hello: 'general',
+	hey: 'general',
+	thanks: 'general',
+	thank: 'general',
 }
