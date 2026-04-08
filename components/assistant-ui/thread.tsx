@@ -49,7 +49,10 @@ const fadeIn = {
 export const Thread: FC = () => {
 	return (
 		<ThreadPrimitive.Root className="flex h-full flex-col overflow-hidden">
-			<ThreadPrimitive.Viewport className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto scroll-smooth px-3 py-4 lg:px-6 lg:py-6">
+			<ThreadPrimitive.Viewport
+				data-stir-scroll-viewport
+				className="flex min-h-40 flex-1 flex-col items-center gap-4 overflow-y-auto scroll-smooth px-3 py-4 lg:min-h-0 lg:px-6 lg:py-6"
+			>
 				<ThreadPrimitive.Empty>
 					<ThreadEmpty />
 				</ThreadPrimitive.Empty>
@@ -149,11 +152,15 @@ const ThreadEmpty: FC = () => {
 
 const ComposerArea: FC = () => {
 	return (
-		<div className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-background/60 px-3 pb-2 pt-2 backdrop-blur-sm lg:px-6 lg:pb-4 lg:pt-3">
+		<div
+			data-stir-composer
+			className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-background/60 px-3 pb-2 pt-2 backdrop-blur-sm lg:px-6 lg:pb-4 lg:pt-3"
+		>
 			<AnimatePresence>
 				<ThreadPrimitive.If empty={false} running={false}>
 					<motion.div
-						className="flex gap-2 overflow-x-auto"
+						data-stir-suggestion-row
+						className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3 -mb-2"
 						initial={{ opacity: 0, y: 4 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.2 }}
@@ -168,7 +175,7 @@ const ComposerArea: FC = () => {
 							>
 								<button
 									type="button"
-									className="shrink-0 whitespace-nowrap rounded-full border border-border/60 bg-background/50 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 hover:text-foreground"
+									className="w-fit shrink-0 whitespace-nowrap rounded-full border border-border/60 bg-background/50 px-3.5 py-2 text-[13px] text-muted-foreground backdrop-blur-sm transition-all hover:border-border hover:bg-background/80 hover:text-foreground"
 								>
 									{suggestion}
 								</button>
@@ -186,9 +193,8 @@ const Composer: FC = () => {
 	return (
 		<ComposerPrimitive.Root className="flex items-center gap-2 rounded-2xl border border-border/40 bg-background/80 px-3 py-2.5 shadow-sm backdrop-blur-sm transition-colors focus-within:border-border lg:px-4 lg:py-3">
 			<ComposerPrimitive.Input
-				autoFocus
 				placeholder="Ask anything"
-				className="min-h-6 flex-1 resize-none bg-transparent text-sm  outline-none placeholder:text-muted-foreground/60 leading-relaxed"
+				className="min-h-6 flex-1 resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground/60 leading-relaxed"
 				submitOnEnter
 			/>
 			<ThreadPrimitive.If running>

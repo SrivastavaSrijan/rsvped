@@ -2,9 +2,11 @@
 
 import { makeAssistantToolUI } from '@assistant-ui/react'
 import { CheckCircle2, Loader2, Tag, XCircle } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui'
 import type { ToolCategoryResult } from '@/lib/ai/agent'
+import { toolCardVariants, toolListVariants } from './motion'
 
 type GetCategoriesArgs = Record<string, never>
 type GetCategoriesResult = ToolCategoryResult[] | { error: string }
@@ -48,26 +50,42 @@ export const GetCategoriesToolUI = makeAssistantToolUI<
 					<CheckCircle2 className="size-3 text-green-600" />
 					{result.length} categor{result.length !== 1 ? 'ies' : 'y'} available
 				</div>
-				<div className="flex flex-wrap gap-1.5">
-					{result.map((category) => (
-						<Link
-							key={category.slug}
-							href={`/events/discover?category=${category.slug}`}
-							className="group"
-						>
-							<Badge
-								variant="outline"
-								className="cursor-pointer gap-1 transition-colors group-hover:border-brand/30 group-hover:text-brand"
+				<motion.div
+					className="flex flex-wrap gap-1.5"
+					variants={toolListVariants}
+					initial="hidden"
+					animate="visible"
+				>
+					<AnimatePresence initial={false}>
+						{result.map((category, index) => (
+							<motion.div
+								key={category.slug}
+								custom={index}
+								variants={toolCardVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
+								layout
 							>
-								<Tag className="size-3" />
-								{category.name}
-								<span className="text-muted-foreground">
-									({category.eventCount})
-								</span>
-							</Badge>
-						</Link>
-					))}
-				</div>
+								<Link
+									href={`/events/discover?category=${category.slug}`}
+									className="group"
+								>
+									<Badge
+										variant="outline"
+										className="cursor-pointer gap-1 transition-colors group-hover:border-brand/30 group-hover:text-brand"
+									>
+										<Tag className="size-3" />
+										{category.name}
+										<span className="text-muted-foreground">
+											({category.eventCount})
+										</span>
+									</Badge>
+								</Link>
+							</motion.div>
+						))}
+					</AnimatePresence>
+				</motion.div>
 			</div>
 		)
 	},
