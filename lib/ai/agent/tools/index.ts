@@ -1,5 +1,8 @@
 export { getCategories } from './get-categories'
 export { getEventDetails } from './get-event-details'
+export { getFriendsAttending } from './get-friends-attending'
+export { getSimilarEvents } from './get-similar-events'
+export { getTrending } from './get-trending'
 export { getUserCommunities } from './get-user-communities'
 export { getUserProfile } from './get-user-profile'
 export { getUserRsvps } from './get-user-rsvps'
