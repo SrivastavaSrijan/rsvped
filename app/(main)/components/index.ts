@@ -1,4 +1,5 @@
 export { ActiveLink } from './ActiveLink'
+export { CommunityCategoryLoading } from './CommunityCategoryLoading'
 export { EmptyState } from './EmptyState'
 export { GenericPagination } from './GenericPagination'
 export { Navbar } from './Navbar'

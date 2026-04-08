@@ -10,7 +10,7 @@ export default function StaticLayout({
 		<div className="flex flex-col">
 			<div className="relative">
 				<Background />
-				<div className="relative z-10 flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-b from-black/0 to-black">
+				<div className="relative z-10 flex min-h-screen w-full flex-col overflow-hidden bg-linear-to-b from-black/0 to-black">
 					<Navbar />
 					<main className="flex flex-1 flex-col items-center">{children}</main>
 					<Footer />

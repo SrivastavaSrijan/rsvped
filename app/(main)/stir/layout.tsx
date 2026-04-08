@@ -6,7 +6,7 @@ export default function StirLayout({ children }: StirLayoutProps) {
 	return (
 		<div
 			data-stir-container
-			className="relative mx-auto flex w-full max-w-wide-page flex-col px-2 pb-2 lg:px-8 lg:pb-4"
+			className="relative mx-auto flex h-[calc(100dvh-var(--navbar-height)-var(--footer-height))] w-full max-w-wide-page flex-col overflow-hidden px-2 pb-2 lg:px-8 lg:pb-4"
 		>
 			<div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/60 shadow-lg backdrop-blur-sm">
 				<div className="pointer-events-none absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-brand/6 to-transparent" />

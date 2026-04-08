@@ -21,7 +21,7 @@ function EventCardSkeleton() {
 
 export default function Loading() {
 	return (
-		<div className="mx-auto flex min-h-screen w-full max-w-page flex-col">
+		<div className="mx-auto flex min-h-app-screen w-full max-w-page flex-col">
 			{/* Header skeleton */}
 			<div className="border-border border-b px-3 py-4 sm:py-5 lg:px-8">
 				<div className="mx-auto max-w-7xl">

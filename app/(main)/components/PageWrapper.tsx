@@ -34,11 +34,11 @@ export function PageWrapper({ children }: { children: React.ReactNode }) {
 			variants={pageEntrance}
 			initial="hidden"
 			animate="visible"
-			className="min-h-screen w-full transition-colors duration-500 ease-in-out lg:pb-16 pb-4"
+			className="min-h-app-screen w-full transition-colors duration-500 ease-in-out"
 			style={styles.background}
 		>
 			<div
-				className="fixed top-0 left-0 z-[-1] h-[200px] w-full transition-all duration-500 ease-in-out"
+				className="fixed top-0 left-0 z-[-1] h-50 w-full transition-all duration-500 ease-in-out"
 				style={styles.pseudoElement}
 			/>
 			{children}

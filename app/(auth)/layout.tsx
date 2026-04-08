@@ -17,7 +17,7 @@ export default function LoginLayout({
 	return (
 		<>
 			<Navbar />
-			<div className="relative z-10 flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-b from-black/0 to-black">
+			<div className="relative z-10 flex min-h-app-screen w-full flex-col overflow-hidden bg-linear-to-b from-black/0 to-black">
 				{children}
 				{modal}
 			</div>
