@@ -1,0 +1,94 @@
+name: Branch Cleanup
+
+on:
+  # Auto-delete the head branch when a PR is merged
+  pull_request:
+    types: [closed]
+
+  # Manual trigger to delete a list of stale branches
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (list branches without deleting)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  # Delete the head branch automatically when a PR is merged
+  auto-delete-merged-branch:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete merged branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            // Never delete main or develop
+            if (['main', 'develop'].includes(branch)) {
+              console.log(`Skipping protected branch: ${branch}`);
+              return;
+            }
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${branch}`,
+              });
+              console.log(`Deleted branch: ${branch}`);
+            } catch (err) {
+              console.log(`Could not delete branch ${branch}: ${err.message}`);
+            }
+
+  # One-time manual cleanup of known stale branches
+  delete-stale-branches:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete stale branches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dryRun = '${{ inputs.dry_run }}' === 'true';
+
+            // Branches that are either merged into main or abandoned (closed PRs, never merged)
+            const staleBranches = [
+              // Merged into main
+              'claude/fix-mobile-chat-users-IgmIF',
+              'feature/demo-user-v2',
+              'feature/event-manage-overhaul',
+              'feature/event-manage-phase2',
+              'feature/stir-ai-overhaul',
+              'feature/ui-improvements',
+              'wt-self',
+              // Abandoned (closed PRs, never merged)
+              'copilot/main-start-implementation',
+              'copilot/vscode1754991439083',
+              'feature/user-profiles-social',
+              'fix/remove-trpc-client-hooks',
+            ];
+
+            for (const branch of staleBranches) {
+              if (dryRun) {
+                console.log(`[dry-run] Would delete: ${branch}`);
+                continue;
+              }
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branch}`,
+                });
+                console.log(`Deleted: ${branch}`);
+              } catch (err) {
+                console.log(`Could not delete ${branch}: ${err.message}`);
+              }
+            }
