@@ -106,8 +106,8 @@ describe('DemoSeedStats shape', () => {
 		}
 
 		expect(stats.receivedFriendRequests).toBeGreaterThan(0)
-		expect(stats.sentFriendRequests).toBeGreaterThan(stats.receivedFriendRequests)
+		expect(stats.sentFriendRequests).toBeGreaterThan(
+			stats.receivedFriendRequests
+		)
 	})
 })
-
-

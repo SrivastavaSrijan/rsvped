@@ -2,12 +2,12 @@ import { faker } from '@faker-js/faker'
 import { OrderStatus } from '@prisma/client'
 import { describe, expect, it } from 'vitest'
 import {
-	type EventWithCategories,
-	type UserWithCategories,
 	determineOrderStatus,
+	type EventWithCategories,
 	findInterestedUsers,
 	selectIntelligentAttendees,
 	selectTierForUser,
+	type UserWithCategories,
 } from '@/prisma/seed/creators/order-helpers'
 
 // --- Test Data Builders ---

@@ -12,7 +12,10 @@ import {
 
 describe('extractSignificantWords', () => {
 	it('removes English stop words', () => {
-		expect(extractSignificantWords('tech in the city')).toEqual(['tech', 'city'])
+		expect(extractSignificantWords('tech in the city')).toEqual([
+			'tech',
+			'city',
+		])
 	})
 
 	it('removes event-domain stop words', () => {
@@ -87,9 +90,10 @@ describe('createEventSearchWhere', () => {
 		expect(where).toHaveProperty('OR')
 		const orBranches = where.OR as Record<string, unknown>[]
 		// First branch should be AND of word conditions
-		const andBranch = orBranches.find(
-			(b) => 'AND' in b
-		) as Record<string, unknown>
+		const andBranch = orBranches.find((b) => 'AND' in b) as Record<
+			string,
+			unknown
+		>
 		expect(andBranch).toBeDefined()
 		const andConditions = andBranch.AND as unknown[]
 		// Should have conditions for both "tech" and "yoga"

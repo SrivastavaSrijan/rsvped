@@ -79,9 +79,9 @@ describe('event.get (public procedures)', () => {
 describe('event.get (protected procedures)', () => {
 	it('throws UNAUTHORIZED when calling edit without auth', async () => {
 		const caller = createPublicCaller()
-		await expect(
-			caller.event.get.edit({ slug: 'any-slug' })
-		).rejects.toThrow(TRPCError)
+		await expect(caller.event.get.edit({ slug: 'any-slug' })).rejects.toThrow(
+			TRPCError
+		)
 
 		try {
 			await caller.event.get.edit({ slug: 'any-slug' })

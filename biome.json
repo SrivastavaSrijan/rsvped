@@ -12,7 +12,8 @@
 			"e2e/**",
 			"lib/**",
 			"server/**",
-			"prisma/**/*.ts"
+			"prisma/**/*.ts",
+			"__tests__/**"
 		],
 		"experimentalScannerIgnores": ["node_modules", ".next"]
 	},

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildDateWhere, parseTemporalHints } from '@/server/api/routers/stir/temporal'
+import {
+	buildDateWhere,
+	parseTemporalHints,
+} from '@/server/api/routers/stir/temporal'
 
 describe('parseTemporalHints', () => {
 	it('parses "today" to today date range', () => {
