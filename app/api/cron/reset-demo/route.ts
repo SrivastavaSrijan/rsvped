@@ -29,10 +29,11 @@ export async function GET(request: Request) {
 
 	try {
 		await resetDemoUser(prisma)
-		await seedDemoUser(prisma)
+		const { stats } = await seedDemoUser(prisma)
 		return NextResponse.json({
 			ok: true,
 			resetAt: new Date().toISOString(),
+			stats,
 		})
 	} catch (error) {
 		console.error('Demo reset failed:', error)

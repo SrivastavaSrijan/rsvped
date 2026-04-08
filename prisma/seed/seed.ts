@@ -186,8 +186,8 @@ async function main() {
 
 		await pipeline.runStage('demo-user', async () => {
 			logger.info('Creating demo user')
-			await seedDemoUser(prisma)
-			logger.success('Demo user created')
+			const { stats } = await seedDemoUser(prisma)
+			logger.success('Demo user created', stats)
 		})
 
 		logger.timeEnd('Complete seed operation')

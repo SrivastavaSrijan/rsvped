@@ -12,41 +12,18 @@ async function main() {
 	await resetDemoUser(prisma)
 
 	console.log('Re-seeding demo user...')
-	const user = await seedDemoUser(prisma)
+	const { user, stats } = await seedDemoUser(prisma)
 
-	const stats = await prisma.user.findUnique({
-		where: { id: user.id },
-		select: {
-			name: true,
-			username: true,
-			bio: true,
-			isDemo: true,
-			location: { select: { name: true } },
-			_count: {
-				select: {
-					communityMemberships: true,
-					rsvps: true,
-					hostedEvents: true,
-					categoryInterests: true,
-					sentFriendRequests: true,
-					activities: true,
-				},
-			},
-		},
-	})
-
-	if (stats) {
-		console.log('\n✅ Demo user seeded:')
-		console.log(`  Name: ${stats.name} (@${stats.username})`)
-		console.log(`  Bio: ${stats.bio}`)
-		console.log(`  City: ${stats.location?.name ?? 'none'}`)
-		console.log(`  Communities: ${stats._count.communityMemberships}`)
-		console.log(`  RSVPs: ${stats._count.rsvps}`)
-		console.log(`  Hosted Events: ${stats._count.hostedEvents}`)
-		console.log(`  Category Interests: ${stats._count.categoryInterests}`)
-		console.log(`  Friendships: ${stats._count.sentFriendRequests}`)
-		console.log(`  Activities: ${stats._count.activities}`)
-	}
+	console.log('\n✅ Demo user seeded:')
+	console.log(`  Name: ${user.name} (@${user.username})`)
+	console.log(`  Email: ${user.email}`)
+	console.log(`  Communities: ${stats.communities}`)
+	console.log(`  RSVPs: ${stats.rsvps}`)
+	console.log(`  Hosted Events: ${stats.hostedEvents}`)
+	console.log(`  Category Interests: ${stats.categoryInterests}`)
+	console.log(`  Sent Friend Requests: ${stats.sentFriendRequests}`)
+	console.log(`  Received Friend Requests: ${stats.receivedFriendRequests}`)
+	console.log(`  Activities: ${stats.activities}`)
 
 	await prisma.$disconnect()
 }

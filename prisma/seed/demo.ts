@@ -17,6 +17,16 @@ import { hashPassword } from '@/lib/auth/password'
 import { DemoUser } from '@/lib/config/demo'
 import { getAvatarURL } from '@/lib/config/routes'
 
+export interface DemoSeedStats {
+	communities: number
+	rsvps: number
+	hostedEvents: number
+	categoryInterests: number
+	sentFriendRequests: number
+	receivedFriendRequests: number
+	activities: number
+}
+
 /**
  * Delete all data owned by/associated with the demo user,
  * then delete the user itself.
@@ -353,7 +363,7 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		})
 	}
 
-	// --- Friendships: 8-12 friends based on shared interests/location ---
+	// --- Friendships: 8-12 sent + 3-5 received, based on shared interests/location ---
 	const potentialFriends = await prisma.user.findMany({
 		where: {
 			id: { not: demoUser.id },
@@ -391,7 +401,11 @@ export async function seedDemoUser(prisma: PrismaClient) {
 	})
 
 	scoredFriends.sort((a, b) => b.score - a.score)
+
+	// Top 12 are friends the demo user reached out to (sent requests)
 	const topFriends = scoredFriends.slice(0, 12).filter((f) => f.score > 0)
+	// Next 4 are friends who reached out to the demo user (received requests)
+	const incomingFriends = scoredFriends.slice(12, 16).filter((f) => f.score > 0)
 
 	const thirtyDaysAgo = new Date(now)
 	thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -415,6 +429,37 @@ export async function seedDemoUser(prisma: PrismaClient) {
 			create: {
 				userId: demoUser.id,
 				friendId: friend.id,
+				status: isAccepted ? 'ACCEPTED' : 'PENDING',
+				createdAt,
+				acceptedAt: isAccepted
+					? new Date(
+							createdAt.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000
+						)
+					: null,
+			},
+		})
+	}
+
+	// Create received friend requests (other users reaching out to demo user)
+	for (let i = 0; i < incomingFriends.length; i++) {
+		const friend = incomingFriends[i]
+		const isAccepted = i < 2 // First 2 accepted, rest pending
+		const createdAt = new Date(
+			thirtyDaysAgo.getTime() +
+				Math.random() * (now.getTime() - thirtyDaysAgo.getTime())
+		)
+
+		await prisma.friendship.upsert({
+			where: {
+				userId_friendId: {
+					userId: friend.id,
+					friendId: demoUser.id,
+				},
+			},
+			update: {},
+			create: {
+				userId: friend.id,
+				friendId: demoUser.id,
 				status: isAccepted ? 'ACCEPTED' : 'PENDING',
 				createdAt,
 				acceptedAt: isAccepted
@@ -473,7 +518,7 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		})
 	}
 
-	// Friendship activities
+	// Sent friend request activities
 	for (let i = 0; i < Math.min(topFriends.length, 10); i++) {
 		const friend = topFriends[i]
 		activities.push({
@@ -485,6 +530,18 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		})
 	}
 
+	// Accept friend request activities (for the incoming accepted ones)
+	for (let i = 0; i < Math.min(incomingFriends.length, 2); i++) {
+		const friend = incomingFriends[i]
+		activities.push({
+			userId: demoUser.id,
+			type: 'ACCEPT_FRIEND_REQUEST',
+			targetId: friend.id,
+			targetType: 'user',
+			createdAt: randomDateInPast(20),
+		})
+	}
+
 	if (activities.length > 0) {
 		await prisma.userActivity.createMany({
 			data: activities,
@@ -492,7 +549,17 @@ export async function seedDemoUser(prisma: PrismaClient) {
 		})
 	}
 
-	return demoUser
+	const stats: DemoSeedStats = {
+		communities: allCommunities.length,
+		rsvps: allEvents.length,
+		hostedEvents: allHostedEvents.length,
+		categoryInterests: categories.length,
+		sentFriendRequests: topFriends.length,
+		receivedFriendRequests: incomingFriends.length,
+		activities: activities.length,
+	}
+
+	return { user: demoUser, stats }
 }
 
 /** Generate a random date within the last N days */
