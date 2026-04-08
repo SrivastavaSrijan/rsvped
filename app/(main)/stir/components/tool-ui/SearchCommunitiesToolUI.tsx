@@ -35,7 +35,7 @@ export const SearchCommunitiesToolUI = makeAssistantToolUI<
 					<div className="grid gap-2">
 						{['a', 'b'].map((id) => (
 							<Card key={`skeleton-${id}`} className="gap-0 py-0">
-								<CardContent className="flex items-start gap-3 p-3">
+								<CardContent className="flex items-start gap-2.5 p-2.5 lg:gap-3 lg:p-3">
 									<Skeleton className="size-9 shrink-0 rounded-full" />
 									<div className="flex flex-1 flex-col gap-1.5">
 										<Skeleton className="h-4 w-2/3" />
@@ -76,7 +76,7 @@ export const SearchCommunitiesToolUI = makeAssistantToolUI<
 		}
 
 		return (
-			<div className="flex flex-col gap-2">
+			<div className="flex w-full min-w-0 flex-col gap-2 overflow-hidden">
 				<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 					<CheckCircle2 className="size-3 text-green-600" />
 					Found {result.length} communit{result.length !== 1 ? 'ies' : 'y'}
@@ -98,13 +98,13 @@ const CommunityResultCard = ({
 }) => {
 	return (
 		<Link href={`/communities/${community.slug}/view`} className="group block">
-			<Card className="gap-0 py-0 transition-colors group-hover:border-brand/30 group-hover:bg-muted/50">
-				<CardContent className="flex items-start gap-3 p-3">
+			<Card className="gap-0 overflow-hidden py-0 transition-colors group-hover:border-brand/30 group-hover:bg-muted/50">
+				<CardContent className="flex items-start gap-2.5 p-2.5 lg:gap-3 lg:p-3">
 					<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/10 font-bold text-brand text-sm">
 						{community.name.charAt(0).toUpperCase()}
 					</div>
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
-						<p className="truncate font-medium text-sm group-hover:text-brand">
+						<p className="truncate font-medium text-xs group-hover:text-brand lg:text-sm">
 							{community.name}
 						</p>
 						{community.description ? (

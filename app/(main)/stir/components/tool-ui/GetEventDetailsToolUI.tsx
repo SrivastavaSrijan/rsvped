@@ -60,7 +60,7 @@ export const GetEventDetailsToolUI = makeAssistantToolUI<
 						Fetching event details...
 					</div>
 					<Card className="gap-0 py-0">
-						<CardContent className="flex flex-col gap-3 p-4">
+						<CardContent className="flex flex-col gap-2.5 p-3 lg:gap-3 lg:p-4">
 							<Skeleton className="h-5 w-3/4" />
 							<Skeleton className="h-3 w-full" />
 							<Skeleton className="h-3 w-2/3" />
@@ -102,11 +102,14 @@ export const GetEventDetailsToolUI = makeAssistantToolUI<
 		const timeStr = `${start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
 
 		return (
-			<Link href={`/events/${result.slug}/view`} className="group block">
-				<Card className="gap-0 py-0 transition-colors group-hover:border-brand/30">
-					<CardContent className="flex flex-col gap-3 p-4">
+			<Link
+				href={`/events/${result.slug}/view`}
+				className="group block w-full min-w-0 overflow-hidden"
+			>
+				<Card className="gap-0 overflow-hidden py-0 transition-colors group-hover:border-brand/30">
+					<CardContent className="flex flex-col gap-2.5 p-3 lg:gap-3 lg:p-4">
 						<div className="flex flex-col gap-1">
-							<p className="font-semibold text-base group-hover:text-brand">
+							<p className="truncate font-semibold text-sm group-hover:text-brand">
 								{result.title}
 							</p>
 							{result.host ? (
@@ -116,7 +119,7 @@ export const GetEventDetailsToolUI = makeAssistantToolUI<
 							) : null}
 						</div>
 
-						<div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+						<div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
 							<span className="flex items-center gap-1">
 								<CalendarDays className="size-3" />
 								{dateStr}
