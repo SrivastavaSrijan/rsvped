@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { Button, Image } from '@/components/ui'
 import { auth } from '@/lib/auth'
 import { Routes } from '@/lib/config'
-import { AssetMap } from '@/lib/config/assets'
 import { copy } from '../copy'
 import { DemoButton } from './DemoButton'
+import { HeroVideo } from './HeroVideo'
 
 export const Hero = async () => {
 	const session = await auth()
@@ -56,9 +56,7 @@ export const Hero = async () => {
 
 				{/* Image Column */}
 				<div className="flex justify-center px-3 lg:col-span-2 lg:justify-end">
-					<video autoPlay loop muted playsInline className="w-full max-w-lg">
-						<source src={AssetMap.HeroVideo} type="video/webm" />
-					</video>
+					<HeroVideo />
 				</div>
 			</div>
 		</section>

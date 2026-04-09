@@ -64,7 +64,7 @@ function FeaturedCommunityCard({
 	return (
 		<Link
 			href={Routes.Main.Communities.ViewBySlug(slug)}
-			className="group flex items-center gap-4 rounded-lg border border-white/10 p-4 transition-colors hover:border-white/30"
+			className="group flex items-center gap-4 rounded-lg border border-white/10 p-2 lg:p-3 transition-colors hover:border-white/30"
 		>
 			{coverImage && (
 				<Image
@@ -72,12 +72,12 @@ function FeaturedCommunityCard({
 					alt={name}
 					fill
 					className="rounded-lg object-cover transition-transform group-hover:scale-105"
-					wrapperClassName="relative shrink-0 size-16"
+					wrapperClassName="relative shrink-0 size-16 overflow-hidden"
 					sizes={{ sm: '64px' }}
 				/>
 			)}
-			<div className="min-w-0 flex-1">
-				<h3 className="truncate font-semibold text-base">{name}</h3>
+			<div className="min-w-0 flex flex-col gap-0.5 flex-1">
+				<h3 className="truncate font-semibold text-sm">{name}</h3>
 				{description && (
 					<p className="line-clamp-2 text-muted-foreground text-sm">
 						{description}

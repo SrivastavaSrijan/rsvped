@@ -6,8 +6,8 @@ import {
 	MessagePrimitive,
 	ThreadPrimitive,
 	useAuiState,
-	useMessagePartText,
 } from '@assistant-ui/react'
+import { MarkdownTextPrimitive } from '@assistant-ui/react-markdown'
 import {
 	AlertTriangle,
 	ArrowUp,
@@ -29,12 +29,21 @@ import { Button } from '@/components/ui'
 import { TOOL_DISPLAY_NAMES } from '@/lib/ai/agent/constants'
 import { getSuggestionsAction } from '@/server/actions/stir'
 
-const messageVariants = {
-	hidden: { opacity: 0, y: 8 },
+const userMessageVariants = {
+	hidden: { opacity: 0, x: 12 },
+	visible: {
+		opacity: 1,
+		x: 0,
+		transition: { type: 'spring' as const, stiffness: 400, damping: 30 },
+	},
+}
+
+const assistantMessageVariants = {
+	hidden: { opacity: 0, y: 6 },
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.3, ease: 'easeOut' as const },
+		transition: { type: 'spring' as const, stiffness: 400, damping: 30 },
 	},
 }
 
@@ -332,36 +341,36 @@ const Composer: FC = () => {
 }
 
 const UserMessage: FC = () => {
+	const [hovered, setHovered] = useState(false)
 	return (
 		<motion.div
-			initial={false}
+			initial="hidden"
 			animate="visible"
-			variants={messageVariants}
-			className="w-full"
+			variants={userMessageVariants}
+			className="relative w-full"
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
 		>
-			<MessagePrimitive.Root className="flex w-full min-w-0 flex-col items-end gap-1">
+			<MessagePrimitive.Root className="flex w-full min-w-0 flex-col items-end">
 				<div className="max-w-[85%] rounded-2xl bg-brand px-3 py-2.5 text-sm leading-relaxed text-white lg:max-w-[70%] lg:px-4">
 					<MessagePrimitive.Content />
 				</div>
-				<UserActionBar />
+				<motion.div
+					animate={{ opacity: hovered ? 1 : 0 }}
+					transition={{ duration: 0.15, ease: 'easeOut' }}
+					className="mr-3 flex h-5 items-center gap-0.5"
+				>
+					<ActionBarPrimitive.Edit asChild>
+						<button
+							type="button"
+							className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+						>
+							<Pencil className="size-3" />
+						</button>
+					</ActionBarPrimitive.Edit>
+				</motion.div>
 			</MessagePrimitive.Root>
 		</motion.div>
-	)
-}
-
-const UserActionBar: FC = () => {
-	return (
-		<ActionBarPrimitive.Root
-			hideWhenRunning
-			autohide="not-last"
-			className="flex items-center gap-1"
-		>
-			<ActionBarPrimitive.Edit asChild>
-				<Button variant="ghost" size="icon" className="size-6">
-					<Pencil className="size-3" />
-				</Button>
-			</ActionBarPrimitive.Edit>
-		</ActionBarPrimitive.Root>
 	)
 }
 
@@ -384,26 +393,50 @@ const EditComposer: FC = () => {
 }
 
 const AssistantMessage: FC = () => {
+	const [hovered, setHovered] = useState(false)
 	return (
 		<motion.div
-			initial={false}
+			initial="hidden"
 			animate="visible"
-			variants={messageVariants}
-			className="w-full max-w-full"
+			variants={assistantMessageVariants}
+			className="relative w-full max-w-full"
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
 		>
-			<MessagePrimitive.Root className="aui-assistant-message flex w-full max-w-full flex-col items-start gap-2 overflow-hidden">
+			<MessagePrimitive.Root className="aui-assistant-message flex w-full max-w-full flex-col items-start gap-2">
 				<ThinkingIndicator />
 				<ErrorIndicator />
 				<MessagePrimitive.Content
 					components={{
-						Text: HtmlText,
+						Text: MarkdownText,
 						tools: {
 							by_name: {},
 							Fallback: ToolFallback,
 						},
 					}}
 				/>
-				<AssistantActionBar />
+				<motion.div
+					animate={{ opacity: hovered ? 1 : 0 }}
+					transition={{ duration: 0.15, ease: 'easeOut' }}
+					className="mt-0.5 flex h-5 items-center gap-3"
+				>
+					<ActionBarPrimitive.Copy asChild>
+						<button
+							type="button"
+							className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+						>
+							<Copy className="size-3" />
+						</button>
+					</ActionBarPrimitive.Copy>
+					<ActionBarPrimitive.Reload asChild>
+						<button
+							type="button"
+							className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+						>
+							<RefreshCw className="size-3" />
+						</button>
+					</ActionBarPrimitive.Reload>
+				</motion.div>
 			</MessagePrimitive.Root>
 		</motion.div>
 	)
@@ -428,6 +461,7 @@ const ErrorIndicator: FC = () => {
 	)
 }
 
+/** Claude-style expanding skeleton lines */
 const ThinkingIndicator: FC = () => {
 	const status = useAuiState((s) => s.message.status)
 	const content = useAuiState((s) => s.message.content)
@@ -435,86 +469,55 @@ const ThinkingIndicator: FC = () => {
 	const hasTextContent = content.some(
 		(part) => part.type === 'text' && part.text.trim().length > 0
 	)
-	const hasToolParts = content.some((part) => part.type.startsWith('tool-'))
 
 	if (!isRunning || hasTextContent) return null
 
-	if (hasToolParts) {
-		return (
-			<motion.div
-				className="flex items-center gap-2 py-1.5"
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ duration: 0.2 }}
-			>
-				<div className="size-3 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
-				<div className="relative h-3.5 w-27.5 overflow-hidden rounded-full bg-muted/80">
-					<motion.div
-						className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/20"
-						animate={{ width: [72, 132, 96] }}
-						transition={{
-							duration: 1.4,
-							repeat: Number.POSITIVE_INFINITY,
-							ease: 'easeInOut',
-						}}
-					/>
-					<motion.div
-						className="absolute inset-y-0 w-12 bg-linear-to-r from-transparent via-background/70 to-transparent"
-						animate={{ x: [-48, 160] }}
-						transition={{
-							duration: 1.2,
-							repeat: Number.POSITIVE_INFINITY,
-							ease: 'linear',
-						}}
-					/>
-				</div>
-				<span className="sr-only">Finalizing response</span>
-			</motion.div>
-		)
-	}
-
 	return (
 		<motion.div
-			className="flex items-center gap-2 py-1.5 text-xs text-muted-foreground"
+			className="flex w-full flex-col gap-2.5 py-1"
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.2 }}
 		>
-			<div className="size-3 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
-			Thinking...
+			{[0, 1, 2].map((i) => (
+				<motion.div
+					key={i}
+					className="relative h-3 overflow-hidden rounded-md bg-muted/50"
+					initial={{ width: 0, opacity: 0 }}
+					animate={{
+						width: i === 2 ? '45%' : i === 1 ? '70%' : '90%',
+						opacity: 1,
+					}}
+					transition={{
+						width: {
+							type: 'spring',
+							stiffness: 100,
+							damping: 20,
+							delay: i * 0.12,
+						},
+						opacity: { duration: 0.15, delay: i * 0.08 },
+					}}
+				>
+					<motion.div
+						className="absolute inset-0 bg-linear-to-r from-transparent via-muted-foreground/8 to-transparent"
+						animate={{ x: ['-100%', '100%'] }}
+						transition={{
+							duration: 1.5,
+							repeat: Number.POSITIVE_INFINITY,
+							ease: 'linear',
+							delay: i * 0.2,
+						}}
+					/>
+				</motion.div>
+			))}
+			<span className="sr-only">Thinking</span>
 		</motion.div>
 	)
 }
 
-const AssistantActionBar: FC = () => {
+const MarkdownText: FC = () => {
 	return (
-		<ActionBarPrimitive.Root
-			autohide="not-last"
-			autohideFloat="single-branch"
-			className="flex items-center gap-1"
-		>
-			<ActionBarPrimitive.Copy asChild>
-				<Button variant="ghost" size="icon" className="size-6">
-					<Copy className="size-3" />
-				</Button>
-			</ActionBarPrimitive.Copy>
-			<ActionBarPrimitive.Reload asChild>
-				<Button variant="ghost" size="icon" className="size-6">
-					<RefreshCw className="size-3" />
-				</Button>
-			</ActionBarPrimitive.Reload>
-		</ActionBarPrimitive.Root>
-	)
-}
-
-const HtmlText: FC = () => {
-	const { text } = useMessagePartText()
-	return (
-		<div
-			className="aui-markdown order-first min-w-0 max-w-none wrap-break-word text-sm leading-relaxed text-foreground"
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: AI model outputs HTML directly — trusted server-generated content
-			dangerouslySetInnerHTML={{ __html: text }}
-		/>
+		<MarkdownTextPrimitive className="aui-markdown order-first min-w-0 max-w-none wrap-break-word text-sm leading-relaxed text-foreground" />
 	)
 }
 

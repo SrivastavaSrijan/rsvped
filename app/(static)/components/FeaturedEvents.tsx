@@ -68,7 +68,7 @@ function FeaturedEventCard({
 	return (
 		<Link
 			href={Routes.Main.Events.ViewBySlug(slug)}
-			className="group flex items-center gap-3 rounded-lg border border-white/10 p-3 transition-colors hover:border-white/30"
+			className="group flex items-center gap-4 rounded-lg border border-white/10 p-2 lg:p-3 transition-colors hover:border-white/30"
 		>
 			{coverImage && (
 				<Image
@@ -77,12 +77,12 @@ function FeaturedEventCard({
 					width={64}
 					height={64}
 					className="rounded-md object-cover transition-transform group-hover:scale-105"
-					wrapperClassName="shrink-0 size-16"
+					wrapperClassName="shrink-0 size-16 overflow-hidden"
 				/>
 			)}
-			<div className="min-w-0 flex-1">
+			<div className="min-w-0 flex flex-col gap-1 flex-1">
 				<h3 className="truncate font-medium text-sm">{title}</h3>
-				<p className="text-muted-foreground text-sm">{range.date}</p>
+				<p className="text-muted-foreground text-xs">{range.date}</p>
 				<p className="text-muted-foreground text-xs">{range.time}</p>
 			</div>
 		</Link>
