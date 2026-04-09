@@ -284,8 +284,8 @@
 	--color-ring: var(--color-secondary);
 
 	/* Charts */
-	--color-chart-1: var(--color-blue-50);
-	--color-chart-2: var(--color-green-50);
+	--color-chart-1: var(--color-cranberry-50);
+	--color-chart-2: var(--color-cranberry-30);
 
 	/* Radius */
 	--radius-sm: 0.25rem;

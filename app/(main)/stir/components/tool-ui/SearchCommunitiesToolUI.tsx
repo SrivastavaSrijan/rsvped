@@ -80,7 +80,7 @@ export const SearchCommunitiesToolUI = makeAssistantToolUI<
 		return (
 			<div className="flex w-full min-w-0 flex-col gap-2 overflow-hidden">
 				<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-					<CheckCircle2 className="size-3 text-green-600" />
+					<CheckCircle2 className="size-3 text-brand" />
 					Found {result.length} communit{result.length !== 1 ? 'ies' : 'y'}
 				</div>
 				<motion.div
