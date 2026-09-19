@@ -11,8 +11,8 @@ export const MODEL_OPTIONS = {
 		label: 'Claude Haiku 4.5',
 	},
 	quality: {
-		id: 'claude-sonnet-4-20250514',
-		label: 'Claude Sonnet 4',
+		id: 'claude-sonnet-4-5-20250929',
+		label: 'Claude Sonnet 4.5',
 	},
 } as const
 
